@@ -5,15 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3年国語 学年末考査 予想問題</title>
     <style>
-        /* --- リセットと基本設定 --- */
-        * {
-            box-sizing: border-box;
-        }
-
+        /* --- 基本設定 --- */
         body {
             margin: 0;
             padding: 0;
-            background-color: #333; /* 背景色（暗くして紙を目立たせる） */
+            background-color: #333; /* 背景色（暗め） */
             font-family: "YuMincho", "Hiragino Mincho ProN", "Yu Mincho", "MS PMincho", serif;
             display: flex;
             flex-direction: column;
@@ -21,76 +17,63 @@
             min-height: 100vh;
         }
 
-        /* --- プレビュー表示用コンテナ --- */
+        /* --- プレビュー領域 --- */
         #preview-area {
             width: 100%;
             padding: 20px 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            overflow-x: hidden; /* 横スクロール防止 */
+            overflow-x: hidden;
         }
 
-        /* 用紙をラップする枠（ここで縮小を行う） */
+        /* 縮小用のラッパー */
         .sheet-wrapper {
             margin-bottom: 20px;
-            transform-origin: top center; /* 上中央を基準に縮小 */
+            transform-origin: top center;
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
             background: white;
-            /* 初期サイズはJSで制御しますが、崩れ防止の初期値 */
-            width: 297mm;
-            height: 210mm;
+            /* サイズはJSで制御 */
         }
 
-        /* --- テスト用紙本体（A4横サイズ固定） --- */
+        /* --- テスト用紙本体（A4横・縦書き） --- */
         .sheet {
-            width: 297mm;  /* 約1123px */
-            height: 210mm; /* 約794px */
-            padding: 15mm; /* 余白 */
+            width: 297mm;  /* A4横幅 */
+            height: 210mm; /* A4高さ */
+            padding: 15mm;
             background-color: white;
             position: relative;
-            overflow: hidden; /* 万が一のはみ出しを隠す */
+            overflow: hidden;
             
             /* 縦書き設定 */
             writing-mode: vertical-rl;
             text-orientation: upright;
         }
 
-        /* --- 印刷時の設定（最重要） --- */
+        /* --- 印刷時の設定 --- */
         @media print {
-            body {
-                background: none;
-                display: block;
-            }
-            #preview-area {
-                padding: 0;
-                display: block;
-            }
+            body { background: none; display: block; }
+            #preview-area { padding: 0; display: block; }
             .sheet-wrapper {
                 margin: 0;
                 box-shadow: none;
-                transform: none !important; /* 縮小を解除 */
+                transform: none !important;
                 width: 100%;
                 height: auto;
                 page-break-after: always;
             }
             .sheet {
                 margin: 0;
-                width: 297mm; /* プリンター用紙サイズに合わせる */
-                height: 209mm; /* 微調整 */
+                width: 297mm;
+                height: 209mm;
                 page-break-after: always;
             }
-            /* 印刷ボタンを消す */
-            #control-panel {
-                display: none !important;
-            }
+            #control-panel { display: none !important; }
         }
 
-        /* --- レイアウト詳細（段組みなど） --- */
-        
-        /* ページ左右分割 */
+        /* --- コンテンツのレイアウト --- */
         .page-column {
-            width: 46%; /* 左右の幅 */
+            width: 46%;
             height: 100%;
             display: inline-block;
             vertical-align: top;
@@ -99,20 +82,12 @@
 
         .divider {
             width: 0;
-            height: 95%; /* 少し短くして上下に余白 */
+            height: 95%;
             border-right: 1px dashed #999;
             display: inline-block;
             margin: 0 12px;
             vertical-align: top;
             margin-top: 10px;
-        }
-
-        /* 文字サイズ調整（枠に収めるため少し詰め気味に） */
-        .q-block {
-            font-size: 10pt;
-            line-height: 1.6;
-            margin-left: 8px;
-            margin-bottom: 15px;
         }
 
         h1.main-title {
@@ -132,31 +107,33 @@
             margin-top: 0;
             margin-bottom: 10px;
             background-color: #eee;
-            padding: 3px 0 3px 5px; /* 縦書きなので上下余白と左余白 */
+            padding: 3px 0 3px 5px;
         }
 
-        /* 本文ボックス */
+        .q-block {
+            font-size: 10pt;
+            line-height: 1.6;
+            margin-left: 8px;
+            margin-bottom: 15px;
+        }
+
         .passage {
             border: 1px solid #333;
             padding: 10px;
             margin: 8px 0;
             background-color: #fafafa;
-            font-size: 9.5pt; /* 本文は少し小さくして収める */
+            font-size: 9.5pt;
             line-height: 1.7;
-            height: auto; /* 自動で伸ばす */
         }
 
-        .sub-q {
-            margin-top: 5px;
-            text-indent: 1em;
-        }
-        
-        .choices {
-            margin-left: 1.5em; /* 選択肢を少し下げる */
-            font-size: 0.95em;
+        .passage-title {
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            font-weight: bold;
         }
 
-        /* 傍線など */
+        .sub-q { margin-top: 5px; text-indent: 1em; }
+        .choices { margin-left: 1.5em; font-size: 0.95em; }
         .underline { text-decoration: underline; text-underline-offset: 3px; }
         .sideline { border-right: 1px solid black; padding-right: 2px; margin-right: 1px; }
 
@@ -164,7 +141,6 @@
         .kanbun { display: inline-block; position: relative; line-height: 1.2; margin: 0 2px; }
         .kaeri { font-size: 0.5em; position: absolute; left: -0.9em; bottom: 0; text-align: right; width: 1em; }
 
-        /* ページ番号 */
         .page-num {
             position: absolute;
             bottom: 5px;
@@ -174,44 +150,12 @@
             writing-mode: horizontal-tb;
         }
 
-        /* --- 解答用紙スタイル --- */
-        .answer-sheet {
-            writing-mode: horizontal-tb; /* 解答用紙は横書きレイアウト */
-            padding: 20mm;
-        }
-        .ans-header {
-            text-align: center;
-            border-bottom: 2px solid #000;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-        }
-        table.ans-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 15px;
-            font-size: 10pt;
-        }
-        table.ans-table th, table.ans-table td {
-            border: 1px solid #000;
-            padding: 5px;
-            vertical-align: middle;
-            text-align: center;
-        }
-        table.ans-table th { background-color: #f0f0f0; width: 8%; }
-        .box { height: 30px; }
-        .long-box { height: 80px; text-align: left !important; padding: 5px !important; }
-
-        /* --- 操作パネル --- */
+        /* --- ボタン --- */
         #control-panel {
             position: fixed;
             bottom: 20px;
             right: 20px;
             z-index: 1000;
-            display: flex;
-            gap: 10px;
         }
         .btn {
             background-color: #007bff;
@@ -223,15 +167,13 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
             cursor: pointer;
             font-weight: bold;
-            transition: transform 0.1s;
         }
-        .btn:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
 
 <div id="control-panel">
-    <button class="btn" onclick="window.print()">🖨️ 印刷 / PDF保存</button>
+    <button class="btn" onclick="window.print()">🖨️ 印刷する</button>
 </div>
 
 <div id="preview-area">
@@ -396,134 +338,6 @@
             </div>
         </div>
     </div>
-
-    <!-- ▼ 3枚目（解答用紙） ▼ -->
-    <div class="sheet-wrapper">
-        <div class="sheet answer-sheet">
-            <div class="ans-header">
-                <h2 style="margin:0;">令和〇年度 第三学年 国語 学年末考査 解答用紙</h2>
-                <div style="text-align:right; margin-bottom:5px;">
-                    <span style="margin-right:20px;">3年　　　組</span>
-                    <span style="margin-right:20px;">　　　番</span>
-                    <span>氏名　　　　　　　　　　　</span>
-                </div>
-            </div>
-        
-            <!-- 第一問 -->
-            <table class="ans-table">
-                <tr>
-                    <th rowspan="4">一</th>
-                    <td>問一</td>
-                    <td>①</td>
-                    <td><div class="box"></div></td>
-                    <td>②</td>
-                    <td><div class="box"></div></td>
-                    <td>③</td>
-                    <td><div class="box"></div></td>
-                    <td>④</td>
-                    <td><div class="box"></div></td>
-                </tr>
-                <tr>
-                    <td>問二</td>
-                    <td colspan="8"><div class="box"></div></td>
-                </tr>
-                <tr>
-                    <td>問三</td>
-                    <td colspan="8"><div class="box"></div></td>
-                </tr>
-                <tr>
-                    <td>問四</td>
-                    <td>①</td>
-                    <td colspan="3"><div class="box"></div></td>
-                    <td>②</td>
-                    <td colspan="3"><div class="box"></div></td>
-                </tr>
-            </table>
-        
-            <!-- 第二問 -->
-            <table class="ans-table">
-                <tr>
-                    <th rowspan="4">二</th>
-                    <td>問一</td>
-                    <td><div class="box"></div></td>
-                </tr>
-                <tr>
-                    <td>問二</td>
-                    <td><div class="box"></div></td>
-                </tr>
-                <tr>
-                    <td>問三</td>
-                    <td><div class="box"></div></td>
-                </tr>
-                <tr>
-                    <td>問四</td>
-                    <td><div class="box"></div></td>
-                </tr>
-            </table>
-        
-            <!-- 第三問 -->
-            <table class="ans-table">
-                <tr>
-                    <th rowspan="2">三</th>
-                    <td>問一</td>
-                    <td><div class="box"></div></td>
-                </tr>
-                <tr>
-                    <td>問二</td>
-                    <td><div class="box"></div></td>
-                </tr>
-            </table>
-        
-            <!-- 第四問 -->
-            <table class="ans-table">
-                <tr>
-                    <th rowspan="4">四</th>
-                    <td>問一</td>
-                    <td><div class="box"></div></td>
-                </tr>
-                <tr>
-                    <td>問二</td>
-                    <td><div class="box"></div></td>
-                </tr>
-                <tr>
-                    <td>問三</td>
-                    <td><div class="box"></div></td>
-                </tr>
-                <tr>
-                    <td>問四</td>
-                    <td><div class="box"></div></td>
-                </tr>
-            </table>
-        
-            <!-- 第五問 -->
-            <table class="ans-table">
-                <tr>
-                    <th rowspan="4">五</th>
-                    <td>問一</td>
-                    <td><div class="box"></div></td>
-                </tr>
-                <tr>
-                    <td>問二</td>
-                    <td><div class="box"></div></td>
-                </tr>
-                <tr>
-                    <td>問三</td>
-                    <td><div class="box"></div></td>
-                </tr>
-                <tr>
-                    <td>問四</td>
-                    <td><div class="long-box">私は、</div></td>
-                </tr>
-            </table>
-            
-            <div style="margin-top:20px; text-align:right;">
-                <div style="display:inline-block; border:1px solid #000; padding:10px 30px;">
-                    <div style="font-size:0.8em; text-align:center;">得点</div>
-                    <div style="height:30px;"></div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 <script>
@@ -531,7 +345,7 @@
         const wrappers = document.querySelectorAll('.sheet-wrapper');
         const sheetWidthMM = 297; 
         const sheetHeightMM = 210;
-        // 1mm = 約3.78px
+        // 1mm = 約3.78px (CSSのmm定義に基づく)
         const baseWidth = sheetWidthMM * 3.78; 
         const baseHeight = sheetHeightMM * 3.78;
         
@@ -558,6 +372,7 @@
         });
     }
 
+    // イベントリスナー設定
     window.addEventListener('load', resizeSheets);
     window.addEventListener('resize', resizeSheets);
 </script>
