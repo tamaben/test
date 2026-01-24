@@ -3,378 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3年国語 学年末考査 予想問題</title>
+    <title>3年国語 学年末考査（1・2ページ）</title>
     <style>
         /* --- 基本設定 --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            margin: 0;
-            padding: 0;
-            background-color: #333; /* 背景色（暗め） */
-            font-family: "YuMincho", "Hiragino Mincho ProN", "Yu Mincho", "MS PMincho", serif;
+            background-color: #555;
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
+            font-family: "HGS Mincho E", "MS Mincho", "Hiragino Mincho ProN", serif;
+            padding-bottom: 50px;
         }
 
-        /* --- プレビュー領域 --- */
-        #preview-area {
+        /* --- プレビューエリア --- */
+        #preview-container {
             width: 100%;
-            padding: 20px 0;
+            padding-top: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             overflow-x: hidden;
         }
 
-        /* 縮小用のラッパー */
+        /* --- 用紙ラッパー --- */
         .sheet-wrapper {
-            margin-bottom: 20px;
-            transform-origin: top center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
             background: white;
-            /* サイズはJSで制御 */
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            /* A4横サイズ */
+            width: 1123px; 
+            height: 794px;
+            transform-origin: top center;
+            transition: transform 0.2s ease;
+            margin-bottom: 20px;
         }
 
-        /* --- テスト用紙本体（A4横・縦書き） --- */
+        /* --- 用紙本体 --- */
         .sheet {
-            width: 297mm;  /* A4横幅 */
-            height: 210mm; /* A4高さ */
-            padding: 15mm;
-            background-color: white;
+            width: 100%;
+            height: 100%;
+            padding: 40px 50px;
             position: relative;
-            overflow: hidden;
-            
-            /* 縦書き設定 */
-            writing-mode: vertical-rl;
+            writing-mode: vertical-rl; /* 縦書き */
             text-orientation: upright;
+            color: #000;
         }
 
-        /* --- 印刷時の設定 --- */
+        /* --- 印刷設定 --- */
         @media print {
             body { background: none; display: block; }
-            #preview-area { padding: 0; display: block; }
+            #preview-container { padding: 0; display: block; }
             .sheet-wrapper {
-                margin: 0;
-                box-shadow: none;
-                transform: none !important;
-                width: 100%;
-                height: auto;
-                page-break-after: always;
+                box-shadow: none; margin: 0; transform: none !important;
+                width: 100%; height: 100%; page-break-after: always;
             }
-            .sheet {
-                margin: 0;
-                width: 297mm;
-                height: 209mm;
-                page-break-after: always;
-            }
-            #control-panel { display: none !important; }
+            .sheet { width: 297mm; height: 209mm; padding: 0; }
+            #control-panel, .sheet-label { display: none !important; }
         }
 
-        /* --- コンテンツのレイアウト --- */
-        .page-column {
-            width: 46%;
+        /* --- 2段組みレイアウト（左右つなげる） --- */
+        .columns {
+            width: 100%;
             height: 100%;
-            display: inline-block;
-            vertical-align: top;
+            column-count: 2; /* 自動で2段に流し込む */
+            column-gap: 60px;
+            column-rule: 1px dotted #000;
             text-align: justify;
         }
 
-        .divider {
-            width: 0;
-            height: 95%;
-            border-right: 1px dashed #999;
-            display: inline-block;
-            margin: 0 12px;
-            vertical-align: top;
-            margin-top: 10px;
+        /* --- コンテンツスタイル --- */
+        .sheet-label {
+            color: white; font-size: 16px; margin-bottom: 10px;
+            font-family: sans-serif; text-align: center; font-weight: bold;
+            background: rgba(0,0,0,0.5); padding: 5px; max-width: 90%;
         }
 
-        h1.main-title {
-            font-size: 14pt;
-            font-weight: bold;
-            text-align: center;
-            border-left: 4px solid #000;
-            padding-left: 8px;
-            margin-left: 0;
-            margin-bottom: 15px;
-            line-height: 1.2;
+        .header-title {
+            font-size: 24px; font-weight: 900; text-align: center;
+            margin-left: 20px; margin-bottom: 10px; letter-spacing: 3px;
+        }
+        .header-info {
+            font-size: 12px; text-align: right; margin-left: 10px; margin-bottom: 15px;
+        }
+        .notes-box {
+            border: 2px solid #000; padding: 12px; font-size: 12px;
+            margin-left: 10px; width: 92%; margin-bottom: 25px; line-height: 1.8;
         }
 
-        h2.q-header {
-            font-size: 11pt;
-            font-weight: bold;
-            margin-top: 0;
-            margin-bottom: 10px;
-            background-color: #eee;
-            padding: 3px 0 3px 5px;
+        .q-main {
+            font-size: 16px; font-weight: bold; margin-top: 0; margin-bottom: 15px;
+            text-indent: -1.5em; margin-left: 1.5em;
         }
-
         .q-block {
-            font-size: 10pt;
-            line-height: 1.6;
-            margin-left: 8px;
-            margin-bottom: 15px;
+            font-size: 14px; line-height: 1.8; margin-left: 15px; margin-bottom: 25px; 
+            break-inside: avoid; /* 問題の途中で段が切れないようにする */
         }
 
-        .passage {
-            border: 1px solid #333;
-            padding: 10px;
-            margin: 8px 0;
-            background-color: #fafafa;
-            font-size: 9.5pt;
-            line-height: 1.7;
-        }
+        .line-s { border-right: 1px solid #000; padding-right: 2px; margin-right: 1px; }
+        .box { border: 1px solid #000; padding: 8px; margin: 5px 0 5px 5px; }
 
-        .passage-title {
-            font-size: 0.9em;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
+        /* 漢文用 */
+        .kb-wrap { display: inline-block; position: relative; line-height: 1.2; margin: 0 2px; }
+        .kb-kaeri { font-size: 0.6em; position: absolute; left: -0.9em; bottom: 0; text-align: right; width: 1em; }
 
-        .sub-q { margin-top: 5px; text-indent: 1em; }
-        .choices { margin-left: 1.5em; font-size: 0.95em; }
-        .underline { text-decoration: underline; text-underline-offset: 3px; }
-        .sideline { border-right: 1px solid black; padding-right: 2px; margin-right: 1px; }
+        /* ページ番号 */
+        .page-num-r { position: absolute; bottom: 20px; left: 75%; font-size: 12px; writing-mode: horizontal-tb; }
+        .page-num-l { position: absolute; bottom: 20px; left: 25%; font-size: 12px; writing-mode: horizontal-tb; }
 
-        /* 漢文 */
-        .kanbun { display: inline-block; position: relative; line-height: 1.2; margin: 0 2px; }
-        .kaeri { font-size: 0.5em; position: absolute; left: -0.9em; bottom: 0; text-align: right; width: 1em; }
-
-        .page-num {
-            position: absolute;
-            bottom: 5px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 9pt;
-            writing-mode: horizontal-tb;
-        }
-
-        /* --- ボタン --- */
-        #control-panel {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-        }
+        /* ボタン */
+        #control-panel { position: fixed; bottom: 20px; right: 20px; z-index: 1000; }
         .btn {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            font-size: 16px;
-            border-radius: 30px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-            cursor: pointer;
-            font-weight: bold;
+            background-color: #000; color: white; border: none; padding: 12px 24px;
+            font-size: 14px; cursor: pointer; border-radius: 4px; font-weight: bold;
+            box-shadow: 0 4px 6px rgba(255,255,255,0.3);
         }
     </style>
 </head>
 <body>
 
 <div id="control-panel">
-    <button class="btn" onclick="window.print()">🖨️ 印刷する</button>
+    <button class="btn" onclick="window.print()">印刷 / PDF保存</button>
 </div>
 
-<div id="preview-area">
+<div id="preview-container">
     
-    <!-- ▼ 1枚目（問題 1, 2ページ） ▼ -->
+    <div class="sheet-label">【１枚目】</div>
     <div class="sheet-wrapper">
         <div class="sheet">
-            <!-- 1ページ目 (右側) -->
-            <div class="page-column">
-                <h1 class="main-title">令和〇年度　第三学年　国語　学年末考査問題</h1>
-                <div style="text-align: right; font-size: 0.9em; margin-bottom: 0.5em;">（試験時間 五十分）</div>
-        
-                <div class="q-block">
-                    <h2 class="q-header">一、次の各問いに答えなさい。（知識・技能）</h2>
-                    
-                    <p>問一　次の線のカタカナを漢字に直しなさい。</p>
-                    <div class="sub-q">①　実験の結果を<span class="underline">ブンセキ</span>する。</div>
-                    <div class="sub-q">②　伝統文化を<span class="underline">ケイショウ</span>する。</div>
-                    <div class="sub-q">③　<span class="underline">ココロヨ</span>い返事をもらう。</div>
-                    <div class="sub-q">④　過去の<span class="underline">アヤマ</span>ちを反省する。</div>
-        
-                    <p style="margin-top:1em;">問二　次の四字熟語の構成として正しいものを、あとのア～エから選びなさい。</p>
-                    <div class="sub-q">【　一進一退　】</div>
-                    <div class="choices">
-                        ア　上の二字と下の二字が反対の意味を持つ。<br>
-                        イ　上の二字と下の二字が似た意味を持つ。<br>
-                        ウ　上の二字が下の二字にかかる。<br>
-                        エ　下の二字が上の二字の目的語になっている。
+            <!-- 2段組みコンテナ -->
+            <div class="columns">
+                
+                <!-- ヘッダー情報 -->
+                <div style="break-inside: avoid;">
+                    <h1 class="header-title">三年　国語科　学年末考査問題</h1>
+                    <div class="header-info">
+                        （令和七年二月二十五日実施）<br>
+                        三年 ＿＿ 組 ＿＿ 番 名前 ＿＿＿＿＿＿＿＿
                     </div>
-        
-                    <p style="margin-top:1em;">問三　次の文の（　　）に入る適切な四字熟語を漢字で書きなさい。</p>
-                    <div class="sub-q">「彼女は（　　　　）な性格で、一度決めたらテコでも動かない。」</div>
-        
-                    <p style="margin-top:1em;">問四　次の傍線部の「ない」の品詞名を答えなさい。</p>
-                    <div class="sub-q">①　この本はあまり面白く<span class="underline">ない</span>。</div>
-                    <div class="sub-q">②　誰もそのことに気づか<span class="underline">ない</span>。</div>
+                    <div class="notes-box">
+                        ※答案用紙には、解答以外記入しません。<br>
+                        ※指定がある設問以外は、習った漢字を使用して答えましょう。<br>
+                        ※句読点（、。）や記号は一字と数えます。<br>
+                        ★知識を問う問題　　※読む力を問う問題
+                    </div>
                 </div>
-                <div class="page-num">- 1 -</div>
-            </div>
-        
-            <div class="divider"></div>
-        
-            <!-- 2ページ目 (左側) -->
-            <div class="page-column">
-                <div class="q-block">
-                    <h2 class="q-header">二、次の「論語」を読んで、あとの問いに答えなさい。</h2>
-                    <div class="passage">
-                        子曰、学<span class="kanbun">而<span class="kaeri">テ</span></span>不<span class="kanbun">思<span class="kaeri">ハ</span></span>則<span class="kanbun">罔<span class="kaeri">シ</span></span>。思<span class="kanbun">而<span class="kaeri">テ</span></span>不<span class="kanbun">学<span class="kaeri">バ</span></span>則<span class="kanbun">殆<span class="kaeri">シ</span></span>。<br>
-                        子曰、温<span class="kanbun">故<span class="kaeri">キヲ</span></span><span class="kanbun">而<span class="kaeri">テ</span></span>知<span class="kanbun">新<span class="kaeri">シキヲ</span></span>、可<span class="kanbun">以<span class="kaeri">テ</span></span>為<span class="kanbun">師<span class="kaeri">ト</span></span>矣。
-                    </div>
-                    
-                    <p>問一　「子」とは誰のことか、人物名を書きなさい。</p>
-                    <p>問二　第一文「学而不思則罔」の書き下し文として最も適切なものを次から選びなさい。</p>
-                    <div class="choices">
-                        ア　学びて思はざれば則ち罔し<br>
-                        イ　学ぶと思ふは則ち罔し<br>
-                        ウ　学びて思はざるは則ち罔し
-                    </div>
-                    <p>問三　「温故而知新」から生まれた四字熟語を書きなさい。</p>
-                    <p>問四　孔子が最も重要だと説いた、他人を思いやる心を何というか。漢字一字で答えなさい。</p>
-                </div>
-        
-                <div class="q-block">
-                    <h2 class="q-header">三、次の詩を読んで、あとの問いに答えなさい。</h2>
-                    <div class="passage">
-                        まだあげ初めし前髪の<br>
-                        林檎のもとに見えしとき<br>
-                        前にさしたる花櫛の<br>
-                        花ある君と思ひけり<br>
-                        <br>
-                        やさしく白き手をのべて<br>
-                        林檎をわれにあたへしは<br>
-                        薄紅の秋の実に<br>
-                        人こひ初めしはじめなり<br>
-                        （島崎藤村「初恋」より）
-                    </div>
-        
-                    <p>問一　この詩の形式とリズムを次から選びなさい。</p>
-                    <div class="choices">
-                        ア　口語自由詩・五七調　　イ　文語定型詩・七五調<br>
-                        ウ　文語自由詩・七五調　　エ　口語定型詩・五七調
-                    </div>
-                    <p>問二　「林檎」は何の象徴として描かれていますか。「恋」という言葉を使って十五字以内で書きなさい。</p>
-                </div>
-                <div class="page-num">- 2 -</div>
-            </div>
-        </div>
-    </div>
 
-    <!-- ▼ 2枚目（問題 3, 4ページ） ▼ -->
-    <div class="sheet-wrapper">
-        <div class="sheet">
-            <!-- 3ページ目 (右側) -->
-            <div class="page-column">
+                <!-- 問一：漢字（教科書内容） -->
                 <div class="q-block">
-                    <h2 class="q-header">四、次の文章を読んで、あとの問いに答えなさい。</h2>
-                    <div class="passage">
-                        <span class="passage-title">（夏目漱石『坊っちゃん』）</span><br>
-                        　親譲りの<span class="sideline">①</span><span class="underline">無鉄砲</span>で小供の時から<span class="sideline">②</span><span class="underline">損ばかりしている</span>。小学校に居る時分学校の二階から飛び降りて一週間ほど腰を抜かした事がある。なぜそんな無闇をしたと聞く人があるかも知れぬ。別段深い理由でもない。新築の二階から首を出していたら、同級生の一人が冗談に、いくら威張っても、そこから飛び降りる事は出来まい。弱虫やーい。と囃したからである。小使に負ぶさって帰って来た時、おやじが大きな眼をして二階ぐらいから飛び降りて腰を抜かす奴があるかと云ったから、この次は抜かさずに飛んで見せますと答えた。<br>
-                        （中略）<br>
-                        　母が死んでから、<span class="sideline">③</span><span class="underline">清</span>という下女が、おれを可愛がってくれた。この婆さんは何だか知らんが、おれの事を非常に好いていた。
+                    <div class="q-main">●一　<span class="line-s">　　</span>部のカタカナを漢字に、漢字は読みをひらがなで書きなさい。</div>
+                    <div style="margin-right:1em;">
+                        ①　親譲りの<span class="line-s">ムテッポウ</span>で損ばかりしている。（坊っちゃん）<br>
+                        ②　分人とは、<span class="line-s">ユイイツ</span>の「本当の自分」ではない。（私とは何か）<br>
+                        ③　文化を次の世代に<span class="line-s">ケイショウ</span>する。<br>
+                        ④　清は、おれの事を<span class="line-s">ヒジョウ</span>に好いていた。（坊っちゃん）<br>
+                        ⑤　同級生が、弱虫やーいと<span class="line-s">囃</span>した。（坊っちゃん）<br>
+                        ⑥　学んで思わざれば則ち<span class="line-s">罔</span>し。（論語）
                     </div>
-        
-                    <p>問一　傍線部①「無鉄砲」の意味として適切なものを選びなさい。</p>
-                    <div class="choices">
-                        ア　気が弱く何もできないこと。<br>
-                        イ　後先を考えずに乱暴な行動をすること。<br>
-                        ウ　親の言いつけを守らないこと。
+                </div>
+                
+                <!-- 問二：四字熟語 -->
+                <div class="q-block">
+                    <div class="q-main">●二　次の四字熟語の意味として最も適切なものを、あとのア～エから選び、記号で答えなさい。</div>
+                    <div style="margin-right:1em; font-weight:bold;">【　粉骨砕身　】</div>
+                    <div class="box">
+                        ア　自分の利益だけを考えて行動すること。<br>
+                        イ　力の限り努力すること。<br>
+                        ウ　非常に危険な状態にあること。<br>
+                        エ　物事が思い通りに進まないこと。
                     </div>
-        
-                    <p>問二　傍線部②「損ばかりしている」の具体例として、この文章に書かれている出来事を、「〜こと」と続くように二十字以内で抜き出しなさい。</p>
-        
-                    <p>問三　坊っちゃんが二階から飛び降りた理由として最も適切なものを選びなさい。</p>
-                    <div class="choices">
-                        ア　父親に度胸があるところを見せたかったから。<br>
-                        イ　二階からの景色がよく、飛び降りたくなったから。<br>
-                        ウ　同級生に弱虫とからかわれ、負けたくなかったから。<br>
-                        エ　学校の校則に反発したかったから。
+                </div>
+
+                <!-- 問三：四字熟語（書き取り） -->
+                <div class="q-block">
+                    <div class="q-main">●三　次の文の（　）に入る適切な四字熟語を漢字で書きなさい。</div>
+                    <div style="margin-right:1em;">
+                        「彼は（　　　　）な性格で、一度決めたらテコでも動かない。」
                     </div>
+                </div>
+
+                <!-- ▼▼ ここから2ページ目の内容が自然と左段に流れます ▼▼ -->
+
+                <!-- 問四：論語 -->
+                <div class="q-block">
+                    <div class="q-main">●四　次の「論語」の文章を読み、あとの問いに答えなさい。</div>
                     
-                    <p>問四　傍線部③「清」について。清は坊っちゃんにとってどのような存在でしたか。最も適切なものを選びなさい。</p>
-                    <div class="choices">
-                        ア　厳しくしつけをする教育係。<br>
-                        イ　唯一自分を理解し愛してくれた存在。<br>
-                        ウ　家事をすべて任せている便利な使用人。<br>
-                        エ　反発しあうライバルのような関係。
+                    <div class="box" style="line-height:2.0; font-size:15px; margin-bottom:20px;">
+                        子曰、学<span class="kb-wrap">而<span class="kb-kaeri">テ</span></span>不<span class="kb-wrap">思<span class="kb-kaeri">ハ</span></span>則<span class="kb-wrap">罔<span class="kb-kaeri">シ</span></span>。思<span class="kb-wrap">而<span class="kb-kaeri">テ</span></span>不<span class="kb-wrap">学<span class="kb-kaeri">バ</span></span>則<span class="kb-wrap">殆<span class="kb-kaeri">シ</span></span>。<br>
+                        <br>
+                        子曰、温<span class="kb-wrap">故<span class="kb-kaeri">キヲ</span></span><span class="kb-wrap">而<span class="kb-kaeri">テ</span></span>知<span class="kb-wrap">新<span class="kb-kaeri">シキヲ</span></span>、可<span class="kb-wrap">以<span class="kb-kaeri">テ</span></span>為<span class="kb-wrap">師<span class="kb-kaeri">ト</span></span>矣。
+                    </div>
+
+                    <div style="margin-right:1em;">
+                        ①「子曰」の「子」とは誰のことか。最も適切な人物名を書きなさい。<br><br>
+                        ②「学而不思則罔」の書き下し文として正しいものを選びなさい。
+                        <div class="box">
+                            ア　学びて思はざれば則ち罔し<br>
+                            イ　学ぶと思ふは則ち罔し<br>
+                            ウ　学びて思はざるは則ち罔し
+                        </div>
+                        ③「温故而知新」の意味として最も適切なものを選びなさい。
+                        <div class="box">
+                            ア　古い友人を大切にし、新しい友人も作ること。<br>
+                            イ　昔のことを研究して、そこから新しい知識や見解を得ること。<br>
+                            ウ　冷たくなったものを温めて、新しく作り直すこと。
+                        </div>
+                        ④ 孔子が理想とした、他人への思いやりを表す漢字一字を次から選びなさい。
+                        <div style="margin-right:1em;">
+                            ア　道　　イ　仁　　ウ　知　　エ　勇
+                        </div>
                     </div>
                 </div>
-                <div class="page-num">- 3 -</div>
+
             </div>
-        
-            <div class="divider"></div>
-        
-            <!-- 4ページ目 (左側) -->
-            <div class="page-column">
-                <div class="q-block">
-                    <h2 class="q-header">五、次の文章を読んで、あとの問いに答えなさい。</h2>
-                    <div class="passage">
-                        <span class="passage-title">（平野啓一郎『私とは何か』）</span><br>
-                        　私たちは、たった一つの「本当の自分」があると考えがちだ。学校でも職場でも家庭でも、どこでも変わらない一貫した「自分」が存在するべきだ、と。<br>
-                        　しかし、実際には、私たちは接する相手によって自然と異なる自分になっている。親と話すときの自分、友人と話すときの自分、先生と話すときの自分は、それぞれ少しずつ違うはずだ。<br>
-                        　筆者は、この一つ一つの異なる自分のことを「<span class="sideline">①</span><span class="underline">分人</span>」と呼んでいる。「個人」という言葉は「これ以上分けられない（in-dividual）」という意味だが、「分人」は「分けられる（dividual）」人間観だ。<br>
-                        　「本当の自分」を探そうとして苦しむよりも、複数の「分人」の集合体が自分なのだと認めるほうが、<span class="sideline">②</span><span class="underline">生きるのが楽になる</span>のではないだろうか。どれか一つの分人がうまくいかなくても、別の分人が充実していれば、自分全体を否定することにはならないからだ。
-                    </div>
-        
-                    <p>問一　筆者は、私たちが一般的に「自分」についてどのように考えがちだと述べていますか。文章中から三十字以内で抜き出しなさい。</p>
-        
-                    <p>問二　傍線部①「分人」の説明として最も適切なものを選びなさい。</p>
-                    <div class="choices">
-                        ア　相手や環境に関わらず、常に一貫している唯一の自分のこと。<br>
-                        イ　対人関係ごとに異なる、複数存在する自分のこと。<br>
-                        ウ　他人に合わせて無理をして演じている偽りの自分のこと。<br>
-                        エ　社会の中で孤立し、誰とも関わらない自分のこと。
-                    </div>
-        
-                    <p>問三　傍線部②「生きるのが楽になる」理由を説明した次の文の空欄にあてはまる言葉を、文章中から五字で抜き出しなさい。</p>
-                    <div class="sub-q">「一つの分人がうまくいかなくても、（　　　　　）を否定することにはならないから。」</div>
-        
-                    <p>問四　この文章を読んで、あなたは「分人」という考え方についてどう思いますか。「私は、」に続けて、あなたの考えとその理由を六十字以内で書きなさい。</p>
-                </div>
-                <div class="page-num">- 4 -</div>
-            </div>
+            <!-- ページ番号 -->
+            <div class="page-num-r">- 1 -</div>
+            <div class="page-num-l">- 2 -</div>
         </div>
     </div>
 </div>
 
 <script>
-    function resizeSheets() {
-        const wrappers = document.querySelectorAll('.sheet-wrapper');
-        const sheetWidthMM = 297; 
-        const sheetHeightMM = 210;
-        // 1mm = 約3.78px (CSSのmm定義に基づく)
-        const baseWidth = sheetWidthMM * 3.78; 
-        const baseHeight = sheetHeightMM * 3.78;
-        
-        // 画面幅（スクロールバー除く）を取得し、余白(20px)を引く
+    function adjustScale() {
+        const wrapper = document.querySelector('.sheet-wrapper');
+        const baseWidth = 1123; 
+        const baseHeight = 794;
         const screenWidth = document.body.clientWidth;
-        const availableWidth = screenWidth - 20;
+        const margin = 20;
+        const availableWidth = screenWidth - margin;
 
-        // 縮小率を計算 (最大1倍)
         let scale = availableWidth / baseWidth;
         if (scale > 1) scale = 1;
 
-        wrappers.forEach(wrapper => {
-            // 中身のサイズを固定
-            wrapper.style.width = baseWidth + 'px';
-            wrapper.style.height = baseHeight + 'px';
-            
-            // 縮小適用
-            wrapper.style.transform = `scale(${scale})`;
-            
-            // scaleしても要素の占有領域は変わらないため、margin-bottomで下の空間を詰める
-            const scaledHeight = baseHeight * scale;
-            const spaceToRemove = baseHeight - scaledHeight;
-            wrapper.style.marginBottom = `-${spaceToRemove - 20}px`; // 20pxはシート間の隙間
-        });
+        wrapper.style.transform = `scale(${scale})`;
+        const currentHeight = baseHeight * scale;
+        const spaceToRemove = baseHeight - currentHeight;
+        wrapper.style.marginBottom = `-${spaceToRemove - 30}px`;
     }
 
-    // イベントリスナー設定
-    window.addEventListener('load', resizeSheets);
-    window.addEventListener('resize', resizeSheets);
+    window.addEventListener('load', adjustScale);
+    window.addEventListener('resize', adjustScale);
 </script>
 
 </body>
