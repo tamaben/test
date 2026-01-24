@@ -3,20 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3年国語 学年末考査（1・2ページ）</title>
+    <title>3年国語 学年末考査</title>
     <style>
-        /* --- 基本設定 --- */
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        /* --- 基本設定（リセット） --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            background-color: #555;
+            background-color: #555; /* 画面背景（暗め） */
             display: flex;
             flex-direction: column;
             align-items: center;
-            font-family: "HGS Mincho E", "MS Mincho", "Hiragino Mincho ProN", serif;
+            font-family: "HGS Mincho E", "MS Mincho", "Hiragino Mincho ProN", serif; /* 明朝体指定 */
+            -webkit-print-color-adjust: exact;
             padding-bottom: 50px;
         }
 
-        /* --- プレビューエリア --- */
+        /* --- プレビュー表示用コンテナ --- */
         #preview-container {
             width: 100%;
             padding-top: 20px;
@@ -26,22 +32,26 @@
             overflow-x: hidden;
         }
 
-        /* --- 用紙ラッパー --- */
+        /* --- 用紙ラッパー（縮小対象） --- */
         .sheet-wrapper {
             background: white;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            /* A4横サイズ */
+            margin-bottom: 40px;
+            
+            /* A4横のピクセルサイズ (1123px x 794px) */
             width: 1123px; 
             height: 794px;
+            
+            /* 縮小基準点：上中央 */
             transform-origin: top center;
             transition: transform 0.2s ease;
-            margin-bottom: 20px;
         }
 
         /* --- 用紙本体 --- */
         .sheet {
             width: 100%;
             height: 100%;
+            /* PDFの余白感を再現 */
             padding: 40px 50px;
             position: relative;
             writing-mode: vertical-rl; /* 縦書き */
@@ -49,66 +59,102 @@
             color: #000;
         }
 
-        /* --- 印刷設定 --- */
+        /* --- 印刷時の設定 --- */
         @media print {
             body { background: none; display: block; }
             #preview-container { padding: 0; display: block; }
             .sheet-wrapper {
-                box-shadow: none; margin: 0; transform: none !important;
-                width: 100%; height: 100%; page-break-after: always;
+                box-shadow: none;
+                margin: 0;
+                transform: none !important; /* 縮小解除 */
+                width: 100%;
+                height: 100%;
+                page-break-after: always;
+                margin-bottom: 0;
             }
             .sheet { width: 297mm; height: 209mm; padding: 0; }
             #control-panel, .sheet-label { display: none !important; }
         }
 
-        /* --- 2段組みレイアウト（左右つなげる） --- */
+        /* --- 2段組みレイアウト --- */
         .columns {
             width: 100%;
             height: 100%;
-            column-count: 2; /* 自動で2段に流し込む */
-            column-gap: 60px;
-            column-rule: 1px dotted #000;
+            column-count: 2;
+            column-gap: 80px; /* 段の間隔（中央の余白） */
+            column-rule: 1px dotted #000; /* 真ん中の線 */
             text-align: justify;
         }
 
-        /* --- コンテンツスタイル --- */
+        /* --- コンテンツスタイル（PDFの再現） --- */
+        
+        /* タイトル周り */
+        .header-title {
+            font-size: 28px;
+            font-weight: 900;
+            text-align: center;
+            margin-left: 30px;
+            margin-bottom: 15px;
+            letter-spacing: 5px;
+            font-family: "HGS Mincho E", serif;
+        }
+
+        .header-info {
+            font-size: 13px;
+            text-align: right;
+            margin-left: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* 注意書きボックス */
+        .notes-box {
+            border: 2px solid #000;
+            padding: 12px;
+            font-size: 12px;
+            margin-left: 10px;
+            width: 90%;
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+
+        /* 問題番号（黒丸） */
+        .q-main {
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 0;
+            margin-bottom: 15px;
+            text-indent: -2em; /* ぶら下げ */
+            margin-left: 2em;
+        }
+
+        /* 問題ブロック */
+        .q-block {
+            font-size: 14px;
+            line-height: 1.8;
+            margin-left: 15px;
+            margin-bottom: 25px;
+            break-inside: avoid;
+        }
+
+        /* 装飾系 */
+        .line-s { border-right: 1px solid #000; padding-right: 2px; margin-right: 1px; }
+        .line-u { text-decoration: underline; text-underline-offset: 3px; }
+        .box { border: 1px solid #000; padding: 10px; margin: 8px 0 8px 8px; }
+
+        /* 漢文・返り点 */
+        .kb-wrap { display: inline-block; position: relative; line-height: 1.2; margin: 0 3px; }
+        .kb-kaeri { font-size: 0.6em; position: absolute; left: -0.9em; bottom: 0; text-align: right; width: 1em; }
+
+        /* ページ番号（左右の柱） */
+        .page-num-r { position: absolute; bottom: 20px; left: 80%; font-size: 12px; writing-mode: horizontal-tb; }
+        .page-num-l { position: absolute; bottom: 20px; left: 20%; font-size: 12px; writing-mode: horizontal-tb; }
+
+        /* 画面用ラベル */
         .sheet-label {
             color: white; font-size: 16px; margin-bottom: 10px;
             font-family: sans-serif; text-align: center; font-weight: bold;
-            background: rgba(0,0,0,0.5); padding: 5px; max-width: 90%;
+            background: rgba(0,0,0,0.5); padding: 5px; max-width: 90%; border-radius: 4px;
         }
-
-        .header-title {
-            font-size: 24px; font-weight: 900; text-align: center;
-            margin-left: 20px; margin-bottom: 10px; letter-spacing: 3px;
-        }
-        .header-info {
-            font-size: 12px; text-align: right; margin-left: 10px; margin-bottom: 15px;
-        }
-        .notes-box {
-            border: 2px solid #000; padding: 12px; font-size: 12px;
-            margin-left: 10px; width: 92%; margin-bottom: 25px; line-height: 1.8;
-        }
-
-        .q-main {
-            font-size: 16px; font-weight: bold; margin-top: 0; margin-bottom: 15px;
-            text-indent: -1.5em; margin-left: 1.5em;
-        }
-        .q-block {
-            font-size: 14px; line-height: 1.8; margin-left: 15px; margin-bottom: 25px; 
-            break-inside: avoid; /* 問題の途中で段が切れないようにする */
-        }
-
-        .line-s { border-right: 1px solid #000; padding-right: 2px; margin-right: 1px; }
-        .box { border: 1px solid #000; padding: 8px; margin: 5px 0 5px 5px; }
-
-        /* 漢文用 */
-        .kb-wrap { display: inline-block; position: relative; line-height: 1.2; margin: 0 2px; }
-        .kb-kaeri { font-size: 0.6em; position: absolute; left: -0.9em; bottom: 0; text-align: right; width: 1em; }
-
-        /* ページ番号 */
-        .page-num-r { position: absolute; bottom: 20px; left: 75%; font-size: 12px; writing-mode: horizontal-tb; }
-        .page-num-l { position: absolute; bottom: 20px; left: 25%; font-size: 12px; writing-mode: horizontal-tb; }
 
         /* ボタン */
         #control-panel { position: fixed; bottom: 20px; right: 20px; z-index: 1000; }
@@ -127,15 +173,17 @@
 
 <div id="preview-container">
     
-    <div class="sheet-label">【１枚目】</div>
+    <!-- ========================================== -->
+    <!-- 【1枚目】（右：1ページ ／ 左：2ページ） -->
+    <!-- ========================================== -->
+    <div class="sheet-label">【１枚目】（右：１ページ ／ 左：２ページ）</div>
     <div class="sheet-wrapper">
         <div class="sheet">
-            <!-- 2段組みコンテナ -->
             <div class="columns">
                 
-                <!-- ヘッダー情報 -->
-                <div style="break-inside: avoid;">
-                    <h1 class="header-title">三年　国語科　学年末考査問題</h1>
+                <!-- ■ 1ページ（右段）：表紙・知識 ■ -->
+                <div class="column-content">
+                    <h1 class="header-title">三年　国語科　学年末考査</h1>
                     <div class="header-info">
                         （令和七年二月二十五日実施）<br>
                         三年 ＿＿ 組 ＿＿ 番 名前 ＿＿＿＿＿＿＿＿
@@ -146,70 +194,67 @@
                         ※句読点（、。）や記号は一字と数えます。<br>
                         ★知識を問う問題　　※読む力を問う問題
                     </div>
-                </div>
 
-                <!-- 問一：漢字（教科書内容） -->
-                <div class="q-block">
-                    <div class="q-main">●一　<span class="line-s">　　</span>部のカタカナを漢字に、漢字は読みをひらがなで書きなさい。</div>
-                    <div style="margin-right:1em;">
-                        ①　親譲りの<span class="line-s">ムテッポウ</span>で損ばかりしている。（坊っちゃん）<br>
-                        ②　分人とは、<span class="line-s">ユイイツ</span>の「本当の自分」ではない。（私とは何か）<br>
-                        ③　文化を次の世代に<span class="line-s">ケイショウ</span>する。<br>
-                        ④　清は、おれの事を<span class="line-s">ヒジョウ</span>に好いていた。（坊っちゃん）<br>
-                        ⑤　同級生が、弱虫やーいと<span class="line-s">囃</span>した。（坊っちゃん）<br>
-                        ⑥　学んで思わざれば則ち<span class="line-s">罔</span>し。（論語）
-                    </div>
-                </div>
-                
-                <!-- 問二：四字熟語 -->
-                <div class="q-block">
-                    <div class="q-main">●二　次の四字熟語の意味として最も適切なものを、あとのア～エから選び、記号で答えなさい。</div>
-                    <div style="margin-right:1em; font-weight:bold;">【　粉骨砕身　】</div>
-                    <div class="box">
-                        ア　自分の利益だけを考えて行動すること。<br>
-                        イ　力の限り努力すること。<br>
-                        ウ　非常に危険な状態にあること。<br>
-                        エ　物事が思い通りに進まないこと。
-                    </div>
-                </div>
-
-                <!-- 問三：四字熟語（書き取り） -->
-                <div class="q-block">
-                    <div class="q-main">●三　次の文の（　）に入る適切な四字熟語を漢字で書きなさい。</div>
-                    <div style="margin-right:1em;">
-                        「彼は（　　　　）な性格で、一度決めたらテコでも動かない。」
-                    </div>
-                </div>
-
-                <!-- ▼▼ ここから2ページ目の内容が自然と左段に流れます ▼▼ -->
-
-                <!-- 問四：論語 -->
-                <div class="q-block">
-                    <div class="q-main">●四　次の「論語」の文章を読み、あとの問いに答えなさい。</div>
-                    
-                    <div class="box" style="line-height:2.0; font-size:15px; margin-bottom:20px;">
-                        子曰、学<span class="kb-wrap">而<span class="kb-kaeri">テ</span></span>不<span class="kb-wrap">思<span class="kb-kaeri">ハ</span></span>則<span class="kb-wrap">罔<span class="kb-kaeri">シ</span></span>。思<span class="kb-wrap">而<span class="kb-kaeri">テ</span></span>不<span class="kb-wrap">学<span class="kb-kaeri">バ</span></span>則<span class="kb-wrap">殆<span class="kb-kaeri">シ</span></span>。<br>
-                        <br>
-                        子曰、温<span class="kb-wrap">故<span class="kb-kaeri">キヲ</span></span><span class="kb-wrap">而<span class="kb-kaeri">テ</span></span>知<span class="kb-wrap">新<span class="kb-kaeri">シキヲ</span></span>、可<span class="kb-wrap">以<span class="kb-kaeri">テ</span></span>為<span class="kb-wrap">師<span class="kb-kaeri">ト</span></span>矣。
-                    </div>
-
-                    <div style="margin-right:1em;">
-                        ①「子曰」の「子」とは誰のことか。最も適切な人物名を書きなさい。<br><br>
-                        ②「学而不思則罔」の書き下し文として正しいものを選びなさい。
-                        <div class="box">
-                            ア　学びて思はざれば則ち罔し<br>
-                            イ　学ぶと思ふは則ち罔し<br>
-                            ウ　学びて思はざるは則ち罔し
-                        </div>
-                        ③「温故而知新」の意味として最も適切なものを選びなさい。
-                        <div class="box">
-                            ア　古い友人を大切にし、新しい友人も作ること。<br>
-                            イ　昔のことを研究して、そこから新しい知識や見解を得ること。<br>
-                            ウ　冷たくなったものを温めて、新しく作り直すこと。
-                        </div>
-                        ④ 孔子が理想とした、他人への思いやりを表す漢字一字を次から選びなさい。
+                    <div class="q-block">
+                        <div class="q-main">●一　<span class="line-s">　　</span>部のカタカナを漢字に、漢字は読みをひらがなで書きなさい。</div>
                         <div style="margin-right:1em;">
-                            ア　道　　イ　仁　　ウ　知　　エ　勇
+                            ①　実験の結果を<span class="line-s">ブンセキ</span>する。<br>
+                            ②　伝統文化を<span class="line-s">ケイショウ</span>する。<br>
+                            ③　<span class="line-s">ココロヨ</span>い返事をもらう。<br>
+                            ④　過去の<span class="line-s">アヤマ</span>ちを反省する。<br>
+                            ⑤　彼は<span class="line-s">奔放</span>な性格だ。<br>
+                            ⑥　相手を<span class="line-s">威嚇</span>する。
+                        </div>
+                    </div>
+                    
+                    <div class="q-block">
+                        <div class="q-main">●二　次の四字熟語の意味として最も適切なものを、あとのア～エから選び、記号で答えなさい。</div>
+                        <div style="margin-right:1em; font-weight:bold;">【　粉骨砕身　】</div>
+                        <div class="box">
+                            ア　自分の利益だけを考えて行動すること。<br>
+                            イ　力の限り努力すること。<br>
+                            ウ　非常に危険な状態にあること。<br>
+                            エ　物事が思い通りに進まないこと。
+                        </div>
+                    </div>
+
+                    <div class="q-block">
+                        <div class="q-main">●三　次の文の（　）に入る適切な四字熟語を漢字で書きなさい。</div>
+                        <div style="margin-right:1em;">
+                            「彼は（　　　　）な性格で、一度決めたらテコでも動かない。」
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ■ 2ページ（左段）：論語 ■ -->
+                <div class="column-content">
+                    <div class="q-block">
+                        <div class="q-main">●四　次の「論語」の文章を読み、あとの問いに答えなさい。</div>
+                        
+                        <div class="box" style="line-height:2.0; font-size:16px; margin-bottom:20px; padding:15px;">
+                            子曰、学<span class="kb-wrap">而<span class="kb-kaeri">テ</span></span>不<span class="kb-wrap">思<span class="kb-kaeri">ハ</span></span>則<span class="kb-wrap">罔<span class="kb-kaeri">シ</span></span>。思<span class="kb-wrap">而<span class="kb-kaeri">テ</span></span>不<span class="kb-wrap">学<span class="kb-kaeri">バ</span></span>則<span class="kb-wrap">殆<span class="kb-kaeri">シ</span></span>。<br>
+                            <br>
+                            子曰、温<span class="kb-wrap">故<span class="kb-kaeri">キヲ</span></span><span class="kb-wrap">而<span class="kb-kaeri">テ</span></span>知<span class="kb-wrap">新<span class="kb-kaeri">シキヲ</span></span>、可<span class="kb-wrap">以<span class="kb-kaeri">テ</span></span>為<span class="kb-wrap">師<span class="kb-kaeri">ト</span></span>矣。
+                        </div>
+
+                        <div style="margin-right:1em;">
+                            ①「子曰」の「子」とは誰のことか。最も適切な人物名を書きなさい。<br><br>
+                            ②「学而不思則罔」の書き下し文として正しいものを選びなさい。
+                            <div class="box">
+                                ア　学びて思はざれば則ち罔し<br>
+                                イ　学ぶと思ふは則ち罔し<br>
+                                ウ　学びて思はざるは則ち罔し
+                            </div>
+                            ③「温故而知新」の意味として最も適切なものを選びなさい。
+                            <div class="box">
+                                ア　古い友人を大切にし、新しい友人も作ること。<br>
+                                イ　昔のことを研究して、そこから新しい知識や見解を得ること。<br>
+                                ウ　冷たくなったものを温めて、新しく作り直すこと。
+                            </div>
+                            ④ 孔子が理想とした、他人への思いやりを表す漢字一字を次から選びなさい。
+                            <div style="margin-right:1em;">
+                                ア　道　　イ　仁　　ウ　知　　エ　勇
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -220,11 +265,122 @@
             <div class="page-num-l">- 2 -</div>
         </div>
     </div>
+
+
+    <!-- ========================================== -->
+    <!-- 【2枚目】（右：3ページ ／ 左：4ページ） -->
+    <!-- ========================================== -->
+    <div class="sheet-label">【２枚目】（右：３ページ ／ 左：４ページ）</div>
+    <div class="sheet-wrapper">
+        <div class="sheet">
+            <div class="columns">
+                
+                <!-- ■ 3ページ（右段）：初恋・坊っちゃん ■ -->
+                <div class="column-content">
+                    <div class="q-block">
+                        <div class="q-main">●五　次の詩（『初恋』）を読み、あとの問いに答えなさい。</div>
+                        <div style="margin: 15px 30px; font-style:italic; line-height:2.0; font-size:16px;">
+                            まだあげ初めし前髪の　林檎のもとに見えしとき<br>
+                            前にさしたる花櫛の　花ある君と思ひけり<br>
+                            <br>
+                            やさしく白き手をのべて　林檎をわれにあたへしは<br>
+                            薄紅の秋の実に　人こひ初めしはじめなり
+                        </div>
+                        <div style="margin-right:1em;">
+                            ① この詩の形式とリズムを、次から一つ選び記号で答えなさい。
+                            <div style="margin-right:1em;">
+                                ア　口語自由詩・七五調　　イ　文語定型詩・七五調<br>
+                                ウ　文語自由詩・五七調　　エ　口語定型詩・五七調
+                            </div>
+                            
+                            ②「林檎」はこの詩の中で何の象徴として使われていますか。
+                            <div style="margin-right:1em;">
+                                ア　秋の味覚　　イ　若々しい恋心　　ウ　故郷の風景
+                            </div>
+
+                            ③「人こひ初めし」とはどういう意味ですか。「自分」「恋」という言葉を使って書きなさい。<br><br>
+                        </div>
+                    </div>
+
+                    <div class="q-block">
+                        <div class="q-main">●六　次の文章（『坊っちゃん』）を読み、あとの問いに答えなさい。</div>
+                        <div class="box" style="line-height:2.0; font-family:'Yu Mincho', serif;">
+                            　親譲りの<span class="line-s">①</span><span class="line-u">無鉄砲</span>で小供の時から<span class="line-s">②</span><span class="line-u">損ばかりしている</span>。小学校に居る時分学校の二階から飛び降りて一週間ほど腰を抜かした事がある。なぜそんな無闇をしたと聞く人があるかも知れぬ。別段深い理由でもない。新築の二階から首を出していたら、同級生の一人が冗談に、いくら威張っても、そこから飛び降りる事は出来まい。弱虫やーい。と囃したからである。小使に負ぶさって帰って来た時、おやじが大きな眼をして二階ぐらいから飛び降りて腰を抜かす奴があるかと云ったから、この次は抜かさずに飛んで見せますと答えた。<br>
+                            （中略）<br>
+                            　母が死んでから、<span class="line-s">③</span><span class="line-u">清</span>という下女が、おれを可愛がってくれた。
+                        </div>
+
+                        <div style="margin-right:1em;">
+                            ① 傍線部①「無鉄砲」の意味として正しいものを選びなさい。
+                            <div class="box">
+                                ア　鉄砲を持っていないこと。<br>
+                                イ　後先を考えずに乱暴な行動をすること。<br>
+                                ウ　親の言いつけを守らないこと。
+                            </div>
+                            
+                            ② 傍線部②「損ばかりしている」の具体例を、文章中から十字以内で書き抜きなさい。
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ■ 4ページ（左段）：坊っちゃん・私とは何か ■ -->
+                <div class="column-content">
+                    <div class="q-block">
+                        <div style="margin-right:1em;">
+                            ③ 坊っちゃんが二階から飛び降りた理由として最も適切なものを選びなさい。
+                            <div class="box">
+                                ア　父親に度胸があるところを見せたかったから。<br>
+                                イ　同級生に弱虫とからかわれ、負けたくなかったから。<br>
+                                ウ　学校の決まりに反発したかったから。
+                            </div>
+                            
+                            ④ 傍線部③「清」は坊っちゃんにとってどのような存在でしたか。
+                            <div style="margin-right:1em;">
+                                ア　教育係　　イ　理解者　　ウ　家政婦　　エ　競争相手
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="q-block">
+                        <div class="q-main">●七　次の文章（『私とは何か』）を読み、あとの問いに答えなさい。</div>
+                        <div class="box" style="line-height:2.0;">
+                            　私たちは、たった一つの「本当の自分」があると考えがちだ。学校でも職場でも家庭でも、どこでも変わらない一貫した「自分」が存在するべきだ、と。しかし、実際には、私たちは接する相手によって自然と異なる自分になっている。親と話すときの自分、友人と話すときの自分、先生と話すときの自分は、それぞれ少しずつ違うはずだ。<br>
+                            　筆者は、この一つ一つの異なる自分のことを「<span class="line-s">①</span><span class="line-u">分人</span>」と呼んでいる。「個人」という言葉は「これ以上分けられない（in-dividual）」という意味だが、「分人」は「分けられる（dividual）」人間観だ。<br>
+                            　「本当の自分」を探そうとして苦しむよりも、複数の「分人」の集合体が自分なのだと認めるほうが、<span class="line-s">②</span><span class="line-u">生きるのが楽になる</span>のではないだろうか。どれか一つの分人がうまくいかなくても、別の分人が充実していれば、自分全体を否定することにはならないからだ。
+                        </div>
+
+                        <div style="margin-right:1em;">
+                            ① 筆者は、私たちが一般的に「自分」についてどのように考えがちだと述べていますか。文章中から三十字以内で抜き出しなさい。<br><br>
+
+                            ② 傍線部①「分人」の説明として最も適切なものを選びなさい。
+                            <div class="box">
+                                ア　相手や環境に関わらず、常に一貫している唯一の自分。<br>
+                                イ　対人関係ごとに異なる、複数存在する自分。<br>
+                                ウ　他人に合わせて無理をして演じている偽りの自分。<br>
+                                エ　社会の中で孤立し、誰とも関わらない自分。
+                            </div>
+
+                            ③ 傍線部②「生きるのが楽になる」理由を説明した次の文の空欄にあてはまる言葉を文章中から抜き出しなさい。
+                            <div class="box">
+                                「一つの分人がうまくいかなくても、（　　　　　）を否定することにはならないから。」
+                            </div>
+
+                            ★④ あなたは「たった一つの本当の自分」と「複数の分人としての自分」、どちらの考え方に共感しますか。あなたの考えを理由とともに四十字以上六十字以内で書きなさい。
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- ページ番号 -->
+            <div class="page-num-r">- 3 -</div>
+            <div class="page-num-l">- 4 -</div>
+        </div>
+    </div>
+
 </div>
 
 <script>
     function adjustScale() {
-        const wrapper = document.querySelector('.sheet-wrapper');
+        const wrappers = document.querySelectorAll('.sheet-wrapper');
         const baseWidth = 1123; 
         const baseHeight = 794;
         const screenWidth = document.body.clientWidth;
@@ -234,10 +390,12 @@
         let scale = availableWidth / baseWidth;
         if (scale > 1) scale = 1;
 
-        wrapper.style.transform = `scale(${scale})`;
-        const currentHeight = baseHeight * scale;
-        const spaceToRemove = baseHeight - currentHeight;
-        wrapper.style.marginBottom = `-${spaceToRemove - 30}px`;
+        wrappers.forEach(wrapper => {
+            wrapper.style.transform = `scale(${scale})`;
+            const currentHeight = baseHeight * scale;
+            const spaceToRemove = baseHeight - currentHeight;
+            wrapper.style.marginBottom = `-${spaceToRemove - 30}px`;
+        });
     }
 
     window.addEventListener('load', adjustScale);
