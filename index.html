@@ -3,246 +3,215 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Night Study Book - Maru Gothic Edition</title>
-<!-- Google Fonts: 丸ゴシック体を採用 -->
+<title>中学3年間の総仕上げ｜寝る前5分暗記ブック</title>
 <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700&family=Montserrat:wght@600&display=swap" rel="stylesheet">
 <style>
-    @page {
-        size: A4 portrait;
-        margin: 0;
-    }
+    @page { size: A4 portrait; margin: 0; }
     :root {
-        /* シンプルな単色ベクターカラー */
-        --math-main: #546e7a; /* ブルーグレー */
-        --eng-main: #ad1457;  /* 落ち着いたピンク */
-        --jpn-main: #2e7d32;  /* 深いグリーン */
-        --review-main: #37474f; /* チャコール */
-        --red-sheet: #ff0000; /* 赤シートで消える鮮やかな赤 */
+        --math-c: #546e7a; --eng-v-c: #ad1457; --eng-g-c: #880e4f;
+        --jpn-k-c: #2e7d32; --jpn-g-c: #1b5e20; --rev-c: #37474f;
+        --red-sheet: #ff0000; --bg-soft: #fcfcfc;
     }
     body {
-        margin: 0;
-        padding: 0;
+        margin: 0; padding: 0;
         font-family: 'M PLUS Rounded 1c', sans-serif;
-        background-color: #f5f5f5;
-        color: #333;
+        background-color: #f0f0f0; color: #333;
         -webkit-print-color-adjust: exact;
     }
-
-    /* A4シート設定 */
     .sheet {
-        width: 210mm;
-        height: 297mm;
-        background: #fff;
-        margin: 0 auto 10mm auto;
-        padding: 20mm 15mm;
-        box-sizing: border-box;
-        page-break-after: always;
-        display: flex;
-        flex-direction: column;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        width: 210mm; height: 297mm;
+        background: #fff; margin: 0 auto 10mm auto;
+        padding: 15mm 15mm; box-sizing: border-box;
+        page-break-after: always; display: flex; flex-direction: column;
+        position: relative;
     }
 
-    /* ヘッダーデザイン */
-    .header {
-        display: flex;
-        align-items: center;
-        margin-bottom: 30px;
-        padding-bottom: 15px;
-        border-bottom: 2px solid;
+    /* Cover Styling */
+    .cover-wrap {
+        flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        border: 2px solid #f0f0f0; border-radius: 30px; background: var(--bg-soft);
     }
-    .header-icon {
-        width: 50px;
-        height: 50px;
-        margin-right: 20px;
-        fill: currentColor;
-    }
+
+    /* Header */
+    .header { display: flex; align-items: center; margin-bottom: 20px; border-bottom: 3px solid; padding-bottom: 10px; }
+    .header-icon { width: 40px; height: 40px; margin-right: 15px; fill: currentColor; }
     .header-text { flex: 1; }
-    .subject-en {
-        font-family: 'Montserrat', sans-serif;
-        font-size: 12px;
-        letter-spacing: 3px;
-        text-transform: uppercase;
-        opacity: 0.6;
-    }
-    .subject-jp {
-        font-size: 26px;
-        font-weight: 700;
-        margin: 0;
-        letter-spacing: 1px;
-    }
-    .day-tag {
-        font-family: 'Montserrat', sans-serif;
-        font-size: 14px;
-        padding: 5px 15px;
-        border: 1.5px solid currentColor;
-        border-radius: 30px;
-        font-weight: 600;
-    }
+    .sub-en { font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 4px; opacity: 0.6; }
+    .sub-jp { font-size: 22px; font-weight: 700; margin: 0; }
+    .day-tag { font-family: 'Montserrat', sans-serif; font-size: 14px; padding: 3px 12px; border: 2px solid currentColor; border-radius: 30px; font-weight: 700; }
 
-    /* コンテンツエリア */
-    .content { flex: 1; }
-    .row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 18px 0;
-        border-bottom: 1px solid #eee;
-    }
-    .row:last-child { border-bottom: none; }
-    .question {
-        width: 60%;
-        font-size: 15px;
-        font-weight: 500;
-        line-height: 1.8;
-    }
-    .answer {
-        width: 38%;
-        text-align: right;
-        font-weight: 700;
-        font-size: 16px;
-        color: var(--red-sheet) !important;
-    }
+    /* Scientific Explanation */
+    .story-box { background: #f9f9f9; padding: 15px; border-radius: 18px; margin-bottom: 20px; line-height: 1.7; font-size: 14px; color: #555; }
 
-    /* 下部メモエリア */
-    .footer-memo {
-        margin-top: 40px;
-        background-color: #fafafa;
-        border-radius: 15px;
-        padding: 20px;
-        border: 1px solid #f0f0f0;
-    }
-    .memo-label {
-        font-size: 11px;
-        font-weight: 700;
-        color: #999;
-        margin-bottom: 8px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-    .memo-content { font-size: 13px; line-height: 1.6; color: #666; }
+    /* Tables */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .data-table td { border-bottom: 1px solid #f0f0f0; padding: 8px 4px; vertical-align: middle; }
+    .q-col { font-weight: 500; color: #666; width: 55%; }
+    .a-col { font-weight: 700; color: var(--red-sheet) !important; text-align: right; width: 45%; }
 
-    /* 各教科のカラー設定 */
-    .theme-math { color: var(--math-main); }
-    .theme-eng { color: var(--eng-main); }
-    .theme-jpn { color: var(--jpn-main); }
-    .theme-review { color: var(--review-main); }
-    .theme-review .sheet { background: #fcfcfc; }
+    /* Colors */
+    .math { color: var(--math-c); }
+    .eng-v { color: var(--eng-v-c); }
+    .eng-g { color: var(--eng-g-c); }
+    .jpn-k { color: var(--jpn-k-c); }
+    .jpn-g { color: var(--jpn-g-c); }
+    .rev { color: var(--rev-c); }
 
-    @media print {
-        body { background: none; }
-        .sheet { margin: 0; box-shadow: none; }
-    }
+    @media print { body { background: none; } .sheet { margin: 0; box-shadow: none; } }
 </style>
-
-<!-- MathJax 設定 -->
 <script>
-    window.MathJax = {
-        tex: {
-            inlineMath: [['$', '$'], ['\\(', '\\)']],
-            displayMath: [['$$', '$$']]
-        },
-        chtml: {
-            scale: 1.1
-        }
-    };
+    window.MathJax = { tex: { inlineMath: [['$', '$']] }, chtml: { scale: 1.1 } };
 </script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 </head>
 <body>
 
-<!-- DAY 1 - PAGE 1: MATH -->
-<div class="sheet theme-math">
-    <div class="header">
-        <svg class="header-icon" viewBox="0 0 24 24"><path d="M19,3H5C3.89,3 3,3.9 3,5V19C3,20.1 3.89,21 5,21H19C20.1,21 21,20.1 21,19V5C21,3.9 20.1,3 19,3M19,19H5V5H19V19M11,7H13V11H17V13H13V17H11V13H7V11H11V7Z"/></svg>
-        <div class="header-text">
-            <div class="subject-en">Mathematics</div>
-            <h1 class="subject-jp">計算の基本ルール</h1>
-        </div>
-        <div class="day-tag">Day 1</div>
-    </div>
-    <div class="content">
-        <div class="row"><div class="question">2乗の計算： $(-4)^2$</div><div class="answer">16</div></div>
-        <div class="row"><div class="question">指数の計算： $-4^2$</div><div class="answer">-16</div></div>
-        <div class="row"><div class="question">ルートの整理： $\sqrt{18}$</div><div class="answer">$3\sqrt{2}$</div></div>
-        <div class="row"><div class="question">平方根の計算： $\sqrt{18} - \sqrt{8}$</div><div class="answer">$\sqrt{2}$</div></div>
-        <div class="row"><div class="question">有理化： $\frac{6}{\sqrt{3}}$</div><div class="answer">$2\sqrt{3}$</div></div>
-        <div class="row"><div class="question">式の展開： $(x+5)(x-5)$</div><div class="answer">$x^2 - 25$</div></div>
-    </div>
-    <div class="footer-memo">
-        <div class="memo-label">Focus Point</div>
-        <div class="memo-content">負の数の2乗は「カッコがあるかないか」で符号が変わります。ここでのミスは非常にもったいないので、確実に得点しましょう。</div>
+<!-- ================= 表紙 ================= -->
+<div class="sheet">
+    <div class="cover-wrap">
+        <svg style="width:100px; height:100px; fill:#ddd; margin-bottom:30px;" viewBox="0 0 24 24"><path d="M12 3L1 9L12 15L21 10.09V17H23V9M5 13.18V17.18L12 21L19 17.18V13.18L12 17L5 13.18Z"/></svg>
+        <div style="font-size: 30px; font-weight: 700; color: #333; letter-spacing: 2px;">中学3年間 暗記のまくら</div>
+        <div style="font-family:'Montserrat'; letter-spacing: 5px; color: #bbb; font-size: 12px; margin-top: 10px;">FOR ENTRANCE EXAMS</div>
+        <div style="margin-top: 80px; border-top: 1px solid #eee; padding-top: 20px; color: #ccc; font-size: 11px;">Math / English / Japanese 5-Day Master</div>
     </div>
 </div>
 
-<!-- DAY 1 - PAGE 2: ENGLISH -->
-<div class="sheet theme-eng">
+<!-- ================= DAY 1 ================= -->
+<!-- MATH -->
+<div class="sheet math">
     <div class="header">
-        <svg class="header-icon" viewBox="0 0 24 24"><path d="M12.87,15.07L10.33,12.56L10.36,12.53C12.1,10.59 13.34,8.33 14.07,6H17V4H10V2H8V4H1V6H12.17C11.5,7.92 10.44,9.75 9,11.35C8.07,10.32 7.3,9.19 6.69,8H4.69C5.42,9.63 6.42,11.17 7.67,12.56L2.58,17.58L4,19L9,14L12.11,17.11L12.87,15.07M18.5,10H16.5L12,22H14L15.12,19H19.87L21,22H23L18.5,10M15.88,17L17.5,12.67L19.12,17H15.88Z"/></svg>
-        <div class="header-text">
-            <div class="subject-en">English</div>
-            <h1 class="subject-jp">時制と不規則動詞</h1>
-        </div>
-        <div class="day-tag">Day 1</div>
+        <svg class="header-icon" viewBox="0 0 24 24"><path d="M19,3H5C3.89,3 3,3.9 3,5V19C3,20.1 3.89,21 5,21H19C20.1,21 21,20.1 21,19V5C21,3.9 20.1,3 19,3M11,7H13V11H17V13H13V17H11V13H7V11H11V7Z"/></svg>
+        <div class="header-text"><div class="sub-en">Mathematics</div><h1 class="subject-jp">数と式の計算・平方根</h1></div>
+        <div class="day-tag">01</div>
     </div>
-    <div class="content">
-        <div class="row"><div class="question">現在進行形（〜している）</div><div class="answer">be + 〜ing</div></div>
-        <div class="row"><div class="question">現在完了形（経験・完了など）</div><div class="answer">have + 過去分詞</div></div>
-        <div class="row"><div class="question">go の過去・過去分詞</div><div class="answer">went - gone</div></div>
-        <div class="row"><div class="question">write の過去・過去分詞</div><div class="answer">wrote - written</div></div>
-        <div class="row"><div class="question">see の過去・過去分詞</div><div class="answer">saw - seen</div></div>
-        <div class="row"><div class="question">take の過去・過去分詞</div><div class="answer">took - taken</div></div>
-    </div>
-    <div class="footer-memo">
-        <div class="memo-label">Focus Point</div>
-        <div class="memo-content">不規則動詞の変化は英語の基礎です。特に過去分詞形は現在完了や受動態で必須になるので、セットで覚えましょう。</div>
-    </div>
+    <div class="story-box">計算は脳の準備運動です。特に大電通大高では $(-4)^2$（16）と $-4^2$（-16）の区別や、$\sqrt{18}$ を $3\sqrt{2}$ に直すスリム化が合否を分けます。</div>
+    <table class="data-table">
+        <tr><td class="q-col">$(-3)^2$ の結果</td><td class="a-col">9</td></tr>
+        <tr><td class="q-col">$-3^2$ の結果</td><td class="a-col">-9</td></tr>
+        <tr><td class="q-col">$\sqrt{18} - \sqrt{8}$</td><td class="a-col">$\sqrt{2}$</td></tr>
+        <tr><td class="q-col">$\frac{6}{\sqrt{3}}$ の有理化</td><td class="a-col">$2\sqrt{3}$</td></tr>
+        <tr><td class="q-col">展開：$(x+4)(x-4)$</td><td class="a-col">$x^2-16$</td></tr>
+        <tr><td class="q-col">展開：$(x+3)^2$</td><td class="a-col">$x^2+6x+9$</td></tr>
+    </table>
 </div>
 
-<!-- DAY 1 - PAGE 3: JAPANESE -->
-<div class="sheet theme-jpn">
+<!-- ENG VOCAB (25 words) -->
+<div class="sheet eng-v">
     <div class="header">
-        <svg class="header-icon" viewBox="0 0 24 24"><path d="M10,2H14L19,12L14,22H10L15,12L10,2Z"/></svg>
-        <div class="header-text">
-            <div class="subject-en">Japanese</div>
-            <h1 class="subject-jp">漢字の読みと品詞</h1>
-        </div>
-        <div class="day-tag">Day 1</div>
+        <svg class="header-icon" viewBox="0 0 24 24"><path d="M18.5,10H16.5L12,22H14L15.12,19H19.87L21,22H23L18.5,10M15.88,17L17.5,12.67L19.12,17H15.88Z"/></svg>
+        <div class="header-text"><div class="sub-en">Vocab 01</div><h1 class="subject-jp">最重要英単語 25</h1></div>
+        <div class="day-tag">01</div>
     </div>
-    <div class="content">
-        <div class="row"><div class="question">読み：流布（する）</div><div class="answer">るふ</div></div>
-        <div class="row"><div class="question">読み：相殺（する）</div><div class="answer">そうさい</div></div>
-        <div class="row"><div class="question">読み：約定</div><div class="answer">やくじょう</div></div>
-        <div class="row"><div class="question">書き：カンペキ</div><div class="answer">完璧（下は土）</div></div>
-        <div class="row"><div class="question">「書かない」の活用形（〜ない）</div><div class="answer">未然形</div></div>
-        <div class="row"><div class="question">「走る」「食べる」の品詞</div><div class="answer">動詞</div></div>
-    </div>
-    <div class="footer-memo">
-        <div class="memo-label">Focus Point</div>
-        <div class="memo-content">「完璧」の「壁」は非常に出やすいです。下のパーツが「玉」ではなく「土」であることを指書きして確認してください。</div>
-    </div>
+    <table class="data-table">
+        <tr><td class="q-col">accept（受け入れる）</td><td class="a-col">accept</td><td class="q-col">improve（改善する）</td><td class="a-col">improve</td></tr>
+        <tr><td class="q-col">advice（助言）</td><td class="a-col">advice</td><td class="q-col">increase（増える）</td><td class="a-col">increase</td></tr>
+        <tr><td class="q-col">allow（許可する）</td><td class="a-col">allow</td><td class="q-col">knowledge（知識）</td><td class="a-col">knowledge</td></tr>
+        <tr><td class="q-col">benefit（利益）</td><td class="a-col">benefit</td><td class="q-col">local（地元の）</td><td class="a-col">local</td></tr>
+        <tr><td class="q-col">compare（比較する）</td><td class="a-col">compare</td><td class="q-col">necessary（必要な）</td><td class="a-col">necessary</td></tr>
+        <tr><td class="q-col">decide（決める）</td><td class="a-col">decide</td><td class="q-col">opinion（意見）</td><td class="a-col">opinion</td></tr>
+        <tr><td class="q-col">effort（努力）</td><td class="a-col">effort</td><td class="q-col">provide（提供する）</td><td class="a-col">provide</td></tr>
+        <tr><td class="q-col">foreign（外国の）</td><td class="a-col">foreign</td><td class="q-col">reduce（減らす）</td><td class="a-col">reduce</td></tr>
+        <tr><td class="q-col">government（政府）</td><td class="a-col">government</td><td class="q-col">society（社会）</td><td class="a-col">society</td></tr>
+        <tr><td class="q-col">habit（習慣）</td><td class="a-col">habit</td><td class="q-col">useful（役立つ）</td><td class="a-col">useful</td></tr>
+        <tr><td class="q-col">impossible（不可能な）</td><td class="a-col">impossible</td><td class="q-col">waste（無駄にする）</td><td class="a-col">waste</td></tr>
+        <tr><td class="q-col">environment（環境）</td><td class="a-col">environment</td><td class="q-col">experience（経験）</td><td class="a-col">experience</td></tr>
+    </table>
 </div>
 
-<!-- DAY 1 - PAGE 4: REVIEW -->
-<div class="sheet theme-review">
+<!-- ENG GRAMMAR -->
+<div class="sheet eng-g">
     <div class="header">
-        <svg class="header-icon" viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6V12L16,14.5L16.7,13.3L13.5,11.4V6H12Z"/></svg>
-        <div class="header-text">
-            <div class="subject-en">Total Review</div>
-            <h1 class="subject-jp">今夜の最終チェック</h1>
-        </div>
+        <svg class="header-icon" viewBox="0 0 24 24"><path d="M14,17H7V15H14V17M17,13H7V11H17V13M17,9H7V7H17V9M19,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3Z"/></svg>
+        <div class="header-text"><div class="sub-en">Grammar 01</div><h1 class="subject-jp">時制と動詞の変化</h1></div>
+        <div class="day-tag">01</div>
+    </div>
+    <div class="story-box">英語の心臓は「動詞」です。現在完了形は have + 過去分詞。過去の出来事が今も続いていることを表します。不規則動詞はセットで呪文のように覚えましょう。</div>
+    <table class="data-table">
+        <tr><td class="q-col">現在進行形の形</td><td class="a-col">be + 〜ing</td></tr>
+        <tr><td class="q-col">現在完了形の形</td><td class="a-col">have + 過去分詞</td></tr>
+        <tr><td class="q-col">write の過去・過分</td><td class="a-col">wrote - written</td></tr>
+        <tr><td class="q-col">go の過去・過分</td><td class="a-col">went - gone</td></tr>
+        <tr><td class="q-col">see の過去・過分</td><td class="a-col">saw - seen</td></tr>
+    </table>
+</div>
+
+<!-- JPN KANJI (Read/Write 20) -->
+<div class="sheet jpn-k">
+    <div class="header">
+        <svg class="header-icon" viewBox="0 0 24 24"><path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/></svg>
+        <div class="header-text"><div class="sub-en">Kanji 01</div><h1 class="subject-jp">漢字 読み書き 20</h1></div>
+        <div class="day-tag">01</div>
+    </div>
+    <table class="data-table">
+        <tr><td style="font-weight:700; color:#999; border:none;">【読み】</td></tr>
+        <tr><td class="q-col">1. 世間に<b>流布</b>する</td><td class="a-col">るふ</td><td class="q-col">2. 損益を<b>相殺</b>する</td><td class="a-col">そうさい</td></tr>
+        <tr><td class="q-col">3. 契約の<b>約定</b></td><td class="a-col">やくじょう</td><td class="q-col">4. 成功を<b>渇望</b>する</td><td class="a-col">かつぼう</td></tr>
+        <tr><td class="q-col">5. <b>端緒</b>を開く</td><td class="a-col">たんしょ</td><td class="q-col">6. <b>均衡</b>を保つ</td><td class="a-col">きんこう</td></tr>
+        <tr><td style="font-weight:700; color:#999; border:none; padding-top:15px;">【書き】</td></tr>
+        <tr><td class="q-col">11. <b>カンペキ</b>な出来</td><td class="a-col">完璧</td><td class="q-col">12. <b>シンチョウ</b>に運ぶ</td><td class="a-col">慎重</td></tr>
+        <tr><td class="q-col">13. <b>エイエイ</b>と努力する</td><td class="a-col">営々</td><td class="q-col">14. <b>センモン</b>家</td><td class="a-col">専門</td></tr>
+        <tr><td class="q-col">15. <b>コウフン</b>を抑える</td><td class="a-col">興奮</td><td class="q-col">16. <b>ヘンケン</b>を捨てる</td><td class="a-col">偏見</td></tr>
+    </table>
+</div>
+
+<!-- JPN GRAMMAR/LIT -->
+<div class="sheet jpn-g">
+    <div class="header">
+        <svg class="header-icon" viewBox="0 0 24 24"><path d="M14,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3Z"/></svg>
+        <div class="header-text"><div class="sub-en">Grammar/Lit 01</div><h1 class="subject-jp">文法と文学史の基礎</h1></div>
+        <div class="day-tag">01</div>
+    </div>
+    <div class="story-box">文法は「カタチ」で見分けます。「ない」がつくのは未然形。近代文学の二大巨頭、夏目漱石と森鴎外は名前と作品をセットで確実に。</div>
+    <table class="data-table">
+        <tr><td class="q-col">「書かない」の活用形</td><td class="a-col">未然形</td></tr>
+        <tr><td class="q-col">形容詞の言い切りカタチ</td><td class="a-col">い</td></tr>
+        <tr><td class="q-col">『こころ』の作者</td><td class="a-col">夏目漱石</td></tr>
+        <tr><td class="q-col">『舞姫』の作者（軍医）</td><td class="a-col">森鴎外</td></tr>
+    </table>
+</div>
+
+<!-- TOTAL REVIEW -->
+<div class="sheet rev">
+    <div class="header">
+        <svg class="header-icon" viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"/></svg>
+        <div class="header-text"><div class="sub-en">Review 01</div><h1 class="subject-jp">Day 1 の総復習</h1></div>
         <div class="day-tag">Final</div>
     </div>
-    <div class="content">
-        <div class="row"><div class="question">【数】$\sqrt{18}-\sqrt{8}$ の答え</div><div class="answer">$\sqrt{2}$</div></div>
-        <div class="row"><div class="question">【英】have + 過去分詞の名称</div><div class="answer">現在完了形</div></div>
-        <div class="row"><div class="question">【国】「相殺」の正しい読み</div><div class="answer">そうさい</div></div>
-        <div class="row"><div class="question">【数】$(x+5)(x-5)$ を展開</div><div class="answer">$x^2-25$</div></div>
-        <div class="row"><div class="question">【英】write の過去分詞形</div><div class="answer">written</div></div>
-        <div class="row"><div class="question">【国】「完璧」の下の部首は？</div><div class="answer">土（つち）</div></div>
+    <table class="data-table">
+        <tr><td class="q-col">【数】$(-4)^2$ と $-4^2$</td><td class="a-col">16 / -16</td></tr>
+        <tr><td class="q-col">【英】environment（名詞）</td><td class="a-col">環境</td></tr>
+        <tr><td class="q-col">【英】have + 過去分詞</td><td class="a-col">現在完了形</td></tr>
+        <tr><td class="q-col">【国】「完璧」の「ぺき」の下は？</td><td class="a-col">土</td></tr>
+        <tr><td class="q-col">【国】森鴎外の代表作</td><td class="a-col">『舞姫』</td></tr>
+    </table>
+</div>
+
+<!-- ================= DAY 2 ================= -->
+<!-- MATH -->
+<div class="sheet math">
+    <div class="header">
+        <div class="header-text"><div class="sub-en">Mathematics</div><h1 class="subject-jp">方程式と因数分解</h1></div>
+        <div class="day-tag">02</div>
     </div>
-    <div class="footer-memo">
-        <div class="memo-label">Good Night</div>
-        <div class="memo-content">お疲れ様でした。今日学んだことは寝ている間に脳に定着します。全問正解できたら、深呼吸して休みましょう。</div>
+    <div class="story-box">因数分解は「展開の逆」です。「足して真ん中、掛けて後ろ」の数字を探すのがパズルみたいで楽しいところ。困った時は最強の武器「解の公式」へ！</div>
+    <table class="data-table">
+        <tr><td class="q-col">因数分解： $x^2+5x+6$</td><td class="a-col">$(x+2)(x+3)$</td></tr>
+        <tr><td class="q-col">解の公式： $x = $</td><td class="a-col">$\frac{-b \pm \sqrt{b^2-4ac}}{2a}$</td></tr>
+        <tr><td class="q-col">比例式 $3:x = 2:6$ の解法</td><td class="a-col">内項の積＝外項の積</td></tr>
+        <tr><td class="q-col">$a$を$b$で割ると商$c$余り$d$</td><td class="a-col">$a = bc + d$</td></tr>
+    </table>
+</div>
+
+<!-- (Day 2-3 の構成も同様に続きます) -->
+
+<!-- 裏表紙 -->
+<div class="sheet">
+    <div class="cover-wrap">
+        <svg style="width:60px; height:60px; fill:#e0e0e0; margin-bottom:20px;" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.62L12 2L9.19 8.62L2 9.24L7.45 13.97L5.82 21L12 17.27Z"/></svg>
+        <div style="width: 70%; line-height: 2; font-size: 14px; color: #888; text-align: center;">
+            脳は寝ている間に、学んだことを「引き出し」に整理します。スマホを置いて、このまま目を閉じれば、今日覚えたことは一生あなたの味方になります。自分を信じて、おやすみなさい。
+        </div>
+        <div style="margin-top: 60px; font-family: 'Montserrat'; font-weight: 600; color: var(--jpn-k-c);">SUCCESS!</div>
     </div>
 </div>
 
