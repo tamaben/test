@@ -2,15 +2,13 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>中学3年間の総仕上げ｜寝る前5分暗記ブック</title>
-<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700&family=Montserrat:wght@600&display=swap" rel="stylesheet">
+<title>中学3年間 完全暗記ブック｜2.10合格に向けて</title>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700&family=Montserrat:wght@500;600&display=swap" rel="stylesheet">
 <style>
     @page { size: A4 portrait; margin: 0; }
     :root {
-        --math-c: #546e7a; --eng-v-c: #ad1457; --eng-g-c: #880e4f;
-        --jpn-k-c: #2e7d32; --jpn-g-c: #1b5e20; --rev-c: #37474f;
-        --red-sheet: #ff0000; --bg-soft: #fcfcfc;
+        --math-c: #546e7a; --eng-c: #ad1457; --jpn-c: #2e7d32; --rev-c: #37474f;
+        --red-sheet: #ff0000; --bg-soft: #fdfdfd;
     }
     body {
         margin: 0; padding: 0;
@@ -20,41 +18,55 @@
     }
     .sheet {
         width: 210mm; height: 297mm;
-        background: #fff; margin: 0 auto 10mm auto;
-        padding: 15mm 15mm; box-sizing: border-box;
+        background: #fff; margin: 0 auto 5mm auto;
+        padding: 10mm 12mm; box-sizing: border-box;
         page-break-after: always; display: flex; flex-direction: column;
         position: relative;
     }
 
-    /* Cover Styling */
+    /* Cover & Back - Stylish Minimalism */
     .cover-wrap {
         flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-        border: 2px solid #f0f0f0; border-radius: 30px; background: var(--bg-soft);
+        border: 1px solid #eee; border-radius: 40px; background: var(--bg-soft);
     }
+    .main-logo { width: 120px; height: 120px; fill: #ddd; margin-bottom: 40px; }
 
-    /* Header */
-    .header { display: flex; align-items: center; margin-bottom: 20px; border-bottom: 3px solid; padding-bottom: 10px; }
-    .header-icon { width: 40px; height: 40px; margin-right: 15px; fill: currentColor; }
+    /* Header Design */
+    .header { display: flex; align-items: center; margin-bottom: 15px; border-bottom: 2px solid; padding-bottom: 8px; }
+    .header-icon { width: 35px; height: 35px; margin-right: 12px; fill: currentColor; }
     .header-text { flex: 1; }
-    .sub-en { font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 4px; opacity: 0.6; }
+    .sub-en { font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 3px; opacity: 0.6; text-transform: uppercase; }
     .sub-jp { font-size: 22px; font-weight: 700; margin: 0; }
-    .day-tag { font-family: 'Montserrat', sans-serif; font-size: 14px; padding: 3px 12px; border: 2px solid currentColor; border-radius: 30px; font-weight: 700; }
+    .day-tag { font-family: 'Montserrat', sans-serif; font-size: 14px; padding: 4px 15px; border: 2px solid currentColor; border-radius: 30px; font-weight: 700; }
 
-    /* Scientific Explanation */
-    .story-box { background: #f9f9f9; padding: 15px; border-radius: 18px; margin-bottom: 20px; line-height: 1.7; font-size: 14px; color: #555; }
+    /* Concept & Logic Box (Scientific) */
+    .concept-box { 
+        background: #f8f9fa; padding: 15px; border-radius: 20px; 
+        margin-bottom: 15px; line-height: 1.7; font-size: 13.5px; 
+        border: 1px solid #eee; position: relative;
+    }
+    .concept-box::after { content: "Logic Tips"; font-size: 8px; color: #ccc; position: absolute; top: 8px; right: 15px; font-weight: bold; }
 
-    /* Tables */
-    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    /* Data List - High Density */
+    .data-area { flex: 1; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     .data-table td { border-bottom: 1px solid #f0f0f0; padding: 8px 4px; vertical-align: middle; }
-    .q-col { font-weight: 500; color: #666; width: 55%; }
+    .q-col { font-weight: 500; color: #555; width: 55%; }
     .a-col { font-weight: 700; color: var(--red-sheet) !important; text-align: right; width: 45%; }
 
-    /* Colors */
+    /* Bottom Margin Utility */
+    .footer-memo { 
+        margin-top: 15px; padding: 12px; background: #fafafa; border-radius: 15px;
+        font-size: 11px; color: #888; border: 1px dashed #ddd; display: flex; justify-content: space-between;
+    }
+
+    /* Math Formula Decoration */
+    .math-deco { font-family: serif; font-style: italic; color: #bbb; font-size: 10px; margin-top: 5px; }
+
+    /* Theme Classes */
     .math { color: var(--math-c); }
-    .eng-v { color: var(--eng-v-c); }
-    .eng-g { color: var(--eng-g-c); }
-    .jpn-k { color: var(--jpn-k-c); }
-    .jpn-g { color: var(--jpn-g-c); }
+    .eng { color: var(--eng-c); }
+    .jpn { color: var(--jpn-c); }
     .rev { color: var(--rev-c); }
 
     @media print { body { background: none; } .sheet { margin: 0; box-shadow: none; } }
@@ -66,152 +78,150 @@
 </head>
 <body>
 
-<!-- ================= 表紙 ================= -->
+<!-- P1: 表紙 (右表紙として機能) -->
 <div class="sheet">
     <div class="cover-wrap">
-        <svg style="width:100px; height:100px; fill:#ddd; margin-bottom:30px;" viewBox="0 0 24 24"><path d="M12 3L1 9L12 15L21 10.09V17H23V9M5 13.18V17.18L12 21L19 17.18V13.18L12 17L5 13.18Z"/></svg>
-        <div style="font-size: 30px; font-weight: 700; color: #333; letter-spacing: 2px;">中学3年間 暗記のまくら</div>
-        <div style="font-family:'Montserrat'; letter-spacing: 5px; color: #bbb; font-size: 12px; margin-top: 10px;">FOR ENTRANCE EXAMS</div>
-        <div style="margin-top: 80px; border-top: 1px solid #eee; padding-top: 20px; color: #ccc; font-size: 11px;">Math / English / Japanese 5-Day Master</div>
+        <svg class="main-logo" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z"/></svg>
+        <div style="font-size: 30px; font-weight: 700; color: #333; letter-spacing: 3px;">暗記のまくら。</div>
+        <div style="font-family:'Montserrat'; letter-spacing: 6px; color: #aaa; font-size: 14px; margin-top: 10px;">OSAKA DENTSU PREP 7-DAYS</div>
+        <div style="margin-top: 80px; font-size: 12px; color: #ccc;">2024 - 2025 Past Analysis Edition</div>
     </div>
 </div>
 
-<!-- ================= DAY 1 ================= -->
-<!-- MATH -->
+<!-- P2: 裏表紙 (小冊子用：表紙の裏にくるメッセージ) -->
+<div class="sheet">
+    <div class="cover-wrap" style="background: #fafafa; border: none; padding: 30px;">
+        <div style="font-size: 18px; font-weight: bold; color: #666; margin-bottom: 20px;">2月10日、最高のあなたへ。</div>
+        <div style="width: 85%; line-height: 2.2; font-size: 13.5px; color: #888; text-align: center;">
+            脳は寝ている間に、この本で得た情報を「引き出し」に整理します。<br>
+            焦りは禁物です。計算は一行ずつ丁寧に。<br>
+            分からない問題があっても大丈夫、飛ばして次へ進もう。<br>
+            あなたがこの7日間を積み重ねた事実は、変わりません。<br>
+            自信を持って、全力を出し切りましょう。<br>
+        </div>
+        <div style="margin-top: 60px; font-family: 'Montserrat'; font-weight: 700; color: #37474f; letter-spacing: 5px;">YOU CAN DO IT!</div>
+    </div>
+</div>
+
+<!-- ================= DAY 1: 計算基礎 ================= -->
 <div class="sheet math">
     <div class="header">
         <svg class="header-icon" viewBox="0 0 24 24"><path d="M19,3H5C3.89,3 3,3.9 3,5V19C3,20.1 3.89,21 5,21H19C20.1,21 21,20.1 21,19V5C21,3.9 20.1,3 19,3M11,7H13V11H17V13H13V17H11V13H7V11H11V7Z"/></svg>
-        <div class="header-text"><div class="sub-en">Mathematics</div><h1 class="subject-jp">数と式の計算・平方根</h1></div>
+        <div class="header-text"><div class="sub-en">Mathematics Day 01</div><h1 class="sub-jp">数と式の計算・平方根</h1></div>
         <div class="day-tag">01</div>
     </div>
-    <div class="story-box">計算は脳の準備運動です。特に大電通大高では $(-4)^2$（16）と $-4^2$（-16）の区別や、$\sqrt{18}$ を $3\sqrt{2}$ に直すスリム化が合否を分けます。</div>
-    <table class="data-table">
-        <tr><td class="q-col">$(-3)^2$ の結果</td><td class="a-col">9</td></tr>
-        <tr><td class="q-col">$-3^2$ の結果</td><td class="a-col">-9</td></tr>
-        <tr><td class="q-col">$\sqrt{18} - \sqrt{8}$</td><td class="a-col">$\sqrt{2}$</td></tr>
-        <tr><td class="q-col">$\frac{6}{\sqrt{3}}$ の有理化</td><td class="a-col">$2\sqrt{3}$</td></tr>
-        <tr><td class="q-col">展開：$(x+4)(x-4)$</td><td class="a-col">$x^2-16$</td></tr>
-        <tr><td class="q-col">展開：$(x+3)^2$</td><td class="a-col">$x^2+6x+9$</td></tr>
-    </table>
+    <div class="concept-box">
+        計算は試験の「リズム」を作ります。$-3^2 = -9$（3を2乗してからマイナス）と $(-3)^2 = 9$（-3を2乗する）の違いを指差し確認。平方根 $\sqrt{18}$ は中に $3 \times 3$ を見つけて $3\sqrt{2}$ にスリム化しましょう。
+    </div>
+    <div class="data-area">
+        <table class="data-table">
+            <tr><td class="q-col">$(-4)^2$ の答え</td><td class="a-col">16</td><td class="q-col">$-4^2$ の答え</td><td class="a-col">-16</td></tr>
+            <tr><td class="q-col">$\sqrt{18} - \sqrt{8}$</td><td class="a-col">$\sqrt{2}$</td><td class="q-col">$\sqrt{12} + \sqrt{27}$</td><td class="a-col">$5\sqrt{3}$</td></tr>
+            <tr><td class="q-col">有理化： $\frac{6}{\sqrt{3}}$</td><td class="a-col">$2\sqrt{3}$</td><td class="q-col">有理化： $\frac{10}{\sqrt{5}}$</td><td class="a-col">$2\sqrt{5}$</td></tr>
+            <tr><td class="q-col">展開：$(x+4)(x-4)$</td><td class="a-col">$x^2-16$</td><td class="q-col">展開：$(x-3)^2$</td><td class="a-col">$x^2-6x+9$</td></tr>
+            <tr><td class="q-col">$(-6) \times 2 + 14 \div (-7)$</td><td class="a-col">-14</td><td class="q-col">$0.42 \div 0.7 \div 0.6$</td><td class="a-col">1</td></tr>
+        </table>
+    </div>
+    <div class="footer-memo">
+        <span>🌙 Bedtime Memo: 今日ミスした計算の符号をここに書こう ____________________</span>
+        <span>Check: □</span>
+    </div>
 </div>
 
-<!-- ENG VOCAB (25 words) -->
-<div class="sheet eng-v">
+<!-- ================= DAY 1: 英単語 (密集) ================= -->
+<div class="sheet eng">
     <div class="header">
         <svg class="header-icon" viewBox="0 0 24 24"><path d="M18.5,10H16.5L12,22H14L15.12,19H19.87L21,22H23L18.5,10M15.88,17L17.5,12.67L19.12,17H15.88Z"/></svg>
-        <div class="header-text"><div class="sub-en">Vocab 01</div><h1 class="subject-jp">最重要英単語 25</h1></div>
+        <div class="header-text"><div class="sub-en">English Vocab Day 01</div><h1 class="sub-jp">最重要英単語 30 - A</h1></div>
         <div class="day-tag">01</div>
     </div>
-    <table class="data-table">
-        <tr><td class="q-col">accept（受け入れる）</td><td class="a-col">accept</td><td class="q-col">improve（改善する）</td><td class="a-col">improve</td></tr>
-        <tr><td class="q-col">advice（助言）</td><td class="a-col">advice</td><td class="q-col">increase（増える）</td><td class="a-col">increase</td></tr>
-        <tr><td class="q-col">allow（許可する）</td><td class="a-col">allow</td><td class="q-col">knowledge（知識）</td><td class="a-col">knowledge</td></tr>
-        <tr><td class="q-col">benefit（利益）</td><td class="a-col">benefit</td><td class="q-col">local（地元の）</td><td class="a-col">local</td></tr>
-        <tr><td class="q-col">compare（比較する）</td><td class="a-col">compare</td><td class="q-col">necessary（必要な）</td><td class="a-col">necessary</td></tr>
-        <tr><td class="q-col">decide（決める）</td><td class="a-col">decide</td><td class="q-col">opinion（意見）</td><td class="a-col">opinion</td></tr>
-        <tr><td class="q-col">effort（努力）</td><td class="a-col">effort</td><td class="q-col">provide（提供する）</td><td class="a-col">provide</td></tr>
-        <tr><td class="q-col">foreign（外国の）</td><td class="a-col">foreign</td><td class="q-col">reduce（減らす）</td><td class="a-col">reduce</td></tr>
-        <tr><td class="q-col">government（政府）</td><td class="a-col">government</td><td class="q-col">society（社会）</td><td class="a-col">society</td></tr>
-        <tr><td class="q-col">habit（習慣）</td><td class="a-col">habit</td><td class="q-col">useful（役立つ）</td><td class="a-col">useful</td></tr>
-        <tr><td class="q-col">impossible（不可能な）</td><td class="a-col">impossible</td><td class="q-col">waste（無駄にする）</td><td class="a-col">waste</td></tr>
-        <tr><td class="q-col">environment（環境）</td><td class="a-col">environment</td><td class="q-col">experience（経験）</td><td class="a-col">experience</td></tr>
-    </table>
+    <div class="concept-box">英単語は、脳内でその「情景」を思い浮かべながら見ると定着率が上がります。</div>
+    <div class="data-area">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0 10px;">
+            <table class="data-table">
+                <tr><td>accept</td><td class="a-col">受け入れる</td></tr>
+                <tr><td>advice</td><td class="a-col">助言</td></tr>
+                <tr><td>allow</td><td class="a-col">許可する</td></tr>
+                <tr><td>benefit</td><td class="a-col">利益</td></tr>
+                <tr><td>compare</td><td class="a-col">比較する</td></tr>
+                <tr><td>decide</td><td class="a-col">決める</td></tr>
+                <tr><td>effort</td><td class="a-col">努力</td></tr>
+                <tr><td>foreign</td><td class="a-col">外国の</td></tr>
+            </table>
+            <table class="data-table">
+                <tr><td>environment</td><td class="a-col">環境</td></tr>
+                <tr><td>government</td><td class="a-col">政府</td></tr>
+                <tr><td>improve</td><td class="a-col">改善する</td></tr>
+                <tr><td>increase</td><td class="a-col">増える</td></tr>
+                <tr><td>knowledge</td><td class="a-col">知識</td></tr>
+                <tr><td>necessary</td><td class="a-col">必要な</td></tr>
+                <tr><td>provide</td><td class="a-col">提供する</td></tr>
+                <tr><td>society</td><td class="a-col">社会</td></tr>
+            </table>
+        </div>
+    </div>
+    <div class="footer-memo">
+        <span>🌙 Bedtime Memo: 覚えにくかった単語1つ ____________________</span>
+        <span>Count: /30</span>
+    </div>
 </div>
 
-<!-- ENG GRAMMAR -->
-<div class="sheet eng-g">
+<!-- ================= DAY 1: 文法・漢字 ================= -->
+<div class="sheet jpn">
     <div class="header">
-        <svg class="header-icon" viewBox="0 0 24 24"><path d="M14,17H7V15H14V17M17,13H7V11H17V13M17,9H7V7H17V9M19,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3Z"/></svg>
-        <div class="header-text"><div class="sub-en">Grammar 01</div><h1 class="subject-jp">時制と動詞の変化</h1></div>
+        <svg class="header-icon" viewBox="0 0 24 24"><path d="M10,2H14L19,12L14,22H10L15,12L10,2Z"/></svg>
+        <div class="header-text"><div class="sub-en">Jpn & Grammar Day 01</div><h1 class="sub-jp">文法・漢字の基礎</h1></div>
         <div class="day-tag">01</div>
     </div>
-    <div class="story-box">英語の心臓は「動詞」です。現在完了形は have + 過去分詞。過去の出来事が今も続いていることを表します。不規則動詞はセットで呪文のように覚えましょう。</div>
-    <table class="data-table">
-        <tr><td class="q-col">現在進行形の形</td><td class="a-col">be + 〜ing</td></tr>
-        <tr><td class="q-col">現在完了形の形</td><td class="a-col">have + 過去分詞</td></tr>
-        <tr><td class="q-col">write の過去・過分</td><td class="a-col">wrote - written</td></tr>
-        <tr><td class="q-col">go の過去・過分</td><td class="a-col">went - gone</td></tr>
-        <tr><td class="q-col">see の過去・過分</td><td class="a-col">saw - seen</td></tr>
-    </table>
-</div>
-
-<!-- JPN KANJI (Read/Write 20) -->
-<div class="sheet jpn-k">
-    <div class="header">
-        <svg class="header-icon" viewBox="0 0 24 24"><path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/></svg>
-        <div class="header-text"><div class="sub-en">Kanji 01</div><h1 class="subject-jp">漢字 読み書き 20</h1></div>
-        <div class="day-tag">01</div>
+    <div class="concept-box">文法は「終わりのカタチ」がすべて。文学史は夏目漱石（余裕派）と森鴎外（エリート軍医）の二大巨頭をまず抑えて。</div>
+    <div class="data-area">
+        <table class="data-table">
+            <tr><td colspan="2" style="font-weight:700;">【国語漢字：読み10問】</td></tr>
+            <tr><td class="q-col">1. 流布</td><td class="a-col">るふ</td><td class="q-col">2. 相殺</td><td class="a-col">そうさい</td></tr>
+            <tr><td class="q-col">3. 約定</td><td class="a-col">やくじょう</td><td class="q-col">4. 端緒</td><td class="a-col">たんしょ</td></tr>
+            <tr><td colspan="2" style="font-weight:700; padding-top:10px;">【英語文法：時制】</td></tr>
+            <tr><td class="q-col">現在進行形（〜している）</td><td class="a-col">be + 〜ing</td><td class="q-col">完了形（have+過分）</td><td class="a-col">現在完了形</td></tr>
+            <tr><td class="q-col">write の三活用</td><td class="a-col">wrote-written</td><td class="q-col">go の三活用</td><td class="a-col">went-gone</td></tr>
+        </table>
     </div>
-    <table class="data-table">
-        <tr><td style="font-weight:700; color:#999; border:none;">【読み】</td></tr>
-        <tr><td class="q-col">1. 世間に<b>流布</b>する</td><td class="a-col">るふ</td><td class="q-col">2. 損益を<b>相殺</b>する</td><td class="a-col">そうさい</td></tr>
-        <tr><td class="q-col">3. 契約の<b>約定</b></td><td class="a-col">やくじょう</td><td class="q-col">4. 成功を<b>渇望</b>する</td><td class="a-col">かつぼう</td></tr>
-        <tr><td class="q-col">5. <b>端緒</b>を開く</td><td class="a-col">たんしょ</td><td class="q-col">6. <b>均衡</b>を保つ</td><td class="a-col">きんこう</td></tr>
-        <tr><td style="font-weight:700; color:#999; border:none; padding-top:15px;">【書き】</td></tr>
-        <tr><td class="q-col">11. <b>カンペキ</b>な出来</td><td class="a-col">完璧</td><td class="q-col">12. <b>シンチョウ</b>に運ぶ</td><td class="a-col">慎重</td></tr>
-        <tr><td class="q-col">13. <b>エイエイ</b>と努力する</td><td class="a-col">営々</td><td class="q-col">14. <b>センモン</b>家</td><td class="a-col">専門</td></tr>
-        <tr><td class="q-col">15. <b>コウフン</b>を抑える</td><td class="a-col">興奮</td><td class="q-col">16. <b>ヘンケン</b>を捨てる</td><td class="a-col">偏見</td></tr>
-    </table>
-</div>
-
-<!-- JPN GRAMMAR/LIT -->
-<div class="sheet jpn-g">
-    <div class="header">
-        <svg class="header-icon" viewBox="0 0 24 24"><path d="M14,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3Z"/></svg>
-        <div class="header-text"><div class="sub-en">Grammar/Lit 01</div><h1 class="subject-jp">文法と文学史の基礎</h1></div>
-        <div class="day-tag">01</div>
+    <div class="footer-memo">
+        <span>🌙 Bedtime Memo: 「完璧」の下は「土」。指で書いて確認 ____________________</span>
+        <span>Check: □</span>
     </div>
-    <div class="story-box">文法は「カタチ」で見分けます。「ない」がつくのは未然形。近代文学の二大巨頭、夏目漱石と森鴎外は名前と作品をセットで確実に。</div>
-    <table class="data-table">
-        <tr><td class="q-col">「書かない」の活用形</td><td class="a-col">未然形</td></tr>
-        <tr><td class="q-col">形容詞の言い切りカタチ</td><td class="a-col">い</td></tr>
-        <tr><td class="q-col">『こころ』の作者</td><td class="a-col">夏目漱石</td></tr>
-        <tr><td class="q-col">『舞姫』の作者（軍医）</td><td class="a-col">森鴎外</td></tr>
-    </table>
 </div>
 
-<!-- TOTAL REVIEW -->
-<div class="sheet rev">
-    <div class="header">
-        <svg class="header-icon" viewBox="0 0 24 24"><path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"/></svg>
-        <div class="header-text"><div class="sub-en">Review 01</div><h1 class="subject-jp">Day 1 の総復習</h1></div>
-        <div class="day-tag">Final</div>
-    </div>
-    <table class="data-table">
-        <tr><td class="q-col">【数】$(-4)^2$ と $-4^2$</td><td class="a-col">16 / -16</td></tr>
-        <tr><td class="q-col">【英】environment（名詞）</td><td class="a-col">環境</td></tr>
-        <tr><td class="q-col">【英】have + 過去分詞</td><td class="a-col">現在完了形</td></tr>
-        <tr><td class="q-col">【国】「完璧」の「ぺき」の下は？</td><td class="a-col">土</td></tr>
-        <tr><td class="q-col">【国】森鴎外の代表作</td><td class="a-col">『舞姫』</td></tr>
-    </table>
-</div>
-
-<!-- ================= DAY 2 ================= -->
-<!-- MATH -->
+<!-- ================= DAY 2: 方程式 ================= -->
 <div class="sheet math">
     <div class="header">
-        <div class="header-text"><div class="sub-en">Mathematics</div><h1 class="subject-jp">方程式と因数分解</h1></div>
+        <div class="header-text"><div class="sub-en">Mathematics Day 02</div><h1 class="sub-jp">方程式と因数分解</h1></div>
         <div class="day-tag">02</div>
     </div>
-    <div class="story-box">因数分解は「展開の逆」です。「足して真ん中、掛けて後ろ」の数字を探すのがパズルみたいで楽しいところ。困った時は最強の武器「解の公式」へ！</div>
-    <table class="data-table">
-        <tr><td class="q-col">因数分解： $x^2+5x+6$</td><td class="a-col">$(x+2)(x+3)$</td></tr>
-        <tr><td class="q-col">解の公式： $x = $</td><td class="a-col">$\frac{-b \pm \sqrt{b^2-4ac}}{2a}$</td></tr>
-        <tr><td class="q-col">比例式 $3:x = 2:6$ の解法</td><td class="a-col">内項の積＝外項の積</td></tr>
-        <tr><td class="q-col">$a$を$b$で割ると商$c$余り$d$</td><td class="a-col">$a = bc + d$</td></tr>
-    </table>
+    <div class="concept-box">因数分解はパズル。「掛けて後ろ、足して真ん中」の数字を探します。困ったときは最強の武器「解の公式」へ。</div>
+    <div class="data-area">
+        <table class="data-table">
+            <tr><td class="q-col">分解： $x^2+5x+6$</td><td class="a-col">$(x+2)(x+3)$</td><td class="q-col">分解： $x^2-25$</td><td class="a-col">$(x+5)(x-5)$</td></tr>
+            <tr><td class="q-col">解の公式： $x = $</td><td class="a-col">$\frac{-b \pm \sqrt{b^2-4ac}}{2a}$</td><td class="q-col">比例式 $3:x = 2:6$</td><td class="a-col">$x=9$</td></tr>
+            <tr><td class="q-col">商と余りの式 ($a \div b = c ... d$)</td><td class="a-col">$a=bc+d$</td><td class="q-col">内項の積 ＝ ？？？</td><td class="a-col">外項の積</td></tr>
+        </table>
+    </div>
 </div>
 
-<!-- (Day 2-3 の構成も同様に続きます) -->
-
-<!-- 裏表紙 -->
-<div class="sheet">
-    <div class="cover-wrap">
-        <svg style="width:60px; height:60px; fill:#e0e0e0; margin-bottom:20px;" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.62L12 2L9.19 8.62L2 9.24L7.45 13.97L5.82 21L12 17.27Z"/></svg>
-        <div style="width: 70%; line-height: 2; font-size: 14px; color: #888; text-align: center;">
-            脳は寝ている間に、学んだことを「引き出し」に整理します。スマホを置いて、このまま目を閉じれば、今日覚えたことは一生あなたの味方になります。自分を信じて、おやすみなさい。
-        </div>
-        <div style="margin-top: 60px; font-family: 'Montserrat'; font-weight: 600; color: var(--jpn-k-c);">SUCCESS!</div>
+<!-- ================= DAY 7: 最終点検 (一番最後に重要内容を配置) ================= -->
+<div class="sheet rev">
+    <div class="header">
+        <div class="header-text"><div class="sub-en">Total Final Day 07</div><h1 class="sub-jp">入試直前、最終総点検</h1></div>
+        <div class="day-tag">07</div>
+    </div>
+    <div class="story-box" style="border-left:5px solid var(--rev-c);">最後は公式の再確認。計算のケアレスミス、漢字の「トメ・ハネ」、英語の「三人称単数のS」。知っていることを絶対落とさないのが合格への最短距離です。</div>
+    <div class="data-area">
+        <table class="data-table">
+            <tr><td class="q-col">【数】放物線の変化の割合</td><td class="a-col">$a(p+q)$</td><td class="q-col">【数】球の表面積</td><td class="a-col">$4 \pi r^2$</td></tr>
+            <tr><td class="q-col">【英】look forward to ...</td><td class="a-col">〜ing (動名詞)</td><td class="q-col">【英】〜した方がよい</td><td class="a-col">had better 〜</td></tr>
+            <tr><td class="q-col">【国】需要 ⇔ ？？？</td><td class="a-col">供給</td><td class="q-col">【国】完璧の「ぺき」の下</td><td class="a-col">土（つち）</td></tr>
+        </table>
+    </div>
+    <div class="footer-memo" style="background:#fff9c4;">
+        <span>🌸 最後は「自分ならできる」と声に出して寝よう！</span>
     </div>
 </div>
 
