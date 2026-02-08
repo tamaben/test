@@ -3,200 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OECU HS - Final Math Check</title>
+    <title>02.10 FINAL CHECK - OECU</title>
 
-    <!-- KaTeX: 数式を美しく表示する標準ライブラリ -->
+    <!-- KaTeX: 数式表示ライブラリ -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
 
     <style>
-        /* 印刷設定 A4 */
+        /* A4サイズ固定・印刷設定 */
         @page { size: A4; margin: 0; }
         
         body {
             margin: 0;
             padding: 0;
-            background-color: #f7f7f7; /* ニュアンスグレーの背景 */
-            /* システム標準の丸ゴシック体 */
-            font-family: "Hiragino Maru Gothic ProN", "Kosugi Maru", "Quicksand", sans-serif;
-            color: #4a4a4a;
+            background-color: #EEEEEE; /* Web背景 */
+            /* 欧文はHelvetica、和文は丸ゴシックでストリート感を演出 */
+            font-family: "Helvetica Neue", "Helvetica", "Hiragino Maru Gothic ProN", "Kosugi Maru", sans-serif;
+            color: #333333;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            -webkit-print-color-adjust: exact; /* 背景色を強制印刷 */
+            print-color-adjust: exact;
         }
 
         .poster {
             width: 210mm;
             height: 297mm;
-            background-color: #ffffff;
-            box-sizing: border-box;
-            padding: 60px 50px;
+            background-color: #F2F2F2; /* ベースのライトグレー */
+            position: relative;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            position: relative;
-            box-shadow: 0 0 40px rgba(0,0,0,0.02);
         }
 
-        /* レスポンシブ（スマホ閲覧用） */
+        /* スマホ閲覧時 */
         @media screen and (max-width: 210mm) {
-            .poster { width: 100%; height: auto; padding: 40px 20px; }
+            .poster { width: 100vw; height: auto; min-height: 100vh; }
         }
 
-        /* ヘッダーデザイン */
+        /* --- 黄金比レイアウト設計 --- */
+        
+        /* 上部 38.2% (黄金比の短辺) */
         header {
-            text-align: center;
-            margin-bottom: 60px;
+            height: 38.2%; 
+            background-color: #333333; /* ダークグレー */
+            color: #F2F2F2;
+            padding: 40px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            position: relative;
         }
-        .school-name {
-            font-size: 8pt;
-            letter-spacing: 0.5em;
-            color: #bbb;
-            text-transform: uppercase;
-            margin-bottom: 12px;
+
+        /* 巨大なタイポグラフィ */
+        .big-date {
+            font-size: 100pt;
+            font-weight: 700;
+            line-height: 0.8;
+            letter-spacing: -0.05em;
+            margin-bottom: 10px;
         }
-        h1 {
-            margin: 0;
-            font-size: 24pt;
+        .subtitle {
+            font-size: 14pt;
             font-weight: 300;
             letter-spacing: 0.2em;
-            color: #333;
-        }
-        .divider {
-            width: 30px;
-            height: 1px;
-            background-color: #eee;
-            margin: 30px auto;
-        }
-
-        /* コンテンツグリッド */
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 50px;
-            flex-grow: 1;
-        }
-        @media screen and (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
-
-        .category h2 {
-            font-size: 10pt;
-            letter-spacing: 0.2em;
-            color: #999;
+            opacity: 0.8;
             margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+        
+        /* 装飾ライン */
+        .golden-line {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            width: 100px;
+            height: 2px;
+            background-color: #F2F2F2;
+        }
+
+        /* 下部 61.8% (黄金比の長辺) */
+        .content-area {
+            height: 61.8%;
+            padding: 40px;
+            box-sizing: border-box;
+            display: grid;
+            /* 左右も黄金比 (1 : 1.618) に分割 */
+            grid-template-columns: 1fr 1.618fr;
+            gap: 30px;
+        }
+        @media screen and (max-width: 600px) {
+            .content-area { display: flex; flex-direction: column; height: auto; }
+        }
+
+        /* 左カラム（インデックス・メッセージ） */
+        .left-col {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border-right: 2px solid #D6D6D6;
+            padding-right: 20px;
+        }
+
+        .brand-box {
+            font-size: 9pt;
+            color: #888888;
+            letter-spacing: 0.1em;
+            line-height: 1.5;
+        }
+
+        .teacher-msg {
+            font-size: 10pt;
             font-weight: bold;
-            display: flex;
-            align-items: center;
-        }
-        .category h2::after {
-            content: "";
-            flex-grow: 1;
-            height: 1px;
-            background-color: #f0f0f0;
-            margin-left: 15px;
+            line-height: 1.8;
+            color: #555555;
         }
 
-        .math-card {
-            background-color: #fafafa;
-            border-radius: 16px;
-            padding: 25px;
-            line-height: 2.2;
+        /* 右カラム（メインコンテンツ） */
+        .right-col {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .section {
+            margin-bottom: 10px;
+        }
+        .sec-title {
+            font-size: 8pt;
+            color: #999999;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        /* 数式ボックス：ミニマルデザイン */
+        .math-block {
+            background-color: #FFFFFF;
+            padding: 18px 25px;
+            border-left: 4px solid #333333; /* アクセント */
+            box-shadow: 10px 10px 0px #E0E0E0; /* ソリッドな影 */
             font-size: 11pt;
-            color: #555;
-            border: 1px solid #f2f2f2;
+            line-height: 2.2;
+            color: #444444;
         }
-
-        /* タイムライン：おしゃれなフロー表示 */
-        .timeline {
-            grid-column: span 2;
-            background-color: #f2f2f2;
-            border-radius: 24px;
-            padding: 30px;
-            display: flex;
-            justify-content: space-around;
-            text-align: center;
-            margin: 10px 0;
+        
+        /* 強調 */
+        .highlight {
+            background-color: #E0E0E0;
+            padding: 2px 6px;
+            font-weight: bold;
+            font-size: 0.9em;
         }
-        @media screen and (max-width: 600px) { .timeline { grid-column: span 1; flex-direction: column; gap: 25px; } }
-        .step span { font-size: 8pt; color: #aaa; letter-spacing: 0.1em; }
-        .step p { margin: 5px 0 0 0; font-size: 12pt; font-weight: bold; color: #666; }
 
         /* フッター */
-        footer {
-            text-align: center;
-            padding-top: 50px;
-        }
-        .quote {
-            font-size: 11pt;
-            color: #aaa;
-            font-style: italic;
-            letter-spacing: 0.05em;
-        }
-        .author {
-            margin-top: 15px;
+        .footer-deco {
+            position: absolute;
+            bottom: 20px;
+            right: 40px;
             font-size: 8pt;
+            color: #AAAAAA;
             letter-spacing: 0.3em;
-            color: #ccc;
+            writing-mode: vertical-rl; /* 縦書きでおしゃれに */
         }
+
     </style>
 </head>
 <body>
 
     <div class="poster">
+        <!-- HEADER: The Bold Statement -->
         <header>
-            <div class="school-name">Osaka Electro-Communication Univ. HS</div>
-            <h1>2026 FINAL CHECK</h1>
-            <div class="divider"></div>
+            <div class="golden-line"></div>
+            <div class="subtitle">Entrance Exam / Math</div>
+            <div class="big-date">02.10</div>
+            <div class="subtitle" style="font-size: 10pt; margin-top: 5px;">Osaka Electro-Communication Univ. HS</div>
         </header>
 
-        <div class="grid">
-            <div class="category">
-                <h2>CALCULATION</h2>
-                <div class="math-card">
-                    ・ \( (-3)^2 = 9 \) ／ \( -3^2 = -9 \) <br>
-                    ・ \( \sqrt{12} = 2\sqrt{3} \) ／ \( \sqrt{27} = 3\sqrt{3} \) <br>
-                    ・ 有理化： \( \frac{6}{\sqrt{3}} = 2\sqrt{3} \)
+        <!-- CONTENT: Golden Ratio Grid -->
+        <div class="content-area">
+            
+            <!-- Left Column: Atmosphere -->
+            <div class="left-col">
+                <div class="brand-box">
+                    FINAL CHECK LIST<br>
+                    DESIGNED BY TAMAKI<br>
+                    OSAKA, JAPAN<br>
+                    2026 EDITION
+                </div>
+                <div class="teacher-msg">
+                    <p>
+                        深呼吸をひとつ。<br>
+                        君の努力は、<br>
+                        このシンプルな<br>
+                        数式のように<br>
+                        揺るがない。<br>
+                        <br>
+                        <span style="font-size: 14pt; color:#333;">GO BEYOND.</span>
+                    </p>
                 </div>
             </div>
 
-            <div class="category">
-                <h2>ALGEBRA</h2>
-                <div class="math-card">
-                    ・ 確率は \( 6 \times 6 \) の表で勝負する <br>
-                    ・ \( 20\% \) 減少 \(\rightarrow\) \( 0.8x \) と置く <br>
-                    ・ \( a^2 - b^2 = (a+b)(a-b) \)
+            <!-- Right Column: The Logic -->
+            <div class="right-col">
+                
+                <div class="section">
+                    <span class="sec-title">01. Calculation Logic</span>
+                    <div class="math-block">
+                        ・ \( (-3)^2 = 9 \) vs \( -3^2 = -9 \) <br>
+                        ・ \( \sqrt{12} = 2\sqrt{3} \) , \( \sqrt{27} = 3\sqrt{3} \) <br>
+                        ・ \( \frac{6}{\sqrt{3}} = 2\sqrt{3} \)
+                    </div>
                 </div>
-            </div>
 
-            <div class="timeline">
-                <div class="step"><span>00-10 min</span><p>計算：全問正解へ</p></div>
-                <div class="step"><span>10-25 min</span><p>小問：確実に加点</p></div>
-                <div class="step"><span>25-45 min</span><p>大問：(1)を死守</p></div>
-            </div>
-
-            <div class="category">
-                <h2>GEOMETRY</h2>
-                <div class="math-card">
-                    ・ 比：\( 1:2:\sqrt{3} \) ／ \( 1:1:\sqrt{2} \)<br>
-                    ・ 円：直径に対する円周角は \( 90^\circ \)<br>
-                    ・ 変域：\( y=ax^2 \) は \( 0 \) を含めば最小 \( 0 \)
+                <div class="section">
+                    <span class="sec-title">02. Essential Algebra</span>
+                    <div class="math-block">
+                        ・ Prob. = <span class="highlight">6×6 Grid System</span><br>
+                        ・ \( a^2 - b^2 = (a+b)(a-b) \)<br>
+                        ・ 20% OFF \(\rightarrow\) \( 0.8x \)
+                    </div>
                 </div>
-            </div>
 
-            <div class="category">
-                <h2>STRATEGY</h2>
-                <div class="math-card">
-                    ・ 詰まったら「飛ばす」勇気を<br>
-                    ・ 最後3分、解答欄のズレを確認<br>
-                    ・ 準備した自分を、最後まで信じる
+                <div class="section">
+                    <span class="sec-title">03. Geometry & Rules</span>
+                    <div class="math-block">
+                        ・ Ratio: \( 1:2:\sqrt{3} \) / \( 1:1:\sqrt{2} \)<br>
+                        ・ Circle: Dia. \(\rightarrow\) Angle is \( 90^\circ \)<br>
+                        ・ Func: \( y=ax^2 \) crosses \( 0 \rightarrow \) min \( 0 \)
+                    </div>
                 </div>
+
             </div>
         </div>
 
-        <footer>
-            <div class="quote">Focus on the problem in front of you.</div>
-            <div class="author">— TAMAKI-SENSEI</div>
-        </footer>
+        <div class="footer-deco">BELIEVE IN YOURSELF</div>
     </div>
 
 </body>
