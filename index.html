@@ -3,245 +3,316 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>02.10 FINAL CHECK - OECU</title>
+    <title>Math Final Check - Professional Design</title>
 
-    <!-- KaTeX: 数式表示ライブラリ -->
+    <!-- Google Fonts: 綺麗な丸ゴシック「Kosugi Maru」と英数字用フォント -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Manrope:wght@300;600;800&display=swap" rel="stylesheet">
+
+    <!-- KaTeX: 数式表示 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
 
     <style>
-        /* A4サイズ固定・印刷設定 */
+        /* A4サイズ設定 */
         @page { size: A4; margin: 0; }
         
+        :root {
+            --bg-color: #F4F5F7; /* 絶妙なブルーグレーホワイト */
+            --text-main: #2D3436; /* ほぼ黒に近いチャコール */
+            --text-sub: #636E72;  /* クールグレー */
+            --accent: #B2BEC3;    /* 薄いグレーのアクセント */
+        }
+
         body {
             margin: 0;
             padding: 0;
-            background-color: #EEEEEE; /* Web背景 */
-            /* 欧文はHelvetica、和文は丸ゴシックでストリート感を演出 */
-            font-family: "Helvetica Neue", "Helvetica", "Hiragino Maru Gothic ProN", "Kosugi Maru", sans-serif;
-            color: #333333;
+            background-color: var(--bg-color);
+            /* 丸ゴシックと幾何学的な英数字の組み合わせ */
+            font-family: 'Manrope', 'Kosugi Maru', "Hiragino Maru Gothic ProN", sans-serif;
+            color: var(--text-main);
             display: flex;
             justify-content: center;
             align-items: center;
-            -webkit-print-color-adjust: exact; /* 背景色を強制印刷 */
+            /* 印刷時に背景色を強制 */
+            -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
 
         .poster {
             width: 210mm;
             height: 297mm;
-            background-color: #F2F2F2; /* ベースのライトグレー */
+            background-color: #FFFFFF;
             position: relative;
+            box-sizing: border-box;
+            padding: 50px;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
         }
 
         /* スマホ閲覧時 */
         @media screen and (max-width: 210mm) {
-            .poster { width: 100vw; height: auto; min-height: 100vh; }
+            .poster { width: 100vw; height: auto; min-height: 100vh; padding: 30px; }
         }
 
-        /* --- 黄金比レイアウト設計 --- */
-        
-        /* 上部 38.2% (黄金比の短辺) */
+        /* --- DESIGN ELEMENTS --- */
+
+        /* Header Area */
         header {
-            height: 38.2%; 
-            background-color: #333333; /* ダークグレー */
-            color: #F2F2F2;
-            padding: 40px;
-            box-sizing: border-box;
+            border-bottom: 2px solid var(--text-main);
+            padding-bottom: 20px;
+            margin-bottom: 40px;
             display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            position: relative;
+            justify-content: space-between;
+            align-items: flex-end;
         }
-
-        /* 巨大なタイポグラフィ */
-        .big-date {
-            font-size: 100pt;
-            font-weight: 700;
-            line-height: 0.8;
-            letter-spacing: -0.05em;
-            margin-bottom: 10px;
+        
+        .header-left h1 {
+            font-size: 48pt;
+            font-weight: 800;
+            margin: 0;
+            line-height: 0.9;
+            letter-spacing: -0.03em;
         }
-        .subtitle {
-            font-size: 14pt;
+        .header-left span {
+            display: block;
+            font-size: 11pt;
             font-weight: 300;
             letter-spacing: 0.2em;
-            opacity: 0.8;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-        }
-        
-        /* 装飾ライン */
-        .golden-line {
-            position: absolute;
-            top: 40px;
-            right: 40px;
-            width: 100px;
-            height: 2px;
-            background-color: #F2F2F2;
+            margin-bottom: 5px;
         }
 
-        /* 下部 61.8% (黄金比の長辺) */
-        .content-area {
-            height: 61.8%;
-            padding: 40px;
-            box-sizing: border-box;
+        .header-right {
+            text-align: right;
+        }
+        .header-right .date {
+            font-size: 16pt;
+            font-weight: 600;
+            background: var(--text-main);
+            color: #FFF;
+            padding: 5px 15px;
+            border-radius: 50px; /* 丸みのあるタグ */
+        }
+
+        /* Main Content Grid */
+        .content {
             display: grid;
-            /* 左右も黄金比 (1 : 1.618) に分割 */
-            grid-template-columns: 1fr 1.618fr;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+        @media screen and (max-width: 600px) { .content { grid-template-columns: 1fr; } }
+
+        /* Sections */
+        .section {
+            margin-bottom: 30px;
+        }
+        .section-title {
+            font-size: 10pt;
+            color: var(--text-sub);
+            border-left: 4px solid var(--text-main);
+            padding-left: 10px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 600;
+        }
+
+        /* Math Cards - Minimalist */
+        .card {
+            background-color: var(--bg-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        .math-item {
+            margin-bottom: 12px;
+            font-size: 12pt;
+            line-height: 1.8;
+            display: flex;
+            align-items: baseline;
+        }
+        .math-item::before {
+            content: "●";
+            font-size: 6pt;
+            color: var(--text-sub);
+            margin-right: 12px;
+            transform: translateY(-2px);
+        }
+
+        /* Strategy Area (Full Width) */
+        .strategy {
+            grid-column: span 2;
+            background-color: var(--text-main);
+            color: #FFF;
+            border-radius: 20px;
+            padding: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        @media screen and (max-width: 600px) { 
+            .strategy { grid-column: span 1; flex-direction: column; text-align: center; gap: 20px; } 
+        }
+        
+        .strategy-title {
+            font-size: 18pt;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+        }
+        .strategy-steps {
+            display: flex;
             gap: 30px;
         }
-        @media screen and (max-width: 600px) {
-            .content-area { display: flex; flex-direction: column; height: auto; }
-        }
-
-        /* 左カラム（インデックス・メッセージ） */
-        .left-col {
+        .step {
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            border-right: 2px solid #D6D6D6;
-            padding-right: 20px;
         }
+        .step span { font-size: 8pt; opacity: 0.6; margin-bottom: 5px; }
+        .step strong { font-size: 12pt; font-weight: 600; }
 
-        .brand-box {
-            font-size: 9pt;
-            color: #888888;
-            letter-spacing: 0.1em;
+        /* Footer */
+        footer {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            color: var(--text-sub);
+        }
+        .message {
+            font-size: 12pt;
+            font-weight: 600;
             line-height: 1.5;
         }
-
-        .teacher-msg {
-            font-size: 10pt;
-            font-weight: bold;
-            line-height: 1.8;
-            color: #555555;
+        .signature {
+            font-size: 9pt;
+            text-align: right;
+            letter-spacing: 0.1em;
         }
 
-        /* 右カラム（メインコンテンツ） */
-        .right-col {
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
-
-        .section {
-            margin-bottom: 10px;
-        }
-        .sec-title {
-            font-size: 8pt;
-            color: #999999;
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-            display: block;
-        }
-
-        /* 数式ボックス：ミニマルデザイン */
-        .math-block {
-            background-color: #FFFFFF;
-            padding: 18px 25px;
-            border-left: 4px solid #333333; /* アクセント */
-            box-shadow: 10px 10px 0px #E0E0E0; /* ソリッドな影 */
-            font-size: 11pt;
-            line-height: 2.2;
-            color: #444444;
-        }
-        
-        /* 強調 */
-        .highlight {
-            background-color: #E0E0E0;
-            padding: 2px 6px;
-            font-weight: bold;
-            font-size: 0.9em;
-        }
-
-        /* フッター */
-        .footer-deco {
+        /* Background Decor (Abstract) */
+        .decor-circle {
             position: absolute;
-            bottom: 20px;
-            right: 40px;
-            font-size: 8pt;
-            color: #AAAAAA;
-            letter-spacing: 0.3em;
-            writing-mode: vertical-rl; /* 縦書きでおしゃれに */
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: #F4F5F7;
+            top: -100px;
+            right: -100px;
+            z-index: 0;
         }
+        .content, header, footer { position: relative; z-index: 1; }
 
     </style>
 </head>
 <body>
 
     <div class="poster">
-        <!-- HEADER: The Bold Statement -->
+        <div class="decor-circle"></div>
+
         <header>
-            <div class="golden-line"></div>
-            <div class="subtitle">Entrance Exam / Math</div>
-            <div class="big-date">02.10</div>
-            <div class="subtitle" style="font-size: 10pt; margin-top: 5px;">Osaka Electro-Communication Univ. HS</div>
+            <div class="header-left">
+                <span>OSAKA ELECTRO-COMM. UNIV. HS</span>
+                <h1>MATH<br>CHECK.</h1>
+            </div>
+            <div class="header-right">
+                <div class="date">02.10</div>
+            </div>
         </header>
 
-        <!-- CONTENT: Golden Ratio Grid -->
-        <div class="content-area">
+        <div class="content">
             
-            <!-- Left Column: Atmosphere -->
-            <div class="left-col">
-                <div class="brand-box">
-                    FINAL CHECK LIST<br>
-                    DESIGNED BY TAMAKI<br>
-                    OSAKA, JAPAN<br>
-                    2026 EDITION
+            <!-- Column 1 -->
+            <div class="column">
+                <div class="section">
+                    <div class="section-title">01 / Calculation Rules</div>
+                    <div class="card">
+                        <div class="math-item">
+                            符号注意：\( (-3)^2 = 9 \) vs \( -3^2 = -9 \)
+                        </div>
+                        <div class="math-item">
+                            ルート整理：\( \sqrt{12} = 2\sqrt{3} \)
+                        </div>
+                        <div class="math-item">
+                            有理化：\( \frac{6}{\sqrt{3}} = 2\sqrt{3} \)
+                        </div>
+                    </div>
                 </div>
-                <div class="teacher-msg">
-                    <p>
-                        深呼吸をひとつ。<br>
-                        君の努力は、<br>
-                        このシンプルな<br>
-                        数式のように<br>
-                        揺るがない。<br>
-                        <br>
-                        <span style="font-size: 14pt; color:#333;">GO BEYOND.</span>
-                    </p>
+
+                <div class="section">
+                    <div class="section-title">02 / Algebra & Data</div>
+                    <div class="card">
+                        <div class="math-item">
+                            確率は「6×6の表」を描く
+                        </div>
+                        <div class="math-item">
+                            20%減少 \(\rightarrow\) \( 0.8x \) と置く
+                        </div>
+                        <div class="math-item">
+                            \( a^2 - b^2 = (a+b)(a-b) \)
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Right Column: The Logic -->
-            <div class="right-col">
-                
+            <!-- Column 2 -->
+            <div class="column">
                 <div class="section">
-                    <span class="sec-title">01. Calculation Logic</span>
-                    <div class="math-block">
-                        ・ \( (-3)^2 = 9 \) vs \( -3^2 = -9 \) <br>
-                        ・ \( \sqrt{12} = 2\sqrt{3} \) , \( \sqrt{27} = 3\sqrt{3} \) <br>
-                        ・ \( \frac{6}{\sqrt{3}} = 2\sqrt{3} \)
+                    <div class="section-title">03 / Geometry Logic</div>
+                    <div class="card">
+                        <div class="math-item">
+                            \( 30^\circ, 60^\circ \rightarrow 1:2:\sqrt{3} \)
+                        </div>
+                        <div class="math-item">
+                            \( 45^\circ \rightarrow 1:1:\sqrt{2} \)
+                        </div>
+                        <div class="math-item">
+                            直径に対する円周角は \( 90^\circ \)
+                        </div>
+                        <div class="math-item">
+                            \( y=ax^2 \) の変域 \(\rightarrow\) 0またぎ注意
+                        </div>
                     </div>
                 </div>
 
                 <div class="section">
-                    <span class="sec-title">02. Essential Algebra</span>
-                    <div class="math-block">
-                        ・ Prob. = <span class="highlight">6×6 Grid System</span><br>
-                        ・ \( a^2 - b^2 = (a+b)(a-b) \)<br>
-                        ・ 20% OFF \(\rightarrow\) \( 0.8x \)
+                    <div class="section-title">04 / Mental Notes</div>
+                    <div class="card" style="background-color: #FFF; border: 1px solid #E0E0E0;">
+                        <div class="math-item">
+                            計算ミスは「符号」から疑え
+                        </div>
+                        <div class="math-item">
+                            詰まったら飛ばす勇気を持つ
+                        </div>
                     </div>
                 </div>
-
-                <div class="section">
-                    <span class="sec-title">03. Geometry & Rules</span>
-                    <div class="math-block">
-                        ・ Ratio: \( 1:2:\sqrt{3} \) / \( 1:1:\sqrt{2} \)<br>
-                        ・ Circle: Dia. \(\rightarrow\) Angle is \( 90^\circ \)<br>
-                        ・ Func: \( y=ax^2 \) crosses \( 0 \rightarrow \) min \( 0 \)
-                    </div>
-                </div>
-
             </div>
+
+            <!-- Full Width Strategy -->
+            <div class="strategy">
+                <div class="strategy-title">TIME STRATEGY</div>
+                <div class="strategy-steps">
+                    <div class="step"><span>00-10 min</span><strong>計算【1】</strong></div>
+                    <div class="step"><span>10-25 min</span><strong>小問【2】【3】</strong></div>
+                    <div class="step"><span>25-45 min</span><strong>大問【4】【5】</strong></div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer style="grid-column: span 2;">
+                <div class="message">
+                    焦らず、いつも通りに。<br>
+                    君の努力は、誰よりも正しい。
+                </div>
+                <div class="signature">
+                    FINAL EXAM PREPARATION<br>
+                    DESIGNED BY TAMAKI-SENSEI<br>
+                    OSAKA, JAPAN
+                </div>
+            </footer>
         </div>
-
-        <div class="footer-deco">BELIEVE IN YOURSELF</div>
     </div>
 
 </body>
