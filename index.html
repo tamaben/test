@@ -3,425 +3,500 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>コトバト広場</title>
-    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
+    <title>みんなでクイズRPG</title>
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
+        /* 共通スタイル */
         :root {
-            --bg-color: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.85);
-            --primary: #6366f1;
-            --accent: #3b82f6;
-            --text: #f8fafc;
-            --text-sub: #94a3b8;
-            --nav-h: 65px;
+            --primary: #6c5ce7;
+            --secondary: #00cec9;
+            --accent: #fd79a8;
+            --bg: #2d3436;
+            --text: #dfe6e9;
         }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
         body {
-            background: radial-gradient(circle at top right, #1e1b4b, #0f172a);
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg);
             color: var(--text);
-            font-family: 'M PLUS Rounded 1c', sans-serif;
-            margin: 0; overflow: hidden; height: 100vh;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            overflow: hidden; /* スクロール防止 */
+        }
+        h1, h2 { margin: 10px 0; }
+        .hidden { display: none !important; }
+        
+        /* ボタン */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 10px;
+            transition: transform 0.1s;
+        }
+        .btn:active { transform: scale(0.95); }
+        .btn-red { background: #d63031; }
+        .btn-green { background: #00b894; }
+
+        /* --- ホスト（PC）画面スタイル --- */
+        #host-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        #lobby-info {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        #qrcode { margin: 20px auto; background: white; padding: 10px; }
+        .player-list {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .player-chip {
+            background: var(--secondary);
+            color: #2d3436;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        /* クイズ・ボス画面 */
+        #game-stage { width: 80%; max-width: 800px; }
+        .boss-container { position: relative; height: 200px; margin: 20px 0; }
+        .boss-hp-bar {
+            width: 100%; height: 30px; background: #555; border-radius: 15px; overflow: hidden;
+            border: 2px solid white;
+        }
+        .boss-hp-fill {
+            width: 100%; height: 100%; background: #d63031; transition: width 0.3s;
+        }
+        .boss-avatar { font-size: 5rem; animation: float 2s infinite ease-in-out; }
+        .question-box {
+            font-size: 1.5rem; background: white; color: #333; padding: 20px; border-radius: 10px;
+            margin-bottom: 20px; font-weight: bold;
+        }
+        .timer-bar { width: 100%; height: 10px; background: var(--accent); margin-top: 10px; transition: width 1s linear; }
+
+        /* --- クライアント（スマホ）画面スタイル --- */
+        #client-screen { height: 100vh; display: flex; flex-direction: column; }
+        .controller-area {
+            flex: 1; display: grid; grid-template-columns: 1fr 1fr; grid-gap: 10px; padding: 10px;
+        }
+        .choice-btn {
+            background: #444; color: white; border: none; border-radius: 10px;
+            font-size: 2rem; font-weight: bold;
+        }
+        .choice-btn:active { background: #666; }
+        .choice-A { background-color: #ff7675; }
+        .choice-B { background-color: #74b9ff; }
+        .choice-C { background-color: #55efc4; color: #333; }
+        .choice-D { background-color: #ffeaa7; color: #333; }
+        
+        .mash-btn {
+            grid-column: span 2; background: #e17055; font-size: 3rem;
+            animation: pulse 0.5s infinite;
         }
 
         /* アニメーション */
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
-        
-        .screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        .screen.active { display: flex; animation: fadeIn 0.4s ease-out; }
-
-        .app-shell { width: 100%; height: 100%; display: flex; flex-direction: column; max-width: 800px; margin: 0 auto; background: rgba(15,23,42,0.5); backdrop-filter: blur(5px); }
-
-        /* カードデザイン */
-        .card {
-            background: var(--card-bg); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px; padding: 25px; width: 100%; max-width: 400px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.4); text-align: center;
-        }
-        
-        h1 { margin: 0 0 15px; background: linear-gradient(90deg, #818cf8, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; letter-spacing: 1px; }
-        
-        input {
-            width: 100%; padding: 15px; margin: 8px 0; border-radius: 12px; border: 1px solid #475569;
-            background: rgba(2,6,23,0.6); color: #fff; font-size: 16px; outline: none; transition: 0.3s;
-        }
-        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25); }
-
-        .btn {
-            width: 100%; padding: 15px; margin-top: 15px; border: none; border-radius: 12px;
-            font-weight: bold; font-size: 16px; cursor: pointer; color: white;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); transition: 0.2s;
-        }
-        .btn:active { transform: scale(0.98); }
-        .btn-link { background: none; color: var(--text-sub); margin-top: 15px; box-shadow: none; font-size: 0.9rem; }
-        .btn-link:hover { color: var(--text); text-decoration: underline; }
-
-        /* コンテンツエリア */
-        .header { padding: 15px 20px; background: rgba(30,41,59,0.9); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 90px; }
-        
-        /* ナビゲーション */
-        .nav {
-            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 500px; height: 65px;
-            background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(10px);
-            border-radius: 35px; border: 1px solid rgba(255,255,255,0.1);
-            display: flex; justify-content: space-around; align-items: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 100;
-        }
-        .nav-item { color: var(--text-sub); font-size: 0.7rem; text-align: center; cursor: pointer; transition: 0.3s; width: 60px; }
-        .nav-item .icon { font-size: 1.5rem; display: block; margin-bottom: 2px; }
-        .nav-item.active { color: var(--primary); transform: translateY(-2px); }
-
-        /* チャット・リスト */
-        .msg-box { display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 10px 15px; border-radius: 15px; max-width: 85%; font-size: 0.9rem; position: relative; }
-        .msg.me { align-self: flex-end; background: var(--primary); border-bottom-right-radius: 4px; }
-        .msg.other { align-self: flex-start; background: #334155; border-bottom-left-radius: 4px; }
-        .sender { font-size: 0.7rem; opacity: 0.8; margin-bottom: 2px; display: block; }
-
-        .list-item { background: rgba(30,41,59,0.6); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-
-        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #10b981; color: white; padding: 12px 24px; border-radius: 30px; font-weight: bold; display: none; z-index: 9999; box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
-        
-        .resource-panel { display: flex; justify-content: space-around; background: rgba(15,23,42,0.8); padding: 15px; border-radius: 15px; margin-bottom: 20px; font-weight: bold; border: 1px solid rgba(255,255,255,0.1); }
+        @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        @keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 100% { transform: translate(-1px, -2px) rotate(-1deg); } }
+        .shake { animation: shake 0.5s; animation-iteration-count: infinite; }
     </style>
 </head>
 <body>
 
-    <div id="toast">✅ 処理完了</div>
-
-    <!-- 1. ログイン画面 -->
-    <div id="screen-login" class="screen active">
-        <div class="card">
-            <h1>コトバト広場</h1>
-            <p style="color:var(--text-sub); margin-bottom:20px;">コミュニティへようこそ</p>
-            
-            <input type="text" id="login-user" placeholder="ユーザー名" autocomplete="off">
-            <input type="password" id="login-pass" placeholder="パスワード">
-            
-            <button class="btn" onclick="doLogin()">ログイン</button>
-            <button class="btn btn-link" onclick="switchScreen('register')">アカウント作成はこちら</button>
-            
-            <div id="conn-status" style="margin-top:15px; font-size:0.8rem; color: #fbbf24;">サーバー接続待機中...</div>
+    <div id="start-screen">
+        <h1>🎮 クイズ＆バトル RPG</h1>
+        <p>PCは「親機」、スマホは「子機」を選んでください</p>
+        <button class="btn" onclick="initHost()">💻 親機としてスタート (Host)</button>
+        <div style="margin-top: 20px; font-size: 0.9rem; color: #aaa;">
+            ※スマホはPCの画面のQRコードを読み取ると自動接続します
         </div>
     </div>
 
-    <!-- 2. 登録画面 -->
-    <div id="screen-register" class="screen">
-        <div class="card">
-            <h1>新規登録</h1>
-            <input type="text" id="reg-user" placeholder="希望ユーザー名 (半角英数)">
-            <input type="password" id="reg-pass" placeholder="パスワード">
-            <input type="text" id="reg-name" placeholder="ニックネーム">
-            
-            <button class="btn" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="doRegister()">登録してスタート</button>
-            <button class="btn btn-link" onclick="switchScreen('login')">ログイン画面へ戻る</button>
+    <div id="host-screen" class="hidden">
+        <div id="host-lobby">
+            <h2>参加者を待っています...</h2>
+            <div id="qrcode"></div>
+            <p>スマホで読み取ってください</p>
+            <div id="player-list" class="player-list"></div>
+            <br>
+            <h3>ゲームモード選択</h3>
+            <button class="btn btn-green" onclick="startGame('coop')">🤝 協力ボス討伐</button>
+            <button class="btn btn-red" onclick="startGame('battle')">⚔️ 早押しバトル</button>
         </div>
-    </div>
 
-    <!-- 3. メイン画面 -->
-    <div id="screen-main" class="screen" style="padding:0;">
-        <div class="app-shell">
-            <div class="header">
-                <div style="font-weight:800; font-size:1.1rem; cursor:pointer;" id="app-title">Cotobato Plaza</div>
-                <div id="header-name" style="font-size:0.8rem; color:var(--text-sub);">Guest</div>
+        <div id="game-stage" class="hidden">
+            <div id="boss-area" class="boss-container">
+                <div class="boss-hp-bar"><div id="boss-hp" class="boss-hp-fill"></div></div>
+                <div id="boss-avatar" class="boss-avatar">👾</div>
+                <div id="damage-display"></div>
             </div>
 
-            <div class="content">
-                
-                <!-- ホーム -->
-                <div id="tab-home">
-                    <div class="resource-panel">
-                        <span>🪙 <span id="val-coins">0</span></span>
-                        <span>💎 <span id="val-dia">0</span></span>
-                        <span>Lv. <span id="val-lv">1</span></span>
-                    </div>
-
-                    <div class="card" style="width:100%; max-width:none; margin-bottom:20px; text-align:left;">
-                        <h3 style="margin:0 0 10px;">☁️ データ同期</h3>
-                        <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:15px;">現在のデータをクラウドに保存します。</p>
-                        <button class="btn" style="margin:0; padding:12px;" onclick="saveCloud()">保存する</button>
-                        <button class="btn" style="margin-top:10px; padding:12px; background:#334155;" onclick="loadCloud()">復元する</button>
-                    </div>
-
-                    <h3 style="margin-bottom:10px;">お知らせ</h3>
-                    <div id="news-list" style="font-size:0.9rem; color:var(--text-sub);">読み込み中...</div>
-                </div>
-
-                <!-- チャット -->
-                <div id="tab-chat" style="display:none;">
-                    <div id="chat-list" class="msg-box" style="padding-bottom:20px;"></div>
-                    <div style="display:flex; gap:10px; position:sticky; bottom:0; background:rgba(15,23,42,0.9); padding:10px 0;">
-                        <input type="text" id="chat-in" placeholder="メッセージ..." style="margin:0;">
-                        <button class="btn" style="width:70px; margin:0; padding:0;" onclick="sendChat()">送信</button>
-                    </div>
-                </div>
-
-                <!-- 交換 -->
-                <div id="tab-trade" style="display:none;">
-                    <div class="card" style="width:100%; max-width:none; margin-bottom:20px;">
-                        <h3>出品する</h3>
-                        <div style="display:flex; gap:5px; margin-bottom:5px;">
-                            <select id="tr-give-t" style="background:#0f172a; color:#fff; border:1px solid #334155; padding:10px; border-radius:8px;"><option value="coins">コイン</option><option value="diamonds">ダイヤ</option></select>
-                            <input type="number" id="tr-give-v" placeholder="量" style="margin:0;">
-                        </div>
-                        <div style="text-align:center; font-size:0.8rem; margin:5px 0;">↓</div>
-                        <div style="display:flex; gap:5px;">
-                            <select id="tr-want-t" style="background:#0f172a; color:#fff; border:1px solid #334155; padding:10px; border-radius:8px;"><option value="coins">コイン</option><option value="diamonds">ダイヤ</option></select>
-                            <input type="number" id="tr-want-v" placeholder="求" style="margin:0;">
-                        </div>
-                        <button class="btn" style="margin-top:15px;" onclick="createTrade()">出品</button>
-                    </div>
-                    <div id="trade-list"></div>
-                </div>
-
-                <!-- 設定 -->
-                <div id="tab-conf" style="display:none;">
-                    <div class="card" style="width:100%; max-width:none;">
-                        <h3>アカウント設定</h3>
-                        <p id="conf-id" style="color:var(--text-sub); margin-bottom:15px;"></p>
-                        <button class="btn" style="background:#ef4444;" onclick="location.reload()">ログアウト</button>
-                    </div>
-                    <div id="admin-panel" style="display:none; margin-top:20px;" class="card">
-                        <h3 style="color:#fbbf24;">運営パネル</h3>
-                        <input type="text" id="adm-news" placeholder="お知らせ配信">
-                        <button class="btn" onclick="sendNews()">配信</button>
-                    </div>
-                </div>
-
+            <div id="quiz-area">
+                <div class="question-box" id="question-text">ここに問題が表示されます</div>
+                <div id="timer-display" style="font-size: 2rem;">10</div>
             </div>
 
-            <!-- ナビゲーション -->
-            <div class="nav">
-                <div class="nav-item active" onclick="switchTab('home', this)"><span class="icon">🏠</span>ホーム</div>
-                <div class="nav-item" onclick="switchTab('chat', this)"><span class="icon">💬</span>チャット</div>
-                <div class="nav-item" onclick="switchTab('trade', this)"><span class="icon">⚖️</span>交換</div>
-                <div class="nav-item" onclick="switchTab('conf', this)"><span class="icon">⚙️</span>設定</div>
-            </div>
+            <div id="result-message" style="font-size: 2rem; margin-top: 20px;"></div>
         </div>
     </div>
 
-    <!-- 関係者試験モーダル -->
-    <div id="quiz-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:9999; align-items:center; justify-content:center; padding:20px;">
-        <div class="card">
-            <h2 style="color:#fbbf24;">関係者確認</h2>
-            <p id="quiz-text"></p>
-            <input type="text" id="quiz-ans">
-            <button class="btn" onclick="answerQuiz()">回答</button>
-            <button class="btn btn-link" onclick="document.getElementById('quiz-modal').style.display='none'">閉じる</button>
+    <div id="client-screen" class="hidden">
+        <div id="client-login" style="padding: 20px;">
+            <h2>名前を入力</h2>
+            <input type="text" id="username" placeholder="ニックネーム" style="font-size: 1.5rem; padding: 10px; width:80%; margin-bottom: 20px;">
+            <br>
+            <button class="btn" onclick="joinGame()">参加する！</button>
+        </div>
+
+        <div id="client-waiting" class="hidden" style="padding: 20px;">
+            <h2>準備完了！</h2>
+            <p>親機の画面を見てお待ちください</p>
+        </div>
+
+        <div id="client-controller" class="hidden controller-area">
+            <button class="choice-btn choice-A" onclick="sendAnswer(0)">A</button>
+            <button class="choice-btn choice-B" onclick="sendAnswer(1)">B</button>
+            <button class="choice-btn choice-C" onclick="sendAnswer(2)">C</button>
+            <button class="choice-btn choice-D" onclick="sendAnswer(3)">D</button>
+        </div>
+
+        <div id="client-mash" class="hidden controller-area" style="display: flex;">
+            <button class="choice-btn mash-btn" onclick="sendMash()">連打!!</button>
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, onSnapshot, serverTimestamp, query, limit, where, deleteDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+    <script>
+    // --- ゲームデータ（クイズ問題）編集可能 ---
+    const QUIZ_DATA = [
+        { q: "「日本一高い山」は？", options: ["富士山", "北岳", "阿蘇山", "高尾山"], ans: 0 },
+        { q: "元素記号「O」は何を表す？", options: ["金", "銀", "酸素", "鉄"], ans: 2 },
+        { q: "1000円札の肖像画は誰？", options: ["野口英世", "福沢諭吉", "北里柴三郎", "夏目漱石"], ans: 2 }, // 2024年新紙幣対応
+        { q: "PCの「マウス」を動かすと動く画面上の矢印は？", options: ["アイコン", "カーソル", "ウィンドウ", "リンク"], ans: 1 },
+        { q: "次の中で「野菜」に分類されるのは？", options: ["イチゴ", "リンゴ", "バナナ", "モモ"], ans: 0 }, // 農水省分類
+    ];
 
-        // ★設定★
-        const firebaseConfig = {
-            apiKey: "AIzaSyDguL7I5v4GxKf5FahdoFEtU5lNMYgxcNo",
-            authDomain: "cotobato-c121f.firebaseapp.com",
-            databaseURL: "https://cotobato-c121f-default-rtdb.firebaseio.com",
-            projectId: "cotobato-c121f",
-            storageBucket: "cotobato-c121f.firebasestorage.app",
-            messagingSenderId: "699569737682",
-            appId: "1:699569737682:web:350b90c25c300a0548020b",
-            measurementId: "G-FQ1VZDXZ6J"
-        };
+    // --- グローバル変数 ---
+    let peer;
+    let conn;
+    let myId;
+    let connections = {}; // ホスト用: { peerId: conn }
+    let players = {};     // ホスト用: { peerId: { name, score, isCorrect } }
+    let gameMode = 'coop';
+    let currentQuestionIndex = 0;
+    let bossHp = 100;
+    let isAcceptingAnswers = false;
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
+    // URLパラメータ取得
+    const urlParams = new URLSearchParams(window.location.search);
+    const hostIdParam = urlParams.get('host');
 
-        let currentUser = null;
-        let isReady = false;
-        let localData = { coins: 0, diamonds: 0, playerLevel: 1 };
+    // 起動時の分岐
+    window.onload = () => {
+        if (hostIdParam) {
+            // QRコードから来た場合、自動的にクライアント画面へ
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('client-screen').classList.remove('hidden');
+        }
+    };
 
-        // 1. 匿名認証（必須）
-        signInAnonymously(auth).catch(e => {
-            document.getElementById('conn-status').innerText = "エラー: データベースを作成してください";
-            document.getElementById('conn-status').style.color = "#ef4444";
+    // --- AudioContext (効果音) ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playTone(freq, type, duration) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+        osc.stop(audioCtx.currentTime + duration);
+    }
+    const sounds = {
+        join: () => playTone(600, 'sine', 0.2),
+        correct: () => { playTone(800, 'sine', 0.1); setTimeout(()=>playTone(1200, 'sine', 0.2), 100); },
+        wrong: () => playTone(150, 'sawtooth', 0.4),
+        attack: () => playTone(100 + Math.random()*200, 'square', 0.1)
+    };
+
+    // ==========================================
+    // ホスト（親機）のロジック
+    // ==========================================
+    function initHost() {
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('host-screen').classList.remove('hidden');
+
+        // PeerJS初期化
+        peer = new Peer({ debug: 2 });
+
+        peer.on('open', (id) => {
+            myId = id;
+            console.log('Host ID:', id);
+            
+            // 現在のURLに?host=IDをつけたURLをQRコード化
+            const joinUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?host=${id}`;
+            new QRCode(document.getElementById("qrcode"), {
+                text: joinUrl,
+                width: 180,
+                height: 180
+            });
         });
 
-        onAuthStateChanged(auth, (u) => {
-            if (u) {
-                isReady = true;
-                document.getElementById('conn-status').innerText = "● サーバー接続完了";
-                document.getElementById('conn-status').style.color = "#10b981";
-            }
+        peer.on('connection', (c) => {
+            c.on('open', () => {
+                console.log('Client connected:', c.peer);
+                connections[c.peer] = c;
+                
+                // データ受信設定
+                c.on('data', (data) => handleDataFromClient(c.peer, data));
+            });
+            
+            c.on('close', () => {
+                delete connections[c.peer];
+                delete players[c.peer];
+                updatePlayerList();
+            });
         });
+    }
 
-        // 画面遷移
-        window.switchScreen = (id) => {
-            document.querySelectorAll('.screen').forEach(e => e.classList.remove('active'));
-            document.getElementById('screen-'+id).classList.add('active');
-        };
-
-        window.switchTab = (id, el) => {
-            ['home','chat','trade','conf'].forEach(t => document.getElementById('tab-'+t).style.display='none');
-            document.getElementById('tab-'+id).style.display='block';
-            document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
-            el.classList.add('active');
-        };
-
-        // 登録（ID重複チェック）
-        window.doRegister = async () => {
-            if(!isReady) return alert("接続中...");
-            const u = document.getElementById('reg-user').value.trim();
-            const p = document.getElementById('reg-pass').value.trim();
-            const n = document.getElementById('reg-name').value.trim() || u;
-
-            if(!u || !p) return alert("入力してください");
-
-            try {
-                const ref = doc(db, "users", u);
-                const snap = await getDoc(ref);
-                if(snap.exists()) return alert("そのIDは使われています");
-
-                const data = { username: u, password: p, name: n, isAdmin: false, createdAt: serverTimestamp() };
-                await setDoc(ref, data);
-                
-                currentUser = data;
-                startApp();
-                showToast("登録完了！");
-            } catch(e) { 
-                console.error(e); 
-                if(e.code === 'unavailable') alert("エラー: データベースを作成してください");
-                else alert("登録エラー: "+e.message); 
-            }
-        };
-
-        // ログイン
-        window.doLogin = async () => {
-            if(!isReady) return alert("接続中...");
-            const u = document.getElementById('login-user').value.trim();
-            const p = document.getElementById('login-pass').value.trim();
-
-            try {
-                const ref = doc(db, "users", u);
-                const snap = await getDoc(ref);
-                if(snap.exists() && snap.data().password === p) {
-                    currentUser = snap.data();
-                    startApp();
-                    showToast("ログイン成功");
-                } else {
-                    alert("IDまたはパスワードが違います");
-                }
-            } catch(e) { alert("エラー: "+e.message); }
-        };
-
-        function startApp() {
-            window.switchScreen('main');
-            document.getElementById('header-name').innerText = currentUser.name;
-            document.getElementById('conf-id').innerText = "ID: " + currentUser.username;
+    function handleDataFromClient(peerId, data) {
+        if (data.type === 'join') {
+            players[peerId] = { name: data.name, score: 0, isCorrect: false };
+            updatePlayerList();
+            sounds.join();
+        } 
+        else if (data.type === 'answer') {
+            if (!isAcceptingAnswers) return;
+            // 回答処理
+            const correct = QUIZ_DATA[currentQuestionIndex].ans;
+            const isCorrect = (data.val === correct);
+            players[peerId].isCorrect = isCorrect;
             
-            // ローカルデータ読み込み
-            const raw = localStorage.getItem('kb_save_v36');
-            if(raw) {
-                localData = JSON.parse(raw);
-                updateHeader();
+            // クライアントへフィードバック送信
+            connections[peerId].send({ type: 'feedback', result: isCorrect });
+        }
+        else if (data.type === 'mash') {
+            // 連打（攻撃）受信
+            if (gameMode === 'coop') {
+                damageBoss(1); // 1タップ1ダメージ
+                sounds.attack();
             }
+        }
+    }
 
-            // リアルタイムリスナー開始（インデックス不要版）
-            startListeners();
-            if(currentUser.isAdmin) document.getElementById('admin-panel').style.display='block';
+    function updatePlayerList() {
+        const listEl = document.getElementById('player-list');
+        listEl.innerHTML = '';
+        Object.values(players).forEach(p => {
+            const chip = document.createElement('div');
+            chip.className = 'player-chip';
+            chip.innerText = p.name;
+            listEl.appendChild(chip);
+        });
+    }
+
+    function startGame(mode) {
+        gameMode = mode;
+        document.getElementById('host-lobby').classList.add('hidden');
+        document.getElementById('game-stage').classList.remove('hidden');
+        
+        currentQuestionIndex = -1;
+        bossHp = 100 * Object.keys(players).length; // 人数に応じてHP増加
+        updateBossHp();
+
+        nextTurn();
+    }
+
+    function nextTurn() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex >= QUIZ_DATA.length) {
+            endGame();
+            return;
         }
 
-        function updateHeader() {
-            document.getElementById('val-coins').innerText = localData.coins || 0;
-            document.getElementById('val-dia').innerText = localData.diamonds || 0;
-            document.getElementById('val-lv').innerText = localData.playerLevel || 1;
-        }
+        const q = QUIZ_DATA[currentQuestionIndex];
+        
+        // 画面リセット
+        document.getElementById('question-text').innerText = `Q${currentQuestionIndex+1}. ${q.q}`;
+        document.getElementById('result-message').innerText = "";
+        
+        // クライアントに問題送信（選択肢表示）
+        broadcast({ type: 'phase_quiz', options: q.options });
 
-        // リスナー（ソートはクライアント側で行う）
-        function startListeners() {
-            // お知らせ (limitのみ)
-            onSnapshot(query(collection(db, "announcements"), limit(10)), (snap) => {
-                const div = document.getElementById('news-list');
-                div.innerHTML = "";
-                const list = [];
-                snap.forEach(d => list.push(d.data()));
-                // 日付でソート(新しい順)
-                list.sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
+        // タイマー開始
+        let timeLeft = 10;
+        isAcceptingAnswers = true;
+        const timerDisplay = document.getElementById('timer-display');
+        
+        const timer = setInterval(() => {
+            timeLeft--;
+            timerDisplay.innerText = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                isAcceptingAnswers = false;
+                showResults();
+            }
+        }, 1000);
+    }
+
+    function showResults() {
+        // 正解者チェック
+        const correctCount = Object.values(players).filter(p => p.isCorrect).length;
+        
+        if (gameMode === 'coop') {
+            if (correctCount > 0) {
+                document.getElementById('result-message').innerText = `${correctCount}人正解！ 攻撃チャンス！連打しろ！`;
+                // 連打フェーズ開始
+                broadcast({ type: 'phase_mash' });
                 
-                list.forEach(d => {
-                    const date = d.createdAt ? new Date(d.createdAt.seconds*1000).toLocaleDateString() : "";
-                    div.innerHTML += `<div class="list-item" style="display:block;"><small style="color:#94a3b8">${date}</small><div style="margin-top:3px;">${d.text}</div></div>`;
-                });
-            });
-
-            // チャット (limitのみ)
-            onSnapshot(query(collection(db, "chat"), limit(30)), (snap) => {
-                const div = document.getElementById('chat-list');
-                div.innerHTML = "";
-                const list = [];
-                snap.forEach(d => list.push(d.data()));
-                // 日付でソート(古い順)
-                list.sort((a,b) => (a.createdAt?.seconds||0) - (b.createdAt?.seconds||0));
-
-                list.forEach(d => {
-                    const isMe = d.username === currentUser.username;
-                    div.innerHTML += `<div class="msg ${isMe?'me':'other'}"><span class="sender">${d.sender}</span>${d.text}</div>`;
-                });
-                div.parentElement.scrollTop = div.parentElement.scrollHeight;
-            });
-
-            // 交換 (whereのみ)
-            onSnapshot(query(collection(db, "trades"), where("status", "==", "open")), (snap) => {
-                const div = document.getElementById('trade-list');
-                div.innerHTML = "";
-                const list = [];
-                snap.forEach(doc => list.push({id: doc.id, ...doc.data()}));
-                // 新しい順
-                list.sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
-
-                list.forEach(t => {
-                    const isMe = t.maker === currentUser.username;
-                    div.innerHTML += `<div class="list-item"><div><b>${t.makerName}</b><br>${t.giveV}${t.giveT} ⇄ ${t.wantV}${t.wantT}</div>${isMe ? `<button class="btn" style="width:auto; padding:5px 10px; background:#ef4444;" onclick="cancelTrade('${t.id}')">取消</button>` : `<button class="btn" style="width:auto; padding:5px 10px;" onclick="acceptTrade('${t.id}')">交換</button>`}</div>`;
-                });
-            });
+                // 5秒間連打タイム
+                setTimeout(() => {
+                    broadcast({ type: 'phase_wait' }); // 連打終了
+                    // 次の問題へ
+                    setTimeout(nextTurn, 2000);
+                }, 5000);
+            } else {
+                document.getElementById('result-message').innerText = "全員不正解... ダメージを与えられない！";
+                document.getElementById('boss-avatar').innerText = "😈"; // 挑発
+                setTimeout(nextTurn, 3000);
+            }
+        } else {
+            // 対戦モードの実装（簡易）
+            // ここではシンプルにするため、次の問題へ
+            setTimeout(nextTurn, 2000);
         }
 
-        // 機能群
-        window.sendChat = async () => {
-            const t = document.getElementById('chat-in').value.trim();
-            if(!t) return;
-            await addDoc(collection(db, "chat"), { text: t, sender: currentUser.name, username: currentUser.username, createdAt: serverTimestamp() });
-            document.getElementById('chat-in').value = "";
-        };
+        // プレイヤーの状態リセット
+        Object.values(players).forEach(p => p.isCorrect = false);
+    }
 
-        window.saveCloud = async () => {
-            const raw = localStorage.getItem('kb_save_v36');
-            if(!raw) return alert("データがありません");
-            await updateDoc(doc(db, "users", currentUser.username), { backupData: raw });
-            showToast("保存しました");
-        };
+    function damageBoss(amt) {
+        bossHp -= amt;
+        if (bossHp < 0) bossHp = 0;
+        updateBossHp();
+        
+        // ボス被弾アニメーション
+        const boss = document.getElementById('boss-avatar');
+        boss.innerText = "😖";
+        boss.classList.add('shake');
+        setTimeout(() => {
+            boss.classList.remove('shake');
+            boss.innerText = "👾";
+        }, 200);
 
-        window.loadCloud = async () => {
-            const s = await getDoc(doc(db, "users", currentUser.username));
-            if(s.data().backupData) {
-                localStorage.setItem('kb_save_v36', s.data().backupData);
-                alert("復元しました。再読み込みします");
-                location.reload();
-            } else alert("データがありません");
-        };
+        if (bossHp <= 0) {
+            document.getElementById('result-message').innerText = "BOSS DEFEATED!!";
+            broadcast({ type: 'game_over', msg: 'YOU WIN!' });
+        }
+    }
 
-        window.createTrade = async () => {
-            const gt=document.getElementById('tr-give-t').value, gv=parseInt(document.getElementById('tr-give-v').value);
-            const wt=document.getElementById('tr-want-t').value, wv=parseInt(document.getElementById('tr-want-v').value);
-            if(!gv || !wv) return;
-            if(localData[gt] < gv) return alert("不足しています");
+    function updateBossHp() {
+        const maxHp = 100 * Object.keys(players).length;
+        const pct = (bossHp / maxHp) * 100;
+        document.getElementById('boss-hp').style.width = pct + "%";
+    }
+
+    function broadcast(data) {
+        Object.values(connections).forEach(c => c.send(data));
+    }
+
+    function endGame() {
+        document.getElementById('question-text').innerText = "ゲーム終了！";
+    }
+
+
+    // ==========================================
+    // クライアント（子機）のロジック
+    // ==========================================
+    function joinGame() {
+        const name = document.getElementById('username').value;
+        if (!name) return alert("名前を入れてね");
+        if (!hostIdParam) return alert("QRコードから読み取っていないか、URLが不正です");
+
+        peer = new Peer(); // IDは自動生成
+
+        peer.on('open', (id) => {
+            conn = peer.connect(hostIdParam);
+
+            conn.on('open', () => {
+                // 接続成功したら名前を送信
+                conn.send({ type: 'join', name: name });
+                
+                document.getElementById('client-login').classList.add('hidden');
+                document.getElementById('client-waiting').classList.remove('hidden');
+            });
+
+            conn.on('data', (data) => handleHostData(data));
             
-            localData[gt] -= gv; localStorage.setItem('kb_save_v36', JSON.stringify(localData)); updateHeader();
-            await addDoc(collection(db, "trades"), { maker: currentUser.username, makerName: currentUser.name, giveT: gt, giveV: gv, wantT: wt, wantV: wv, status: 'open', createdAt: serverTimestamp() });
-            showToast("出品しました");
-        };
+            conn.on('error', (err) => alert("接続エラー: " + err));
+        });
+    }
 
-        window.cancelTrade = async (id) => {
-            const s = await getDoc(doc(db, "trades", id));
-            const t = s.data();
-            localData[t.giveT] += t.giveV; localStorage.setItem('kb_save_v36', JSON.stringify(localData)); updateHeader();
-            await deleteDoc(doc(db, "trades", id));
-            sho
+    function handleHostData(data) {
+        // フェーズ切替
+        if (data.type === 'phase_quiz') {
+            showController('quiz', data.options);
+        } else if (data.type === 'phase_mash') {
+            showController('mash');
+            navigator.vibrate(200); // 振動合図
+        } else if (data.type === 'phase_wait') {
+            showController('wait');
+        } else if (data.type === 'feedback') {
+            // 正誤判定受信
+            if (data.result) {
+                document.body.style.backgroundColor = "#00b894"; // 緑
+                sounds.correct();
+            } else {
+                document.body.style.backgroundColor = "#d63031"; // 赤
+                sounds.wrong();
+            }
+            setTimeout(() => document.body.style.backgroundColor = "#2d3436", 1000);
+        }
+    }
+
+    function showController(mode, options = []) {
+        document.getElementById('client-waiting').classList.add('hidden');
+        document.getElementById('client-controller').classList.add('hidden');
+        document.getElementById('client-mash').classList.add('hidden');
+
+        if (mode === 'quiz') {
+            const ctrl = document.getElementById('client-controller');
+            ctrl.classList.remove('hidden');
+            // 選択肢ボタンに文字を入れるならここで設定（今回はA/B/C/D固定）
+        } else if (mode === 'mash') {
+            document.getElementById('client-mash').classList.remove('hidden');
+        } else {
+            document.getElementById('client-waiting').classList.remove('hidden');
+        }
+    }
+
+    function sendAnswer(val) {
+        conn.send({ type: 'answer', val: val });
+        // 押したら待機画面へ（連打防止）
+        showController('wait');
+    }
+
+    function sendMash() {
+        conn.send({ type: 'mash' });
+        navigator.vibrate(50); // タップフィードバック
+    }
+
+</script>
+</body>
+</html>
