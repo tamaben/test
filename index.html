@@ -2,764 +2,112 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ULTIMATE PARTY 50</title>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;700&family=Yusei+Magic&display=swap" rel="stylesheet">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>止まらないサーバー（Firebase HA構成）</title>
     <style>
-        :root {
-            --bg: #0b0c15;
-            --panel: #161823;
-            --primary: #00f0ff; /* Neon Cyan */
-            --secondary: #ff003c; /* Neon Red */
-            --accent: #fcee0a; /* Neon Yellow */
-            --text: #ffffff;
-            --font-main: 'Yusei Magic', sans-serif;
-            --font-num: 'Chakra Petch', sans-serif;
-        }
-
-        * { box-sizing: border-box; touch-action: none; user-select: none; -webkit-user-select: none; }
-        
-        body {
-            margin: 0; background-color: var(--bg); color: var(--text);
-            font-family: var(--font-main); overflow: hidden; height: 100vh; width: 100vw;
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(0, 240, 255, 0.1) 0%, transparent 20%),
-                radial-gradient(circle at 90% 80%, rgba(255, 0, 60, 0.1) 0%, transparent 20%);
-        }
-
-        /* --- UI COMPONENTS --- */
-        .screen {
-            position: fixed; inset: 0; display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            transition: opacity 0.4s ease, transform 0.4s ease;
-            z-index: 10; padding: 20px;
-        }
-        .hidden { opacity: 0; pointer-events: none; transform: scale(0.95); z-index: -1; }
-
-        h1 {
-            font-family: var(--font-num); font-size: 3.5rem; text-align: center;
-            color: var(--primary); text-shadow: 0 0 20px var(--primary);
-            margin: 0 0 10px 0; line-height: 0.9;
-        }
-        
-        .card {
-            background: rgba(22, 24, 35, 0.9); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 16px; padding: 20px; text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(10px);
-            max-width: 400px; width: 100%;
-        }
-
-        .btn {
-            background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.2), transparent);
-            border: 2px solid var(--primary); color: var(--primary);
-            font-family: var(--font-num); font-size: 1.2rem; font-weight: bold;
-            padding: 15px 40px; border-radius: 4px; cursor: pointer;
-            margin: 10px; width: 100%; text-transform: uppercase;
-            transition: 0.2s; position: relative; overflow: hidden;
-        }
-        .btn:hover { background: var(--primary); color: #000; box-shadow: 0 0 20px var(--primary); }
-        .btn:active { transform: scale(0.98); }
-        
-        .btn-red { border-color: var(--secondary); color: var(--secondary); background: linear-gradient(90deg, transparent, rgba(255, 0, 60, 0.2), transparent); }
-        .btn-red:hover { background: var(--secondary); color: #000; box-shadow: 0 0 20px var(--secondary); }
-
-        /* --- HOST GAME LIST --- */
-        #game-list {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 10px; width: 100%; height: 60vh; overflow-y: auto; padding-bottom: 50px;
-        }
-        .g-item {
-            background: var(--panel); border: 1px solid #333; border-radius: 8px;
-            padding: 10px; cursor: pointer; display: flex; flex-direction: column; align-items: center;
-            transition: 0.2s; position: relative;
-        }
-        .g-item:hover { border-color: var(--primary); transform: translateY(-2px); }
-        .g-icon { font-size: 2rem; margin-bottom: 5px; }
-        .g-name { font-size: 0.8rem; font-weight: bold; }
-        .g-tag {
-            font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-top: 4px;
-            background: #333; color: #aaa;
-        }
-
-        /* --- GAME UI --- */
-        .bar-wrap { position: fixed; top: 0; left: 0; width: 100%; height: 8px; background: #222; z-index: 100; }
-        .bar-fill { height: 100%; background: var(--secondary); width: 100%; transition: width 0.1s linear; }
-        
-        .rule-modal {
-            position: absolute; inset: 0; background: rgba(0,0,0,0.9);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 50; text-align: center;
-        }
-
-        /* --- CONTROLLER --- */
-        .c-grid { width: 100%; height: 100%; display: grid; gap: 10px; padding: 10px; }
-        .c-btn {
-            border: none; border-radius: 12px; font-family: var(--font-num);
-            font-size: 2.5rem; color: white; font-weight: bold;
-            box-shadow: 0 5px 0 rgba(0,0,0,0.3); transition: transform 0.1s;
-        }
-        .c-btn:active { transform: translateY(5px); box-shadow: none; }
-        
-        .bg-red { background: var(--secondary); }
-        .bg-blue { background: var(--primary); }
-        .bg-green { background: #00ff88; }
-        .bg-yellow { background: var(--accent); color: black; }
-
-        input {
-            width: 100%; padding: 15px; background: #000; border: 2px solid #333;
-            color: white; font-family: var(--font-num); font-size: 1.5rem;
-            text-align: center; margin-bottom: 10px; border-radius: 8px;
-            text-transform: uppercase;
-        }
-        input:focus { border-color: var(--primary); outline: none; }
-
-        /* Connection Status Indicator */
-        .status-badge {
-            position: fixed; top: 10px; left: 10px; font-size: 0.7rem;
-            padding: 4px 8px; border-radius: 4px; background: #333; color: #aaa;
-            z-index: 1000; font-family: var(--font-num);
-        }
-        .s-p2p { background: var(--primary); color: #000; box-shadow: 0 0 10px var(--primary); }
-        .s-db { background: var(--secondary); color: #fff; }
-
+        body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; }
+        .status-box { padding: 10px; border-radius: 5px; margin-bottom: 20px; font-weight: bold; }
+        .online { background-color: #d4edda; color: #155724; }
+        .offline { background-color: #f8d7da; color: #721c24; }
+        input, button { padding: 10px; font-size: 16px; }
+        ul { list-style-type: none; padding: 0; }
+        li { background: #f9f9f9; border-bottom: 1px solid #ddd; padding: 10px; }
     </style>
 </head>
 <body>
 
-<div id="conn-status" class="status-badge hidden">OFFLINE</div>
+    <h1>Firebase 高可用性デモ</h1>
 
-<div id="s-title" class="screen">
-    <h1>ULTIMATE<br>PARTY 50</h1>
-    <div class="card">
-        <p style="color:#888; font-size:0.9rem;">P2P + Firebase Hybrid Engine</p>
-        <button class="btn" onclick="App.host()">👑 部屋を作る (HOST)</button>
-        <button class="btn btn-red" onclick="App.client()">📱 参加する (JOIN)</button>
-    </div>
-</div>
+    <div id="status" class="status-box online">接続状態: 初期化中...</div>
 
-<div id="s-h-lobby" class="screen hidden">
-    <h2>ROOM ID</h2>
-    <div id="room-id-disp" style="font-size: 4rem; font-family: var(--font-num); color: var(--primary); letter-spacing: 5px;">...</div>
-    <div id="qrcode" style="background: white; padding: 10px; border-radius: 8px; margin: 20px;"></div>
-    <div class="card">
-        <p>参加人数: <span id="p-count" style="color:var(--primary); font-size:1.5rem; font-weight:bold;">0</span></p>
-        <button class="btn" onclick="Host.toMenu()">ゲーム選択へ</button>
-    </div>
-</div>
-
-<div id="s-h-menu" class="screen hidden">
-    <h2 style="margin-bottom:10px;">SELECT GAME</h2>
-    <div id="game-list"></div>
-</div>
-
-<div id="s-h-game" class="screen hidden">
-    <div class="bar-wrap"><div id="time-bar" class="bar-fill"></div></div>
-    
-    <div id="rule-overlay" class="rule-modal">
-        <div style="font-size:4rem; margin-bottom:20px;" id="r-icon">🎮</div>
-        <h2 id="r-title" style="font-size:2rem; color:var(--primary);">GAME TITLE</h2>
-        <p id="r-desc" style="font-size:1.2rem; max-width:80%;">ルール説明</p>
-        <div id="r-count" style="font-size:5rem; font-family:var(--font-num); margin-top:30px; color:var(--accent);">3</div>
+    <div>
+        <input type="text" id="messageInput" placeholder="メッセージを入力">
+        <button id="sendBtn">送信（保存）</button>
     </div>
 
-    <div style="text-align:center; padding-top:50px;">
-        <h2 id="g-title-main" style="opacity:0.5;">TITLE</h2>
-        <div id="g-timer-disp" style="font-size:6rem; font-family:var(--font-num);">GO!</div>
-        <div id="ranking-box" style="width:100%; max-width:500px; margin-top:20px; text-align:left;"></div>
-    </div>
-</div>
+    <h3>メッセージリスト (リアルタイム同期)</h3>
+    <ul id="messageList"></ul>
 
-<div id="s-h-result" class="screen hidden">
-    <h1 style="color:var(--accent);">WINNER</h1>
-    <div class="card" style="margin-top:20px;">
-        <div id="res-name" style="font-size:3rem; font-weight:bold;">???</div>
-        <div id="res-score" style="font-size:2rem; color:var(--primary);">0 PTS</div>
-        <button class="btn" onclick="Host.toMenu()">メニューに戻る</button>
-    </div>
-</div>
+    <script type="module">
+        // 必要な機能をインポート
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { 
+            getFirestore, 
+            collection, 
+            addDoc, 
+            onSnapshot, 
+            enableIndexedDbPersistence,
+            serverTimestamp 
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-<div id="s-c-login" class="screen hidden">
-    <div class="card">
-        <h2>ENTER ROOM</h2>
-        <input type="text" id="inp-room" placeholder="ROOM ID (4文字)" maxlength="4">
-        <input type="text" id="inp-name" placeholder="YOUR NAME" maxlength="8">
-        <button class="btn btn-red" onclick="Client.join()">参加スタート</button>
-        <p id="c-msg" style="color:var(--secondary); font-size:0.8rem; height:20px;"></p>
-    </div>
-</div>
+        // ▼▼▼ ここにご自身のFirebase設定を貼り付けてください ▼▼▼
+        const firebaseConfig = {
+            apiKey: "AIzaSy...",
+            authDomain: "your-project.firebaseapp.com",
+            projectId: "your-project",
+            storageBucket: "your-project.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef"
+        };
+        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
-<div id="s-c-perm" class="screen hidden">
-    <div class="card">
-        <h2>センサー許可</h2>
-        <div style="font-size:3rem; margin:20px;">📱🔄</div>
-        <p>ゲームを遊ぶために<br>スマホの傾き検知を許可してください</p>
-        <button class="btn" onclick="Client.grantPerm()">OK</button>
-    </div>
-</div>
+        // アプリとデータベースの初期化
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-<div id="s-c-wait" class="screen hidden">
-    <h2 style="animation: pulse 1s infinite; color:var(--primary);">WAITING...</h2>
-    <p>ホストがゲームを選んでいます</p>
-</div>
-
-<div id="s-c-ctrl" class="screen hidden">
-    <div id="ctrl-area" class="c-grid"></div>
-</div>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, get, onValue, update, onDisconnect, remove, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-// --- CONFIGURATION ---
-// ※ご自身のFirebase Configに書き換えてください。以下はデモ用ダミーです。
-// これがないと動きません。
-const firebaseConfig = {
-    apiKey: "AIzaSyDummyKeyForDemoPurposeOnly",
-    authDomain: "party-game-demo.firebaseapp.com",
-    databaseURL: "https://party-game-demo-default-rtdb.firebaseio.com",
-    projectId: "party-game-demo",
-    storageBucket: "party-game-demo.appspot.com",
-    messagingSenderId: "123456789",
-    appId: "1:123456789:web:abcdef"
-};
-
-// initializeApp(firebaseConfig); // ← 本番ではこちらを有効化
-// ★動作テスト用にモック（偽）DBオブジェクトを作成します。
-// ★Firebaseキーを設定したら、以下のMockブロックを削除し、上のinitializeAppを有効にしてください。
-const app = {}; 
-const db = {}; // Real implementation requires valid config
-
-// --- UTILS ---
-const $ = id => document.getElementById(id);
-const show = id => { document.querySelectorAll('.screen').forEach(e => e.classList.add('hidden')); $(id).classList.remove('hidden'); };
-const genId = () => Math.random().toString(36).substr(2, 4).toUpperCase();
-const myId = Math.random().toString(36).substr(2, 6);
-const wait = ms => new Promise(r => setTimeout(r, ms));
-
-// --- 50 GAMES DATA (GENERATOR) ---
-// Type: tap(連打), shake(振る), squat(スクワット), balance(バランス), math(計算), color(色), luck(運)
-const GAMES = [
-    // 1-10: TAP VARIATIONS
-    { i:1, t:'tap', n:'連打スプリント', d:'5秒間全力で連打せよ！', s:5, icon:'🔥' },
-    { i:2, t:'tap', n:'連打マラソン', d:'15秒間ペースを維持して連打！', s:15, icon:'🏃' },
-    { i:3, t:'tap', n:'3秒バースト', d:'一瞬の爆発力が勝負！', s:3, icon:'💥' },
-    { i:4, t:'tap_red', n:'赤だけ叩け', d:'赤いボタンだけを連打しろ！', s:10, icon:'🔴' },
-    { i:5, t:'tap_blue', n:'青だけ叩け', d:'青いボタンだけを連打しろ！', s:10, icon:'🔵' },
-    { i:6, t:'tap_alt', n:'交互連打', d:'赤と青を交互に叩け！(未実装→自由連打)', s:10, icon:'👐' }, 
-    { i:7, t:'tap', n:'サバイバル連打', d:'指が壊れるまで叩け！', s:20, icon:'☠️' },
-    { i:8, t:'tap', n:'リズム連打', d:'一定のリズムを刻め(脳内で)', s:10, icon:'🥁' },
-    { i:9, t:'tap', n:'ラストスパート', d:'後半に本気を出せ！', s:12, icon:'🏁' },
-    { i:10, t:'tap', n:'ウォームアップ', d:'準備運動がてら軽く連打', s:8, icon:'👟' },
-
-    // 11-20: SHAKE VARIATIONS
-    { i:11, t:'shake', n:'プロテインシェイク', d:'バーテンダーのように振れ！', s:10, icon:'🍸' },
-    { i:12, t:'shake', n:'全力フリフリ', d:'スマホが飛ぶ勢いで振れ！(注意)', s:5, icon:'👋' },
-    { i:13, t:'shake', n:'横振りダンス', d:'横方向に激しく振れ！', s:10, icon:'💃' },
-    { i:14, t:'shake', n:'縦振りハンマー', d:'縦方向に叩きつけろ！', s:10, icon:'🔨' },
-    { i:15, t:'shake', n:'耐久シェイク', d:'20秒間振り続けろ！', s:20, icon:'🥵' },
-    { i:16, t:'shake', n:'ジェントルシェイク', d:'優しく素早く振れ', s:10, icon:'🍼' },
-    { i:17, t:'shake', n:'左手シェイク', d:'左手だけで振れ！', s:8, icon:'👈' },
-    { i:18, t:'shake', n:'右手シェイク', d:'右手だけで振れ！', s:8, icon:'👉' },
-    { i:19, t:'shake', n:'ジャンプ振動', d:'ポケットに入れてジャンプ！', s:10, icon:'🐇' },
-    { i:20, t:'shake', n:'クレイジーシェイク', d:'上下左右ランダムに暴れろ！', s:12, icon:'🤪' },
-
-    // 21-30: BODY & SENSOR
-    { i:21, t:'squat', n:'スクワット王', d:'スマホを持ってしゃがんで立て！', s:15, icon:'🏋️' },
-    { i:22, t:'squat', n:'高速スクワット', d:'浅く速くスクワット！', s:10, icon:'🦵' },
-    { i:23, t:'squat', n:'地獄の脚トレ', d:'太ももをいじめ抜け！', s:20, icon:'👺' },
-    { i:24, t:'balance', n:'バランス禅', d:'スマホを水平に保て！動くな！', s:15, icon:'🧘' },
-    { i:25, t:'balance', n:'絶対水平', d:'少しでも傾けたら減点！', s:20, icon:'📏' },
-    { i:26, t:'balance', n:'バランス・デス', d:'30秒間耐えきれ！', s:30, icon:'⚰️' },
-    { i:27, t:'squat', n:'スロー・スクワット', d:'ゆっくりしゃがんで立つ', s:20, icon:'🐢' },
-    { i:28, t:'shake', n:'バイブレーション', d:'細かく震わせろ', s:10, icon:'📳' },
-    { i:29, t:'balance', n:'片足バランス', d:'片足立ちで水平維持(自己申告)', s:15, icon:'🦩' },
-    { i:30, t:'squat', n:'空気椅子', d:'中腰をキープ(スクワット判定を利用)', s:15, icon:'🪑' },
-
-    // 31-40: BRAIN & REFLEX
-    { i:31, t:'math', n:'暗算バトル', d:'計算式の答えを選べ！', s:20, icon:'🧮' },
-    { i:32, t:'math', n:'スピード計算', d:'簡単な計算を高速で！', s:10, icon:'🚀' },
-    { i:33, t:'color', n:'反射カラー', d:'文字の「色」と同じボタンを押せ！', s:15, icon:'🎨' },
-    { i:34, t:'color_text', n:'文字読み', d:'文字の「意味」と同じボタンを押せ！', s:15, icon:'🧠' },
-    { i:35, t:'react', n:'早押し反射', d:'「GO」が出たらすぐ押せ！', s:10, icon:'🔫' },
-    { i:36, t:'react', n:'信号機', d:'青になったら押せ！', s:10, icon:'🚥' },
-    { i:37, t:'math', n:'引き算地獄', d:'引き算のみの計算', s:20, icon:'➖' },
-    { i:38, t:'math', n:'足し算天国', d:'足し算のみの計算', s:20, icon:'➕' },
-    { i:39, t:'num', n:'最大数', d:'一番大きい数字を選べ', s:15, icon:'🔢' },
-    { i:40, t:'num', n:'最小数', d:'一番小さい数字を選べ', s:15, icon:'🐜' },
-
-    // 41-50: LUCK & VARIETY
-    { i:41, t:'luck', n:'運ゲーAorB', d:'正解はランダム。勘で押せ！', s:10, icon:'🎰' },
-    { i:42, t:'luck4', n:'4択運試し', d:'4つの中からアタリを引け！', s:10, icon:'🍀' },
-    { i:43, t:'luck', n:'超・運試し', d:'一発勝負！確率は50%', s:5, icon:'🎲' },
-    { i:44, t:'mix', n:'連打と運', d:'連打しながら運も必要？', s:20, icon:'🔱' },
-    { i:45, t:'tap', n:'ラストバトル', d:'全ての力を出し切れ', s:30, icon:'👑' },
-    { i:46, t:'shake', n:'ファイナルシェイク', d:'腕がちぎれるまで', s:30, icon:'🦾' },
-    { i:47, t:'squat', n:'ファイナルスクワット', d:'明日は歩けない', s:30, icon:'🚑' },
-    { i:48, t:'quiz', n:'直感クイズ', d:'正解っぽいものを選べ', s:15, icon:'💡' },
-    { i:49, t:'color', n:'色彩の暴力', d:'目がチカチカするぞ', s:20, icon:'🌈' },
-    { i:50, t:'tap', n:'THE END', d:'最後のゲーム。悔いなく終われ', s:60, icon:'🏁' }
-];
-
-// --- GLOBAL STATE ---
-let roomId = null;
-let peer = null;
-let p2pConn = null;
-let hostConns = {};
-let isHost = false;
-let hostHeartbeatLoop = null;
-
-// ==========================================
-//               APP CONTROLLER
-// ==========================================
-window.App = {
-    host: () => Host.init(),
-    client: () => {
-        const p = new URLSearchParams(location.search);
-        if(p.get('room')) $('inp-room').value = p.get('room');
-        show('s-c-login');
-    }
-};
-
-// ==========================================
-//               HOST LOGIC
-// ==========================================
-window.Host = {
-    players: {}, // { id: { name, score } }
-
-    init: async () => {
-        show('s-h-lobby');
-        $('conn-status').classList.remove('hidden');
-        
-        // 1. Room ID Generation & Validation
-        // もしURLにroomパラメータがあれば再利用を試みる、なければ新規生成
-        const p = new URLSearchParams(location.search);
-        roomId = p.get('room') ? p.get('room').toUpperCase() : genId();
-        
-        // 2. Check for Zombie Host (もし既存の部屋があっても、反応がなければ乗っ取る)
-        const roomRef = ref(db, `rooms/${roomId}`);
-        const snap = await get(roomRef);
-        
-        if (snap.exists()) {
-            const data = snap.val();
-            const now = Date.now();
-            // 15秒以上Heartbeatがなければ死んでいるとみなして上書き
-            if (data.heartbeat && now - data.heartbeat < 15000) {
-                // 生きている部屋があるなら、IDを変えて作り直す
-                roomId = genId();
-            }
-        }
-
-        $('room-id-disp').innerText = roomId;
-        new QRCode($('qrcode'), { text: `${location.href.split('?')[0]}?room=${roomId}`, width: 128, height: 128 });
-
-        // 3. Initialize Firebase Room
-        await set(ref(db, `rooms/${roomId}`), {
-            status: 'lobby',
-            createdAt: Date.now(),
-            heartbeat: Date.now()
-        });
-        
-        // Heartbeat Loop (I am alive)
-        if(hostHeartbeatLoop) clearInterval(hostHeartbeatLoop);
-        hostHeartbeatLoop = setInterval(() => {
-            update(ref(db, `rooms/${roomId}`), { heartbeat: Date.now() });
-        }, 5000);
-
-        // Remove room on disconnect
-        onDisconnect(ref(db, `rooms/${roomId}`)).remove();
-
-        // 4. Initialize PeerJS (Hybrid)
-        try {
-            peer = new Peer();
-            peer.on('open', (id) => {
-                console.log("PeerID:", id);
-                update(ref(db, `rooms/${roomId}`), { hostPeerId: id });
-                $('conn-status').innerText = "P2P ONLINE";
-                $('conn-status').className = "status-badge s-p2p";
-            });
-            peer.on('connection', (c) => {
-                hostConns[c.peer] = c;
-                c.on('data', (d) => Host.handleInput(d.pid, d.val, d.name));
-            });
-            peer.on('error', () => {
-                $('conn-status').innerText = "DB MODE";
-                $('conn-status').className = "status-badge s-db";
-            });
-        } catch (e) {
-            $('conn-status').innerText = "DB MODE";
-            $('conn-status').className = "status-badge s-db";
-        }
-
-        // 5. Setup Listeners (DB Fallback)
-        onChildAdded(ref(db, `rooms/${roomId}/actions`), (s) => {
-            const v = s.val();
-            Host.handleInput(v.pid, v.val, v.name);
-            remove(s.ref); // Processed
-        });
-
-        // Player Sync
-        onValue(ref(db, `rooms/${roomId}/players`), (s) => {
-            const val = s.val() || {};
-            // 同期ロジック: 既存プレイヤーのスコアを保持しつつリスト更新
-            Object.keys(val).forEach(pid => {
-                if(!Host.players[pid]) Host.players[pid] = { name: val[pid].name, score: 0 };
-            });
-            $('p-count').innerText = Object.keys(Host.players).length;
-        });
-    },
-
-    handleInput: (pid, val, name) => {
-        // 新規参加なら登録
-        if (!Host.players[pid]) {
-            Host.players[pid] = { name: name || "Unknown", score: 0 };
-            update(ref(db, `rooms/${roomId}/players/${pid}`), { name: name || "Unknown" });
-        }
-        // ゲーム中ならスコア加算
-        if (!$('s-h-game').classList.contains('hidden') && val) {
-            Host.players[pid].score += val;
-        }
-    },
-
-    toMenu: () => {
-        show('s-h-menu');
-        const list = $('game-list');
-        list.innerHTML = GAMES.map(g => `
-            <div class="g-item" onclick="Host.startGame(${g.i})">
-                <div class="g-icon">${g.icon}</div>
-                <div class="g-name">${g.i}. ${g.n}</div>
-                <div class="g-tag">${g.t} / ${g.s}s</div>
-            </div>
-        `).join('');
-        update(ref(db, `rooms/${roomId}`), { status: 'menu' });
-    },
-
-    startGame: async (id) => {
-        const game = GAMES.find(g => g.i === id);
-        
-        // 1. Reset Scores
-        Object.keys(Host.players).forEach(k => Host.players[k].score = 0);
-        
-        // 2. Show Game Screen & Rule Overlay
-        show('s-h-game');
-        $('r-title').innerText = game.n;
-        $('r-desc').innerText = game.d;
-        $('r-icon').innerText = game.icon;
-        $('rule-overlay').classList.remove('hidden');
-        
-        // 3. Notify Clients (Start Loading)
-        update(ref(db, `rooms/${roomId}`), { 
-            status: 'playing',
-            gameId: game.i,
-            timestamp: Date.now()
-        });
-
-        // 4. Countdown (Rule Phase)
-        let cd = 3;
-        $('r-count').innerText = cd;
-        const cdInt = setInterval(() => {
-            cd--;
-            $('r-count').innerText = cd;
-            if (cd <= 0) {
-                clearInterval(cdInt);
-                $('rule-overlay').classList.add('hidden');
-                Host.gameLoop(game);
-            }
-        }, 1000);
-    },
-
-    gameLoop: (game) => {
-        $('g-title-main').innerText = game.n;
-        $('g-timer-disp').innerText = "GO!";
-        
-        let left = game.s;
-        const max = game.s;
-        
-        const loop = setInterval(() => {
-            left -= 0.1;
-            $('time-bar').style.width = (left / max * 100) + "%";
-            $('g-timer-disp').innerText = Math.ceil(left);
-            
-            // Realtime Ranking
-            const sorted = Object.values(Host.players).sort((a,b)=>b.score-a.score).slice(0,5);
-            $('ranking-box').innerHTML = sorted.map((p,i) => `
-                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #333; padding:5px;">
-                    <span>#${i+1} ${p.name}</span>
-                    <span style="color:var(--primary); font-weight:bold;">${Math.floor(p.score)}</span>
-                </div>
-            `).join('');
-
-            if (left <= 0) {
-                clearInterval(loop);
-                Host.endGame(sorted[0]);
-            }
-        }, 100);
-    },
-
-    endGame: (winner) => {
-        update(ref(db, `rooms/${roomId}`), { status: 'result' });
-        show('s-h-result');
-        $('res-name').innerText = winner ? winner.name : "NO WINNER";
-        $('res-score').innerText = winner ? Math.floor(winner.score) + " PTS" : "";
-    }
-};
-
-// ==========================================
-//               CLIENT LOGIC
-// ==========================================
-window.Client = {
-    name: "Guest",
-    game: null,
-    
-    join: async () => {
-        const rid = $('inp-room').value.toUpperCase();
-        const nm = $('inp-name').value || "Guest";
-        
-        if(rid.length !== 4) return $('c-msg').innerText = "IDは4文字です";
-        $('c-msg').innerText = "接続中...";
-        
-        // 1. Check Room
-        const roomRef = ref(db, `rooms/${rid}`);
-        const snap = await get(roomRef);
-        
-        if(!snap.exists()) return $('c-msg').innerText = "部屋が見つかりません";
-        
-        // 2. Register
-        roomId = rid;
-        Client.name = nm;
-        await update(ref(db, `rooms/${roomId}/players/${myId}`), { name: nm });
-        onDisconnect(ref(db, `rooms/${roomId}/players/${myId}`)).remove();
-
-        // 3. Try P2P
-        const rVal = snap.val();
-        if (rVal.hostPeerId) Client.connectP2P(rVal.hostPeerId);
-        else Client.useDB();
-
-        // 4. Listen Room State
-        onValue(roomRef, (s) => {
-            const d = s.val();
-            if(!d) { alert("部屋が解散されました"); location.reload(); return; }
-            
-            if(d.status === 'playing' && d.gameId) {
-                const g = GAMES.find(x => x.i === d.gameId);
-                // タイムスタンプが変わっていれば新規ゲーム開始
-                if(Client.lastTs !== d.timestamp) {
-                    Client.lastTs = d.timestamp;
-                    Client.setupGame(g);
+        // 【最重要】オフラインでも止まらないようにする設定
+        enableIndexedDbPersistence(db)
+            .catch((err) => {
+                if (err.code == 'failed-precondition') {
+                    console.error('複数のタブで開かれています。オフラインモードは1つのタブでのみ有効です。');
+                } else if (err.code == 'unimplemented') {
+                    console.error('このブラウザはオフラインモードをサポートしていません。');
                 }
-            } else if (d.status === 'menu' || d.status === 'result') {
-                show('s-c-wait');
-            }
-        });
-        
-        // Sensor Prompt
-        if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-            show('s-c-perm');
-        } else {
-            show('s-c-wait');
-        }
-    },
-    
-    connectP2P: (hid) => {
-        try {
-            peer = new Peer();
-            // 3秒待って繋がらなければDBモードへ
-            const to = setTimeout(() => Client.useDB(), 3000);
-            
-            peer.on('open', () => {
-                p2pConn = peer.connect(hid);
-                p2pConn.on('open', () => {
-                    clearTimeout(to);
-                    $('conn-status').classList.remove('hidden');
-                    $('conn-status').innerText = "P2P ONLINE";
-                    $('conn-status').className = "status-badge s-p2p";
+            });
+
+        // HTML要素の取得
+        const statusDiv = document.getElementById('status');
+        const input = document.getElementById('messageInput');
+        const btn = document.getElementById('sendBtn');
+        const list = document.getElementById('messageList');
+
+        // データの送信処理
+        btn.addEventListener('click', async () => {
+            if(input.value === "") return;
+            try {
+                // Firestoreにデータを追加
+                await addDoc(collection(db, "messages"), {
+                    text: input.value,
+                    timestamp: serverTimestamp() // サーバー時間を記録
                 });
-                p2pConn.on('error', () => Client.useDB());
-            });
-            peer.on('error', () => Client.useDB());
-        } catch(e) { Client.useDB(); }
-    },
-    
-    useDB: () => {
-        $('conn-status').classList.remove('hidden');
-        $('conn-status').innerText = "DB MODE";
-        $('conn-status').className = "status-badge s-db";
-        p2pConn = null;
-    },
-    
-    grantPerm: () => {
-        DeviceMotionEvent.requestPermission().then(r => {
-            if(r==='granted') show('s-c-wait');
-        }).catch(()=>show('s-c-wait'));
-    },
-    
-    setupGame: (game) => {
-        Client.game = game;
-        show('s-c-ctrl');
-        const area = $('ctrl-area');
-        area.innerHTML = '';
-        
-        // Controller Generator based on Game Type
-        const t = game.t;
-        
-        if (t === 'tap' || t === 'tap_alt' || t === 'mix') {
-            area.innerHTML = `<button class="c-btn bg-red" style="height:80%" ontouchstart="Client.send(1)">PUSH!</button>`;
-        }
-        else if (t === 'tap_red') {
-             area.innerHTML = `<button class="c-btn bg-red" style="height:80%" ontouchstart="Client.send(1)">赤</button>`;
-        }
-        else if (t === 'tap_blue') {
-             area.innerHTML = `<button class="c-btn bg-blue" style="height:80%" ontouchstart="Client.send(1)">青</button>`;
-        }
-        else if (t === 'shake' || t === 'squat' || t === 'balance') {
-            area.innerHTML = `
-                <div style="text-align:center; color:white;">
-                    <div style="font-size:5rem;">${game.icon}</div>
-                    <div style="font-size:1.5rem; margin-top:20px;">${game.d}</div>
-                </div>`;
-        }
-        else if (t === 'math' || t === 'num') {
-            Client.renderMath();
-        }
-        else if (t === 'color' || t === 'color_text') {
-            Client.renderColor();
-        }
-        else if (t === 'luck' || t === 'luck4' || t === 'quiz' || t === 'react') {
-            const count = (t === 'luck4' || t === 'quiz') ? 4 : 2;
-            const colors = ['bg-red', 'bg-blue', 'bg-green', 'bg-yellow'];
-            area.style.gridTemplateColumns = "1fr 1fr";
-            
-            for(let i=0; i<count; i++) {
-                const btn = document.createElement('button');
-                btn.className = `c-btn ${colors[i]}`;
-                btn.innerText = (t === 'react') ? "GO" : "?";
-                btn.onclick = () => {
-                    // Logic for random/quiz
-                    if(t === 'react') { Client.send(1); btn.disabled=true; }
-                    else {
-                        const win = Math.random() > 0.5;
-                        if(win) { Client.send(10); if(navigator.vibrate) navigator.vibrate(50); }
-                        else Client.send(-2);
-                    }
-                };
-                area.appendChild(btn);
+                input.value = ""; // 入力欄をクリア
+            } catch (e) {
+                console.error("エラーが発生しました: ", e);
+                alert("送信エラー（コンソールを確認してください）");
             }
-        }
-        
-        Client.initSensors();
-    },
-    
-    renderMath: () => {
-        const area = $('ctrl-area');
-        const n1 = Math.floor(Math.random()*9)+1;
-        const n2 = Math.floor(Math.random()*9)+1;
-        const isAdd = Math.random()>0.5;
-        const ans = isAdd ? n1+n2 : n1-n2;
-        const wrong = ans + (Math.random()>0.5?1:-1);
-        
-        area.innerHTML = `
-            <div style="grid-column:1/-1; display:flex; justify-content:center; align-items:center; font-size:4rem;">
-                ${n1} ${isAdd?'+':'-'} ${n2} = ?
-            </div>
-            <button class="c-btn bg-blue" onclick="Client.check(${ans},${ans})">${ans}</button>
-            <button class="c-btn bg-red" onclick="Client.check(${wrong},${ans})">${wrong}</button>
-        `;
-    },
-    
-    renderColor: () => {
-        const area = $('ctrl-area');
-        const cols = [
-            {n:'あか', c:'red', cls:'bg-red'},
-            {n:'あお', c:'blue', cls:'bg-blue'},
-            {n:'みどり', c:'green', cls:'bg-green'},
-            {n:'きいろ', c:'gold', cls:'bg-yellow'}
-        ];
-        // Target
-        const txt = cols[Math.floor(Math.random()*4)];
-        const ink = cols[Math.floor(Math.random()*4)];
-        
-        area.innerHTML = `<div style="grid-column:1/-1; font-size:4rem; color:${ink.c}; font-weight:bold; text-align:center;">${txt.n}</div>`;
-        area.style.gridTemplateColumns = "1fr 1fr";
-        
-        cols.forEach(opt => {
-            const btn = document.createElement('button');
-            btn.className = `c-btn ${opt.cls}`;
-            btn.onclick = () => {
-                const target = Client.game.t === 'color' ? ink.c : txt.c; // color:インク色一致, color_text:文字意味一致... actually logic is simpler
-                // Fix Logic:
-                // Game 33 (Color): Match the INK color.
-                // Game 34 (Text): Match the TEXT meaning.
-                let isCor = false;
-                if(Client.game.t === 'color') isCor = (opt.c === ink.c);
-                else isCor = (opt.c === txt.c); // txt.c holds the 'true color' of the word meaning
-                
-                if(isCor) Client.send(1); else Client.send(-1);
-                Client.renderColor();
-            };
-            area.appendChild(btn);
         });
-    },
-    
-    check: (v, a) => {
-        if(v===a) Client.send(1); else Client.send(-1);
-        Client.renderMath();
-    },
 
-    send: (val) => {
-        const d = { pid: myId, val: val, name: Client.name };
-        if(p2pConn && p2pConn.open) p2pConn.send(d);
-        else push(ref(db, `rooms/${roomId}/actions`), d);
-        
-        if(val > 0 && navigator.vibrate) navigator.vibrate(30);
-    },
-    
-    initSensors: () => {
-        // Reset Logic
-        window.ondevicemotion = null;
-        window.ondeviceorientation = null;
-        
-        if(!Client.game) return;
-        const t = Client.game.t;
-        
-        if(t === 'shake' || t === 'squat' || t === 'balance') {
-            let lx=0, ly=0, lz=0;
-            let squatSt = 'up';
+        // データのリアルタイム受信（ここが切断検知も兼ねる）
+        onSnapshot(collection(db, "messages"), (snapshot) => {
+            // 接続状態の判定
+            const source = snapshot.metadata.fromCache ? "ローカルキャッシュ" : "サーバー";
             
-            window.ondevicemotion = (e) => {
-                const acc = e.accelerationIncludingGravity;
-                if(!acc) return;
-                
-                if(t === 'shake') {
-                    const d = Math.abs(acc.x+acc.y+acc.z - lx-ly-lz);
-                    if(d > 25) Client.send(1); // Sensitivity
-                    lx=acc.x; ly=acc.y; lz=acc.z;
-                }
-                else if(t === 'squat') {
-                    // Y axis gravity: Stand ~9.8, Squat(down) drops, Up spikes
-                    // Simple threshold logic
-                    if(squatSt==='up' && acc.y < 5) squatSt='down';
-                    if(squatSt==='down' && acc.y > 8) { squatSt='up'; Client.send(1); }
-                }
-            };
-            
-            if(t === 'balance') {
-                window.ondeviceorientation = (e) => {
-                    // Keep flat (beta/gamma near 0)
-                    const tilt = Math.abs(e.beta) + Math.abs(e.gamma);
-                    if(tilt < 15) {
-                        if(Math.random()>0.9) Client.send(1);
-                    } else {
-                         if(Math.random()>0.9) Client.send(-1);
-                    }
-                };
+            if (snapshot.metadata.fromCache) {
+                statusDiv.textContent = "⚠ オフライン (キャッシュで動作中・送信データは復帰時に同期されます)";
+                statusDiv.className = "status-box offline";
+            } else {
+                statusDiv.textContent = "● オンライン (サーバーと同期中)";
+                statusDiv.className = "status-box online";
             }
-        }
-    }
-};
-</script>
+
+            // リストの描画更新
+            list.innerHTML = "";
+            snapshot.forEach((doc) => {
+                const li = document.createElement("li");
+                li.textContent = `${doc.data().text} (${source})`;
+                list.appendChild(li);
+            });
+        });
+    </script>
 </body>
 </html>
