@@ -3,477 +3,513 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>100 GAMES PARTY</title>
+    <title>50 GAMES BATTLE</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;700&family=Zen+Kaku+Gothic+New:wght@500;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Kosugi+Maru&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #121212;
-            --primary: #00ff88;
-            --accent: #ff0055;
-            --text: #ffffff;
-            --panel: #1e1e1e;
+            --bg: #111;
+            --main: #00ffcc; /* Cyan */
+            --sub: #ff0099;  /* Pink */
+            --warn: #ffcc00; /* Yellow */
+            --txt: #fff;
         }
-        * { box-sizing: border-box; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
-        body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Zen Kaku Gothic New', sans-serif; overflow: hidden; height: 100vh; width: 100vw; }
+        * { box-sizing: border-box; touch-action: none; user-select: none; -webkit-user-select: none; }
+        body { margin: 0; background: var(--bg); color: var(--txt); font-family: 'Kosugi Maru', sans-serif; overflow: hidden; height: 100vh; }
 
-        /* スクリーン管理 */
-        .screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: var(--bg); transition: opacity 0.3s; z-index: 10;
-        }
-        .hidden { opacity: 0; pointer-events: none; z-index: -1; }
+        /* SCREENS */
+        .screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg); transition: 0.3s; z-index: 10; }
+        .hidden { opacity: 0; pointer-events: none; z-index: -1; transform: scale(0.9); }
 
-        /* デザイン要素 */
-        h1, h2 { font-family: 'Teko', sans-serif; text-transform: uppercase; margin: 0; line-height: 1; }
-        h1 { font-size: 4rem; color: var(--primary); text-shadow: 0 0 20px rgba(0,255,136,0.5); }
+        /* TYPOGRAPHY */
+        h1 { font-family: 'Black Ops One', cursive; color: var(--main); font-size: 3rem; margin: 0; text-shadow: 0 0 10px var(--main); text-align: center; }
+        h2 { color: var(--sub); font-size: 1.5rem; margin: 10px; }
+        .big-txt { font-size: 4rem; font-weight: bold; font-family: 'Black Ops One'; }
+        
+        /* UI ELEMENTS */
         .btn {
-            background: transparent; border: 2px solid var(--primary); color: var(--primary);
-            padding: 15px 40px; font-size: 1.5rem; font-family: 'Teko', sans-serif;
-            margin: 10px; cursor: pointer; border-radius: 50px; transition: 0.2s; text-transform: uppercase;
-            min-width: 200px;
+            background: rgba(255,255,255,0.1); border: 2px solid var(--main); color: var(--main);
+            padding: 15px 30px; font-size: 1.2rem; border-radius: 30px; margin: 10px; cursor: pointer;
+            transition: 0.1s; width: 80%; max-width: 300px; font-weight: bold;
         }
-        .btn:active { background: var(--primary); color: #000; transform: scale(0.95); }
-        .btn-red { border-color: var(--accent); color: var(--accent); }
-        .btn-red:active { background: var(--accent); color: white; }
+        .btn:active { background: var(--main); color: #000; transform: scale(0.95); }
+        .btn-p { border-color: var(--sub); color: var(--sub); }
+        .btn-p:active { background: var(--sub); }
 
-        /* ホスト画面 */
-        #game-list {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
-            width: 95%; max-width: 800px; height: 60vh; overflow-y: auto;
-            padding: 10px; background: rgba(255,255,255,0.05); border-radius: 10px;
+        /* GAME LIST (GRID) */
+        #list-container {
+            width: 95%; height: 60vh; overflow-y: scroll; display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; padding: 10px;
+            background: #222; border-radius: 10px; border: 1px solid #444;
         }
-        .game-card {
-            background: #2a2a2a; border: 1px solid #444; padding: 15px; border-radius: 8px;
-            cursor: pointer; text-align: left; transition: 0.2s; display: flex; align-items: center;
+        .g-card {
+            background: #333; padding: 10px; border-radius: 5px; cursor: pointer; border: 1px solid #555;
+            display: flex; flex-direction: column; align-items: center; text-align: center;
         }
-        .game-card:hover { border-color: var(--primary); background: #333; }
-        .gc-num { font-size: 1.5rem; font-family: 'Teko'; color: #666; margin-right: 10px; width: 40px; }
-        .gc-name { font-weight: bold; font-size: 1rem; }
+        .g-card:active { background: var(--main); color: #000; }
+        .g-icon { font-size: 2rem; margin-bottom: 5px; }
+        .g-name { font-size: 0.8rem; font-weight: bold; line-height: 1.2; }
+        .g-type { font-size: 0.6rem; color: #aaa; margin-top: 2px; }
+
+        /* GAME UI */
+        .bar-wrap { position: fixed; top: 0; left: 0; width: 100%; height: 10px; background: #333; }
+        .bar-fill { height: 100%; background: var(--warn); width: 100%; transition: width 0.1s linear; }
         
-        /* ゲーム中画面 */
-        .timer-bar { position: fixed; top: 0; left: 0; height: 10px; background: var(--accent); width: 100%; transition: width 0.1s linear; }
-        .big-text { font-size: 5rem; font-family: 'Teko'; text-shadow: 0 0 20px white; }
-        .sub-text { font-size: 1.2rem; color: #aaa; text-align: center; max-width: 80%; }
-
-        /* クライアント操作画面 */
-        .ctrl-grid { width: 100%; height: 100%; display: grid; place-items: center; }
-        .tap-btn {
-            width: 90%; height: 70%; background: var(--accent); border: none; border-radius: 20px;
-            font-size: 3rem; color: white; font-weight: bold; box-shadow: 0 10px 0 #900;
-        }
-        .tap-btn:active { transform: translateY(10px); box-shadow: 0 0 0 #900; }
+        /* CONTROLLER */
+        .c-area { width: 100%; height: 100%; display: flex; flex-direction: column; }
+        .c-btn { flex: 1; border: none; font-size: 2rem; font-weight: bold; color: white; display: flex; align-items: center; justify-content: center; margin: 2px; border-radius: 10px; }
+        .bg-r { background: #ff4757; } .bg-b { background: #1e90ff; } .bg-g { background: #2ed573; } .bg-y { background: #ffa502; }
         
-        .quiz-grid { display: grid; grid-template-columns: 1fr 1fr; width: 100%; height: 100%; }
-        .q-btn { width: 100%; height: 100%; border: none; font-size: 3rem; font-weight: bold; color: white; }
-        .c-red { background: #ff4757; } .c-blue { background: #2e86de; }
-        .c-green { background: #2ed573; } .c-yellow { background: #ffa502; }
-
-        input { font-size: 2rem; text-align: center; background: #333; color: white; border: none; padding: 10px; width: 80%; border-radius: 10px; margin-bottom: 20px; }
+        input { font-size: 1.5rem; text-align: center; padding: 10px; margin: 10px; width: 70%; background: #333; color: white; border: none; border-radius: 5px; }
     </style>
 </head>
 <body>
 
-<div id="s-top" class="screen">
-    <h1>100 GAMES</h1>
-    <p>究極のパーティゲーム集</p>
-    <button class="btn" onclick="App.startHost()">👑 ホスト (部屋作成)</button>
-    <button class="btn btn-red" onclick="App.startClient()">📱 プレイヤー (参加)</button>
+<div id="s-title" class="screen">
+    <h1>50 GAMES<br>BATTLE</h1>
+    <p>頭脳と体力の限界に挑め</p>
+    <button class="btn" onclick="App.host()">👑 部屋を作る (HOST)</button>
+    <button class="btn btn-p" onclick="App.client()">📱 参加する (PLAYER)</button>
 </div>
 
 <div id="s-h-lobby" class="screen hidden">
     <h2>ROOM ID</h2>
-    <h1 id="disp-id" style="letter-spacing: 5px;">...</h1>
-    <div id="qrcode" style="background:white; padding:10px; border-radius:10px; margin:20px;"></div>
-    <p>参加人数: <span id="p-count" style="font-size:2rem; color:var(--primary)">0</span> 人</p>
-    <button class="btn" onclick="Host.showMenu()">ゲーム選択へ</button>
+    <h1 id="dsp-id" style="font-size: 5rem; letter-spacing: 5px;">----</h1>
+    <div id="qrcode" style="background: white; padding: 10px; border-radius: 10px; margin: 10px;"></div>
+    <p>参加人数: <span id="p-count" style="font-size: 2rem; color: var(--main)">0</span></p>
+    <button class="btn" onclick="Host.menu()">ゲーム選択へ</button>
 </div>
 
 <div id="s-h-menu" class="screen hidden">
     <h2>SELECT GAME</h2>
-    <div id="game-list"></div>
+    <div id="list-container"></div>
 </div>
 
 <div id="s-h-play" class="screen hidden">
-    <div class="timer-bar" id="timer-bar"></div>
-    <h2 id="g-name" style="margin-top:50px;">GAME NAME</h2>
-    <div id="g-main" class="big-text">READY</div>
-    <div id="g-sub" class="sub-text">説明文</div>
-    <div id="live-rank" style="margin-top:20px; font-size:1.5rem;"></div>
+    <div class="bar-wrap"><div id="bar" class="bar-fill"></div></div>
+    <div style="margin-top: 40px; color: #888;">CURRENT GAME</div>
+    <h2 id="g-title" style="font-size: 2.5rem; color: white;">TITLE</h2>
+    <div id="g-timer" class="big-txt" style="color: var(--warn)">READY</div>
+    <div id="g-rank" style="width: 90%; text-align: center; font-size: 1.5rem; margin-top: 20px;"></div>
 </div>
 
-<div id="s-h-result" class="screen hidden">
-    <h1 style="color:var(--accent)">WINNER</h1>
-    <div id="res-name" class="big-text">???</div>
-    <div id="res-score" style="font-size:2rem; color:var(--primary)">0 PTS</div>
-    <button class="btn" onclick="Host.showMenu()">メニューに戻る</button>
+<div id="s-h-res" class="screen hidden">
+    <h1 style="color: var(--warn)">WINNER</h1>
+    <div id="res-name" class="big-txt" style="margin: 20px 0;">???</div>
+    <div id="res-score" style="font-size: 2rem;">0 PTS</div>
+    <button class="btn" onclick="Host.menu()">メニューへ</button>
 </div>
 
 <div id="s-c-login" class="screen hidden">
-    <h2>ENTER ROOM ID</h2>
-    <input type="text" id="inp-room" placeholder="ID (4文字)" maxlength="4" style="text-transform:uppercase;">
-    <input type="text" id="inp-name" placeholder="ニックネーム" maxlength="8">
-    <button class="btn btn-red" onclick="Client.join()">参加する</button>
+    <h2>ENTER ID</h2>
+    <input type="text" id="inp-id" placeholder="ROOM ID" maxlength="4" style="text-transform: uppercase;">
+    <input type="text" id="inp-name" placeholder="NAME" maxlength="8">
+    <button class="btn btn-p" onclick="Client.join()">JOIN</button>
 </div>
 
 <div id="s-c-perm" class="screen hidden">
-    <h2>センサー準備</h2>
-    <p>ゲームを楽しむために<br>許可ボタンを押してください</p>
-    <button class="btn" onclick="Client.requestPerm()">許可して待機</button>
+    <h2>SENSOR SETUP</h2>
+    <p>スマホのセンサーを使います</p>
+    <div style="font-size: 3rem;">📱🔄</div>
+    <button class="btn" onclick="Client.perm()">許可してスタート</button>
 </div>
 
 <div id="s-c-wait" class="screen hidden">
-    <h1 style="font-size:2rem; animation:pulse 1s infinite">WAITING...</h1>
+    <h2 class="big-txt" style="animation: pulse 1s infinite">WAITING</h2>
     <p>ホストがゲームを選んでいます</p>
 </div>
 
 <div id="s-c-ctrl" class="screen hidden">
-    <div id="ctrl-area" style="width:100%; height:100%;"></div>
+    <div id="c-board" class="c-area"></div>
 </div>
 
 <script type="module">
-    // ==========================================
-    // FIREBASE SETUP
-    // ==========================================
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-    import { getDatabase, ref, set, onValue, update, onDisconnect, remove, push, child } 
-           from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getDatabase, ref, set, onValue, update, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyDbZzTMvUkG2LXIGY4ux0KBTmnAdqP236s",
-        authDomain: "game-4f2d9.firebaseapp.com",
-        databaseURL: "https://game-4f2d9-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "game-4f2d9",
-        storageBucket: "game-4f2d9.firebasestorage.app",
-        messagingSenderId: "574316347824",
-        appId: "1:574316347824:web:cf686040628e25ad615675",
-        measurementId: "G-T0ZKQCC9L3"
-    };
+const firebaseConfig = {
+    apiKey: "AIzaSyDbZzTMvUkG2LXIGY4ux0KBTmnAdqP236s",
+    authDomain: "game-4f2d9.firebaseapp.com",
+    databaseURL: "https://game-4f2d9-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "game-4f2d9",
+    storageBucket: "game-4f2d9.firebasestorage.app",
+    messagingSenderId: "574316347824",
+    appId: "1:574316347824:web:cf686040628e25ad615675",
+    measurementId: "G-T0ZKQCC9L3"
+};
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-    // ==========================================
-    // GAME DATABASE (100 GAMES GENERATOR)
-    // ==========================================
-    const GAMES = [];
-    
-    // Core Archetypes
-    const ARCHETYPES = {
-        tap:   { name: "連打", type: "tap", icon: "🔥", desc: "画面を連打しろ！" },
-        shake: { name: "フリフリ", type: "shake", icon: "👋", desc: "スマホを振れ！" },
-        quiz:  { name: "4択クイズ", type: "quiz", icon: "❓", desc: "正しい色を押せ！" },
-        luck:  { name: "運試し", type: "luck", icon: "🎲", desc: "運を天に任せろ" },
-        just:  { name: "体内時計", type: "tap", icon: "⏱️", desc: "指定秒数で止めろ" }
-    };
+// --- 50 GAMES DATA ---
+// Types: tap(連打), shake(振る), squat(スクワット), balance(バランス), quiz(クイズ/脳トレ), spin(回転)
+const GAMES = [
+    // --- BASIC TAP (1-8) ---
+    { i:1, n:"連打スプリント", t:"tap", time:5, desc:"5秒間で限界まで連打せよ！", icon:"🔥" },
+    { i:2, n:"連打マラソン", t:"tap", time:20, desc:"20秒間ペースを維持しろ！", icon:"🏃" },
+    { i:3, n:"超高速3秒", t:"tap", time:3, desc:"一瞬の爆発力勝負！", icon:"⚡" },
+    { i:4, n:"サバイバル連打", t:"tap", time:15, desc:"指が壊れるまで叩け！", icon:"☠️" },
+    { i:5, n:"リズムタップ", t:"tap", time:10, desc:"一定のリズムで叩け(脳内)", icon:"🥁" },
+    { i:6, n:"片手連打王", t:"tap", time:10, desc:"片手だけで連打しろ！", icon:"✋" },
+    { i:7, n:"両手乱舞", t:"tap", time:8, desc:"両指を使って連打！", icon:"👐" },
+    { i:8, n:"ラストスパート", t:"tap", time:12, desc:"後半に本気を出せ！", icon:"🏁" },
 
-    // 1-10: Unique Classics
-    GAMES.push({ id: 1, ...ARCHETYPES.tap, name: "連打王決定戦", time: 10 });
-    GAMES.push({ id: 2, ...ARCHETYPES.shake, name: "シェイク・バトル", time: 10 });
-    GAMES.push({ id: 3, ...ARCHETYPES.quiz, name: "早押しカラー", time: 15 });
-    GAMES.push({ id: 4, ...ARCHETYPES.luck, name: "ロシアン・ルーレット", time: 5 });
-    GAMES.push({ id: 5, ...ARCHETYPES.tap, name: "100回タップ耐久", time: 30, goal: 100 });
-    GAMES.push({ id: 6, ...ARCHETYPES.shake, name: "プロテインシェイク", time: 5, mod: "hard" });
-    GAMES.push({ id: 7, ...ARCHETYPES.just, name: "5秒ジャスト", time: 10, target: 5.0 });
-    GAMES.push({ id: 8, ...ARCHETYPES.tap, name: "超高速3秒バトル", time: 3 });
-    GAMES.push({ id: 9, ...ARCHETYPES.quiz, name: "直感サバイバル", time: 10 });
-    GAMES.push({ id: 10, ...ARCHETYPES.luck, name: "今日の運勢", time: 5 });
+    // --- BODY SHAKE (9-16) ---
+    { i:9, n:"プロテインシェイク", t:"shake", time:10, desc:"バーテンダーのように振れ！", icon:"🍸" },
+    { i:10, n:"全力フリフリ", t:"shake", time:5, desc:"スマホが飛ぶ勢いで振れ！", icon:"👋" },
+    { i:11, n:"横振りダンス", t:"shake", time:10, desc:"横方向に振りまくれ！", icon:"💃" },
+    { i:12, n:"縦振りハンマー", t:"shake", time:10, desc:"縦方向に叩きつけろ！", icon:"🔨" },
+    { i:13, n:"耐久シェイク", t:"shake", time:20, desc:"20秒間振り続けられるか？", icon:"🥵" },
+    { i:14, n:"優しくシェイク", t:"shake", time:10, desc:"壊さないように速く振れ", icon:"🍼" },
+    { i:15, n:"左手シェイク", t:"shake", time:8, desc:"左手だけで振れ！", icon:"👈" },
+    { i:16, n:"右手シェイク", t:"shake", time:8, desc:"右手だけで振れ！", icon:"👉" },
 
-    // 11-50: Tap Variations (Different times and difficulties)
-    for(let i=11; i<=50; i++) {
-        let t = 5 + (i % 10) * 2; 
-        GAMES.push({ id: i, type: "tap", name: `連打Lv.${i-10} (${t}秒)`, desc: `${t}秒間連打し続けろ！`, time: t, icon: "👆" });
+    // --- BODY MOVEMENT (17-24) ---
+    { i:17, n:"スクワット王", t:"squat", time:15, desc:"スマホを持ってしゃがんで立て！", icon:"🏋️" },
+    { i:18, n:"高速スクワット", t:"squat", time:10, desc:"浅く速くスクワット！", icon:"🦵" },
+    { i:19, n:"地獄の脚トレ", t:"squat", time:20, desc:"太ももをいじめ抜け！", icon:"👺" },
+    { i:20, n:"スピン・マスター", t:"spin", time:15, desc:"その場で回転しろ！(周り注意)", icon:"🌪️" },
+    { i:21, n:"左回りスピン", t:"spin", time:10, desc:"反時計回りに回れ！", icon:"🔄" },
+    { i:22, n:"バランス禅", t:"balance", time:15, desc:"スマホを水平に保て！動くな！", icon:"🧘" },
+    { i:23, n:"バランス・デス", t:"balance", time:30, desc:"30秒間、絶対に傾けるな！", icon:"⚰️" },
+    { i:24, n:"ジャンプ(振動)", t:"shake", time:10, desc:"ポケットに入れてジャンプ！", icon:"🐇" },
+
+    // --- BRAIN QUIZ (25-35) ---
+    { i:25, n:"暗算バトル", t:"math", time:20, desc:"計算式の答えを選べ！", icon:"🧮" },
+    { i:26, n:"暗算スピード", t:"math", time:10, desc:"簡単な計算を高速で！", icon:"🚀" },
+    { i:27, n:"反射カラー", t:"color", time:15, desc:"文字の色と同じボタンを押せ！", icon:"🎨" },
+    { i:28, n:"逆反射カラー", t:"color", time:15, desc:"文字の意味と同じボタンを押せ！", icon:"🧠" },
+    { i:29, n:"最大数選び", t:"num", time:15, desc:"一番大きい数字を選べ！", icon:"🔢" },
+    { i:30, n:"最小数選び", t:"num", time:15, desc:"一番小さい数字を選べ！", icon:"🐜" },
+    { i:31, n:"奇数だけ押せ", t:"odd", time:15, desc:"奇数(1,3,5..)なら押せ！", icon:"1️⃣" },
+    { i:32, n:"偶数だけ押せ", t:"even", time:15, desc:"偶数(2,4,6..)なら押せ！", icon:"2️⃣" },
+    { i:33, n:"運ゲーAorB", t:"luck", time:10, desc:"正解はランダム。勘で押せ！", icon:"🎰" },
+    { i:34, n:"4択運試し", t:"luck4", time:10, desc:"4つの中からアタリを引け！", icon:"🍀" },
+    { i:35, n:"早押し反射", t:"react", time:10, desc:"「GO」が出たらすぐ押せ！", icon:"🔫" },
+
+    // --- VARIETY & MIX (36-50) ---
+    { i:36, n:"連打Lv.MAX", t:"tap", time:30, desc:"30秒間の地獄連打", icon:"👿" },
+    { i:37, n:"シェイクLv.MAX", t:"shake", time:30, desc:"腕が千切れるまで振れ", icon:"🦾" },
+    { i:38, n:"スクワットLv.MAX", t:"squat", time:30, desc:"明日は筋肉痛確定", icon:"🚑" },
+    { i:39, n:"トリッキー計算", t:"math", time:25, desc:"3つの数字の計算", icon:"🎓" },
+    { i:40, n:"色と文字の罠", t:"color", time:20, desc:"騙されずに正解を選べ", icon:"🌈" },
+    { i:41, n:"スロー連打", t:"tap", time:10, desc:"ゆっくり確実に押せ", icon:"🐢" },
+    { i:42, n:"超・運試し", t:"luck", time:5, desc:"一発勝負！", icon:"🎲" },
+    { i:43, n:"ぐるぐるバット", t:"spin", time:20, desc:"目が回るまで回れ", icon:"😵" },
+    { i:44, n:"微動だにするな", t:"balance", time:10, desc:"少しでも揺れたら減点", icon:"🗿" },
+    { i:45, n:"クレイジーシェイク", t:"shake", time:12, desc:"上下左右ランダムに振れ", icon:"🤪" },
+    { i:46, n:"ボタン探し", t:"react", time:15, desc:"光ったボタンを押せ", icon:"💡" },
+    { i:47, n:"記憶タップ", t:"mem", time:15, desc:"指定された色を覚えろ（仮）", icon:"💾" }, // 簡易版
+    { i:48, n:"赤連打", t:"color_mash", time:10, desc:"赤いボタンだけ連打しろ", icon:"🔴" },
+    { i:49, n:"青連打", t:"color_mash", time:10, desc:"青いボタンだけ連打しろ", icon:"🔵" },
+    { i:50, n:"ファイナルバトル", t:"mix", time:20, desc:"連打と運の融合", icon:"👑" }
+];
+
+// --- APP STATE ---
+let myId = Math.random().toString(36).substr(2, 6);
+let roomId = "";
+let isHost = false;
+let players = {};
+let gameLoop = null;
+
+// --- UTILS ---
+const $ = id => document.getElementById(id);
+const show = id => {
+    document.querySelectorAll('.screen').forEach(e => e.classList.add('hidden'));
+    $(id).classList.remove('hidden');
+};
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+const beep = (freq=440, dur=0.1) => {
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.connect(g); g.connect(audioCtx.destination);
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    g.gain.linearRampToValueAtTime(0, audioCtx.currentTime + dur);
+    o.start(); o.stop(audioCtx.currentTime + dur);
+};
+
+// --- GLOBAL APP ---
+window.App = {
+    host: () => {
+        isHost = true;
+        Host.init();
+    },
+    client: () => {
+        isHost = false;
+        const p = new URLSearchParams(location.search);
+        if(p.get('room')) $('inp-id').value = p.get('room');
+        show('s-c-login');
     }
+};
 
-    // 51-80: Shake Variations
-    for(let i=51; i<=80; i++) {
-        let t = 5 + (i % 5) * 3;
-        GAMES.push({ id: i, type: "shake", name: `シェイクLv.${i-50} (${t}秒)`, desc: `全力で${t}秒間触れ！`, time: t, icon: "📱" });
-    }
+// --- HOST LOGIC ---
+window.Host = {
+    init: () => {
+        roomId = Math.random().toString(36).substr(2, 4).toUpperCase();
+        const r = ref(db, `rooms/${roomId}`);
+        set(r, { status: 'lobby' });
+        onDisconnect(r).remove();
 
-    // 81-100: Mixed Luck & Quiz
-    for(let i=81; i<=100; i++) {
-        if(i % 2 === 0) {
-            GAMES.push({ id: i, type: "luck", name: `運試し No.${i}`, desc: "祈れ。", time: 3, icon: "🎰" });
-        } else {
-            GAMES.push({ id: i, type: "quiz", name: `反射神経 No.${i}`, desc: "ホストが言った色を押せ！", time: 5, icon: "⚡" });
-        }
-    }
+        $('dsp-id').innerText = roomId;
+        new QRCode($('qrcode'), { text: `${location.href.split('?')[0]}?room=${roomId}`, width:128, height:128 });
+        show('s-h-lobby');
 
-    // ==========================================
-    // APP STATE
-    // ==========================================
-    const Utils = {
-        show: (id) => {
-            document.querySelectorAll('.screen').forEach(el => el.classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
-        },
-        genId: () => Math.random().toString(36).substr(2, 4).toUpperCase()
-    };
-
-    let myId = Utils.genId();
-    let roomId = null;
-    let players = {};
-    let isHost = false;
-
-    // ==========================================
-    // GLOBAL APP CONTROLLER
-    // ==========================================
-    window.App = {
-        startHost: () => {
-            isHost = true;
-            Host.init();
-        },
-        startClient: () => {
-            isHost = false;
-            // URLパラメータチェック
-            const params = new URLSearchParams(window.location.search);
-            if(params.get('room')) document.getElementById('inp-room').value = params.get('room');
-            Utils.show('s-c-login');
-        }
-    };
-
-    // ==========================================
-    // HOST LOGIC
-    // ==========================================
-    window.Host = {
-        timer: null,
-
-        init: async () => {
-            roomId = Utils.genId();
-            
-            // 部屋作成
-            const roomRef = ref(db, `rooms/${roomId}`);
-            await set(roomRef, { status: 'lobby', created: Date.now() });
-            onDisconnect(roomRef).remove(); // 切断時に部屋削除
-
-            // UI更新
-            document.getElementById('disp-id').innerText = roomId;
-            new QRCode(document.getElementById('qrcode'), {
-                text: `${location.href.split('?')[0]}?room=${roomId}`,
-                width: 150, height: 150
-            });
-            Utils.show('s-h-lobby');
-
-            // プレイヤー監視
-            onValue(ref(db, `rooms/${roomId}/players`), (snap) => {
-                players = snap.val() || {};
-                document.getElementById('p-count').innerText = Object.keys(players).length;
-            });
-        },
-
-        showMenu: () => {
-            Utils.show('s-h-menu');
-            const list = document.getElementById('game-list');
-            list.innerHTML = "";
-            
-            GAMES.forEach(g => {
-                const el = document.createElement('div');
-                el.className = "game-card";
-                el.innerHTML = `<span class="gc-num">${g.id}</span><div class="gc-info"><div class="gc-name">${g.icon} ${g.name}</div></div>`;
-                el.onclick = () => Host.startGame(g.id);
-                list.appendChild(el);
-            });
-            
-            // 部屋の状態を更新
-            update(ref(db, `rooms/${roomId}`), { status: 'menu' });
-        },
-
-        startGame: (gid) => {
-            const game = GAMES.find(g => g.id === gid);
-            Utils.show('s-h-play');
-            
-            // UI初期化
-            document.getElementById('g-name').innerText = game.name;
-            document.getElementById('g-main').innerText = "READY";
-            document.getElementById('g-sub').innerText = game.desc;
-            document.getElementById('timer-bar').style.width = "100%";
-            document.getElementById('live-rank').innerText = "";
-
-            // スコアリセット
-            if(players) {
-                Object.keys(players).forEach(pid => {
-                    set(ref(db, `rooms/${roomId}/players/${pid}/score`), 0);
-                });
-            }
-
-            // ゲーム開始信号送信
-            update(ref(db, `rooms/${roomId}`), {
-                status: 'playing',
-                game: game
-            });
-
-            // カウントダウン
-            let count = 3;
-            const cdTimer = setInterval(() => {
-                count--;
-                if(count > 0) {
-                    document.getElementById('g-main').innerText = count;
-                } else {
-                    clearInterval(cdTimer);
-                    document.getElementById('g-main').innerText = "GO!";
-                    Host.runTimer(game);
-                }
-            }, 1000);
-        },
-
-        runTimer: (game) => {
-            let time = game.time;
-            const maxTime = game.time;
-            
-            Host.timer = setInterval(() => {
-                time -= 0.1;
-                const pct = (time / maxTime) * 100;
-                document.getElementById('timer-bar').style.width = `${pct}%`;
-
-                // 途中経過（上位1名）表示
-                const sorted = Object.values(players).sort((a,b) => (b.score||0) - (a.score||0));
-                if(sorted.length > 0) {
-                    document.getElementById('live-rank').innerText = `TOP: ${sorted[0].name} (${Math.floor(sorted[0].score)})`;
-                }
-
-                if(time <= 0) {
-                    clearInterval(Host.timer);
-                    Host.finishGame();
-                }
-            }, 100);
-        },
-
-        finishGame: () => {
-            update(ref(db, `rooms/${roomId}`), { status: 'result' });
-            Utils.show('s-h-result');
-            
-            const sorted = Object.values(players).sort((a,b) => (b.score||0) - (a.score||0));
-            const winner = sorted[0];
-            
-            document.getElementById('res-name').innerText = winner ? winner.name : "NO WINNER";
-            document.getElementById('res-score').innerText = winner ? `${Math.floor(winner.score)} PTS` : "";
-        }
-    };
-
-    // ==========================================
-    // CLIENT LOGIC
-    // ==========================================
-    window.Client = {
-        localScore: 0,
-        gameType: null,
+        onValue(ref(db, `rooms/${roomId}/players`), s => {
+            players = s.val() || {};
+            $('p-count').innerText = Object.keys(players).length;
+        });
+    },
+    menu: () => {
+        update(ref(db, `rooms/${roomId}`), { status: 'menu' });
+        show('s-h-menu');
+        const list = $('list-container');
+        list.innerHTML = GAMES.map(g => `
+            <div class="g-card" onclick="Host.start(${g.i})">
+                <div class="g-icon">${g.icon}</div>
+                <div class="g-name">${g.i}. ${g.n}</div>
+                <div class="g-type">${g.time}秒</div>
+            </div>
+        `).join('');
+    },
+    start: (idx) => {
+        const game = GAMES.find(g => g.i === idx);
+        // Reset Scores
+        Object.keys(players).forEach(p => set(ref(db, `rooms/${roomId}/players/${p}/score`), 0));
         
-        join: async () => {
-            const rid = document.getElementById('inp-room').value.toUpperCase();
-            const name = document.getElementById('inp-name').value || "Guest";
-            
-            if(rid.length !== 4) return alert("IDを確認してください");
-            roomId = rid;
+        update(ref(db, `rooms/${roomId}`), { 
+            status: 'playing', 
+            game: game,
+            startTime: Date.now() + 3000 // 3sec delay
+        });
 
-            const myRef = ref(db, `rooms/${roomId}/players/${myId}`);
+        show('s-h-play');
+        $('g-title').innerText = game.n;
+        $('g-timer').innerText = "READY";
+        
+        setTimeout(() => {
+            $('g-timer').innerText = "GO!";
+            beep(880, 0.5);
+            Host.timer(game.time);
+        }, 3000);
+    },
+    timer: (sec) => {
+        let left = sec;
+        $('bar').style.width = "100%";
+        
+        gameLoop = setInterval(() => {
+            left -= 0.1;
+            $('bar').style.width = (left / sec * 100) + "%";
             
-            try {
-                await set(myRef, { name: name, score: 0 });
-                onDisconnect(myRef).remove();
-                
-                // センサー許可が必要かチェック
-                if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                    Utils.show('s-c-perm');
+            // Live Ranking (Top 1)
+            const sorted = Object.values(players).sort((a,b)=>(b.score||0)-(a.score||0));
+            if(sorted[0]) $('g-rank').innerText = `TOP: ${sorted[0].name} (${sorted[0].score})`;
+
+            if(left <= 0) {
+                clearInterval(gameLoop);
+                Host.end();
+            }
+        }, 100);
+    },
+    end: () => {
+        update(ref(db, `rooms/${roomId}`), { status: 'result' });
+        show('s-h-res');
+        const sorted = Object.values(players).sort((a,b)=>(b.score||0)-(a.score||0));
+        const win = sorted[0];
+        $('res-name').innerText = win ? win.name : "NO WINNER";
+        $('res-score').innerText = win ? win.score + " PTS" : "";
+        beep(1200, 0.2); beep(1200, 0.2);
+    }
+};
+
+// --- CLIENT LOGIC ---
+window.Client = {
+    score: 0,
+    currGame: null,
+    
+    join: () => {
+        roomId = $('inp-id').value.toUpperCase();
+        const name = $('inp-name').value || "NO NAME";
+        if(roomId.length !== 4) return alert("IDは4文字です");
+        
+        const r = ref(db, `rooms/${roomId}/players/${myId}`);
+        set(r, { name: name, score: 0 })
+        .then(() => {
+            onDisconnect(r).remove();
+            if(typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                show('s-c-perm'); // iOS Check
+            } else {
+                Client.wait();
+            }
+        })
+        .catch(() => alert("部屋が見つかりません"));
+    },
+    perm: () => {
+        DeviceMotionEvent.requestPermission().then(r => {
+            if(r==='granted') Client.wait();
+            else alert("許可が必要です");
+        });
+    },
+    wait: () => {
+        show('s-c-wait');
+        Client.initSensors();
+        onValue(ref(db, `rooms/${roomId}`), s => {
+            const d = s.val();
+            if(!d) return;
+            if(d.status === 'playing' && d.game) {
+                if(d.startTime > Date.now()) {
+                    setTimeout(() => Client.start(d.game), d.startTime - Date.now());
                 } else {
-                    Client.wait();
+                    Client.start(d.game);
                 }
-            } catch(e) {
-                alert("接続エラー: IDが間違っているか、部屋がありません。");
+            } else {
+                show('s-c-wait');
             }
-        },
-
-        requestPerm: () => {
-            DeviceMotionEvent.requestPermission()
-                .then(res => {
-                    if (res === 'granted') Client.wait();
-                    else alert("許可がないと一部のゲームで遊べません");
-                })
-                .catch(e => console.error(e));
-        },
-
-        wait: () => {
-            Utils.show('s-c-wait');
-            Client.initSensors();
-
-            // 部屋の状態監視
-            onValue(ref(db, `rooms/${roomId}`), (snap) => {
-                const data = snap.val();
-                if(!data) return; // 部屋解散
-
-                if(data.status === 'playing' && data.game) {
-                    Client.setupController(data.game);
-                } else if (data.status === 'result' || data.status === 'menu' || data.status === 'lobby') {
-                    Utils.show('s-c-wait');
-                    // バイブ停止など
-                }
-            });
-        },
-
-        setupController: (game) => {
-            Utils.show('s-c-ctrl');
-            const area = document.getElementById('ctrl-area');
-            area.innerHTML = "";
-            Client.localScore = 0;
-            Client.gameType = game.type;
-
-            // コントローラー生成
-            if (game.type === 'tap') {
-                area.innerHTML = `<button id="btn-tap" class="tap-btn">PUSH!</button>`;
-                document.getElementById('btn-tap').onpointerdown = (e) => {
-                    e.preventDefault();
-                    Client.addScore(1);
-                    Client.vib(30);
-                };
-            } else if (game.type === 'quiz') {
-                area.innerHTML = `
-                <div class="quiz-grid">
-                    <button class="q-btn c-red" onclick="Client.addScore(1)">A</button>
-                    <button class="q-btn c-blue" onclick="Client.addScore(1)">B</button>
-                    <button class="q-btn c-green" onclick="Client.addScore(1)">C</button>
-                    <button class="q-btn c-yellow" onclick="Client.addScore(1)">D</button>
-                </div>`;
-            } else if (game.type === 'shake') {
-                area.innerHTML = `<div style="color:white; font-size:2rem; text-align:center;">スマホを振れ！！<br>👋📱👋</div>`;
-            } else if (game.type === 'luck') {
-                area.innerHTML = `<button class="tap-btn" style="background:#888" onclick="Client.addScore(Math.floor(Math.random()*10)); this.disabled=true;">運試し</button>`;
-            }
-        },
-
-        addScore: (val) => {
-            Client.localScore += val;
-            // 通信量削減のため、トランザクションを使わず直接セット（簡易実装）
-            set(ref(db, `rooms/${roomId}/players/${myId}/score`), Client.localScore);
-        },
-
-        vib: (ms) => {
-            if(navigator.vibrate) navigator.vibrate(ms);
-        },
-
-        initSensors: () => {
-            let lastX = 0, lastY = 0, lastZ = 0;
-            let lastUpdate = 0;
-
-            window.addEventListener('devicemotion', (e) => {
-                if(Client.gameType !== 'shake') return;
-                
-                const now = Date.now();
-                if(now - lastUpdate < 100) return; // 0.1秒間隔で判定
-
-                const acc = e.accelerationIncludingGravity;
-                if(!acc) return;
-
-                const delta = Math.abs(acc.x + acc.y + acc.z - lastX - lastY - lastZ);
-                if(delta > 15) { // 閾値
-                    Client.addScore(1);
-                    Client.vib(50);
-                }
-
-                lastX = acc.x; lastY = acc.y; lastZ = acc.z;
-                lastUpdate = now;
-            });
+        });
+    },
+    start: (game) => {
+        Client.currGame = game;
+        Client.score = 0;
+        show('s-c-ctrl');
+        const b = $('c-board');
+        b.innerHTML = '';
+        
+        // Controller Generator based on TYPE
+        if(game.t === 'tap' || game.t === 'mix') {
+             b.innerHTML = `<button class="c-btn bg-r" ontouchstart="Client.act(1)">PUSH!</button>`;
+        } 
+        else if (game.t === 'shake' || game.t === 'squat' || game.t === 'spin') {
+            b.innerHTML = `<div class="big-txt" style="text-align:center;">${game.icon}<br>MOVE!</div>`;
         }
-    };
+        else if (game.t === 'math' || game.t === 'num') {
+            Client.genMath();
+        }
+        else if (game.t === 'color') {
+            Client.genColor();
+        }
+        else if (game.t === 'luck' || game.t === 'luck4') {
+            const opts = game.t === 'luck' ? 2 : 4;
+            for(let i=0; i<opts; i++) {
+                const btn = document.createElement('button');
+                btn.className = `c-btn ${['bg-r','bg-b','bg-g','bg-y'][i]}`;
+                btn.innerText = "?";
+                btn.onclick = () => { 
+                    btn.innerText = Math.random()>0.5 ? "当たり" : "ハズレ";
+                    if(btn.innerText==="当たり") { Client.act(10); beep(800,0.1); } else { Client.act(-5); }
+                    setTimeout(() => Client.start(game), 1000); // Re-render
+                };
+                b.appendChild(btn);
+            }
+        }
+        else if (game.t === 'balance') {
+             b.innerHTML = `<div class="big-txt">KEEP<br>LEVEL</div>`;
+        }
+    },
+    // LOGIC GENERATORS
+    genMath: () => {
+        const b = $('c-board'); b.innerHTML = '';
+        const n1 = Math.floor(Math.random()*10)+1;
+        const n2 = Math.floor(Math.random()*10)+1;
+        const ans = n1 + n2;
+        const wrong = ans + Math.floor(Math.random()*5)+1;
+        const qDiv = document.createElement('div');
+        qDiv.innerHTML = `<div style="font-size:3rem;text-align:center;width:100%">${n1} + ${n2} = ?</div>`;
+        qDiv.style.cssText = "width:100%; color:white;";
+        b.appendChild(qDiv);
+        
+        const row = document.createElement('div');
+        row.style.cssText = "display:flex; width:100%; height:100%;";
+        [ans, wrong].sort(()=>Math.random()-0.5).forEach(val => {
+            const btn = document.createElement('button');
+            btn.className = 'c-btn bg-b';
+            btn.innerText = val;
+            btn.onclick = () => {
+                if(val === ans) { Client.act(1); beep(600,0.1); } else { Client.act(-1); }
+                Client.genMath();
+            };
+            row.appendChild(btn);
+        });
+        b.appendChild(row);
+    },
+    genColor: () => {
+        const b = $('c-board'); b.innerHTML = '';
+        const colors = [{n:'赤',c:'red'}, {n:'青',c:'blue'}, {n:'緑',c:'green'}, {n:'黄',c:'gold'}];
+        const target = colors[Math.floor(Math.random()*4)]; // Text
+        const ink = colors[Math.floor(Math.random()*4)]; // Color of text
+        
+        const qDiv = document.createElement('div');
+        qDiv.innerHTML = `<div style="font-size:4rem;text-align:center;width:100%;color:${ink.c};font-weight:bold;">${target.n}</div>`;
+        b.appendChild(qDiv);
+
+        const grid = document.createElement('div');
+        grid.style.cssText = "display:grid; grid-template-columns:1fr 1fr; width:100%; height:100%;";
+        
+        colors.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'c-btn';
+            btn.style.background = opt.c;
+            btn.onclick = () => {
+                // Game 27: Match Color of Ink, Game 28: Match Meaning
+                const isMatch = (Client.currGame.n.includes("逆")) ? (opt.n === target.n) : (opt.c === ink.c);
+                if(isMatch) Client.act(1); else Client.act(-1);
+                Client.genColor();
+            };
+            grid.appendChild(btn);
+        });
+        b.appendChild(grid);
+    },
+    act: (v) => {
+        Client.score += v;
+        set(ref(db, `rooms/${roomId}/players/${myId}/score`), Client.score);
+        if(navigator.vibrate) navigator.vibrate(30);
+    },
+    initSensors: () => {
+        let lastX=0, lastY=0, lastZ=0;
+        let squatState = 'up';
+        
+        window.addEventListener('devicemotion', e => {
+            if(!Client.currGame) return;
+            const type = Client.currGame.t;
+            const acc = e.accelerationIncludingGravity;
+            if(!acc) return;
+
+            // SHAKE logic
+            if(type === 'shake') {
+                const d = Math.abs(acc.x+acc.y+acc.z - lastX-lastY-lastZ);
+                if(d > 20) Client.act(1);
+                lastX=acc.x; lastY=acc.y; lastZ=acc.z;
+            }
+            // SQUAT logic (Gravity Y)
+            if(type === 'squat') {
+                if(squatState==='up' && acc.y < 4) squatState='down';
+                if(squatState==='down' && acc.y > 8) { squatState='up'; Client.act(1); beep(400,0.05); }
+            }
+        });
+
+        window.addEventListener('deviceorientation', e => {
+            if(!Client.currGame) return;
+            const type = Client.currGame.t;
+            
+            // SPIN logic (alpha 0-360)
+            if(type === 'spin') {
+                 if(!Client.lastAlpha) Client.lastAlpha = e.alpha;
+                 let d = Math.abs(e.alpha - Client.lastAlpha);
+                 if(d > 300) d = 360 - d; // Boundary fix
+                 if(d > 10) { Client.act(1); Client.lastAlpha = e.alpha; }
+            }
+            // BALANCE logic
+            if(type === 'balance') {
+                // Tilt > 15 degrees = Penalty
+                if(Math.abs(e.beta) > 15 || Math.abs(e.gamma) > 15) {
+                    if(Math.random()>0.8) { Client.act(-1); if(navigator.vibrate) navigator.vibrate(200); }
+                } else {
+                    if(Math.random()>0.9) Client.act(1); // Bonus for staying still
+                }
+            }
+        });
+    }
+};
 </script>
 </body>
 </html>
