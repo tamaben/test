@@ -2,318 +2,339 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Final Check - Professional Design</title>
-
-    <!-- Google Fonts: 綺麗な丸ゴシック「Kosugi Maru」と英数字用フォント -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Manrope:wght@300;600;800&display=swap" rel="stylesheet">
-
-    <!-- KaTeX: 数式表示 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>コトバト広場</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        /* A4サイズ設定 */
-        @page { size: A4; margin: 0; }
-        
         :root {
-            --bg-color: #F4F5F7; /* 絶妙なブルーグレーホワイト */
-            --text-main: #2D3436; /* ほぼ黒に近いチャコール */
-            --text-sub: #636E72;  /* クールグレー */
-            --accent: #B2BEC3;    /* 薄いグレーのアクセント */
+            --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --sub: #94a3b8;
+            --primary: #3b82f6; --accent: #8b5cf6; --danger: #ef4444; --success: #10b981;
+            --glass: rgba(30, 41, 59, 0.7);
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            background: var(--bg); color: var(--text); 
+            font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; height: 100vh; 
         }
 
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-color);
-            /* 丸ゴシックと幾何学的な英数字の組み合わせ */
-            font-family: 'Manrope', 'Kosugi Maru', "Hiragino Maru Gothic ProN", sans-serif;
-            color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            /* 印刷時に背景色を強制 */
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
+        /* 画面管理 */
+        .screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }
+        .screen.active { display: flex; opacity: 1; }
 
-        .poster {
-            width: 210mm;
-            height: 297mm;
-            background-color: #FFFFFF;
-            position: relative;
-            box-sizing: border-box;
-            padding: 50px;
-            display: grid;
-            grid-template-rows: auto 1fr auto;
-            overflow: hidden;
+        /* コンポーネント */
+        .card { 
+            background: var(--card); border: 1px solid #334155; border-radius: 20px; 
+            padding: 24px; width: 90%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            text-align: center;
         }
+        h1 { margin: 0 0 10px; font-weight: 800; background: linear-gradient(to right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        p { color: var(--sub); font-size: 0.9rem; margin-bottom: 20px; }
 
-        /* スマホ閲覧時 */
-        @media screen and (max-width: 210mm) {
-            .poster { width: 100vw; height: auto; min-height: 100vh; padding: 30px; }
+        input {
+            width: 100%; background: #020617; border: 1px solid #334155; color: #fff;
+            padding: 14px; border-radius: 12px; margin-bottom: 10px; font-size: 16px; outline: none;
+            transition: 0.2s;
         }
+        input:focus { border-color: var(--primary); }
 
-        /* --- DESIGN ELEMENTS --- */
-
-        /* Header Area */
-        header {
-            border-bottom: 2px solid var(--text-main);
-            padding-bottom: 20px;
-            margin-bottom: 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
+        .btn {
+            width: 100%; padding: 14px; border: none; border-radius: 12px;
+            font-weight: bold; font-size: 16px; cursor: pointer; color: white;
+            background: var(--primary); margin-top: 10px; transition: 0.2s;
         }
+        .btn:active { transform: scale(0.98); }
+        .btn-sub { background: transparent; color: var(--primary); margin-top: 15px; }
+        .btn-sub:hover { text-decoration: underline; }
+
+        /* メイン画面レイアウト */
+        .app-shell { width: 100%; height: 100%; display: flex; flex-direction: column; }
+        .header { padding: 15px 20px; background: rgba(15,23,42,0.9); border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
+        .content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 90px; }
         
-        .header-left h1 {
-            font-size: 48pt;
-            font-weight: 800;
-            margin: 0;
-            line-height: 0.9;
-            letter-spacing: -0.03em;
+        .nav {
+            position: absolute; bottom: 0; width: 100%; height: 70px; background: #1e293b;
+            display: flex; border-top: 1px solid #334155; z-index: 10;
         }
-        .header-left span {
-            display: block;
-            font-size: 11pt;
-            font-weight: 300;
-            letter-spacing: 0.2em;
-            margin-bottom: 5px;
+        .nav-item {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: var(--sub); font-size: 0.7rem; cursor: pointer; transition: 0.2s;
         }
+        .nav-item.active { color: var(--primary); }
+        .nav-icon { font-size: 1.4rem; margin-bottom: 3px; }
 
-        .header-right {
-            text-align: right;
-        }
-        .header-right .date {
-            font-size: 16pt;
-            font-weight: 600;
-            background: var(--text-main);
-            color: #FFF;
-            padding: 5px 15px;
-            border-radius: 50px; /* 丸みのあるタグ */
-        }
+        /* チャット・リスト */
+        .msg { text-align: left; background: #334155; padding: 10px 14px; border-radius: 14px; margin-bottom: 10px; max-width: 85%; font-size: 0.9rem; }
+        .msg.me { background: var(--primary); margin-left: auto; border-bottom-right-radius: 2px; }
+        .msg.other { border-bottom-left-radius: 2px; }
+        .sender { font-size: 0.7rem; opacity: 0.7; margin-bottom: 2px; display: block; }
 
-        /* Main Content Grid */
-        .content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-        }
-        @media screen and (max-width: 600px) { .content { grid-template-columns: 1fr; } }
+        .list-item { background: #0f172a; padding: 12px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 8px; text-align: left; display:flex; justify-content:space-between; align-items:center; }
 
-        /* Sections */
-        .section {
-            margin-bottom: 30px;
-        }
-        .section-title {
-            font-size: 10pt;
-            color: var(--text-sub);
-            border-left: 4px solid var(--text-main);
-            padding-left: 10px;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            font-weight: 600;
-        }
-
-        /* Math Cards - Minimalist */
-        .card {
-            background-color: var(--bg-color);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-        }
-        .math-item {
-            margin-bottom: 12px;
-            font-size: 12pt;
-            line-height: 1.8;
-            display: flex;
-            align-items: baseline;
-        }
-        .math-item::before {
-            content: "●";
-            font-size: 6pt;
-            color: var(--text-sub);
-            margin-right: 12px;
-            transform: translateY(-2px);
-        }
-
-        /* Strategy Area (Full Width) */
-        .strategy {
-            grid-column: span 2;
-            background-color: var(--text-main);
-            color: #FFF;
-            border-radius: 20px;
-            padding: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        @media screen and (max-width: 600px) { 
-            .strategy { grid-column: span 1; flex-direction: column; text-align: center; gap: 20px; } 
-        }
-        
-        .strategy-title {
-            font-size: 18pt;
-            font-weight: 800;
-            letter-spacing: 0.05em;
-        }
-        .strategy-steps {
-            display: flex;
-            gap: 30px;
-        }
-        .step {
-            display: flex;
-            flex-direction: column;
-        }
-        .step span { font-size: 8pt; opacity: 0.6; margin-bottom: 5px; }
-        .step strong { font-size: 12pt; font-weight: 600; }
-
-        /* Footer */
-        footer {
-            margin-top: 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            color: var(--text-sub);
-        }
-        .message {
-            font-size: 12pt;
-            font-weight: 600;
-            line-height: 1.5;
-        }
-        .signature {
-            font-size: 9pt;
-            text-align: right;
-            letter-spacing: 0.1em;
-        }
-
-        /* Background Decor (Abstract) */
-        .decor-circle {
-            position: absolute;
-            width: 400px;
-            height: 400px;
-            border-radius: 50%;
-            background: #F4F5F7;
-            top: -100px;
-            right: -100px;
-            z-index: 0;
-        }
-        .content, header, footer { position: relative; z-index: 1; }
-
+        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--success); padding: 10px 20px; border-radius: 30px; display: none; z-index: 9999; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="poster">
-        <div class="decor-circle"></div>
+    <div id="toast">✅ 完了</div>
 
-        <header>
-            <div class="header-left">
-                <span>OSAKA ELECTRO-COMM. UNIV. HS</span>
-                <h1>MATH<br>CHECK.</h1>
-            </div>
-            <div class="header-right">
-                <div class="date">02.10</div>
-            </div>
-        </header>
-
-        <div class="content">
-            
-            <!-- Column 1 -->
-            <div class="column">
-                <div class="section">
-                    <div class="section-title">01 / Calculation Rules</div>
-                    <div class="card">
-                        <div class="math-item">
-                            符号注意：\( (-3)^2 = 9 \) vs \( -3^2 = -9 \)
-                        </div>
-                        <div class="math-item">
-                            ルート整理：\( \sqrt{12} = 2\sqrt{3} \)
-                        </div>
-                        <div class="math-item">
-                            有理化：\( \frac{6}{\sqrt{3}} = 2\sqrt{3} \)
-                        </div>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <div class="section-title">02 / Algebra & Data</div>
-                    <div class="card">
-                        <div class="math-item">
-                            確率は「6×6の表」を描く
-                        </div>
-                        <div class="math-item">
-                            20%減少 \(\rightarrow\) \( 0.8x \) と置く
-                        </div>
-                        <div class="math-item">
-                            \( a^2 - b^2 = (a+b)(a-b) \)
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Column 2 -->
-            <div class="column">
-                <div class="section">
-                    <div class="section-title">03 / Geometry Logic</div>
-                    <div class="card">
-                        <div class="math-item">
-                            \( 30^\circ, 60^\circ \rightarrow 1:2:\sqrt{3} \)
-                        </div>
-                        <div class="math-item">
-                            \( 45^\circ \rightarrow 1:1:\sqrt{2} \)
-                        </div>
-                        <div class="math-item">
-                            直径に対する円周角は \( 90^\circ \)
-                        </div>
-                        <div class="math-item">
-                            \( y=ax^2 \) の変域 \(\rightarrow\) 0またぎ注意
-                        </div>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <div class="section-title">04 / Mental Notes</div>
-                    <div class="card" style="background-color: #FFF; border: 1px solid #E0E0E0;">
-                        <div class="math-item">
-                            計算ミスは「符号」から疑え
-                        </div>
-                        <div class="math-item">
-                            詰まったら飛ばす勇気を持つ
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Full Width Strategy -->
-            <div class="strategy">
-                <div class="strategy-title">TIME STRATEGY</div>
-                <div class="strategy-steps">
-                    <div class="step"><span>00-10 min</span><strong>計算【1】</strong></div>
-                    <div class="step"><span>10-25 min</span><strong>小問【2】【3】</strong></div>
-                    <div class="step"><span>25-45 min</span><strong>大問【4】【5】</strong></div>
-                </div>
-            </div>
-
-            <!-- Footer -->
-            <footer style="grid-column: span 2;">
-                <div class="message">
-                    焦らず、いつも通りに。<br>
-                    君の努力は、誰よりも正しい。
-                </div>
-                <div class="signature">
-                    FINAL EXAM PREPARATION<br>
-                    DESIGNED BY TAMAKI-SENSEI<br>
-                    OSAKA, JAPAN
-                </div>
-            </footer>
+    <!-- 1. ログイン -->
+    <div id="scr-login" class="screen active">
+        <div class="card">
+            <h1>コトバト広場</h1>
+            <p>ログインしてデータを同期します</p>
+            <input type="text" id="log-user" placeholder="ユーザー名">
+            <input type="password" id="log-pass" placeholder="パスワード">
+            <button class="btn" onclick="login()">ログイン</button>
+            <button class="btn btn-sub" onclick="go('scr-reg')">新規登録はこちら</button>
+            <div id="log-stat" style="margin-top:10px; font-size:0.8rem; color:var(--warning);">接続待機中...</div>
         </div>
     </div>
 
+    <!-- 2. 登録 -->
+    <div id="scr-reg" class="screen">
+        <div class="card">
+            <h1>新規登録</h1>
+            <p>アカウントを作成します</p>
+            <input type="text" id="reg-user" placeholder="希望ユーザー名 (半角英数)">
+            <input type="password" id="reg-pass" placeholder="パスワード">
+            <input type="text" id="reg-name" placeholder="ニックネーム">
+            <button class="btn" onclick="register()">登録して開始</button>
+            <button class="btn btn-sub" onclick="go('scr-login')">戻る</button>
+        </div>
+    </div>
+
+    <!-- 3. メイン -->
+    <div id="scr-main" class="screen">
+        <div class="app-shell">
+            <div class="header">
+                <div style="font-weight:bold;">コトバト広場</div>
+                <div id="head-name" style="font-size:0.8rem; color:var(--sub);">Guest</div>
+            </div>
+
+            <div class="content" id="tab-content">
+                <!-- ホームタブ -->
+                <div id="view-home">
+                    <div class="card" style="width:100%; max-width:none; margin-bottom:20px; display:flex; justify-content:space-around;">
+                        <span>🪙 <span id="val-coins">0</span></span>
+                        <span>💎 <span id="val-dia">0</span></span>
+                    </div>
+                    
+                    <h3 style="margin-bottom:10px; font-size:1rem;">クラウド同期</h3>
+                    <div class="card" style="width:100%; max-width:none; text-align:left; margin-bottom:20px;">
+                        <p style="margin-bottom:10px;">現在のデータを保存します（1日2回まで）</p>
+                        <button class="btn" onclick="saveCloud()">クラウドへ保存</button>
+                        <div id="hist-list" style="margin-top:15px;"></div>
+                    </div>
+
+                    <h3 style="margin-bottom:10px; font-size:1rem;">お知らせ</h3>
+                    <div id="news-list">読み込み中...</div>
+                </div>
+
+                <!-- チャットタブ -->
+                <div id="view-chat" style="display:none;">
+                    <div id="chat-list" style="display:flex; flex-direction:column; padding-bottom:10px;"></div>
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" id="chat-in" placeholder="メッセージ..." style="margin:0;">
+                        <button class="btn" style="width:60px; margin:0;" onclick="sendChat()">送</button>
+                    </div>
+                </div>
+
+                <!-- 設定タブ -->
+                <div id="view-conf" style="display:none;">
+                    <div class="card" style="width:100%; max-width:none;">
+                        <h3>設定</h3>
+                        <button class="btn" style="background:var(--danger);" onclick="location.reload()">ログアウト</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav">
+                <div class="nav-item active" onclick="tab('home', this)"><div class="nav-icon">🏠</div>ホーム</div>
+                <div class="nav-item" onclick="tab('chat', this)"><div class="nav-icon">💬</div>チャット</div>
+                <div class="nav-item" onclick="tab('conf', this)"><div class="nav-icon">⚙️</div>設定</div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, limit, where } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDguL7I5v4GxKf5FahdoFEtU5lNMYgxcNo",
+            authDomain: "cotobato-c121f.firebaseapp.com",
+            databaseURL: "https://cotobato-c121f-default-rtdb.firebaseio.com",
+            projectId: "cotobato-c121f",
+            storageBucket: "cotobato-c121f.firebasestorage.app",
+            messagingSenderId: "699569737682",
+            appId: "1:699569737682:web:350b90c25c300a0548020b",
+            measurementId: "G-FQ1VZDXZ6J"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        let myUser = null;
+        let isReady = false;
+
+        // 1. まず匿名認証を通す（必須）
+        signInAnonymously(auth).catch(e => alert("Firebase設定エラー: Authenticationで匿名を有効にしてください"));
+
+        onAuthStateChanged(auth, (u) => {
+            if (u) {
+                isReady = true;
+                document.getElementById('log-stat').innerText = "接続完了";
+                document.getElementById('log-stat').style.color = "#10b981";
+            }
+        });
+
+        // 画面遷移
+        window.go = (id) => {
+            document.querySelectorAll('.screen').forEach(e => e.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        };
+
+        window.tab = (id, el) => {
+            ['home','chat','conf'].forEach(t => document.getElementById('view-'+t).style.display='none');
+            document.getElementById('view-'+id).style.display='block';
+            document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
+            el.classList.add('active');
+        };
+
+        // 登録
+        window.register = async () => {
+            if(!isReady) return alert("接続中...");
+            const u = document.getElementById('reg-user').value.trim();
+            const p = document.getElementById('reg-pass').value.trim();
+            const n = document.getElementById('reg-name').value.trim() || u;
+            
+            if(!u || !p) return alert("入力してください");
+
+            try {
+                const ref = doc(db, "users", u);
+                const snap = await getDoc(ref);
+                if(snap.exists()) return alert("そのIDは使われています");
+
+                const data = { username: u, password: p, name: n, createdAt: serverTimestamp() };
+                await setDoc(ref, data);
+                
+                myUser = data;
+                startApp();
+            } catch(e) { console.error(e); alert("エラー: Firestoreルールを確認してください"); }
+        };
+
+        // ログイン
+        window.login = async () => {
+            if(!isReady) return alert("接続中...");
+            const u = document.getElementById('log-user').value.trim();
+            const p = document.getElementById('log-pass').value.trim();
+
+            try {
+                const ref = doc(db, "users", u);
+                const snap = await getDoc(ref);
+                if(snap.exists() && snap.data().password === p) {
+                    myUser = snap.data();
+                    startApp();
+                } else {
+                    alert("IDかパスワードが違います");
+                }
+            } catch(e) { alert("ログインエラー"); }
+        };
+
+        function startApp() {
+            window.go('scr-main');
+            document.getElementById('head-name').innerText = myUser.name;
+            
+            // ローカルデータ表示
+            const raw = localStorage.getItem('kb_save_v36');
+            if(raw) {
+                const d = JSON.parse(raw);
+                document.getElementById('val-coins').innerText = d.coins || 0;
+                document.getElementById('val-dia').innerText = d.diamonds || 0;
+            }
+
+            loadListeners();
+        }
+
+        // リスナー（インデックス不要版：複雑な並び替えをしない）
+        function loadListeners() {
+            // お知らせ（limitのみ）
+            onSnapshot(query(collection(db, "announcements"), limit(5)), (snap) => {
+                const div = document.getElementById('news-list');
+                div.innerHTML = "";
+                const list = [];
+                snap.forEach(d => list.push(d.data()));
+                // JS側で日付ソート（新しい順）
+                list.sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
+                
+                if(list.length===0) div.innerHTML = "なし";
+                list.forEach(d => {
+                    div.innerHTML += `<div class="list-item" style="display:block;">${d.text}</div>`;
+                });
+            });
+
+            // チャット（limitのみ）
+            onSnapshot(query(collection(db, "chat"), limit(30)), (snap) => {
+                const div = document.getElementById('chat-list');
+                div.innerHTML = "";
+                const list = [];
+                snap.forEach(d => list.push(d.data()));
+                // JS側で日付ソート（古い順）
+                list.sort((a,b) => (a.createdAt?.seconds||0) - (b.createdAt?.seconds||0));
+
+                list.forEach(d => {
+                    const isMe = d.username === myUser.username;
+                    div.innerHTML += `
+                        <div class="msg ${isMe ? 'me' : 'other'}">
+                            <span class="sender">${d.sender}</span>${d.text}
+                        </div>`;
+                });
+                div.parentElement.scrollTop = div.parentElement.scrollHeight;
+            });
+        }
+
+        window.sendChat = async () => {
+            const t = document.getElementById('chat-in').value.trim();
+            if(!t) return;
+            await addDoc(collection(db, "chat"), {
+                text: t, sender: myUser.name, username: myUser.username, createdAt: serverTimestamp()
+            });
+            document.getElementById('chat-in').value = "";
+        };
+
+        window.saveCloud = async () => {
+            const raw = localStorage.getItem('kb_save_v36');
+            if(!raw) return alert("データがありません");
+            
+            // 履歴に追加
+            const hist = myUser.history || [];
+            hist.push({ date: new Date().toLocaleString(), data: raw });
+            if(hist.length > 5) hist.shift();
+
+            await updateDoc(doc(db, "users", myUser.username), { history: hist });
+            myUser.history = hist;
+            alert("保存しました");
+            renderHistory();
+        };
+
+        window.restoreCloud = (idx) => {
+            if(!confirm("復元しますか？")) return;
+            const d = myUser.history[idx].data;
+            localStorage.setItem('kb_save_v36', d);
+            alert("復元しました。リロードします");
+            location.reload();
+        };
+
+        function renderHistory() {
+            const div = document.getElementById('hist-list');
+            div.innerHTML = "";
+            (myUser.history || []).slice().reverse().forEach((h, i) => {
+                const idx = (myUser.history.length - 1) - i;
+                div.innerHTML += `<div class="list-item"><span>${h.date}</span><button class="btn" style="width:auto; padding:5px 10px; margin:0;" onclick="restoreCloud(${idx})">復元</button></div>`;
+            });
+        }
+    </script>
 </body>
 </html>
