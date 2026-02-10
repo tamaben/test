@@ -3,722 +3,669 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PARTY BOX 10: ULTIMATE</title>
+    <title>Party Box 9</title>
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    
     <style>
+        /* === デザインシステム === */
         :root {
-            --bg: #050505;
-            --panel: #1a1a1a;
-            --primary: #00f2ff; /* Cyan */
-            --secondary: #ff0055; /* Magenta */
-            --accent: #ffee00; /* Yellow */
+            --bg: #121212;
+            --surface: #1e1e1e;
+            --primary: #70a1ff;
+            --accent: #ff4757;
             --text: #ffffff;
-            --font-main: 'Orbitron', sans-serif;
-            --font-sub: 'Roboto', sans-serif;
+            --subtext: #a4b0be;
+            --success: #2ed573;
         }
 
-        * { box-sizing: border-box; touch-action: none; user-select: none; -webkit-user-select: none; }
-
+        * { box-sizing: border-box; touch-action: manipulation; }
+        
         body {
-            margin: 0; padding: 0; background: var(--bg); color: var(--text);
-            font-family: var(--font-sub); overflow: hidden;
+            margin: 0; padding: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden; /* スクロール完全禁止 */
+            user-select: none;
+            -webkit-user-select: none;
         }
 
-        /* --- UI Utility Classes --- */
+        /* 画面共通 */
         .screen {
-            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
-            transition: opacity 0.5s ease; opacity: 1; pointer-events: auto;
+            padding: 20px; transition: opacity 0.5s;
         }
-        .screen.hidden { opacity: 0; pointer-events: none; z-index: -1; }
+        .hidden { display: none !important; opacity: 0; pointer-events: none; }
 
-        h1 { font-family: var(--font-main); font-size: 4rem; text-shadow: 0 0 20px var(--primary); margin: 0; text-align: center; line-height: 1; }
-        h2 { font-family: var(--font-main); color: var(--secondary); margin: 10px; font-size: 2rem; text-transform: uppercase; }
-        p { color: #aaa; font-size: 1.2rem; max-width: 800px; text-align: center; }
+        h1 { font-weight: 900; font-size: 3rem; margin: 0; letter-spacing: -2px; background: linear-gradient(45deg, var(--primary), #a29bfe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        h2 { font-size: 2rem; margin-bottom: 10px; }
+        p { color: var(--subtext); font-size: 1.1rem; max-width: 600px; line-height: 1.6; }
 
+        /* ボタン */
         .btn {
-            background: transparent; border: 2px solid var(--primary); color: var(--primary);
-            padding: 15px 40px; font-size: 1.2rem; font-family: var(--font-main);
-            cursor: pointer; transition: 0.2s; margin: 10px; text-transform: uppercase;
-            position: relative; overflow: hidden;
+            background: var(--surface); color: var(--text); border: 1px solid rgba(255,255,255,0.1);
+            padding: 15px 40px; font-size: 1.2rem; border-radius: 50px; cursor: pointer;
+            margin: 10px; transition: all 0.2s; font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
-        .btn::before {
-            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-            background: var(--primary); transition: 0.3s; z-index: -1; opacity: 0.2;
-        }
-        .btn:hover { background: var(--primary); color: #000; box-shadow: 0 0 30px var(--primary); }
         .btn:active { transform: scale(0.95); }
-        .btn-secondary { border-color: var(--secondary); color: var(--secondary); }
-        .btn-secondary:hover { background: var(--secondary); box-shadow: 0 0 30px var(--secondary); }
+        .btn-primary { background: var(--primary); color: #000; border: none; }
+        .btn-big { font-size: 2rem; padding: 30px 60px; }
+        .btn-full { width: 100%; height: 100%; font-size: 3rem; border-radius: 20px; background: var(--accent); }
 
-        /* --- Host: Menu Grid --- */
-        .game-grid {
-            display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px;
-            max-width: 1000px; margin-top: 30px;
-        }
-        .game-card {
-            background: rgba(255,255,255,0.05); border: 1px solid #333; padding: 20px;
-            text-align: center; cursor: pointer; transition: 0.3s; aspect-ratio: 1/1;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-        }
-        .game-card:hover { border-color: var(--accent); background: rgba(255,238,0,0.1); transform: translateY(-5px); }
-        .game-icon { font-size: 3rem; margin-bottom: 10px; }
-        .game-name { font-size: 0.9rem; font-weight: bold; }
+        /* --- ホスト画面 --- */
+        #host-lobby .qr-container { background: white; padding: 15px; border-radius: 10px; margin: 20px; }
+        .player-grid { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 20px; }
+        .player-badge { background: var(--surface); padding: 8px 16px; border-radius: 20px; border: 1px solid var(--primary); animation: pop 0.3s; }
 
-        /* --- Host: Game Stage --- */
-        #host-stage { justify-content: flex-start; padding-top: 50px; }
-        .stage-header { width: 100%; display: flex; justify-content: space-between; padding: 0 50px; align-items: center; }
-        .timer-display { font-family: var(--font-main); font-size: 3rem; color: var(--accent); }
-        .main-visual { 
-            flex: 1; width: 100%; display: flex; align-items: center; justify-content: center; 
-            font-size: 5rem; font-weight: bold; text-align: center; position: relative;
+        /* ルーレット */
+        #roulette-wheel {
+            font-size: 4rem; font-weight: 900; color: var(--accent);
+            height: 150px; display: flex; align-items: center; justify-content: center;
+            text-shadow: 0 0 20px rgba(255,71,87,0.5);
         }
+
+        /* ゲーム画面 */
+        .game-info { position: absolute; top: 20px; width: 100%; text-align: center; }
+        .timer-bar { width: 0%; height: 10px; background: var(--primary); position: absolute; top: 0; left: 0; transition: width 0.1s linear; }
         
-        /* Player List Chips */
-        .player-chip {
-            background: #333; padding: 5px 15px; border-radius: 20px; border: 1px solid #555;
-            display: inline-block; margin: 5px; font-size: 0.9rem;
-        }
-        .player-chip.ready { border-color: var(--success); color: var(--success); }
-
-        /* --- Client: Controllers --- */
-        #client-ui { background: #000; }
-        .ctrl-btn {
-            width: 100%; height: 100%; border: none; font-size: 2rem; font-weight: bold;
-            display: flex; align-items: center; justify-content: center; color: white;
-            transition: 0.1s;
-        }
-        .ctrl-btn:active { opacity: 0.7; transform: scale(0.98); }
-        .bg-red { background: #ff4757; }
-        .bg-blue { background: #2e86de; }
-        .bg-green { background: #2ed573; }
-        .bg-yellow { background: #ffa502; color: black; }
-
-        .swipe-area {
-            width: 100%; height: 100%; background: #222; 
-            display: flex; align-items: center; justify-content: center;
-            color: #555; font-size: 1.5rem;
-        }
-
-        /* --- Animations --- */
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-        .pulse { animation: pulse 0.5s infinite; }
-        @keyframes shake { 0% { transform: translate(1px, 1px); } 100% { transform: translate(-1px, -1px); } }
-        .shake { animation: shake 0.2s infinite; }
+        .score-board { font-size: 3rem; font-weight: bold; }
         
-        /* Modal for Rules */
+        /* モーダル（ルール説明） */
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 100;
+            background: rgba(0,0,0,0.9); z-index: 100;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
-        .rule-content { border: 2px solid var(--primary); padding: 40px; text-align: center; max-width: 600px; background: #111; }
+        .modal-content { background: var(--surface); padding: 40px; border-radius: 20px; max-width: 80%; text-align: center; }
+        .rule-icon { font-size: 4rem; margin-bottom: 20px; }
+
+        /* --- クライアント画面 --- */
+        .input-area { width: 100%; max-width: 400px; }
+        input[type="text"] {
+            width: 100%; padding: 15px; border-radius: 10px; border: none;
+            background: #333; color: white; font-size: 1.2rem; margin-bottom: 20px; text-align: center;
+        }
+
+        /* コントローラーUI */
+        #ctrl-tap { background: var(--accent); }
+        #ctrl-shake { background: var(--success); display: flex; align-items: center; justify-content: center; flex-direction: column; }
+        #ctrl-gyro { background: var(--primary); position: relative; }
+        .bubble-level { 
+            width: 50px; height: 50px; background: white; border-radius: 50%;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            transition: all 0.1s;
+        }
+        #ctrl-werewolf { display: flex; flex-direction: column; gap: 10px; }
+        .role-card { padding: 30px; background: #333; border-radius: 10px; margin-bottom: 20px; font-size: 2rem; }
+
+        @keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
     </style>
 </head>
 <body>
 
-    <div id="host-app" class="hidden">
-        <div id="h-lobby" class="screen">
-            <h1>PARTY BOX 10<br><span style="font-size:2rem; color:var(--primary)">ULTIMATE</span></h1>
-            <div style="background: white; padding: 10px; margin: 20px; border-radius: 5px;">
-                <div id="qrcode"></div>
-            </div>
-            <p>スマホでQRコードを読み取って参加</p>
-            <div id="player-list-display" style="margin: 20px;"></div>
-            <button class="btn pulse" id="btn-start-menu" onclick="Host.toMenu()" disabled>プレイヤー待機中...</button>
+    <div id="host-view" class="hidden">
+        <div id="host-lobby" class="screen">
+            <h1>PARTY BOX 9</h1>
+            <p>スマホでQRコードを読み取って参加しよう</p>
+            <div class="qr-container" id="qrcode"></div>
+            <div class="player-grid" id="player-list"></div>
+            <button class="btn btn-primary btn-big" onclick="Host.startRoulette()" id="btn-start-game" disabled>参加者を待機中...</button>
         </div>
 
-        <div id="h-menu" class="screen hidden">
-            <h2>GAME SELECT</h2>
-            <div class="game-grid" id="game-grid">
-                </div>
-            <div style="margin-top: 30px;">
-                <button class="btn btn-secondary" onclick="Host.startRoulette()">🎲 RANDOM ROULETTE</button>
-            </div>
+        <div id="host-pregame" class="screen hidden">
+            <h2>NEXT GAME</h2>
+            <div id="roulette-wheel">???</div>
         </div>
 
-        <div id="h-pregame" class="screen hidden">
-            <div id="roulette-display" style="font-size: 5rem; font-weight: bold; color: var(--accent);"></div>
-            <div id="rule-modal" class="modal hidden">
-                <div class="rule-content">
-                    <h2 id="rule-title">GAME TITLE</h2>
-                    <p id="rule-desc" style="margin: 20px auto;">Description</p>
-                    <div style="font-size: 3rem; margin: 20px;" id="rule-icon">🎮</div>
-                    <button class="btn" onclick="Host.startGame()">START GAME</button>
-                </div>
+        <div id="rule-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="rule-icon" id="rule-icon">🎮</div>
+                <h2 id="rule-title">タイトル</h2>
+                <p id="rule-desc">説明文</p>
+                <button class="btn btn-primary" onclick="Host.launchGame()">START!</button>
             </div>
         </div>
 
-        <div id="h-stage" class="screen hidden" id="host-stage">
-            <div class="stage-header">
-                <div id="game-title-sm" style="color:#888;">TITLE</div>
-                <div class="timer-display" id="stage-timer">00.00</div>
+        <div id="host-game" class="screen hidden">
+            <div class="timer-bar" id="game-timer"></div>
+            <div class="game-info">
+                <h2 id="game-title-display">TITLE</h2>
+                <div id="game-status"></div>
             </div>
-            <div class="main-visual" id="stage-visual">
-                READY?
+            <div id="game-stage" style="width: 100%; height: 60%; display: flex; justify-content: center; align-items: center;">
+                <div class="score-board" id="score-board"></div>
             </div>
-            <div id="stage-status" style="margin-bottom: 20px; font-size: 1.5rem; color: var(--text);"></div>
         </div>
 
-        <div id="h-result" class="screen hidden">
-            <h1 style="color: var(--accent);">WINNER</h1>
-            <div id="winner-name" style="font-size: 4rem; margin: 40px 0;">???</div>
-            <button class="btn" onclick="Host.toMenu()">BACK TO MENU</button>
+        <div id="host-result" class="screen hidden">
+            <h1>RESULT</h1>
+            <div id="winner-display" style="font-size: 4rem; margin: 40px 0; color: var(--primary);"></div>
+            <button class="btn" onclick="Host.backToLobby()">ロビーに戻る</button>
         </div>
     </div>
 
-    <div id="client-app" class="hidden">
-        <div id="c-login" class="screen">
-            <h2>JOIN GAME</h2>
-            <input type="text" id="username" placeholder="NAME" maxlength="8" style="padding: 15px; font-size: 1.5rem; width: 80%; text-align: center; margin-bottom: 20px; background:#333; color:white; border:none;">
-            <button class="btn" onclick="Client.join()">参加</button>
-            <p style="font-size:0.8rem; margin-top:20px;">※iPhoneの方は次の画面で「センサー許可」を押してください</p>
+    <div id="client-view" class="hidden">
+        <div id="client-login" class="screen">
+            <h1>JOIN</h1>
+            <div class="input-area">
+                <input type="text" id="username" placeholder="ニックネーム" maxlength="8">
+                <button class="btn btn-primary btn-full" style="height: auto; font-size: 1.5rem;" onclick="Client.join()">参加</button>
+            </div>
         </div>
 
-        <div id="c-perm" class="screen hidden">
+        <div id="client-permission" class="screen hidden">
             <h2>センサー許可</h2>
-            <p>ゲームを楽しむためにモーションセンサーの使用を許可してください。</p>
-            <button class="btn btn-secondary" onclick="Client.requestPerm()">許可する</button>
+            <p>ゲームでスマホを振ったり傾けたりするために、センサーの使用を許可してください。</p>
+            <button class="btn btn-primary" onclick="Client.requestPermission()">許可して進む</button>
         </div>
 
-        <div id="c-wait" class="screen hidden">
-            <h2 class="pulse">WAITING...</h2>
+        <div id="client-waiting" class="screen hidden">
+            <h2>WAITING...</h2>
             <p>親機の画面を見てね</p>
         </div>
 
-        <div id="c-ctrl" class="screen hidden" style="background: #111;">
-            </div>
+        <div id="ctrl-tap" class="screen hidden">
+            <div style="pointer-events: none; font-size: 3rem; color: rgba(255,255,255,0.5);">TAP!</div>
+        </div>
+
+        <div id="ctrl-shake" class="screen hidden">
+            <div style="font-size: 4rem;">👋</div>
+            <p>振れ！！</p>
+        </div>
+
+        <div id="ctrl-gyro" class="screen hidden">
+            <div class="bubble-level" id="gyro-bubble"></div>
+        </div>
+
+        <div id="ctrl-werewolf" class="screen hidden">
+            <h2>あなたの役職</h2>
+            <div class="role-card" id="my-role">?</div>
+            <p>怪しい人をタップして投票</p>
+            <div id="vote-list" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;"></div>
+        </div>
     </div>
 
 <script>
-/* ================= GAME DATA ================= */
-const GAMES = [
-    { id: 'werewolf', name: 'ワンナイト人狼', icon: '🐺', type: 'werewolf', desc: '【心理戦】配られた役職を確認せよ。議論タイムの後、怪しい人物を投票で処刑しろ！' },
-    { id: 'swipe', name: 'サムライ・スワイプ', icon: '⚔️', type: 'swipe', desc: '【反射神経】画面に出る矢印と同じ方向に素早くフリックしろ！' },
-    { id: 'timer', name: 'ジャスト・タイマー', icon: '⏱️', type: 'tap', desc: '【体内時計】10.00秒ピッタリでボタンを押せ！5秒過ぎるとタイマーは消えるぞ。' },
-    { id: 'mash', name: 'ニトロ・レース', icon: '🏎️', type: 'tap', desc: '【連打】とにかく画面を連打しろ！一番多く叩いた奴が勝ちだ！' },
-    { id: 'bomb', name: 'シェイク・ボム', icon: '💣', type: 'shake', desc: '【スリル】スマホを振って爆弾を解除＆隣へパス！自分の番で爆発したら負け。' },
-    { id: 'balance', name: 'ゼロ・バランス', icon: '⚖️', type: 'gyro', desc: '【バランス】スマホを地面と水平に保ち続けろ！傾くと減点だ。' },
-    { id: 'quiz', name: '早押しバトル', icon: '🧠', type: 'quiz', desc: '【知識】親機が出題するクイズに答えろ！早押し4択勝負。' },
-    { id: 'reflex', name: 'カラー・リフレックス', icon: '🎨', type: 'tap', desc: '【瞬発力】親機の画面が「緑」になった瞬間にタップしろ！お手付き厳禁。' },
-    { id: 'ghost', name: 'ゴースト・ハンター', icon: '👻', type: 'gyro', desc: '【探索】スマホを周囲にかざしてオバケを探せ！振動が強くなる方向を見つけてタップ！' },
-    { id: 'team', name: '紅白連打合戦', icon: '🚩', type: 'tap', desc: '【チーム戦】赤チームと青チームに分かれて総連打数を競え！' }
-];
+    // ================= ゲームデータ =================
+    const GAMES = [
+        { id: 'tap_race', name: '連打レース', type: 'tap', desc: '画面をひたすら連打しろ！一番多く叩いた人の勝ち！', icon: '👆' },
+        { id: 'shake_battle', name: 'シェイクバトル', type: 'shake', desc: 'スマホを全力で振れ！回数が一番多い人が優勝！(飛ばさないでね)', icon: '👋' },
+        { id: 'balance', name: 'バランス王', type: 'gyro', desc: 'スマホを地面と水平に保て！一番安定していた人が勝ち。', icon: '⚖️' },
+        { id: 'reflex', name: '早押し反応', type: 'tap', desc: '親機の画面の色が変わった瞬間にタップ！お手つき厳禁。', icon: '⚡' },
+        { id: 'bomb', name: '爆弾回し', type: 'shake', desc: '振って爆弾を隣の人へパス！爆発した時に持っていた人の負け。', icon: '💣' },
+        { id: 'timer_stop', name: '10秒ジャスト', type: 'tap', desc: '体内時計で10秒ピッタリで止めろ！', icon: '⏱️' },
+        { id: 'tug_war', name: 'チーム綱引き', type: 'tap', desc: '赤チームvs青チーム！合計連打数で勝負！', icon: '🚩' },
+        { id: 'survival', name: '傾きサバイバル', type: 'gyro', desc: '指定された方向に傾け続けろ！脱落したら負け。', icon: '🧭' },
+        { id: 'werewolf', name: 'ワンナイト人狼', type: 'werewolf', desc: '誰が人狼か話し合え！最後に投票で追放者を決める。', icon: '🐺' }
+    ];
 
-/* ================= AUDIO SYSTEM ================= */
-const AudioSys = {
-    ctx: new (window.AudioContext || window.webkitAudioContext)(),
-    playTone: (freq, type, dur, vol=0.1) => {
-        if(AudioSys.ctx.state === 'suspended') AudioSys.ctx.resume();
-        const osc = AudioSys.ctx.createOscillator();
-        const gain = AudioSys.ctx.createGain();
-        osc.frequency.setValueAtTime(freq, AudioSys.ctx.currentTime);
-        osc.type = type;
-        gain.gain.setValueAtTime(vol, AudioSys.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, AudioSys.ctx.currentTime + dur);
-        osc.connect(gain); gain.connect(AudioSys.ctx.destination);
-        osc.start(); osc.stop(AudioSys.ctx.currentTime + dur);
-    },
-    sfx: {
-        tap: () => AudioSys.playTone(400, 'triangle', 0.1),
-        win: () => { AudioSys.playTone(600, 'square', 0.1); setTimeout(()=>AudioSys.playTone(800,'square',0.4), 100); },
-        alert: () => AudioSys.playTone(150, 'sawtooth', 0.3),
-        tick: () => AudioSys.playTone(800, 'sine', 0.05, 0.05)
-    }
-};
+    // ================= 共通処理 =================
+    const Utils = {
+        // ID生成
+        generateId: () => Math.random().toString(36).substr(2, 5).toUpperCase(),
+        // 配列シャッフル
+        shuffle: (array) => array.sort(() => Math.random() - 0.5),
+        // 音再生(簡易シンセ)
+        playTone: (freq, type, dur) => {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.frequency.value = freq;
+            osc.type = type;
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + dur);
+            osc.stop(ctx.currentTime + dur);
+        }
+    };
 
-/* ================= HOST LOGIC ================= */
-const Host = {
-    peer: null, connMap: {}, players: {}, 
-    state: 'lobby', currentGame: null, gameLoop: null,
-    
-    init: () => {
-        document.getElementById('host-app').classList.remove('hidden');
-        Host.peer = new Peer(generateId());
-        Host.peer.on('open', id => {
-            const url = `${location.href.split('?')[0]}?host=${id}`;
-            new QRCode(document.getElementById("qrcode"), { text: url, width: 150, height: 150 });
-        });
-        Host.peer.on('connection', conn => {
-            conn.on('open', () => {
-                Host.connMap[conn.peer] = conn;
-                conn.on('data', data => Host.handleData(conn.peer, data));
-                conn.on('close', () => { delete Host.players[conn.peer]; Host.updateLobby(); });
+    // スマホのダブルタップ拡大などの防止
+    document.addEventListener('dblclick', function(event) { event.preventDefault(); }, { passive: false });
+    document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
+
+    // ================= HOST (親機) =================
+    const Host = {
+        peer: null,
+        id: null,
+        conns: {},
+        players: {}, // { id: { name, score, ... } }
+        currentGame: null,
+        gameLoop: null,
+        state: 'lobby',
+
+        init: () => {
+            document.getElementById('host-view').classList.remove('hidden');
+            Host.peer = new Peer(Utils.generateId());
+            
+            Host.peer.on('open', (id) => {
+                Host.id = id;
+                const url = `${location.protocol}//${location.host}${location.pathname}?host=${id}`;
+                new QRCode(document.getElementById("qrcode"), { text: url, width: 150, height: 150 });
+                console.log('Host initialized:', id);
             });
-        });
-        Host.renderMenu();
-    },
 
-    handleData: (pid, data) => {
-        if (data.act === 'join') {
-            Host.players[pid] = { id: pid, name: data.name, score: 0 };
-            Host.updateLobby();
-            AudioSys.sfx.tap();
-        } else if (Host.state === 'gaming') {
-            Host.processGameInput(pid, data);
-        }
-    },
+            Host.peer.on('connection', (conn) => {
+                conn.on('open', () => {
+                    Host.conns[conn.peer] = conn;
+                    conn.on('data', (data) => Host.handleData(conn.peer, data));
+                    conn.on('close', () => {
+                        delete Host.conns[conn.peer];
+                        delete Host.players[conn.peer];
+                        Host.updateLobby();
+                    });
+                });
+            });
+        },
 
-    updateLobby: () => {
-        const list = document.getElementById('player-list-display');
-        list.innerHTML = Object.values(Host.players).map(p => `<span class="player-chip">${p.name}</span>`).join('');
-        document.getElementById('btn-start-menu').disabled = Object.keys(Host.players).length === 0;
-        document.getElementById('btn-start-menu').innerText = `ゲーム選択へ (${Object.keys(Host.players).length}人)`;
-    },
-
-    renderMenu: () => {
-        const grid = document.getElementById('game-grid');
-        grid.innerHTML = GAMES.map(g => `
-            <div class="game-card" onclick="Host.selectGame('${g.id}')">
-                <div class="game-icon">${g.icon}</div>
-                <div class="game-name">${g.name}</div>
-            </div>
-        `).join('');
-    },
-
-    toMenu: () => {
-        Host.switchScreen('h-menu');
-        Host.state = 'menu';
-    },
-
-    selectGame: (id) => {
-        const game = GAMES.find(g => g.id === id);
-        Host.currentGame = game;
-        document.getElementById('rule-title').innerText = game.name;
-        document.getElementById('rule-desc').innerText = game.desc;
-        document.getElementById('rule-icon').innerText = game.icon;
-        
-        Host.switchScreen('h-pregame');
-        document.getElementById('roulette-display').style.display = 'none';
-        document.getElementById('rule-modal').classList.remove('hidden');
-    },
-
-    startRoulette: () => {
-        Host.switchScreen('h-pregame');
-        const rDisplay = document.getElementById('roulette-display');
-        rDisplay.style.display = 'block';
-        document.getElementById('rule-modal').classList.add('hidden');
-        
-        let count = 0;
-        const interval = setInterval(() => {
-            const g = GAMES[Math.floor(Math.random() * GAMES.length)];
-            rDisplay.innerText = g.icon;
-            AudioSys.sfx.tap();
-            count++;
-            if(count > 20) {
-                clearInterval(interval);
-                AudioSys.sfx.win();
-                setTimeout(() => Host.selectGame(g.id), 1000);
+        handleData: (pid, data) => {
+            // 参加処理
+            if (data.act === 'join') {
+                Host.players[pid] = { name: data.name, id: pid, score: 0, role: null };
+                Host.updateLobby();
+                Utils.playTone(800, 'sine', 0.1);
             }
-        }, 100);
-    },
+            // ゲーム入力処理
+            if (Host.state === 'gaming' && Host.currentGame) {
+                Host.processGameInput(pid, data);
+            }
+        },
 
-    startGame: () => {
-        document.getElementById('rule-modal').classList.add('hidden');
-        Host.switchScreen('h-stage');
-        Host.state = 'gaming';
-        
-        // Game Init
-        const g = Host.currentGame;
-        document.getElementById('game-title-sm').innerText = g.name;
-        document.getElementById('stage-timer').innerText = "00.00";
-        document.getElementById('stage-visual').innerHTML = "READY?";
-        document.getElementById('stage-status').innerText = "";
-        
-        Object.values(Host.players).forEach(p => { p.score = 0; p.vote = null; p.alive = true; });
+        updateLobby: () => {
+            const list = document.getElementById('player-list');
+            list.innerHTML = '';
+            const count = Object.keys(Host.players).length;
+            
+            Object.values(Host.players).forEach(p => {
+                const el = document.createElement('div');
+                el.className = 'player-badge';
+                el.innerText = p.name;
+                list.appendChild(el);
+            });
 
-        // Controller Setup Broadcast
-        Host.broadcast({ act: 'init_ctrl', type: g.type, info: g });
+            const btn = document.getElementById('btn-start-game');
+            if (count > 0) {
+                btn.disabled = false;
+                btn.innerText = `ゲーム開始 (${count}人)`;
+            } else {
+                btn.disabled = true;
+                btn.innerText = "参加者を待機中...";
+            }
+        },
 
-        setTimeout(() => {
-            document.getElementById('stage-visual').innerText = "GO!";
-            AudioSys.sfx.win();
-            Host.runGameLogic(g);
-        }, 2000);
-    },
+        // --- ルーレット & 準備 ---
+        startRoulette: () => {
+            Host.state = 'roulette';
+            document.getElementById('host-lobby').classList.add('hidden');
+            document.getElementById('host-result').classList.add('hidden');
+            document.getElementById('host-pregame').classList.remove('hidden');
 
-    runGameLogic: (game) => {
-        let timer = 0;
-        const visual = document.getElementById('stage-visual');
-        const timerDisplay = document.getElementById('stage-timer');
-        
-        // --- LOGIC PER GAME TYPE ---
-        if (game.id === 'werewolf') {
-            Host.logicWerewolf();
-            return;
-        }
+            const wheel = document.getElementById('roulette-wheel');
+            let counter = 0;
+            const interval = setInterval(() => {
+                const randomGame = GAMES[Math.floor(Math.random() * GAMES.length)];
+                wheel.innerText = randomGame.name;
+                wheel.style.color = counter % 2 === 0 ? '#ff4757' : '#70a1ff';
+                Utils.playTone(400, 'square', 0.05);
+                counter++;
+                if (counter > 20) {
+                    clearInterval(interval);
+                    Host.showRule(GAMES[Math.floor(Math.random() * GAMES.length)]); // 最終決定
+                }
+            }, 100);
+        },
 
-        if (game.id === 'timer') {
-            let limit = 15;
+        showRule: (gameObj) => {
+            Host.currentGame = gameObj;
+            document.getElementById('rule-modal').classList.remove('hidden');
+            document.getElementById('rule-icon').innerText = gameObj.icon;
+            document.getElementById('rule-title').innerText = gameObj.name;
+            document.getElementById('rule-desc').innerText = gameObj.desc;
+        },
+
+        // --- ゲーム開始 ---
+        launchGame: () => {
+            document.getElementById('rule-modal').classList.add('hidden');
+            document.getElementById('host-pregame').classList.add('hidden');
+            document.getElementById('host-game').classList.remove('hidden');
+            Host.state = 'gaming';
+
+            // 全員の状態リセット
+            Object.values(Host.players).forEach(p => { p.score = 0; p.vote = null; });
+            document.getElementById('score-board').innerText = '';
+            
+            // クライアントの画面切り替え
+            Host.broadcast({ act: 'start', mode: Host.currentGame.type, gameId: Host.currentGame.id });
+
+            // ゲームごとの初期化
+            document.getElementById('game-title-display').innerText = Host.currentGame.name;
+            Host.startGameLogic();
+        },
+
+        startGameLogic: () => {
+            const game = Host.currentGame;
+            
+            // 人狼の場合
+            if (game.id === 'werewolf') {
+                Host.setupWerewolf();
+                return;
+            }
+
+            // 通常のアクションゲーム（タイマー制）
+            let time = 10; 
+            if (game.id === 'timer_stop') time = 15;
+            
+            const timerBar = document.getElementById('game-timer');
+            timerBar.style.width = '100%';
+            
+            // カウントダウン
+            let timeLeft = time;
             Host.gameLoop = setInterval(() => {
-                limit -= 0.05;
-                if(limit < 10) visual.innerText = "???"; // Blind
-                else visual.innerText = limit.toFixed(2);
+                timeLeft -= 0.1;
+                timerBar.style.width = (timeLeft / time * 100) + '%';
                 
-                if(limit <= 0) Host.endGame();
-            }, 50);
-            return;
-        }
+                // リアルタイムスコア表示（連打系のみ）
+                if (game.type === 'tap' || game.type === 'shake') {
+                    Host.updateRealtimeScore();
+                }
 
-        if (game.id === 'quiz') {
-            visual.innerHTML = "<div style='font-size:2rem'>親機の出題を聞いて<br>正解ボタンを押せ！</div>";
-            return;
-        }
-
-        if (game.id === 'reflex') {
-            visual.style.color = 'white';
-            visual.innerText = "WAIT...";
-            const delay = 2000 + Math.random() * 5000;
-            setTimeout(() => {
-                if(Host.state !== 'gaming') return;
-                visual.style.color = '#2ed573'; // Green
-                visual.innerText = "TAP!";
-                Host.reflexStart = Date.now();
-            }, delay);
-            return;
-        }
-        
-        if (game.id === 'swipe') {
-            Host.swipeDir = ['UP','DOWN','LEFT','RIGHT'][Math.floor(Math.random()*4)];
-            visual.innerText = Host.swipeDir;
-            // 2秒ごとに切り替え
-            Host.gameLoop = setInterval(() => {
-                Host.swipeDir = ['UP','DOWN','LEFT','RIGHT'][Math.floor(Math.random()*4)];
-                visual.innerText = Host.swipeDir;
-                AudioSys.sfx.tap();
-            }, 2000);
-            setTimeout(Host.endGame, 15000); // 15秒で終了
-            return;
-        }
-
-        // Standard Timer Games (Mash, Shake, Balance)
-        let timeLeft = 10; 
-        if(game.id === 'team') timeLeft = 15;
-        if(game.id === 'ghost') timeLeft = 20;
-
-        Host.gameLoop = setInterval(() => {
-            timeLeft -= 0.1;
-            timerDisplay.innerText = timeLeft.toFixed(2);
-            
-            // Realtime ranking for Mash/Shake
-            if(game.id === 'mash' || game.id === 'shake') {
-                const top = Object.values(Host.players).sort((a,b)=>b.score-a.score)[0];
-                if(top) visual.innerText = `${top.name}: ${top.score}`;
-            }
-            if(game.id === 'team') {
-                const red = Object.values(Host.players).filter((p,i)=>i%2===0).reduce((a,c)=>a+c.score,0);
-                const blue = Object.values(Host.players).filter((p,i)=>i%2!==0).reduce((a,c)=>a+c.score,0);
-                visual.innerHTML = `<span style="color:#ff4757">${red}</span> vs <span style="color:#2e86de">${blue}</span>`;
-            }
-
-            if(timeLeft <= 0) {
-                clearInterval(Host.gameLoop);
-                Host.endGame();
-            }
-        }, 100);
-    },
-
-    processGameInput: (pid, data) => {
-        const p = Host.players[pid];
-        const g = Host.currentGame;
-
-        if (g.id === 'mash' && data.act === 'tap') p.score++;
-        if (g.id === 'shake' && data.act === 'shake') p.score++;
-        if (g.id === 'swipe' && data.act === 'swipe') {
-            if(data.dir === Host.swipeDir) { p.score++; AudioSys.sfx.tap(); } 
-            else { p.score--; AudioSys.sfx.alert(); }
-        }
-        if (g.id === 'timer' && data.act === 'tap') {
-            // Stop logic
-            const time = parseFloat(document.getElementById('stage-timer').innerText); // Hacky but works for demo
-            // Actually better to use server time, but for simplicity:
-            p.score = Math.abs(10.00 - (15 - parseFloat(document.getElementById('stage-visual').innerText || 0))); // Mock logic
-             p.finalTime = data.time; // Store logical time
-        }
-        if (g.id === 'quiz' && data.act === 'answer') {
-            // Host manually checks winner in real life usually, but let's say:
-            // First to press gets highlighting
-            document.getElementById('stage-visual').innerText = `${p.name}が回答権獲得！\n(答え: ${data.val})`;
-            AudioSys.sfx.win();
-            Host.state = 'result_wait'; // Pause input
-            setTimeout(() => Host.showWinner(p), 3000);
-        }
-        if (g.id === 'reflex' && data.act === 'tap') {
-            if(document.getElementById('stage-visual').innerText === "TAP!") {
-                Host.showWinner(p);
-            } else {
-                p.score = -999; // Penalty
-            }
-        }
-        if (g.id === 'team' && data.act === 'tap') p.score++;
-        
-        // Werewolf voting
-        if (g.id === 'werewolf' && data.act === 'vote') {
-            p.vote = data.target;
-        }
-    },
-
-    // --- WEREWOLF SPECIAL LOGIC ---
-    logicWerewolf: () => {
-        const pIds = Object.keys(Host.players);
-        if(pIds.length < 3) { alert("最低3人必要です"); Host.toMenu(); return; }
-        
-        const wolf = pIds[Math.floor(Math.random()*pIds.length)];
-        pIds.forEach(id => {
-            Host.players[id].role = (id === wolf) ? 'werewolf' : 'villager';
-            Host.connMap[id].send({ act: 'role', role: Host.players[id].role });
-        });
-
-        const visual = document.getElementById('stage-visual');
-        const status = document.getElementById('stage-status');
-
-        // Phase 1: Night
-        visual.innerText = "夜のターン";
-        status.innerText = "スマホを確認してください";
-        
-        setTimeout(() => {
-            // Phase 2: Discussion
-            visual.innerText = "議論タイム";
-            let discussTime = 60;
-            Host.gameLoop = setInterval(() => {
-                discussTime--;
-                status.innerText = `残り ${discussTime}秒`;
-                if(discussTime <= 0) {
+                if (timeLeft <= 0) {
                     clearInterval(Host.gameLoop);
-                    startVoting();
+                    Host.finishGame();
                 }
-            }, 1000);
-        }, 5000);
+            }, 100);
+        },
 
-        function startVoting() {
-            visual.innerText = "投票タイム";
-            status.innerText = "怪しい人をタップしてください";
-            Host.broadcast({ act: 'start_vote', list: Host.players });
+        processGameInput: (pid, data) => {
+            const p = Host.players[pid];
+            const g = Host.currentGame;
+
+            if (g.type === 'tap' && data.act === 'tap') {
+                p.score++;
+            }
+            if (g.type === 'shake' && data.act === 'shake') {
+                p.score += data.val; // 強さに応じて
+            }
+            if (g.type === 'gyro' && data.act === 'gyro') {
+                // バランス: 0に近いほど高得点（ここでは絶対値を累積し、低いほうが勝ち）
+                const tilt = Math.abs(data.beta) + Math.abs(data.gamma);
+                p.score += tilt; 
+            }
+            if (g.id === 'werewolf' && data.act === 'vote') {
+                p.vote = data.target;
+                Host.checkWerewolfEnd();
+            }
+        },
+
+        updateRealtimeScore: () => {
+            // 上位3名を表示
+            const sorted = Object.values(Host.players).sort((a,b) => b.score - a.score).slice(0,3);
+            const board = document.getElementById('score-board');
+            board.innerHTML = sorted.map((p, i) => 
+                `<div style="font-size:${3-i}rem">${i+1}. ${p.name}: ${Math.floor(p.score)}</div>`
+            ).join('');
+        },
+
+        // --- 人狼ロジック ---
+        setupWerewolf: () => {
+            const pIds = Object.keys(Host.players);
+            if(pIds.length < 3) {
+                alert("人狼は3人以上必要です。勝ち判定にします。");
+                Host.finishGame(); 
+                return;
+            }
             
-            // Wait for votes
-            let voteCheck = setInterval(() => {
-                const votedCount = Object.values(Host.players).filter(p => p.vote).length;
-                if(votedCount === pIds.length) {
-                    clearInterval(voteCheck);
-                    calcResult();
+            // 役職割り当て (人狼1、他市民)
+            const wolfIndex = Math.floor(Math.random() * pIds.length);
+            const wolfId = pIds[wolfIndex];
+            
+            pIds.forEach(pid => {
+                const role = (pid === wolfId) ? '人狼' : '市民';
+                Host.players[pid].role = role;
+                // 個別に役職通知
+                if (Host.conns[pid]) {
+                    Host.conns[pid].send({ act: 'role_assign', role: role, players: Host.players });
                 }
-            }, 1000);
-        }
+            });
 
-        function calcResult() {
-            // Tally votes
-            const counts = {};
-            Object.values(Host.players).forEach(p => counts[p.vote] = (counts[p.vote]||0)+1);
-            const executedId = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
-            
-            const executedName = Host.players[executedId].name;
-            const isWolf = Host.players[executedId].role === 'werewolf';
-            
-            visual.innerText = "結果発表";
-            status.innerText = `${executedName} が処刑されました...`;
+            document.getElementById('score-board').innerHTML = "<div style='font-size:2rem'>話し合いタイム: 30秒<br>誰が人狼か探せ！</div>";
             
             setTimeout(() => {
-                if(isWolf) {
-                    document.getElementById('winner-name').innerHTML = `<span style="color:#2ed573">市民の勝利！</span><br><span style="font-size:2rem">人狼は ${executedName} でした</span>`;
+                Host.broadcast({ act: 'start_vote' });
+                document.getElementById('score-board').innerText = "投票中...";
+            }, 30000);
+        },
+
+        checkWerewolfEnd: () => {
+            const allVoted = Object.values(Host.players).every(p => p.vote);
+            if (allVoted) Host.finishGame();
+        },
+
+        // --- ゲーム終了・結果 ---
+        finishGame: () => {
+            clearInterval(Host.gameLoop);
+            Host.state = 'result';
+            document.getElementById('host-game').classList.add('hidden');
+            document.getElementById('host-result').classList.remove('hidden');
+            
+            Host.broadcast({ act: 'end' });
+            Utils.playTone(600, 'square', 0.5);
+
+            const display = document.getElementById('winner-display');
+            const g = Host.currentGame;
+            let winnerText = "";
+
+            if (g.id === 'werewolf') {
+                // 最多得票者を計算
+                const votes = {};
+                Object.values(Host.players).forEach(p => {
+                    votes[p.vote] = (votes[p.vote] || 0) + 1;
+                });
+                const executedId = Object.keys(votes).reduce((a, b) => votes[a] > votes[b] ? a : b);
+                const wolf = Object.values(Host.players).find(p => p.role === '人狼');
+                
+                if (executedId === wolf.id) {
+                    winnerText = `市民の勝ち！\n(人狼は ${wolf.name} でした)`;
+                    display.style.color = "#2ed573";
                 } else {
-                    const wolfName = Object.values(Host.players).find(p=>p.role==='werewolf').name;
-                    document.getElementById('winner-name').innerHTML = `<span style="color:#ff4757">人狼の勝利...</span><br><span style="font-size:2rem">人狼は ${wolfName} でした</span>`;
+                    winnerText = `人狼の勝ち！\n(人狼は ${wolf.name} でした)`;
+                    display.style.color = "#ff4757";
                 }
-                Host.switchScreen('h-result');
-            }, 4000);
-        }
-    },
 
-    endGame: () => {
-        clearInterval(Host.gameLoop);
-        const g = Host.currentGame;
-        let winner = null;
-
-        // Calc Winner based on game type
-        const sorted = Object.values(Host.players).sort((a,b) => b.score - a.score);
-        
-        if(g.id === 'timer') {
-            // Closest to 10s logic would be here, skipping complex math for brevity
-            winner = sorted[0]; // Placeholder
-        } else if (g.id === 'team') {
-            const red = Object.values(Host.players).filter((p,i)=>i%2===0).reduce((a,c)=>a+c.score,0);
-            const blue = Object.values(Host.players).filter((p,i)=>i%2!==0).reduce((a,c)=>a+c.score,0);
-            Host.showWinner({ name: red > blue ? "赤チーム" : "青チーム" });
-            return;
-        } else {
-            winner = sorted[0];
-        }
-
-        Host.showWinner(winner);
-    },
-
-    showWinner: (p) => {
-        AudioSys.sfx.win();
-        document.getElementById('winner-name').innerText = p.name + " WIN!";
-        Host.switchScreen('h-result');
-        Host.broadcast({ act: 'end' });
-    },
-
-    broadcast: (data) => Object.values(Host.connMap).forEach(c => c.send(data)),
-    switchScreen: (id) => {
-        document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-        document.getElementById(id).classList.remove('hidden');
-    }
-};
-
-/* ================= CLIENT LOGIC ================= */
-const Client = {
-    peer: null, conn: null, myId: null,
-    
-    init: () => {
-        const params = new URLSearchParams(location.search);
-        const hostId = params.get('host');
-        if(hostId) {
-            document.getElementById('client-app').classList.remove('hidden');
-            Client.peer = new Peer();
-            Client.peer.on('open', id => {
-                Client.conn = Client.peer.connect(hostId);
-                Client.conn.on('open', () => console.log("Connected"));
-                Client.conn.on('data', Client.handleData);
-            });
-        } else {
-            Host.init();
-        }
-    },
-
-    join: () => {
-        const name = document.getElementById('username').value || "Guest";
-        // Check iOS permission
-        if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-            Client.switchScreen('c-perm');
-        } else {
-            Client.sendJoin(name);
-        }
-    },
-
-    requestPerm: () => {
-        DeviceMotionEvent.requestPermission().then(res => {
-            if(res === 'granted') Client.sendJoin(document.getElementById('username').value);
-        });
-    },
-
-    sendJoin: (name) => {
-        Client.conn.send({ act: 'join', name: name });
-        Client.switchScreen('c-wait');
-        Client.initSensors();
-    },
-
-    handleData: (data) => {
-        if(data.act === 'init_ctrl') {
-            Client.setupController(data.type, data.info);
-        } else if (data.act === 'end') {
-            Client.switchScreen('c-wait');
-        } else if (data.act === 'role') {
-            // Werewolf Role Reveal
-            const area = document.getElementById('c-ctrl');
-            area.innerHTML = `
-                <div style="text-align:center; padding:50px;">
-                    <p>あなたの役職</p>
-                    <h1 style="color:${data.role==='werewolf'?'#ff4757':'#2ed573'}">${data.role==='werewolf'?'人狼':'市民'}</h1>
-                    <p>${data.role==='werewolf'?'嘘をついて生き残れ':'人狼を見つけ出せ'}</p>
-                </div>
-            `;
-            Client.switchScreen('c-ctrl');
-        } else if (data.act === 'start_vote') {
-            const list = Object.values(data.list).filter(p => p.id !== Client.peer.id);
-            const area = document.getElementById('c-ctrl');
-            area.innerHTML = `<h2>追放する人を選べ</h2><div style="display:grid; gap:10px;">
-                ${list.map(p => `<button class="btn" onclick="Client.conn.send({act:'vote', target:'${p.id}'}); this.innerText='投票済'; this.disabled=true;">${p.name}</button>`).join('')}
-            </div>`;
-        }
-    },
-
-    setupController: (type, info) => {
-        Client.switchScreen('c-ctrl');
-        const area = document.getElementById('c-ctrl');
-        area.innerHTML = '';
-
-        if(type === 'tap' || type === 'mash') {
-            // Big Button
-            if(info.id === 'team') {
-                 // Team Color assignment logic needed on server, simplifing:
-                 area.innerHTML = `<button class="ctrl-btn bg-red" ontouchstart="Client.tap()">連打!!</button>`;
+            } else if (g.type === 'gyro' && g.id === 'balance') {
+                // スコアが低い（傾きが少ない）人が勝ち
+                const sorted = Object.values(Host.players).sort((a,b) => a.score - b.score);
+                winnerText = `WINNER: ${sorted[0].name}`;
             } else {
-                area.innerHTML = `<button class="ctrl-btn bg-blue" ontouchstart="Client.tap()">PUSH</button>`;
+                // スコアが高い人が勝ち
+                const sorted = Object.values(Host.players).sort((a,b) => b.score - a.score);
+                winnerText = `WINNER: ${sorted[0].name}`;
             }
-        }
-        else if (type === 'swipe') {
-            area.innerHTML = `<div class="swipe-area" id="swipe-pad">フリックせよ！</div>`;
-            Client.initSwipe(document.getElementById('swipe-pad'));
-        }
-        else if (type === 'quiz') {
-            area.innerHTML = `
-                <div style="display:grid; grid-template-columns:1fr 1fr; height:100%;">
-                    <button class="ctrl-btn bg-red" onclick="Client.ans('A')">A</button>
-                    <button class="ctrl-btn bg-blue" onclick="Client.ans('B')">B</button>
-                    <button class="ctrl-btn bg-green" onclick="Client.ans('C')">C</button>
-                    <button class="ctrl-btn bg-yellow" onclick="Client.ans('D')">D</button>
-                </div>`;
-        }
-        else if (type === 'shake') {
-            area.innerHTML = `<div class="ctrl-btn" style="background:#444">SHAKE!!</div>`;
-        }
-        else if (type === 'gyro') {
-            area.innerHTML = `<div class="ctrl-btn" style="background:#222">傾けろ！</div>`;
-        }
-    },
 
-    tap: () => {
-        Client.conn.send({ act: 'tap' });
-        navigator.vibrate(30);
-    },
-    ans: (val) => Client.conn.send({ act: 'answer', val: val }),
+            display.innerText = winnerText;
+        },
 
-    initSensors: () => {
-        // Shake
-        let lastX=0, lastY=0, lastZ=0;
-        window.addEventListener('devicemotion', e => {
-            const acc = e.accelerationIncludingGravity;
-            if(!acc) return;
-            const delta = Math.abs(acc.x+acc.y+acc.z - lastX - lastY - lastZ);
-            if(delta > 25) {
-                Client.conn.send({ act: 'shake' });
-                navigator.vibrate(50);
+        backToLobby: () => {
+            Host.state = 'lobby';
+            document.getElementById('host-result').classList.add('hidden');
+            document.getElementById('host-lobby').classList.remove('hidden');
+        },
+
+        broadcast: (data) => {
+            Object.values(Host.conns).forEach(c => c.send(data));
+        }
+    };
+
+    // ================= CLIENT (子機) =================
+    const Client = {
+        peer: null,
+        conn: null,
+        myId: null,
+
+        init: () => {
+            const params = new URLSearchParams(window.location.search);
+            const hostId = params.get('host');
+            
+            if (hostId) {
+                // QRから来た場合
+                document.getElementById('client-view').classList.remove('hidden');
+                Client.peer = new Peer(); // ID自動生成
+                Client.peer.on('open', (id) => {
+                    Client.myId = id;
+                    Client.conn = Client.peer.connect(hostId);
+                    Client.setupConnection();
+                });
+            } else {
+                // パラメータなしは親機モードへ
+                Host.init();
             }
-            lastX=acc.x; lastY=acc.y; lastZ=acc.z;
-        });
-        // Gyro
-        window.addEventListener('deviceorientation', e => {
-            // Throttle sending
-            if(Math.random() > 0.8) Client.conn.send({ act: 'gyro', b: e.beta, g: e.gamma });
-        });
-    },
+        },
 
-    initSwipe: (el) => {
-        let sx = 0, sy = 0;
-        el.addEventListener('touchstart', e => { sx=e.touches[0].clientX; sy=e.touches[0].clientY; });
-        el.addEventListener('touchend', e => {
-            const dx = e.changedTouches[0].clientX - sx;
-            const dy = e.changedTouches[0].clientY - sy;
-            if(Math.abs(dx) > 50 || Math.abs(dy) > 50) {
-                let dir = "";
-                if(Math.abs(dx) > Math.abs(dy)) dir = dx > 0 ? 'RIGHT' : 'LEFT';
-                else dir = dy > 0 ? 'DOWN' : 'UP';
-                Client.conn.send({ act: 'swipe', dir: dir });
+        setupConnection: () => {
+            Client.conn.on('open', () => {
+                console.log("Connected to Host");
+            });
+            Client.conn.on('data', (data) => Client.handleHostData(data));
+            Client.conn.on('close', () => alert("親機との接続が切れました"));
+        },
+
+        join: () => {
+            const name = document.getElementById('username').value || "Guest";
+            // iOS等でセンサー許可が必要かチェック
+            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                document.getElementById('client-login').classList.add('hidden');
+                document.getElementById('client-permission').classList.remove('hidden');
+            } else {
+                Client.finalizeJoin(name);
             }
-        });
-    },
+        },
 
-    switchScreen: (id) => {
-        document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-        document.getElementById(id).classList.remove('hidden');
-    }
-};
-const generateId = () => Math.random().toString(36).substr(2, 5).toUpperCase();
-window.onload = Client.init;
+        requestPermission: () => {
+            // iOS 13+ ジャイロ許可
+            DeviceMotionEvent.requestPermission()
+                .then(response => {
+                    if (response == 'granted') {
+                        Client.finalizeJoin(document.getElementById('username').value);
+                    } else {
+                        alert("許可されないと遊べないゲームがあります");
+                    }
+                })
+                .catch(console.error);
+        },
+
+        finalizeJoin: (name) => {
+            Client.conn.send({ act: 'join', name: name });
+            document.getElementById('client-login').classList.add('hidden');
+            document.getElementById('client-permission').classList.add('hidden');
+            document.getElementById('client-waiting').classList.remove('hidden');
+            Client.initSensors();
+        },
+
+        handleHostData: (data) => {
+            if (data.act === 'start') {
+                Client.showController(data.mode);
+            } else if (data.act === 'end') {
+                Client.resetScreens();
+            } else if (data.act === 'role_assign') {
+                // 人狼用
+                Client.showWerewolfCtrl(data.role, data.players);
+            } else if (data.act === 'start_vote') {
+                alert("投票してください！");
+            }
+        },
+
+        showController: (mode) => {
+            document.getElementById('client-waiting').classList.add('hidden');
+            document.querySelectorAll('.screen').forEach(el => {
+                if(el.id.startsWith('ctrl-')) el.classList.add('hidden');
+            });
+
+            if (mode === 'tap') {
+                const el = document.getElementById('ctrl-tap');
+                el.classList.remove('hidden');
+                el.onclick = () => {
+                    Client.conn.send({ act: 'tap' });
+                    Utils.playTone(300, 'triangle', 0.05);
+                    navigator.vibrate(50);
+                };
+            }
+            if (mode === 'shake') document.getElementById('ctrl-shake').classList.remove('hidden');
+            if (mode === 'gyro') document.getElementById('ctrl-gyro').classList.remove('hidden');
+            if (mode === 'werewolf') document.getElementById('ctrl-werewolf').classList.remove('hidden');
+        },
+
+        showWerewolfCtrl: (role, players) => {
+            document.getElementById('client-waiting').classList.add('hidden');
+            const el = document.getElementById('ctrl-werewolf');
+            el.classList.remove('hidden');
+            
+            const roleCard = document.getElementById('my-role');
+            roleCard.innerText = role;
+            roleCard.style.color = (role === '人狼') ? '#ff4757' : '#2ed573';
+
+            const list = document.getElementById('vote-list');
+            list.innerHTML = '';
+            Object.values(players).forEach(p => {
+                if (p.id === Client.myId) return; // 自分には投票不可
+                const btn = document.createElement('button');
+                btn.className = 'btn';
+                btn.innerText = p.name;
+                btn.onclick = () => {
+                    if(confirm(`${p.name} に投票しますか？`)) {
+                        Client.conn.send({ act: 'vote', target: p.id });
+                        list.innerHTML = "<p>投票完了。結果を待て。</p>";
+                    }
+                };
+                list.appendChild(btn);
+            });
+        },
+
+        resetScreens: () => {
+            document.querySelectorAll('.screen').forEach(el => {
+                if(el.id.startsWith('ctrl-')) el.classList.add('hidden');
+            });
+            document.getElementById('client-waiting').classList.remove('hidden');
+        },
+
+        initSensors: () => {
+            // シェイク検知 (加速度)
+            let lastX = 0, lastY = 0, lastZ = 0;
+            window.addEventListener('devicemotion', (e) => {
+                const acc = e.accelerationIncludingGravity;
+                if (!acc) return;
+                const delta = Math.abs(acc.x + acc.y + acc.z - lastX - lastY - lastZ);
+                if (delta > 20) { // シェイク閾値
+                    Client.conn.send({ act: 'shake', val: 1 });
+                    navigator.vibrate(50);
+                }
+                lastX = acc.x; lastY = acc.y; lastZ = acc.z;
+            });
+
+            // ジャイロ検知 (傾き)
+            window.addEventListener('deviceorientation', (e) => {
+                if (document.getElementById('ctrl-gyro').classList.contains('hidden')) return;
+                
+                // 画面上のボールを動かす
+                const bubble = document.getElementById('gyro-bubble');
+                const x = Math.min(Math.max(e.gamma, -45), 45); // 左右
+                const y = Math.min(Math.max(e.beta, -45), 45);  // 前後
+                
+                bubble.style.transform = `translate(calc(-50% + ${x*3}px), calc(-50% + ${y*3}px))`;
+                
+                // データ送信 (頻度制限推奨だが簡易的に送る)
+                Client.conn.send({ act: 'gyro', beta: e.beta, gamma: e.gamma });
+            });
+        }
+    };
+
+    // 起動
+    window.onload = Client.init;
+
 </script>
 </body>
 </html>
