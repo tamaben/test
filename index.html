@@ -4,136 +4,222 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>コトバト広場</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --sub: #94a3b8;
-            --primary: #3b82f6; --danger: #ef4444; --success: #10b981;
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.85);
+            --primary: #6366f1;
+            --accent: #3b82f6;
+            --text: #f8fafc;
+            --text-sub: #94a3b8;
+            --nav-h: 65px;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; height: 100vh; overflow: hidden; }
+        
+        body {
+            background: radial-gradient(circle at top right, #1e1b4b, #0f172a);
+            color: var(--text);
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            margin: 0; overflow: hidden; height: 100vh;
+        }
 
-        /* 画面遷移 */
-        .screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; }
-        .screen.active { display: flex; opacity: 1; }
+        /* アニメーション */
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        
+        .screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .screen.active { display: flex; animation: fadeIn 0.4s ease-out; }
+
+        .app-shell { width: 100%; height: 100%; display: flex; flex-direction: column; max-width: 800px; margin: 0 auto; background: rgba(15,23,42,0.5); backdrop-filter: blur(5px); }
 
         /* カードデザイン */
-        .card { 
-            background: var(--card); border: 1px solid #334155; border-radius: 20px; 
-            padding: 30px; width: 90%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center;
+        .card {
+            background: var(--card-bg); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px; padding: 25px; width: 100%; max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4); text-align: center;
         }
-        h1 { margin: 0 0 10px; background: linear-gradient(to right, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; }
         
-        input { 
-            width: 100%; padding: 14px; margin: 8px 0; border-radius: 10px; border: 1px solid #475569; 
-            background: #020617; color: #fff; font-size: 16px; outline: none; transition: 0.2s;
+        h1 { margin: 0 0 15px; background: linear-gradient(90deg, #818cf8, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; letter-spacing: 1px; }
+        
+        input {
+            width: 100%; padding: 15px; margin: 8px 0; border-radius: 12px; border: 1px solid #475569;
+            background: rgba(2,6,23,0.6); color: #fff; font-size: 16px; outline: none; transition: 0.3s;
         }
-        input:focus { border-color: var(--primary); }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25); }
 
-        .btn { 
-            width: 100%; padding: 14px; margin-top: 15px; border: none; border-radius: 10px; 
-            font-weight: bold; cursor: pointer; color: white; background: var(--primary); font-size: 16px;
+        .btn {
+            width: 100%; padding: 15px; margin-top: 15px; border: none; border-radius: 12px;
+            font-weight: bold; font-size: 16px; cursor: pointer; color: white;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); transition: 0.2s;
         }
-        .btn:active { opacity: 0.8; }
-        .btn-link { background: none; color: var(--sub); margin-top: 10px; font-size: 0.9rem; }
+        .btn:active { transform: scale(0.98); }
+        .btn-link { background: none; color: var(--text-sub); margin-top: 15px; box-shadow: none; font-size: 0.9rem; }
         .btn-link:hover { color: var(--text); text-decoration: underline; }
 
-        /* メイン画面 */
-        .app-layout { width: 100%; height: 100%; display: flex; flex-direction: column; }
-        .header { padding: 15px 20px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; background: #1e293b; }
-        .content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 80px; }
+        /* コンテンツエリア */
+        .header { padding: 15px 20px; background: rgba(30,41,59,0.9); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 90px; }
         
-        .nav { position: fixed; bottom: 0; width: 100%; height: 65px; background: #1e293b; display: flex; border-top: 1px solid #334155; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--sub); font-size: 0.7rem; cursor: pointer; }
-        .nav-item.active { color: var(--primary); }
-        .nav-icon { font-size: 1.4rem; margin-bottom: 3px; }
+        /* ナビゲーション */
+        .nav {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 500px; height: 65px;
+            background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(10px);
+            border-radius: 35px; border: 1px solid rgba(255,255,255,0.1);
+            display: flex; justify-content: space-around; align-items: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 100;
+        }
+        .nav-item { color: var(--text-sub); font-size: 0.7rem; text-align: center; cursor: pointer; transition: 0.3s; width: 60px; }
+        .nav-item .icon { font-size: 1.5rem; display: block; margin-bottom: 2px; }
+        .nav-item.active { color: var(--primary); transform: translateY(-2px); }
 
-        /* 通知 */
-        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--success); padding: 10px 20px; border-radius: 20px; display: none; font-weight: bold; z-index: 9999; }
+        /* チャット・リスト */
+        .msg-box { display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 10px 15px; border-radius: 15px; max-width: 85%; font-size: 0.9rem; position: relative; }
+        .msg.me { align-self: flex-end; background: var(--primary); border-bottom-right-radius: 4px; }
+        .msg.other { align-self: flex-start; background: #334155; border-bottom-left-radius: 4px; }
+        .sender { font-size: 0.7rem; opacity: 0.8; margin-bottom: 2px; display: block; }
+
+        .list-item { background: rgba(30,41,59,0.6); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+
+        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #10b981; color: white; padding: 12px 24px; border-radius: 30px; font-weight: bold; display: none; z-index: 9999; box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
+        
+        .resource-panel { display: flex; justify-content: space-around; background: rgba(15,23,42,0.8); padding: 15px; border-radius: 15px; margin-bottom: 20px; font-weight: bold; border: 1px solid rgba(255,255,255,0.1); }
     </style>
 </head>
 <body>
 
-    <div id="toast">✅ 完了</div>
+    <div id="toast">✅ 処理完了</div>
 
     <!-- 1. ログイン画面 -->
-    <div id="scr-login" class="screen active">
+    <div id="screen-login" class="screen active">
         <div class="card">
             <h1>コトバト広場</h1>
-            <p style="color:var(--sub); font-size:0.9rem; margin-bottom:20px;">ログインしてデータを同期</p>
-            <input type="text" id="log-u" placeholder="ユーザー名">
-            <input type="password" id="log-p" placeholder="パスワード">
-            <button class="btn" onclick="tryLogin()">ログイン</button>
-            <button class="btn btn-link" onclick="go('scr-reg')">新規登録はこちら</button>
-            <div id="status" style="margin-top:15px; font-size:0.8rem; color:var(--sub);">サーバー接続中...</div>
+            <p style="color:var(--text-sub); margin-bottom:20px;">コミュニティへようこそ</p>
+            
+            <input type="text" id="login-user" placeholder="ユーザー名" autocomplete="off">
+            <input type="password" id="login-pass" placeholder="パスワード">
+            
+            <button class="btn" onclick="doLogin()">ログイン</button>
+            <button class="btn btn-link" onclick="switchScreen('register')">アカウント作成はこちら</button>
+            
+            <div id="conn-status" style="margin-top:15px; font-size:0.8rem; color: #fbbf24;">サーバー接続待機中...</div>
         </div>
     </div>
 
-    <!-- 2. 新規登録画面 -->
-    <div id="scr-reg" class="screen">
+    <!-- 2. 登録画面 -->
+    <div id="screen-register" class="screen">
         <div class="card">
             <h1>新規登録</h1>
-            <input type="text" id="reg-u" placeholder="希望ユーザー名 (半角英数)">
-            <input type="password" id="reg-p" placeholder="パスワード">
-            <input type="text" id="reg-n" placeholder="表示名 (ニックネーム)">
-            <button class="btn" style="background:var(--success);" onclick="tryRegister()">登録して開始</button>
-            <button class="btn btn-link" onclick="go('scr-login')">戻る</button>
+            <input type="text" id="reg-user" placeholder="希望ユーザー名 (半角英数)">
+            <input type="password" id="reg-pass" placeholder="パスワード">
+            <input type="text" id="reg-name" placeholder="ニックネーム">
+            
+            <button class="btn" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="doRegister()">登録してスタート</button>
+            <button class="btn btn-link" onclick="switchScreen('login')">ログイン画面へ戻る</button>
         </div>
     </div>
 
     <!-- 3. メイン画面 -->
-    <div id="scr-main" class="screen">
-        <div class="app-layout">
+    <div id="screen-main" class="screen" style="padding:0;">
+        <div class="app-shell">
             <div class="header">
-                <div style="font-weight:bold; font-size:1.1rem;">コトバト広場</div>
-                <div id="u-name" style="font-size:0.8rem; color:var(--sub);">Guest</div>
+                <div style="font-weight:800; font-size:1.1rem; cursor:pointer;" id="app-title">Cotobato Plaza</div>
+                <div id="header-name" style="font-size:0.8rem; color:var(--text-sub);">Guest</div>
             </div>
 
-            <div class="content" id="tab-content">
+            <div class="content">
+                
                 <!-- ホーム -->
-                <div id="view-home">
-                    <div class="card" style="width:100%; max-width:none; margin-bottom:20px;">
-                        <h3>クラウド同期</h3>
-                        <p style="font-size:0.85rem; color:var(--sub);">「コトバト」のデータをクラウドに保存・復元します。</p>
-                        <button class="btn" onclick="saveCloud()">保存する</button>
-                        <button class="btn" style="background:#334155; margin-top:10px;" onclick="loadCloud()">復元する</button>
+                <div id="tab-home">
+                    <div class="resource-panel">
+                        <span>🪙 <span id="val-coins">0</span></span>
+                        <span>💎 <span id="val-dia">0</span></span>
+                        <span>Lv. <span id="val-lv">1</span></span>
                     </div>
-                    <h3>お知らせ</h3>
-                    <div id="news-box" style="margin-top:10px; color:var(--sub); font-size:0.9rem;">読み込み中...</div>
+
+                    <div class="card" style="width:100%; max-width:none; margin-bottom:20px; text-align:left;">
+                        <h3 style="margin:0 0 10px;">☁️ データ同期</h3>
+                        <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:15px;">現在のデータをクラウドに保存します。</p>
+                        <button class="btn" style="margin:0; padding:12px;" onclick="saveCloud()">保存する</button>
+                        <button class="btn" style="margin-top:10px; padding:12px; background:#334155;" onclick="loadCloud()">復元する</button>
+                    </div>
+
+                    <h3 style="margin-bottom:10px;">お知らせ</h3>
+                    <div id="news-list" style="font-size:0.9rem; color:var(--text-sub);">読み込み中...</div>
                 </div>
 
                 <!-- チャット -->
-                <div id="view-chat" style="display:none;">
-                    <div id="chat-box" style="display:flex; flex-direction:column; gap:10px; padding-bottom:20px;"></div>
-                    <div style="display:flex; gap:10px; margin-top:10px;">
+                <div id="tab-chat" style="display:none;">
+                    <div id="chat-list" class="msg-box" style="padding-bottom:20px;"></div>
+                    <div style="display:flex; gap:10px; position:sticky; bottom:0; background:rgba(15,23,42,0.9); padding:10px 0;">
                         <input type="text" id="chat-in" placeholder="メッセージ..." style="margin:0;">
-                        <button class="btn" style="width:60px; margin:0;" onclick="sendChat()">送</button>
+                        <button class="btn" style="width:70px; margin:0; padding:0;" onclick="sendChat()">送信</button>
                     </div>
+                </div>
+
+                <!-- 交換 -->
+                <div id="tab-trade" style="display:none;">
+                    <div class="card" style="width:100%; max-width:none; margin-bottom:20px;">
+                        <h3>出品する</h3>
+                        <div style="display:flex; gap:5px; margin-bottom:5px;">
+                            <select id="tr-give-t" style="background:#0f172a; color:#fff; border:1px solid #334155; padding:10px; border-radius:8px;"><option value="coins">コイン</option><option value="diamonds">ダイヤ</option></select>
+                            <input type="number" id="tr-give-v" placeholder="量" style="margin:0;">
+                        </div>
+                        <div style="text-align:center; font-size:0.8rem; margin:5px 0;">↓</div>
+                        <div style="display:flex; gap:5px;">
+                            <select id="tr-want-t" style="background:#0f172a; color:#fff; border:1px solid #334155; padding:10px; border-radius:8px;"><option value="coins">コイン</option><option value="diamonds">ダイヤ</option></select>
+                            <input type="number" id="tr-want-v" placeholder="求" style="margin:0;">
+                        </div>
+                        <button class="btn" style="margin-top:15px;" onclick="createTrade()">出品</button>
+                    </div>
+                    <div id="trade-list"></div>
                 </div>
 
                 <!-- 設定 -->
-                <div id="view-conf" style="display:none;">
+                <div id="tab-conf" style="display:none;">
                     <div class="card" style="width:100%; max-width:none;">
-                        <button class="btn" style="background:var(--danger);" onclick="location.reload()">ログアウト</button>
+                        <h3>アカウント設定</h3>
+                        <p id="conf-id" style="color:var(--text-sub); margin-bottom:15px;"></p>
+                        <button class="btn" style="background:#ef4444;" onclick="location.reload()">ログアウト</button>
+                    </div>
+                    <div id="admin-panel" style="display:none; margin-top:20px;" class="card">
+                        <h3 style="color:#fbbf24;">運営パネル</h3>
+                        <input type="text" id="adm-news" placeholder="お知らせ配信">
+                        <button class="btn" onclick="sendNews()">配信</button>
                     </div>
                 </div>
+
             </div>
 
+            <!-- ナビゲーション -->
             <div class="nav">
-                <div class="nav-item active" onclick="tab('home', this)"><div class="nav-icon">🏠</div>ホーム</div>
-                <div class="nav-item" onclick="tab('chat', this)"><div class="nav-icon">💬</div>チャット</div>
-                <div class="nav-item" onclick="tab('conf', this)"><div class="nav-icon">⚙️</div>設定</div>
+                <div class="nav-item active" onclick="switchTab('home', this)"><span class="icon">🏠</span>ホーム</div>
+                <div class="nav-item" onclick="switchTab('chat', this)"><span class="icon">💬</span>チャット</div>
+                <div class="nav-item" onclick="switchTab('trade', this)"><span class="icon">⚖️</span>交換</div>
+                <div class="nav-item" onclick="switchTab('conf', this)"><span class="icon">⚙️</span>設定</div>
             </div>
         </div>
     </div>
 
-    <!-- Firebase SDK -->
+    <!-- 関係者試験モーダル -->
+    <div id="quiz-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:9999; align-items:center; justify-content:center; padding:20px;">
+        <div class="card">
+            <h2 style="color:#fbbf24;">関係者確認</h2>
+            <p id="quiz-text"></p>
+            <input type="text" id="quiz-ans">
+            <button class="btn" onclick="answerQuiz()">回答</button>
+            <button class="btn btn-link" onclick="document.getElementById('quiz-modal').style.display='none'">閉じる</button>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, onSnapshot, serverTimestamp, query, limit } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, onSnapshot, serverTimestamp, query, limit, where, deleteDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
-        // ★ここにあなたのFirebase Configを貼り付けてください★
+        // ★設定★
         const firebaseConfig = {
             apiKey: "AIzaSyDguL7I5v4GxKf5FahdoFEtU5lNMYgxcNo",
             authDomain: "cotobato-c121f.firebaseapp.com",
@@ -149,176 +235,193 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        let myUser = null;
+        let currentUser = null;
         let isReady = false;
+        let localData = { coins: 0, diamonds: 0, playerLevel: 1 };
 
-        // 1. 匿名認証 (必須)
-        signInAnonymously(auth).catch(err => {
-            console.error(err);
-            document.getElementById('status').innerText = "エラー: Authenticationで匿名を有効にしてください";
-            document.getElementById('status').style.color = "#ef4444";
+        // 1. 匿名認証（必須）
+        signInAnonymously(auth).catch(e => {
+            document.getElementById('conn-status').innerText = "エラー: データベースを作成してください";
+            document.getElementById('conn-status').style.color = "#ef4444";
         });
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
+        onAuthStateChanged(auth, (u) => {
+            if (u) {
                 isReady = true;
-                document.getElementById('status').innerText = "サーバー接続完了";
-                document.getElementById('status').style.color = "#10b981";
+                document.getElementById('conn-status').innerText = "● サーバー接続完了";
+                document.getElementById('conn-status').style.color = "#10b981";
             }
         });
 
         // 画面遷移
-        window.go = (id) => {
+        window.switchScreen = (id) => {
             document.querySelectorAll('.screen').forEach(e => e.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
+            document.getElementById('screen-'+id).classList.add('active');
         };
 
-        window.tab = (id, el) => {
-            ['home','chat','conf'].forEach(t => document.getElementById('view-'+t).style.display='none');
-            document.getElementById('view-'+id).style.display='block';
+        window.switchTab = (id, el) => {
+            ['home','chat','trade','conf'].forEach(t => document.getElementById('tab-'+t).style.display='none');
+            document.getElementById('tab-'+id).style.display='block';
             document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
             el.classList.add('active');
         };
 
-        // 登録処理
-        window.tryRegister = async () => {
-            if(!isReady) return alert("接続中...少々お待ちください");
-            
-            const u = document.getElementById('reg-u').value.trim();
-            const p = document.getElementById('reg-p').value.trim();
-            const n = document.getElementById('reg-n').value.trim() || u;
+        // 登録（ID重複チェック）
+        window.doRegister = async () => {
+            if(!isReady) return alert("接続中...");
+            const u = document.getElementById('reg-user').value.trim();
+            const p = document.getElementById('reg-pass').value.trim();
+            const n = document.getElementById('reg-name').value.trim() || u;
 
-            if(!u || !p) return alert("ユーザー名とパスワードは必須です");
+            if(!u || !p) return alert("入力してください");
 
             try {
-                // 重複チェック
                 const ref = doc(db, "users", u);
                 const snap = await getDoc(ref);
-                
-                if(snap.exists()) {
-                    alert("そのユーザー名は既に使用されています");
-                    return;
-                }
+                if(snap.exists()) return alert("そのIDは使われています");
 
-                // ユーザー作成
-                const newData = { username: u, password: p, name: n, createdAt: serverTimestamp() };
-                await setDoc(ref, newData);
+                const data = { username: u, password: p, name: n, isAdmin: false, createdAt: serverTimestamp() };
+                await setDoc(ref, data);
                 
-                myUser = newData;
-                startMain();
-                showToast("✨ 登録完了！");
-
-            } catch(e) {
-                console.error(e);
-                alert("登録エラー: Firestoreのルールを確認してください。\n" + e.message);
+                currentUser = data;
+                startApp();
+                showToast("登録完了！");
+            } catch(e) { 
+                console.error(e); 
+                if(e.code === 'unavailable') alert("エラー: データベースを作成してください");
+                else alert("登録エラー: "+e.message); 
             }
         };
 
-        // ログイン処理
-        window.tryLogin = async () => {
-            if(!isReady) return alert("接続中...少々お待ちください");
-
-            const u = document.getElementById('log-u').value.trim();
-            const p = document.getElementById('log-p').value.trim();
-
-            if(!u || !p) return;
+        // ログイン
+        window.doLogin = async () => {
+            if(!isReady) return alert("接続中...");
+            const u = document.getElementById('login-user').value.trim();
+            const p = document.getElementById('login-pass').value.trim();
 
             try {
                 const ref = doc(db, "users", u);
                 const snap = await getDoc(ref);
-
                 if(snap.exists() && snap.data().password === p) {
-                    myUser = snap.data();
-                    startMain();
-                    showToast("🔓 ログイン成功");
+                    currentUser = snap.data();
+                    startApp();
+                    showToast("ログイン成功");
                 } else {
-                    alert("ユーザー名かパスワードが違います");
+                    alert("IDまたはパスワードが違います");
                 }
-            } catch(e) {
-                console.error(e);
-                alert("ログインエラー: " + e.message);
-            }
+            } catch(e) { alert("エラー: "+e.message); }
         };
 
-        // メイン開始
-        function startMain() {
-            window.go('scr-main');
-            document.getElementById('u-name').innerText = myUser.name;
+        function startApp() {
+            window.switchScreen('main');
+            document.getElementById('header-name').innerText = currentUser.name;
+            document.getElementById('conf-id').innerText = "ID: " + currentUser.username;
+            
+            // ローカルデータ読み込み
+            const raw = localStorage.getItem('kb_save_v36');
+            if(raw) {
+                localData = JSON.parse(raw);
+                updateHeader();
+            }
+
+            // リアルタイムリスナー開始（インデックス不要版）
             startListeners();
+            if(currentUser.isAdmin) document.getElementById('admin-panel').style.display='block';
         }
 
-        // リアルタイム通信 (インデックス不要モード)
+        function updateHeader() {
+            document.getElementById('val-coins').innerText = localData.coins || 0;
+            document.getElementById('val-dia').innerText = localData.diamonds || 0;
+            document.getElementById('val-lv').innerText = localData.playerLevel || 1;
+        }
+
+        // リスナー（ソートはクライアント側で行う）
         function startListeners() {
-            // お知らせ
-            onSnapshot(query(collection(db, "announcements"), limit(5)), (snap) => {
-                const div = document.getElementById('news-box');
+            // お知らせ (limitのみ)
+            onSnapshot(query(collection(db, "announcements"), limit(10)), (snap) => {
+                const div = document.getElementById('news-list');
                 div.innerHTML = "";
-                if(snap.empty) { div.innerHTML = "お知らせはありません"; return; }
-                
                 const list = [];
                 snap.forEach(d => list.push(d.data()));
-                // アプリ側でソート
+                // 日付でソート(新しい順)
                 list.sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
                 
                 list.forEach(d => {
                     const date = d.createdAt ? new Date(d.createdAt.seconds*1000).toLocaleDateString() : "";
-                    div.innerHTML += `<div style="background:#334155; padding:10px; border-radius:8px; margin-bottom:5px;">
-                        <small style="color:#94a3b8">${date}</small><br>${d.text}</div>`;
+                    div.innerHTML += `<div class="list-item" style="display:block;"><small style="color:#94a3b8">${date}</small><div style="margin-top:3px;">${d.text}</div></div>`;
                 });
             });
 
-            // チャット
-            onSnapshot(query(collection(db, "chat"), limit(20)), (snap) => {
-                const box = document.getElementById('chat-box');
-                box.innerHTML = "";
-                
+            // チャット (limitのみ)
+            onSnapshot(query(collection(db, "chat"), limit(30)), (snap) => {
+                const div = document.getElementById('chat-list');
+                div.innerHTML = "";
                 const list = [];
                 snap.forEach(d => list.push(d.data()));
+                // 日付でソート(古い順)
                 list.sort((a,b) => (a.createdAt?.seconds||0) - (b.createdAt?.seconds||0));
 
                 list.forEach(d => {
-                    const isMe = d.username === myUser.username;
-                    box.innerHTML += `<div style="align-self:${isMe?'flex-end':'flex-start'}; background:${isMe?'#3b82f6':'#334155'}; padding:8px 12px; border-radius:12px; max-width:80%; font-size:0.9rem;">
-                        <span style="font-size:0.7rem; opacity:0.7; display:block;">${d.sender}</span>${d.text}</div>`;
+                    const isMe = d.username === currentUser.username;
+                    div.innerHTML += `<div class="msg ${isMe?'me':'other'}"><span class="sender">${d.sender}</span>${d.text}</div>`;
                 });
-                box.parentElement.scrollTop = box.parentElement.scrollHeight;
+                div.parentElement.scrollTop = div.parentElement.scrollHeight;
+            });
+
+            // 交換 (whereのみ)
+            onSnapshot(query(collection(db, "trades"), where("status", "==", "open")), (snap) => {
+                const div = document.getElementById('trade-list');
+                div.innerHTML = "";
+                const list = [];
+                snap.forEach(doc => list.push({id: doc.id, ...doc.data()}));
+                // 新しい順
+                list.sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
+
+                list.forEach(t => {
+                    const isMe = t.maker === currentUser.username;
+                    div.innerHTML += `<div class="list-item"><div><b>${t.makerName}</b><br>${t.giveV}${t.giveT} ⇄ ${t.wantV}${t.wantT}</div>${isMe ? `<button class="btn" style="width:auto; padding:5px 10px; background:#ef4444;" onclick="cancelTrade('${t.id}')">取消</button>` : `<button class="btn" style="width:auto; padding:5px 10px;" onclick="acceptTrade('${t.id}')">交換</button>`}</div>`;
+                });
             });
         }
 
+        // 機能群
         window.sendChat = async () => {
             const t = document.getElementById('chat-in').value.trim();
             if(!t) return;
-            await addDoc(collection(db, "chat"), {
-                text: t, sender: myUser.name, username: myUser.username, createdAt: serverTimestamp()
-            });
+            await addDoc(collection(db, "chat"), { text: t, sender: currentUser.name, username: currentUser.username, createdAt: serverTimestamp() });
             document.getElementById('chat-in').value = "";
         };
 
         window.saveCloud = async () => {
-            const data = localStorage.getItem('kb_save_v36');
-            if(!data) return alert("セーブデータがありません");
-            await updateDoc(doc(db, "users", myUser.username), { backupData: data });
-            showToast("☁️ 保存しました");
+            const raw = localStorage.getItem('kb_save_v36');
+            if(!raw) return alert("データがありません");
+            await updateDoc(doc(db, "users", currentUser.username), { backupData: raw });
+            showToast("保存しました");
         };
 
         window.loadCloud = async () => {
-            const snap = await getDoc(doc(db, "users", myUser.username));
-            const data = snap.data().backupData;
-            if(data) {
-                localStorage.setItem('kb_save_v36', data);
-                alert("復元しました。再読み込みします。");
+            const s = await getDoc(doc(db, "users", currentUser.username));
+            if(s.data().backupData) {
+                localStorage.setItem('kb_save_v36', s.data().backupData);
+                alert("復元しました。再読み込みします");
                 location.reload();
-            } else {
-                alert("クラウドにデータがありません");
-            }
+            } else alert("データがありません");
         };
 
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.innerText = msg;
-            t.style.display = 'block';
-            setTimeout(()=>t.style.display='none', 3000);
-        }
-    </script>
-</body>
-</html>
+        window.createTrade = async () => {
+            const gt=document.getElementById('tr-give-t').value, gv=parseInt(document.getElementById('tr-give-v').value);
+            const wt=document.getElementById('tr-want-t').value, wv=parseInt(document.getElementById('tr-want-v').value);
+            if(!gv || !wv) return;
+            if(localData[gt] < gv) return alert("不足しています");
+            
+            localData[gt] -= gv; localStorage.setItem('kb_save_v36', JSON.stringify(localData)); updateHeader();
+            await addDoc(collection(db, "trades"), { maker: currentUser.username, makerName: currentUser.name, giveT: gt, giveV: gv, wantT: wt, wantV: wv, status: 'open', createdAt: serverTimestamp() });
+            showToast("出品しました");
+        };
+
+        window.cancelTrade = async (id) => {
+            const s = await getDoc(doc(db, "trades", id));
+            const t = s.data();
+            localData[t.giveT] += t.giveV; localStorage.setItem('kb_save_v36', JSON.stringify(localData)); updateHeader();
+            await deleteDoc(doc(db, "trades", id));
+            sho
