@@ -3,73 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PEER PARTY 50</title>
+    <title>HYBRID PARTY 50</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=M+PLUS+Rounded+1c:wght@500;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Zen+Maru+Gothic:wght@500;900&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #050510; --main: #00f2ff; --sub: #ff0055; --text: #fff; }
+        :root { --bg: #0f0f1a; --main: #00ff88; --sub: #ff0055; --text: #fff; --panel: #1a1a2e; }
         * { box-sizing: border-box; touch-action: none; user-select: none; -webkit-user-select: none; }
-        body { margin: 0; background: var(--bg); color: var(--text); font-family: 'M PLUS Rounded 1c', sans-serif; overflow: hidden; height: 100vh; width: 100vw; }
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Zen Maru Gothic', sans-serif; overflow: hidden; height: 100vh; width: 100vw; }
 
-        .screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg); transition: 0.3s; z-index: 10; }
+        /* SCENE MANAGEMENT */
+        .screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg); transition: opacity 0.3s; z-index: 10; }
         .hidden { opacity: 0; pointer-events: none; z-index: -1; transform: scale(0.95); }
 
-        h1 { font-family: 'Black Ops One'; font-size: 3rem; color: var(--main); margin: 0; text-shadow: 0 0 15px var(--main); line-height: 1; text-align: center; }
-        h2 { color: var(--sub); font-size: 1.2rem; margin: 10px; letter-spacing: 2px; }
-        p { color: #aaa; font-size: 0.9rem; margin: 5px; }
+        /* UI COMPONENTS */
+        h1 { font-family: 'Audiowide'; font-size: 3.5rem; color: var(--main); margin: 0; text-shadow: 0 0 15px rgba(0,255,136,0.4); line-height: 1; text-align: center; }
+        h2 { color: var(--sub); font-size: 1.2rem; margin: 10px; letter-spacing: 2px; text-transform: uppercase; }
+        p { color: #889; font-size: 0.9rem; margin: 5px; }
 
         .btn {
-            background: rgba(0, 242, 255, 0.1); border: 2px solid var(--main); color: var(--main);
+            background: linear-gradient(135deg, rgba(0,255,136,0.1), rgba(0,255,136,0));
+            border: 2px solid var(--main); color: var(--main);
             padding: 15px 40px; font-size: 1.2rem; font-weight: bold; border-radius: 50px;
-            margin: 10px; cursor: pointer; width: 80%; max-width: 300px; transition: 0.2s;
+            margin: 10px; cursor: pointer; width: 85%; max-width: 320px; transition: 0.2s;
+            box-shadow: 0 0 10px rgba(0,255,136,0.1);
         }
         .btn:active { background: var(--main); color: #000; transform: scale(0.96); }
-        .btn-p { border-color: var(--sub); color: var(--sub); background: rgba(255, 0, 85, 0.1); }
-        .btn-p:active { background: var(--sub); }
+        .btn-red { border-color: var(--sub); color: var(--sub); background: linear-gradient(135deg, rgba(255,0,85,0.1), rgba(255,0,85,0)); }
+        .btn-red:active { background: var(--sub); color: #fff; }
 
-        /* HOST LOBBY */
-        #room-display { font-size: 5rem; font-family: 'Black Ops One'; color: var(--main); margin: 10px; letter-spacing: 5px; }
-        .status-badge { padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; background: #333; margin-bottom: 10px; }
-        .s-ok { background: #00b894; color: white; }
-        .s-wait { background: #fdcb6e; color: black; }
+        /* STATUS BADGE */
+        .badge { padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; margin-bottom: 10px; display: inline-block; }
+        .b-p2p { background: #00b894; color: white; border: 1px solid #55efc4; } /* P2P OK */
+        .b-db { background: #e17055; color: white; border: 1px solid #fab1a0; } /* Firebase Mode */
+        .b-wait { background: #636e72; color: #dfe6e9; }
 
         /* GAME LIST */
-        #game-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; width: 95%; height: 60vh; overflow-y: auto; padding: 10px; }
-        .g-card { background: #1a1a1a; border: 1px solid #333; padding: 10px; border-radius: 8px; text-align: center; cursor: pointer; }
-        .g-card:active { background: var(--main); color: black; }
+        #game-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 95%; height: 60vh; overflow-y: auto; padding: 10px; padding-bottom: 50px; }
+        .g-card { background: var(--panel); border: 1px solid #333; padding: 15px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .g-card:active { background: var(--main); border-color: var(--main); transform: scale(0.98); }
+        .g-icon { font-size: 2rem; margin-bottom: 5px; }
+        .g-name { font-weight: 900; font-size: 0.9rem; }
 
-        /* GAME STAGE */
-        .bar-bg { width: 100%; height: 10px; background: #222; position: fixed; top: 0; }
-        .bar-fill { height: 100%; background: var(--sub); width: 100%; }
-        .rank-row { display: flex; justify-content: space-between; width: 90%; background: #222; padding: 10px; margin: 5px 0; border-radius: 5px; }
+        /* PLAY AREA */
+        .bar-bg { width: 100%; height: 8px; background: #333; position: fixed; top: 0; }
+        .bar-fill { height: 100%; background: var(--main); width: 100%; transition: width 0.1s linear; }
+        .rank-list { width: 90%; margin-top: 20px; }
+        .rank-item { display: flex; justify-content: space-between; background: rgba(255,255,255,0.05); padding: 10px; margin-bottom: 5px; border-radius: 5px; }
         
-        /* CLIENT CONTROLLER */
-        .c-full { width: 100%; height: 100%; display: grid; place-items: center; }
-        .c-btn { width: 90%; height: 80%; border: none; border-radius: 20px; font-size: 3rem; font-weight: bold; color: white; box-shadow: 0 10px 0 rgba(0,0,0,0.5); }
-        .c-btn:active { transform: translateY(10px); box-shadow: none; }
-        .bg-r { background: #ff4757; } .bg-b { background: #1e90ff; }
-        
-        input { font-size: 2rem; text-align: center; background: #222; border: 2px solid #444; color: white; padding: 10px; border-radius: 10px; width: 80%; margin: 10px; text-transform: uppercase; }
+        /* CONTROLLER */
+        .c-grid { width: 100%; height: 100%; display: grid; place-items: center; padding: 10px; }
+        .c-btn { width: 100%; height: 100%; border: none; border-radius: 20px; font-size: 3rem; font-weight: bold; color: white; box-shadow: 0 8px 0 rgba(0,0,0,0.3); transition: 0.05s; }
+        .c-btn:active { transform: translateY(8px); box-shadow: none; }
+        .bg-tap { background: var(--sub); }
+        .bg-blue { background: #0984e3; }
+        .bg-green { background: #00b894; }
+
+        input { font-size: 1.5rem; text-align: center; background: #222; border: 2px solid #444; color: white; padding: 12px; border-radius: 10px; width: 80%; margin: 10px; text-transform: uppercase; letter-spacing: 2px; }
     </style>
 </head>
 <body>
 
 <div id="s-title" class="screen">
-    <h1>PEER<br>PARTY</h1>
-    <p>PeerJS x Firebase Hybrid</p>
-    <div style="margin: 20px; font-size: 0.8rem; color: #666;">50 GAMES INCLUDED</div>
-    <button class="btn" onclick="App.initHost()">👑 HOST (部屋作成)</button>
-    <button class="btn btn-p" onclick="App.initClient()">📱 JOIN (参加)</button>
+    <h1>HYBRID<br>PARTY</h1>
+    <p>50 Games / Auto-Switching</p>
+    <div style="margin:20px 0; color:#666; font-size:0.8rem;">P2P(WebRTC) + DB(Firebase)</div>
+    <button class="btn" onclick="App.host()">👑 部屋を作る (HOST)</button>
+    <button class="btn btn-red" onclick="App.client()">📱 参加する (JOIN)</button>
 </div>
 
 <div id="s-h-lobby" class="screen hidden">
-    <div id="h-status" class="status-badge s-wait">接続準備中...</div>
+    <div id="h-status" class="badge b-wait">通信初期化中...</div>
     <h2>ROOM ID</h2>
-    <div id="room-display">----</div>
-    <div id="qrcode" style="background: white; padding: 10px; border-radius: 10px;"></div>
-    <p>参加者: <span id="p-count" style="color:var(--main); font-size:1.5rem;">0</span> 人</p>
-    <button class="btn" onclick="Host.toMenu()">ゲーム選択へ</button>
+    <div id="room-disp" style="font-size: 4rem; font-family: 'Audiowide'; letter-spacing: 5px; color:var(--main);">...</div>
+    <div id="qrcode" style="background:white; padding:10px; border-radius:10px; margin:15px;"></div>
+    <p>参加人数: <span id="p-count" style="color:var(--main); font-size:1.5rem; font-weight:bold;">0</span></p>
+    <button class="btn" onclick="Host.menu()">ゲーム選択へ</button>
 </div>
 
 <div id="s-h-menu" class="screen hidden">
@@ -78,49 +87,49 @@
 </div>
 
 <div id="s-h-game" class="screen hidden">
-    <div class="bar-bg"><div id="timer-bar" class="bar-fill"></div></div>
-    <h2 id="g-name" style="margin-top: 40px; color:white;">GAME</h2>
-    <div id="g-main" style="font-size: 5rem; font-family: 'Black Ops One';">READY</div>
-    <div id="leaderboard" style="width: 100%; display: flex; flex-direction: column; align-items: center; margin-top: 20px;"></div>
+    <div class="bar-bg"><div id="t-bar" class="bar-fill"></div></div>
+    <h2 id="g-name" style="margin-top:50px; color:white;">GAME NAME</h2>
+    <div id="g-main" style="font-size:5rem; font-family:'Audiowide';">READY</div>
+    <div id="ranking" class="rank-list"></div>
 </div>
 
-<div id="s-h-result" class="screen hidden">
-    <h1 style="color: var(--sub)">WINNER</h1>
-    <div id="res-name" style="font-size: 3rem; margin: 20px;">???</div>
-    <div id="res-score" style="font-size: 2rem;">0 PTS</div>
-    <button class="btn" onclick="Host.toMenu()">メニューへ</button>
+<div id="s-h-res" class="screen hidden">
+    <h1 style="color:var(--sub)">WINNER</h1>
+    <div id="res-name" style="font-size:3rem; margin:20px; font-weight:bold;">???</div>
+    <div id="res-score" style="font-size:2rem; color:var(--main);">0 PTS</div>
+    <button class="btn" onclick="Host.menu()">メニューへ戻る</button>
 </div>
 
 <div id="s-c-login" class="screen hidden">
     <h2>ENTER ROOM ID</h2>
     <input type="text" id="inp-room" placeholder="ID (4文字)" maxlength="4">
-    <input type="text" id="inp-name" placeholder="NAME" maxlength="8">
-    <button class="btn btn-p" onclick="Client.join()">参加する</button>
-    <p id="c-status" style="height: 20px; color: var(--sub);"></p>
+    <input type="text" id="inp-name" placeholder="NICKNAME" maxlength="8">
+    <button class="btn btn-red" onclick="Client.join()">参加する</button>
+    <div id="c-msg" style="color:var(--main); margin-top:10px; font-size:0.9rem;"></div>
 </div>
 
 <div id="s-c-perm" class="screen hidden">
     <h2>センサー許可</h2>
-    <p>iPhoneの方は許可が必要です</p>
-    <div style="font-size: 3rem;">📱🔓</div>
-    <button class="btn" onclick="Client.grantPerm()">許可してスタート</button>
+    <p>ゲームに必要です</p>
+    <div style="font-size:3rem;">📱🔓</div>
+    <button class="btn" onclick="Client.perm()">許可して完了</button>
 </div>
 
 <div id="s-c-wait" class="screen hidden">
-    <h2>WAITING...</h2>
-    <p>ホストが準備中です</p>
-    <div id="c-conn-stat" class="status-badge s-ok">HOST CONNECTED</div>
+    <div id="c-status" class="badge b-wait">CONNECTING...</div>
+    <h2 style="animation:pulse 1s infinite">WAITING</h2>
+    <p>ホストがゲームを選んでいます</p>
 </div>
 
 <div id="s-c-ctrl" class="screen hidden">
-    <div id="ctrl-area" class="c-full"></div>
+    <div id="ctrl-area" class="c-grid"></div>
 </div>
 
 <script type="module">
+// --- FIREBASE SETUP ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getDatabase, ref, set, get, onValue, update, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+import { getDatabase, ref, set, get, onValue, update, onDisconnect, push, onChildAdded, remove } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
-// --- CONFIG ---
 const firebaseConfig = {
     apiKey: "AIzaSyDbZzTMvUkG2LXIGY4ux0KBTmnAdqP236s",
     authDomain: "game-4f2d9.firebaseapp.com",
@@ -141,38 +150,37 @@ const show = id => { document.querySelectorAll('.screen').forEach(e => e.classLi
 const genId = () => Math.random().toString(36).substr(2, 4).toUpperCase();
 const myId = Math.random().toString(36).substr(2, 6);
 
-// --- 50 GAMES DATA (圧縮生成) ---
+// --- 50 GAMES DATA ---
 const GAMES = [];
-// 1-10: Basic Tap
-for(let i=1; i<=10; i++) GAMES.push({ id:i, type:'tap', name:`連打 Lv.${i}`, time:5+(i*2), desc:'ひたすら連打！' });
-// 11-20: Shake
-for(let i=11; i<=20; i++) GAMES.push({ id:i, type:'shake', name:`シェイク Lv.${i-10}`, time:5+(i%5)*3, desc:'スマホを振れ！' });
-// 21-30: Squat/Tilt
-for(let i=21; i<=30; i++) GAMES.push({ id:i, type:'squat', name:`スクワット No.${i}`, time:15, desc:'しゃがんで立て！' });
-// 31-40: Math/Brain
-for(let i=31; i<=40; i++) GAMES.push({ id:i, type:'math', name:`暗算バトル ${i}`, time:20, desc:'答えを選べ！' });
+// 1-10: Tap Basics
+for(let i=1; i<=10; i++) GAMES.push({id:i, t:'tap', n:`連打 Lv.${i}`, tm:5+i, d:'画面を連打しろ！', icon:'🔥'});
+// 11-20: Shake Basics
+for(let i=11; i<=20; i++) GAMES.push({id:i, t:'shake', n:`シェイク Lv.${i-10}`, tm:5+(i%5)*2, d:'スマホを振れ！', icon:'👋'});
+// 21-30: Squat
+for(let i=21; i<=30; i++) GAMES.push({id:i, t:'squat', n:`スクワット No.${i}`, tm:15, d:'しゃがんで立て！', icon:'🦵'});
+// 31-40: Math
+for(let i=31; i<=40; i++) GAMES.push({id:i, t:'math', n:`暗算バトル ${i}`, tm:20, d:'計算して答えろ', icon:'🧮'});
 // 41-50: Variety
-GAMES.push({id:41, type:'luck', name:'運ゲー', time:5, desc:'当たりを引け'});
-GAMES.push({id:42, type:'tap', name:'3秒連打', time:3, desc:'超高速連打！'});
-GAMES.push({id:43, type:'shake', name:'耐久シェイク', time:30, desc:'振り続けろ！'});
-GAMES.push({id:44, type:'quiz', name:'4択クイズ', time:15, desc:'指示に従え'});
-GAMES.push({id:45, type:'balance', name:'バランス', time:15, desc:'水平を保て'});
-for(let i=46; i<=50; i++) GAMES.push({ id:i, type:'mix', name:`ファイナル ${i}`, time:15, desc:'全力で挑め' });
+GAMES.push({id:41, t:'luck', n:'運ゲー', tm:5, d:'当たりを引け', icon:'🎰'});
+GAMES.push({id:42, t:'tap', n:'3秒連打', tm:3, d:'超高速タップ！', icon:'⚡'});
+GAMES.push({id:43, t:'shake', n:'耐久シェイク', tm:30, d:'30秒間振れ', icon:'🥵'});
+GAMES.push({id:44, t:'quiz', n:'4択クイズ', tm:15, d:'直感で選べ', icon:'❓'});
+GAMES.push({id:45, t:'balance', n:'バランス', tm:15, d:'水平を保て', icon:'⚖️'});
+for(let i=46; i<=50; i++) GAMES.push({id:i, t:'mix', n:`ファイナル ${i}`, tm:20, d:'全力で挑め', icon:'👑'});
 
-// --- GLOBAL VARS ---
+// --- GLOBAL STATE ---
 let roomId = null;
-let peer = null; // PeerJS instance
-let conn = null; // Client side connection to host
-let connections = {}; // Host side: map of peerId -> dataConnection
+let peer = null;
+let p2pConn = null;
+let isP2pAvailable = false;
+let hostConnections = {};
 
 // ==========================================
 //               APP CONTROLLER
 // ==========================================
 window.App = {
-    initHost: () => {
-        Host.init();
-    },
-    initClient: () => {
+    host: () => Host.init(),
+    client: () => {
         const p = new URLSearchParams(location.search);
         if(p.get('room')) $('inp-room').value = p.get('room');
         show('s-c-login');
@@ -183,155 +191,153 @@ window.App = {
 //               HOST LOGIC
 // ==========================================
 window.Host = {
-    players: {}, // { peerId: { name: "Bob", score: 0 } }
-    
-    init: () => {
+    players: {}, // { id: { name, score } }
+
+    init: async () => {
         show('s-h-lobby');
-        $('h-status').innerText = "PeerJSサーバー接続中...";
-        $('h-status').className = "status-badge s-wait";
+        roomId = genId();
+        $('room-disp').innerText = roomId;
+        new QRCode($('qrcode'), { text: `${location.href.split('?')[0]}?room=${roomId}`, width: 128, height: 128 });
 
-        // 1. PeerJS Init
-        peer = new Peer();
+        // 1. Firebase Room Create (Base)
+        const roomRef = ref(db, `rooms/${roomId}`);
+        await set(roomRef, { status: 'lobby', created: Date.now() });
+        onDisconnect(roomRef).remove();
 
-        peer.on('open', (id) => {
-            // PeerID取得後にFirebase部屋作成
-            roomId = genId();
-            const r = ref(db, `rooms/${roomId}`);
+        // 2. Try PeerJS
+        try {
+            peer = new Peer();
             
-            set(r, {
-                hostPeerId: id, // クライアントはこれを見てconnectする
-                status: 'lobby',
-                createdAt: Date.now()
-            }).then(() => {
-                // UI Update
-                $('room-display').innerText = roomId;
-                $('h-status').innerText = "接続待機中 (OK)";
-                $('h-status').className = "status-badge s-ok";
-                new QRCode($('qrcode'), { text: `${location.href.split('?')[0]}?room=${roomId}`, width: 128, height: 128 });
-
-                // 切断時クリーンアップ
-                onDisconnect(r).remove();
+            // Error Handler: If P2P fails, we just rely on Firebase
+            peer.on('error', (err) => {
+                console.warn("PeerJS Error (Fallback to DB):", err);
+                $('h-status').innerText = "DBモード (安定版)";
+                $('h-status').className = "badge b-db";
+                // Update room to say P2P is dead
+                update(roomRef, { p2pId: null });
             });
+
+            peer.on('open', (id) => {
+                console.log("PeerJS ID:", id);
+                $('h-status').innerText = "P2Pハイブリッド (高速)";
+                $('h-status').className = "badge b-p2p";
+                update(roomRef, { p2pId: id });
+            });
+
+            peer.on('connection', (conn) => {
+                hostConnections[conn.peer] = conn;
+                conn.on('data', (d) => Host.handleInput(d.pid, d.val, d.name));
+            });
+
+        } catch (e) {
+            console.log("PeerJS Init Failed");
+        }
+
+        // 3. Listen to Firebase Inputs (FALLBACK CHANNEL)
+        // クライアントがP2Pで繋がらない場合、Firebaseに書き込むのでそれも監視する
+        onChildAdded(ref(db, `rooms/${roomId}/actions`), (snap) => {
+            const val = snap.val();
+            Host.handleInput(val.pid, val.val, val.name);
+            // Processed, remove to save space? No, let's keep for simplicity, auto-deleted on room removal
+            remove(snap.ref); 
         });
 
-        peer.on('error', (err) => {
-            alert("PeerJS Error: " + err.type);
-            $('h-status').innerText = "エラー発生";
-        });
-
-        // 2. クライアントからの接続待ち
-        peer.on('connection', (c) => {
-            c.on('open', () => {
-                connections[c.peer] = c;
-                
-                // データ受信 (Input from Client)
-                c.on('data', (data) => {
-                    Host.handleData(c.peer, data);
-                });
-
-                // 切断検知
-                c.on('close', () => {
-                    delete connections[c.peer];
-                    delete Host.players[c.peer];
-                    Host.updateLobbyCount();
-                });
+        // 4. Listen for Player Joins (via Firebase Presence)
+        onValue(ref(db, `rooms/${roomId}/players`), (snap) => {
+            const val = snap.val() || {};
+            // Merge logic if needed, but here we just trust the list
+            Object.keys(val).forEach(pid => {
+                if(!Host.players[pid]) Host.players[pid] = { name: val[pid].name, score: 0 };
             });
+            $('p-count').innerText = Object.keys(Host.players).length;
         });
     },
 
-    handleData: (peerId, data) => {
-        // data = { type: 'join', name: '...' } OR { type: 'action', val: 1 }
-        if (data.type === 'join') {
-            Host.players[peerId] = { name: data.name, score: 0 };
-            Host.updateLobbyCount();
-        } 
-        else if (data.type === 'action') {
-            if (Host.players[peerId]) {
-                Host.players[peerId].score += data.val;
-            }
+    handleInput: (pid, val, name) => {
+        // Player Join Signal
+        if (!Host.players[pid]) {
+            Host.players[pid] = { name: name || "Guest", score: 0 };
+            // Sync back to Firebase for persistence
+            update(ref(db, `rooms/${roomId}/players/${pid}`), { name: name || "Guest" });
+            $('p-count').innerText = Object.keys(Host.players).length;
+        }
+
+        // Game Action Signal (only if playing)
+        if ($('s-h-game').classList.contains('hidden')) return;
+
+        if (val) {
+            Host.players[pid].score += val;
         }
     },
 
-    updateLobbyCount: () => {
-        $('p-count').innerText = Object.keys(Host.players).length;
-    },
-
-    toMenu: () => {
+    menu: () => {
         show('s-h-menu');
-        const g = $('game-grid');
-        g.innerHTML = GAMES.map(game => `
-            <div class="g-card" onclick="Host.startGame(${game.id})">
-                <div style="font-size:2rem;">${game.id}</div>
-                <div>${game.name}</div>
-                <div style="font-size:0.7rem; color:#888;">${game.desc}</div>
+        $('game-grid').innerHTML = GAMES.map(g => `
+            <div class="g-card" onclick="Host.start(${g.id})">
+                <div class="g-icon">${g.icon}</div>
+                <div class="g-name">${g.id}. ${g.n}</div>
             </div>
         `).join('');
-        
-        // 全クライアントにメニュー画面へ遷移するよう通知（必要なら）
-        Host.broadcast({ type: 'state', status: 'menu' });
+        update(ref(db, `rooms/${roomId}`), { status: 'menu' });
     },
 
-    startGame: (gameId) => {
-        const game = GAMES.find(g => g.id === gameId);
+    start: (gid) => {
+        const game = GAMES.find(g => g.id === gid);
         show('s-h-game');
-        $('g-name').innerText = game.name;
+        $('g-name').innerText = game.n;
         $('g-main').innerText = "READY";
-        $('leaderboard').innerHTML = "";
+        $('ranking').innerHTML = "";
+        
+        // Reset Scores
+        Object.keys(Host.players).forEach(k => Host.players[k].score = 0);
 
-        // スコアリセット
-        Object.keys(Host.players).forEach(pid => Host.players[pid].score = 0);
-
-        // クライアントへ開始通知 (PeerJSで送信)
-        Host.broadcast({ 
-            type: 'start', 
-            game: game 
+        // Notify Clients (Firebase update handles everyone)
+        update(ref(db, `rooms/${roomId}`), { 
+            status: 'playing', 
+            game: game,
+            ts: Date.now() // timestamp to force update
         });
 
-        // カウントダウン
+        // Countdown
         let cd = 3;
-        const cdt = setInterval(() => {
-            if(cd > 0) $('g-main').innerText = cd--;
+        const t = setInterval(() => {
+            if(cd>0) $('g-main').innerText = cd--;
             else {
-                clearInterval(cdt);
+                clearInterval(t);
                 $('g-main').innerText = "GO!";
-                Host.gameLoop(game.time);
+                Host.loop(game.tm);
             }
         }, 1000);
     },
 
-    gameLoop: (seconds) => {
-        let left = seconds;
-        const max = seconds;
-        
-        const loop = setInterval(() => {
+    loop: (sec) => {
+        let left = sec;
+        const max = sec;
+        const timer = setInterval(() => {
             left -= 0.1;
-            $('timer-bar').style.width = (left / max * 100) + "%";
+            $('t-bar').style.width = (left/max*100) + "%";
 
-            // リアルタイムランキング更新
-            const sorted = Object.values(Host.players).sort((a,b) => b.score - a.score);
-            $('leaderboard').innerHTML = sorted.slice(0, 3).map((p, i) => `
-                <div class="rank-row">
+            // Update Rankings
+            const sorted = Object.values(Host.players).sort((a,b)=>b.score-a.score).slice(0,3);
+            $('ranking').innerHTML = sorted.map((p,i) => `
+                <div class="rank-item">
                     <span>#${i+1} ${p.name}</span>
-                    <span>${Math.floor(p.score)}</span>
+                    <span style="font-weight:bold; color:var(--main)">${Math.floor(p.score)}</span>
                 </div>
             `).join('');
 
             if(left <= 0) {
-                clearInterval(loop);
-                Host.finishGame(sorted[0]);
+                clearInterval(timer);
+                Host.end(sorted[0]);
             }
         }, 100);
     },
 
-    finishGame: (winner) => {
-        Host.broadcast({ type: 'end' });
-        show('s-h-result');
+    end: (winner) => {
+        update(ref(db, `rooms/${roomId}`), { status: 'result' });
+        show('s-h-res');
         $('res-name').innerText = winner ? winner.name : "NO WINNER";
         $('res-score').innerText = winner ? Math.floor(winner.score) + " PTS" : "";
-    },
-
-    broadcast: (msg) => {
-        Object.values(connections).forEach(c => c.send(msg));
     }
 };
 
@@ -340,150 +346,202 @@ window.Host = {
 // ==========================================
 window.Client = {
     name: "Guest",
-    score: 0,
-    currGame: null,
+    game: null,
     
     join: async () => {
         const rid = $('inp-room').value.toUpperCase();
         Client.name = $('inp-name').value || "Guest";
         
-        if (rid.length !== 4) return alert("4文字のIDを入力してください");
+        if (rid.length !== 4) {
+            $('c-msg').innerText = "IDは4文字です";
+            return;
+        }
         
-        $('c-status').innerText = "部屋を探しています...";
-
-        // 1. Firebaseから部屋情報を取得
+        $('c-msg').innerText = "部屋を探しています...";
+        
+        // 1. Check Room Existence
         const snap = await get(ref(db, `rooms/${rid}`));
-        
         if (!snap.exists()) {
-            $('c-status').innerText = "部屋が見つかりません (ID確認)";
+            $('c-msg').innerText = "部屋が見つかりません";
             return;
         }
-
-        const roomData = snap.val();
-        if (!roomData.hostPeerId) {
-            $('c-status').innerText = "ホストの準備が完了していません";
-            return;
-        }
-
-        // 2. PeerJS初期化 & ホストへ接続
-        $('c-status').innerText = "PeerJSサーバーへ接続中...";
-        peer = new Peer();
-
-        peer.on('open', (id) => {
-            $('c-status').innerText = "ホストへ接続中...";
-            conn = peer.connect(roomData.hostPeerId);
-
-            conn.on('open', () => {
-                // 接続成功 -> 名前送信
-                conn.send({ type: 'join', name: Client.name });
-                
-                // センサーチェック
-                if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                    show('s-c-perm');
-                } else {
-                    Client.wait();
-                }
-            });
-
-            conn.on('data', (data) => {
-                Client.handleHostData(data);
-            });
-            
-            conn.on('close', () => alert("ホストとの接続が切れました"));
-            conn.on('error', () => alert("接続エラー"));
-        });
         
-        peer.on('error', (e) => $('c-status').innerText = "通信エラー: " + e.type);
-    },
+        roomId = rid;
+        const rData = snap.val();
+        
+        // 2. Register Presence
+        await set(ref(db, `rooms/${rid}/players/${myId}`), { name: Client.name });
+        onDisconnect(ref(db, `rooms/${rid}/players/${myId}`)).remove();
 
-    grantPerm: () => {
-        DeviceMotionEvent.requestPermission().then(r => {
-            if (r==='granted') Client.wait();
-            else alert("センサー権限が必要です");
-        }).catch(e => alert(e));
-    },
+        // 3. Try P2P Connection (if host has ID)
+        if (rData.p2pId) {
+            Client.connectP2P(rData.p2pId);
+        } else {
+            Client.useDBMode();
+        }
 
-    wait: () => {
-        show('s-c-wait');
-        Client.initSensors();
-    },
+        // 4. Start Listeners
+        Client.listen();
 
-    handleHostData: (data) => {
-        if (data.type === 'start') {
-            Client.setupController(data.game);
-        } else if (data.type === 'end') {
+        // 5. Sensor Check
+        if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+            show('s-c-perm');
+        } else {
             show('s-c-wait');
         }
     },
 
-    setupController: (game) => {
+    connectP2P: (hostPeerId) => {
+        $('c-status').innerText = "P2P接続試行中...";
+        try {
+            peer = new Peer();
+            peer.on('open', (id) => {
+                p2pConn = peer.connect(hostPeerId);
+                p2pConn.on('open', () => {
+                    isP2pAvailable = true;
+                    $('c-status').innerText = "P2P CONNECTED (高速)";
+                    $('c-status').className = "badge b-p2p";
+                    Client.send(0); // Join signal
+                });
+                p2pConn.on('error', () => Client.useDBMode());
+                p2pConn.on('close', () => Client.useDBMode());
+            });
+            peer.on('error', () => Client.useDBMode());
+        } catch (e) {
+            Client.useDBMode();
+        }
+    },
+
+    useDBMode: () => {
+        isP2pAvailable = false;
+        $('c-status').innerText = "DB CONNECTION (安定)";
+        $('c-status').className = "badge b-db";
+        // Send initial join signal via DB
+        Client.send(0);
+    },
+
+    listen: () => {
+        onValue(ref(db, `rooms/${roomId}`), (snap) => {
+            const d = snap.val();
+            if (!d) return; // Room closed
+
+            if (d.status === 'playing' && d.game) {
+                // Prevent restart if already playing same game
+                if (Client.game && Client.game.id === d.game.id) return;
+                Client.startGame(d.game);
+            } else if (d.status === 'menu' || d.status === 'result' || d.status === 'lobby') {
+                Client.game = null;
+                show('s-c-wait');
+                if(navigator.vibrate) navigator.vibrate(0);
+            }
+        });
+    },
+
+    perm: () => {
+        DeviceMotionEvent.requestPermission().then(r => {
+            if(r==='granted') show('s-c-wait');
+            else alert("許可がないと遊べないゲームがあります");
+        }).catch(e=>show('s-c-wait'));
+    },
+
+    startGame: (game) => {
+        Client.game = game;
         show('s-c-ctrl');
         const area = $('ctrl-area');
         area.innerHTML = "";
-        Client.currGame = game;
 
-        if (game.type === 'tap' || game.type === 'mix') {
-            area.innerHTML = `<button class="c-btn bg-r" ontouchstart="Client.send(1)">PUSH!</button>`;
-        } else if (game.type === 'math') {
-            // 簡易計算
-            const n1 = Math.floor(Math.random()*9)+1;
-            const n2 = Math.floor(Math.random()*9)+1;
+        // UI Generator
+        if (game.t === 'tap' || game.t === 'mix') {
+            area.innerHTML = `<button class="c-btn bg-tap" ontouchstart="Client.send(1)">PUSH!</button>`;
+        } else if (game.t === 'math') {
+            Client.genMath();
+        } else if (game.t === 'quiz') {
             area.innerHTML = `
-                <div style="font-size:3rem; color:white; margin-bottom:20px;">${n1} + ${n2} = ?</div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; width:100%;">
-                    <button class="c-btn bg-b" style="font-size:2rem" onclick="Client.ans(${n1+n2}, ${n1+n2})">${n1+n2}</button>
-                    <button class="c-btn bg-r" style="font-size:2rem" onclick="Client.ans(${n1+n2+1}, ${n1+n2})">${n1+n2+1}</button>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; width:100%; height:100%;">
+                    <button class="c-btn bg-tap" onclick="Client.send(1)">A</button>
+                    <button class="c-btn bg-blue" onclick="Client.send(1)">B</button>
+                    <button class="c-btn bg-green" onclick="Client.send(1)">C</button>
+                    <button class="c-btn" style="background:#e17055" onclick="Client.send(1)">D</button>
                 </div>`;
         } else {
-            // センサー系
-            area.innerHTML = `<div style="font-size:2rem; color:white; text-align:center;">${game.desc}<br><br>MOVE!</div>`;
+            area.innerHTML = `<div style="text-align:center; color:white;">
+                <div style="font-size:4rem; margin-bottom:20px;">${game.icon}</div>
+                <div style="font-size:1.5rem;">${game.d}</div>
+            </div>`;
         }
+
+        // Init Sensors
+        Client.initSensors();
     },
 
-    ans: (val, correct) => {
-        if(val === correct) Client.send(1);
+    genMath: () => {
+        const n1 = Math.floor(Math.random()*9)+1;
+        const n2 = Math.floor(Math.random()*9)+1;
+        const ans = n1+n2;
+        const area = $('ctrl-area');
+        area.innerHTML = `
+            <div style="width:100%; height:100%; display:flex; flex-direction:column;">
+                <div style="flex:1; display:flex; align-items:center; justify-content:center; font-size:4rem; font-weight:bold;">${n1} + ${n2} = ?</div>
+                <div style="flex:1; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    <button class="c-btn bg-blue" onclick="Client.ans(${ans},${ans})">${ans}</button>
+                    <button class="c-btn bg-tap" onclick="Client.ans(${ans+1},${ans})">${ans+1}</button>
+                </div>
+            </div>`;
+    },
+
+    ans: (v, cor) => {
+        if(v===cor) Client.send(1);
         else Client.send(-1);
-        // 次の問題へ（簡易リロード）
-        setTimeout(() => Client.setupController(Client.currGame), 200);
+        Client.genMath();
     },
 
+    // --- SEND DATA (HYBRID) ---
     send: (val) => {
-        if (conn && conn.open) {
-            conn.send({ type: 'action', val: val });
-            if(navigator.vibrate) navigator.vibrate(30);
+        const payload = { pid: myId, val: val, name: Client.name };
+
+        if (isP2pAvailable && p2pConn && p2pConn.open) {
+            // Plan A: Send via PeerJS
+            p2pConn.send(payload);
+        } else {
+            // Plan B: Send via Firebase
+            push(ref(db, `rooms/${roomId}/actions`), payload);
         }
+        
+        if (val > 0 && navigator.vibrate) navigator.vibrate(30);
     },
 
     initSensors: () => {
-        let lastX=0, lastY=0, lastZ=0;
+        let lx=0, ly=0, lz=0;
         let squatState = 'up';
-        
-        window.addEventListener('devicemotion', e => {
-            if(!Client.currGame) return;
-            const t = Client.currGame.type;
+
+        const handler = (e) => {
+            if(!Client.game || $('s-c-ctrl').classList.contains('hidden')) return;
+            const t = Client.game.t;
             const acc = e.accelerationIncludingGravity;
             if(!acc) return;
 
-            if (t === 'shake') {
-                const d = Math.abs(acc.x+acc.y+acc.z - lastX-lastY-lastZ);
+            if (t === 'shake' || t === 'mix') {
+                const d = Math.abs(acc.x+acc.y+acc.z - lx-ly-lz);
                 if(d > 20) Client.send(1);
-                lastX=acc.x; lastY=acc.y; lastZ=acc.z;
+                lx=acc.x; ly=acc.y; lz=acc.z;
             } else if (t === 'squat') {
-                if(squatState==='up' && acc.y < 4) squatState='down';
-                if(squatState==='down' && acc.y > 8) { squatState='up'; Client.send(1); }
+                if(squatState==='up' && acc.y < 3) squatState='down';
+                if(squatState==='down' && acc.y > 7) { squatState='up'; Client.send(1); }
             }
-        });
+        };
+
+        window.ondevicemotion = handler;
         
-        window.addEventListener('deviceorientation', e => {
-            if(!Client.currGame) return;
-            if (Client.currGame.type === 'balance') {
-                 if (Math.abs(e.beta) < 10 && Math.abs(e.gamma) < 10) {
-                     if(Math.random()>0.9) Client.send(1);
-                 } else {
-                     if(Math.random()>0.9) Client.send(-1);
-                 }
+        window.ondeviceorientation = (e) => {
+            if(!Client.game || $('s-c-ctrl').classList.contains('hidden')) return;
+            if (Client.game.t === 'balance') {
+                if(Math.abs(e.beta)<10 && Math.abs(e.gamma)<10) {
+                    if(Math.random()>0.92) Client.send(1);
+                } else {
+                    if(Math.random()>0.9) Client.send(-1);
+                }
             }
-        });
+        };
     }
 };
 </script>
