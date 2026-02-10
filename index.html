@@ -3,465 +3,331 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PARTY BOX: SENSOR FIX</title>
-    
-    <!-- ライブラリ -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    
-    <!-- デザイン -->
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=M+PLUS+Rounded+1c:wght@800&display=swap" rel="stylesheet">
-    
+    <title>コトバト広場</title>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #121212; --primary: #00ff88; --accent: #ff0055; --ui: #ffffff; }
+        :root { --bg: #0f172a; --card: rgba(30, 41, 59, 0.9); --primary: #6366f1; --text: #f8fafc; --sub: #94a3b8; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: radial-gradient(circle at top, #1e1b4b, #0f172a); color: var(--text); font-family: 'M PLUS Rounded 1c', sans-serif; margin: 0; overflow: hidden; height: 100vh; }
         
-        body {
-            margin: 0; background: var(--bg); color: var(--ui);
-            font-family: 'M PLUS Rounded 1c', sans-serif;
-            overflow: hidden; height: 100vh; text-align: center;
-            user-select: none; touch-action: manipulation;
-        }
+        .screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .screen.active { display: flex; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 画面切り替え */
-        .screen {
-            position: fixed; inset: 0;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: radial-gradient(circle at center, #2a2a2a 0%, #000 100%);
-            transition: opacity 0.3s; z-index: 1; padding: 20px;
-        }
-        .hidden { opacity: 0; pointer-events: none; z-index: -10; }
-
-        /* UIパーツ */
-        h1 { font-family: 'Fredoka', sans-serif; font-size: 3.5rem; color: var(--primary); margin: 0; letter-spacing: 2px; text-shadow: 4px 4px 0 rgba(0,0,0,0.5); }
-        h2 { margin: 10px; font-size: 1.8rem; }
-        p { color: #aaa; font-size: 1rem; margin: 5px; }
-
-        .btn {
-            background: linear-gradient(135deg, var(--primary), #00ccff);
-            border: none; color: #000; padding: 15px 40px;
-            font-size: 1.4rem; border-radius: 50px; cursor: pointer;
-            margin: 15px; font-weight: bold;
-            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
-            transition: transform 0.1s;
-        }
-        .btn:active { transform: scale(0.95); }
-        .btn-red { background: linear-gradient(135deg, #ff0055, #ff5500); color: white; box-shadow: 0 5px 15px rgba(255, 0, 85, 0.3); }
-
-        /* インプット */
-        input {
-            font-size: 1.5rem; padding: 15px; width: 250px; text-align: center;
-            border-radius: 15px; border: 2px solid #555; background: #222; color: white;
-            margin-bottom: 15px; outline: none;
-        }
-        input:focus { border-color: var(--primary); }
-
-        /* ゲーム画面（ホスト） */
-        .big-timer { font-size: 6rem; font-family: 'Fredoka'; color: var(--ui); margin: 20px; }
-        .leaderboard { width: 100%; max-width: 500px; background: rgba(255,255,255,0.1); border-radius: 15px; padding: 10px; }
-        .rank-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 1.2rem; }
-
-        /* ゲーム画面（クライアント） */
-        .game-area { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        .card { background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 30px; width: 100%; max-width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); text-align: center; backdrop-filter: blur(10px); }
         
-        /* アクションボタン */
-        .act-btn {
-            width: 160px; height: 160px; border-radius: 50%;
-            border: 8px solid rgba(255,255,255,0.1);
-            background: #333; color: white;
-            font-size: 2rem; font-weight: 900;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            box-shadow: 0 10px 0 rgba(0,0,0,0.3);
-            transition: transform 0.05s; cursor: pointer;
-            -webkit-user-select: none;
-        }
-        .act-btn:active { transform: translateY(10px); box-shadow: none; }
-        .act-btn.huge { width: 260px; height: 260px; font-size: 3rem; background: var(--accent); border-color: #ff88aa; }
+        h1 { margin: 0 0 10px; background: linear-gradient(90deg, #818cf8, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; letter-spacing: 2px; font-size: 1.8rem; }
+        p { color: var(--sub); font-size: 0.9rem; margin-bottom: 25px; }
+
+        input { width: 100%; padding: 16px; margin: 8px 0; border-radius: 12px; border: 1px solid #475569; background: rgba(2,6,23,0.6); color: #fff; font-size: 16px; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3); }
+
+        .btn { width: 100%; padding: 16px; margin-top: 20px; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; color: white; background: linear-gradient(135deg, var(--primary), #3b82f6); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); transition: 0.2s; }
+        .btn:active { transform: scale(0.98); }
+        .btn-link { background: none; color: var(--text); margin-top: 15px; box-shadow: none; font-size: 0.9rem; opacity: 0.7; }
         
-        /* センサーデバッグ用 */
-        #sensor-debug { position: absolute; bottom: 10px; left: 10px; font-size: 0.8rem; color: #555; text-align: left; pointer-events: none; }
+        /* 接続ステータス表示用 */
+        #status-box { margin-top: 20px; padding: 10px; border-radius: 8px; font-size: 0.8rem; background: rgba(0,0,0,0.3); display: block; }
+        .status-ok { color: #4ade80; }
+        .status-wait { color: #facc15; }
+        .status-err { color: #f87171; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; }
+
+        /* メイン画面・その他 */
+        .app-shell { width: 100%; height: 100%; display: flex; flex-direction: column; max-width: 800px; margin: 0 auto; }
+        .header { padding: 20px; background: rgba(30,41,59,0.9); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; }
+        
+        .nav { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; height: 70px; background: rgba(30, 41, 59, 0.9); backdrop-filter: blur(10px); border-radius: 40px; border: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-evenly; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 100; }
+        .nav-item { color: var(--sub); font-size: 0.7rem; text-align: center; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; }
+        .nav-item .icon { font-size: 1.4rem; margin-bottom: 2px; }
+        .nav-item.active { color: var(--primary); transform: translateY(-3px); }
+
+        .list-item { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .msg { padding: 10px 15px; border-radius: 15px; max-width: 85%; font-size: 0.9rem; margin-bottom: 10px; word-break: break-all; }
+        .msg.me { align-self: flex-end; background: var(--primary); border-bottom-right-radius: 2px; margin-left: auto; }
+        .msg.other { align-self: flex-start; background: #334155; border-bottom-left-radius: 2px; }
+        
+        #toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%); background: #10b981; color: white; padding: 12px 24px; border-radius: 30px; font-weight: bold; display: none; z-index: 9999; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
     </style>
 </head>
 <body>
 
-    <!-- ================= HOST SCREENS ================= -->
-    <div id="h-top" class="screen">
-        <h1>PARTY BOX</h1>
-        <p>20 MINI GAMES BATTLE</p>
-        <div style="margin-top:30px;">
-            <button id="btn-start-host" class="btn">💻 ホストではじめる</button>
-            <button id="btn-goto-client" class="btn btn-red">📱 スマホで参加</button>
+    <div id="toast">✅ 完了</div>
+
+    <!-- 1. ログイン -->
+    <div id="scr-login" class="screen active">
+        <div class="card">
+            <h1>コトバト広場</h1>
+            <p>コミュニティへようこそ</p>
+            
+            <input type="text" id="log-user" placeholder="ユーザー名" autocomplete="off">
+            <input type="password" id="log-pass" placeholder="パスワード">
+            
+            <button class="btn" onclick="doLogin()">ログイン</button>
+            <button class="btn btn-link" onclick="go('scr-reg')">アカウントを作成する</button>
+            
+            <div id="status-box" class="status-wait">● サーバー接続待機中...</div>
         </div>
     </div>
 
-    <div id="h-lobby" class="screen hidden">
-        <h2>ROOM ID</h2>
-        <div id="disp-id" style="font-size:5rem; font-family:'Fredoka'; color:var(--primary);">----</div>
-        <div id="qrcode" style="background:white; padding:15px; border-radius:15px; margin:20px;"></div>
-        <p>参加人数: <span id="p-count" style="color:var(--primary); font-weight:bold; font-size:1.5rem;">0</span> 人</p>
-        <button id="btn-game-start" class="btn">ゲームスタート！</button>
-    </div>
-
-    <div id="h-game" class="screen hidden">
-        <h2 id="g-round" style="color:var(--primary);">ROUND 1</h2>
-        <h1 id="g-title" style="font-size:3rem;">GAME TITLE</h1>
-        <p id="g-desc">Description</p>
-        <div id="g-timer" class="big-timer">READY</div>
-        <div id="g-info" style="font-size:1.5rem; color:#aaa;"></div>
-    </div>
-
-    <div id="h-result" class="screen hidden">
-        <h1>RESULT</h1>
-        <div id="ranking-container" class="leaderboard"></div>
-        <button id="btn-next-round" class="btn">次のラウンドへ</button>
-    </div>
-
-    <!-- ================= CLIENT SCREENS ================= -->
-    <div id="c-login" class="screen hidden">
-        <h2>ROOM ID</h2>
-        <input id="inp-rid" type="text" maxlength="4" placeholder="ABCD" style="text-transform:uppercase;">
-        <input id="inp-name" type="text" maxlength="8" placeholder="ニックネーム">
-        <br>
-        <p style="font-size:0.9rem; color:#f88;">※参加ボタンを押すと<br>センサー許可の確認が出ます</p>
-        <button id="btn-join" class="btn btn-red">参加する</button>
-    </div>
-
-    <div id="c-play" class="screen hidden">
-        <div id="c-status" style="position:absolute; top:20px; font-size:1.2rem; color:#888;">待機中...</div>
-        <div id="c-area" class="game-area"></div>
-        <div id="sensor-debug">Sensor: OFF</div>
-    </div>
-
-    <!-- ================= SCRIPT ================= -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, set, get, onValue, update, remove, onDisconnect, runTransaction, child } 
-               from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-        // Firebase設定
-        const firebaseConfig = {
-            apiKey: "AIzaSyDbZzTMvUkG2LXIGY4ux0KBTmnAdqP236s",
-            authDomain: "game-4f2d9.firebaseapp.com",
-            databaseURL: "https://game-4f2d9-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "game-4f2d9",
-            storageBucket: "game-4f2d9.firebasestorage.app",
-            messagingSenderId: "574316347824",
-            appId: "1:574316347824:web:cf686040628e25ad615675"
-        };
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        // UIヘルパー
-        const $ = id => document.getElementById(id);
-        const show = id => {
-            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-            $(id).classList.remove('hidden');
-        };
-
-        // 変数
-        let myId = "P" + Math.random().toString(36).substr(2, 5);
-        let roomId = "";
-        let currentRound = 1;
-        const TOTAL_ROUNDS = 5;
-        let sensorActive = false;
-
-        // ゲーム定義
-        const GAMES = [
-            {id:'tap', n:'連打バトル', d:'画面を壊れるほど連打しろ！', t:'tap'},
-            {id:'shake', n:'シェイク！', d:'スマホを全力で振れ！', t:'shake'},
-            {id:'stop', n:'5秒止め', d:'5.00秒ピッタリで止めろ！', t:'stop'},
-            {id:'charge', n:'パワー充填', d:'長押しして100%を目指せ！', t:'charge'},
-            {id:'math', n:'計算クイズ', d:'正しい答えを選べ！', t:'quiz_math'},
-            {id:'color', n:'色彩感覚', d:'文字の「色」を選べ！', t:'quiz_color'},
-            {id:'count', n:'10回押せ', d:'正確に10回だけ押して決定！', t:'count'},
-            {id:'dont', n:'押すな！', d:'絶対にボタンを押すな！', t:'dont'},
-            {id:'luck', n:'運試し', d:'当たりを引け！', t:'luck'}
-        ];
-
-        // ---------------- HOST LOGIC ----------------
-        $('btn-start-host').addEventListener('click', () => {
-            roomId = Math.random().toString(36).substr(2, 4).toUpperCase();
-            const rRef = ref(db, `rooms/${roomId}`);
-            set(rRef, { status: 'lobby', round: 1 });
-            onDisconnect(rRef).remove();
+    <!-- 2. 登録 -->
+    <div id="scr-reg" class="screen">
+        <div class="card">
+            <h1>新規登録</h1>
+            <p>アカウントを作成します</p>
+            <input type="text" id="reg-user" placeholder="希望ユーザー名 (半角英数)">
+            <input type="password" id="reg-pass" placeholder="パスワード">
+            <input type="text" id="reg-name" placeholder="ニックネーム">
             
-            $('disp-id').innerText = roomId;
-            $('qrcode').innerHTML = "";
-            new QRCode($('qrcode'), { text: `${location.origin}${location.pathname}?room=${roomId}`, width: 128, height: 128 });
-            
-            show('h-lobby');
-            
-            onValue(ref(db, `rooms/${roomId}/players`), snap => {
-                $('p-count').innerText = snap.exists() ? Object.keys(snap.val()).length : 0;
-            });
-        });
+            <button class="btn" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="doRegister()">登録してスタート</button>
+            <button class="btn btn-link" onclick="go('scr-login')">ログイン画面へ戻る</button>
+        </div>
+    </div>
 
-        $('btn-game-start').addEventListener('click', () => {
-            currentRound = 1;
-            // スコアリセット
-            get(ref(db, `rooms/${roomId}/players`)).then(snap => {
-                if(!snap.exists()) return alert("プレイヤーがいません");
-                const u = {};
-                snap.forEach(p => u[`rooms/${roomId}/players/${p.key}/total`] = 0);
-                update(ref(db), u).then(startRound);
-            });
-        });
+    <!-- 3. メイン -->
+    <div id="scr-main" class="screen" style="padding:0;">
+        <div class="app-shell">
+            <div class="header">
+                <div style="font-weight:800; font-size:1.2rem;">Cotobato Plaza</div>
+                <div id="head-name" style="font-size:0.8rem; color:var(--sub);">Guest</div>
+            </div>
 
-        $('btn-next-round').addEventListener('click', () => {
-            currentRound++;
-            if(currentRound > TOTAL_ROUNDS) location.reload(); // 終了
-            else startRound();
-        });
-
-        function startRound() {
-            const game = GAMES[Math.floor(Math.random() * GAMES.length)];
-            const u = {};
-            // ラウンドスコアリセット & ゲーム設定
-            get(ref(db, `rooms/${roomId}/players`)).then(snap => {
-                snap.forEach(p => u[`rooms/${roomId}/players/${p.key}/score`] = 0);
-                u[`rooms/${roomId}/status`] = 'game';
-                u[`rooms/${roomId}/game`] = game;
-                u[`rooms/${roomId}/round`] = currentRound;
-                update(ref(db), u);
-                
-                show('h-game');
-                $('g-round').innerText = `ROUND ${currentRound}/${TOTAL_ROUNDS}`;
-                $('g-title').innerText = game.n;
-                $('g-desc').innerText = game.d;
-                $('g-timer').innerText = "READY";
-                $('g-info').innerText = "";
-
-                // カウントダウン
-                setTimeout(() => {
-                    $('g-timer').innerText = "GO!";
-                    let t = 15.0;
-                    const timer = setInterval(() => {
-                        t -= 0.1;
-                        $('g-timer').innerText = t.toFixed(1);
-                        if(t <= 0) {
-                            clearInterval(timer);
-                            endRound();
-                        }
-                    }, 100);
-                }, 3000);
-            });
-        }
-
-        function endRound() {
-            get(ref(db, `rooms/${roomId}/players`)).then(snap => {
-                const list = [];
-                const u = {};
-                snap.forEach(p => {
-                    const d = p.val();
-                    const s = d.score || 0;
-                    const total = (d.total || 0) + s;
-                    u[`rooms/${roomId}/players/${p.key}/total`] = total;
-                    list.push({n:d.name, s:s, t:total});
-                });
-                update(ref(db), u);
-                
-                update(ref(db, `rooms/${roomId}/status`), 'result');
-                show('h-result');
-                
-                list.sort((a,b) => b.s - a.s);
-                $('ranking-container').innerHTML = list.map((p,i) => `
-                    <div class="rank-row">
-                        <span>#${i+1} ${p.n}</span>
-                        <span>+${p.s} (計${p.t})</span>
+            <div class="content" id="tab-content">
+                <!-- ホーム -->
+                <div id="view-home">
+                    <div class="card" style="width:100%; max-width:none; margin-bottom:20px; display:flex; justify-content:space-around;">
+                        <span>🪙 <span id="val-coins">0</span></span>
+                        <span>💎 <span id="val-dia">0</span></span>
                     </div>
-                `).join('');
-                confetti();
-            });
+                    <div class="card" style="width:100%; max-width:none; text-align:left; margin-bottom:20px;">
+                        <h3 style="margin:0 0 10px;">☁️ データ同期</h3>
+                        <button class="btn" style="margin:0; padding:12px;" onclick="saveCloud()">保存する</button>
+                        <button class="btn" style="margin-top:10px; padding:12px; background:#334155;" onclick="loadCloud()">復元する</button>
+                    </div>
+                    <h3 style="margin-bottom:10px;">お知らせ</h3>
+                    <div id="news-list">読み込み中...</div>
+                </div>
+
+                <!-- チャット -->
+                <div id="view-chat" style="display:none;">
+                    <div id="chat-list" style="display:flex; flex-direction:column; padding-bottom:10px;"></div>
+                    <div style="display:flex; gap:10px; position:sticky; bottom:0;">
+                        <input type="text" id="chat-in" placeholder="メッセージ..." style="margin:0;">
+                        <button class="btn" style="width:60px; margin:0;" onclick="sendChat()">送</button>
+                    </div>
+                </div>
+
+                <!-- 設定 -->
+                <div id="view-conf" style="display:none;">
+                    <div class="card" style="width:100%; max-width:none;">
+                        <p id="conf-id"></p>
+                        <button class="btn" style="background:#ef4444;" onclick="location.reload()">ログアウト</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav">
+                <div class="nav-item active" onclick="tab('home', this)"><div class="icon">🏠</div>ホーム</div>
+                <div class="nav-item" onclick="tab('chat', this)"><div class="icon">💬</div>チャット</div>
+                <div class="nav-item" onclick="tab('conf', this)"><div class="icon">⚙️</div>設定</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, onSnapshot, serverTimestamp, query, limit } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+
+        // ★必ずあなたのFirebase設定に書き換えてください★
+        const firebaseConfig = {
+            apiKey: "AIzaSyDguL7I5v4GxKf5FahdoFEtU5lNMYgxcNo",
+            authDomain: "cotobato-c121f.firebaseapp.com",
+            databaseURL: "https://cotobato-c121f-default-rtdb.firebaseio.com",
+            projectId: "cotobato-c121f",
+            storageBucket: "cotobato-c121f.firebasestorage.app",
+            messagingSenderId: "699569737682",
+            appId: "1:699569737682:web:350b90c25c300a0548020b",
+            measurementId: "G-FQ1VZDXZ6J"
+        };
+
+        let app, db, auth;
+        let isReady = false;
+        let currentUser = null;
+
+        // ステータス表示関数
+        function setStatus(msg, type) {
+            const el = document.getElementById('status-box');
+            el.innerText = msg;
+            el.className = type === 'error' ? 'status-err' : (type === 'ok' ? 'status-ok' : 'status-wait');
         }
 
-        // ---------------- CLIENT LOGIC ----------------
-        const params = new URLSearchParams(location.search);
-        if(params.get('room')) { $('inp-rid').value = params.get('room'); show('c-login'); }
+        try {
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
 
-        $('btn-goto-client').addEventListener('click', () => show('c-login'));
-
-        $('btn-join').addEventListener('click', async () => {
-            const rid = $('inp-rid').value.toUpperCase();
-            const name = $('inp-name').value || "名無し";
-            if(!rid) return alert("部屋IDを入力してください");
-
-            // ★重要: iOS用センサー許可リクエスト
-            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                try {
-                    const permissionState = await DeviceMotionEvent.requestPermission();
-                    if (permissionState === 'granted') {
-                        sensorActive = true;
-                        $('sensor-debug').innerText = "Sensor: OK (iOS)";
-                    } else {
-                        alert("センサー許可が拒否されました。ゲームの一部が遊べません。");
-                    }
-                } catch (e) {
-                    console.error(e);
-                    // PCなどではエラーになるが無視して進む
-                }
-            } else {
-                sensorActive = true;
-                $('sensor-debug').innerText = "Sensor: OK (Android/PC)";
-            }
-
-            // Firebase接続
-            const rSnap = await get(child(ref(db), `rooms/${rid}`));
-            if(!rSnap.exists()) return alert("部屋が見つかりません");
-
-            roomId = rid;
-            const pRef = ref(db, `rooms/${roomId}/players/${myId}`);
-            set(pRef, { name: name, score: 0, total: 0 });
-            onDisconnect(pRef).remove();
-
-            show('c-play');
-            listenRoom();
-        });
-
-        function listenRoom() {
-            onValue(ref(db, `rooms/${roomId}`), snap => {
-                const data = snap.val();
-                if(!data) return;
-
-                if(data.status === 'lobby') {
-                    $('c-status').innerText = "ホストの開始待ち...";
-                    $('c-area').innerHTML = "<div style='font-size:3rem;'>⏳</div>";
-                }
-                else if (data.status === 'result') {
-                    $('c-status').innerText = "結果発表";
-                    $('c-area').innerHTML = "<div style='font-size:3rem;'>🏆</div>";
-                }
-                else if (data.status === 'game') {
-                    $('c-status').innerText = `R${data.round}: ${data.game.n}`;
-                    // ゲームが変わった時だけ再描画するための簡易チェック
-                    if($('c-area').getAttribute('data-gid') !== data.game.id) {
-                        $('c-area').setAttribute('data-gid', data.game.id);
-                        $('c-area').innerHTML = `<div style="font-size:2rem;">READY...</div>`;
-                        setTimeout(() => renderGameUI(data.game), 3000);
-                    }
-                }
-            });
-        }
-
-        function renderGameUI(game) {
-            const area = $('c-area');
-            area.innerHTML = "";
-            let score = 0;
-
-            // スコア送信関数
-            const sendScore = (val) => {
-                score = val;
-                runTransaction(ref(db, `rooms/${roomId}/players/${myId}/score`), _ => score);
-            };
-            const addScore = (val=1) => {
-                score += val;
-                runTransaction(ref(db, `rooms/${roomId}/players/${myId}/score`), c => (c||0)+val);
-                if(navigator.vibrate) navigator.vibrate(30);
-            };
-
-            // ゲーム別UI生成
-            if(game.t === 'tap') {
-                const b = document.createElement('button');
-                b.className = "act-btn huge";
-                b.innerText = "PUSH!";
-                // ポインターイベントで高速反応
-                b.onpointerdown = (e) => {
-                    e.preventDefault();
-                    addScore(1);
-                    b.style.transform = "scale(0.9)";
-                };
-                b.onpointerup = () => b.style.transform = "scale(1)";
-                area.appendChild(b);
-            }
-            else if(game.t === 'shake') {
-                area.innerHTML = `<div style="font-size:5rem;">📱</div><p>振れ！</p>`;
-                if(sensorActive) {
-                    let last = {x:0,y:0,z:0};
-                    const h = (e) => {
-                        const a = e.accelerationIncludingGravity;
-                        if(!a) return;
-                        const d = Math.abs(a.x+a.y+a.z - last.x-last.y-last.z);
-                        if(d > 25) addScore(1);
-                        last = {x:a.x, y:a.y, z:a.z};
-                    };
-                    window.addEventListener('devicemotion', h, {once:false});
-                    setTimeout(()=>window.removeEventListener('devicemotion', h), 15000);
+            // 1. 匿名認証の試行
+            signInAnonymously(auth).catch((error) => {
+                console.error("Auth Error:", error);
+                if(error.code === 'auth/unauthorized-domain') {
+                    setStatus("エラー: Authenticationの設定で「承認済みドメイン」に tamaben.github.io を追加してください。", "error");
+                } else if(error.code === 'auth/admin-restricted-operation') {
+                    setStatus("エラー: Authenticationの設定で「匿名(Anonymous)」を有効にしてください。", "error");
                 } else {
-                    area.innerHTML += `<p style="color:red">センサーOFFのため<br>画面タップで代用</p>`;
-                    area.onclick = () => addScore(1);
+                    setStatus("認証エラー: " + error.message, "error");
                 }
-            }
-            else if(game.t === 'stop') {
-                const start = Date.now();
-                const b = document.createElement('button');
-                b.className = "act-btn";
-                b.innerText = "STOP";
-                b.onclick = () => {
-                    const diff = Math.abs(5000 - (Date.now() - start));
-                    const pt = Math.max(0, 1000 - diff);
-                    sendScore(Math.floor(pt));
-                    b.disabled = true;
-                    b.innerText = (diff/1000).toFixed(2);
-                };
-                area.appendChild(b);
-            }
-            else if(game.t === 'charge') {
-                const bar = document.createElement('div');
-                bar.style.cssText = "width:200px; height:20px; background:#333; margin-bottom:20px; border:2px solid white;";
-                const fill = document.createElement('div');
-                fill.style.cssText = "width:0%; height:100%; background:var(--primary);";
-                bar.appendChild(fill);
-                
-                const b = document.createElement('button');
-                b.className = "act-btn huge";
-                b.innerText = "HOLD";
-                
-                let p = 0, iv;
-                b.onpointerdown = (e) => {
-                    e.preventDefault();
-                    p = 0;
-                    iv = setInterval(()=>{ p+=2; fill.style.width=Math.min(100,p)+"%"; }, 30);
-                };
-                b.onpointerup = () => {
-                    clearInterval(iv);
-                    if(p >= 90 && p <= 100) sendScore(500);
-                    else if(p > 100) sendScore(0); // バースト
-                    else sendScore(p);
-                    p=0; fill.style.width="0%";
-                };
-                area.appendChild(bar);
-                area.appendChild(b);
-            }
-            else if(game.t === 'quiz_math') {
-                const n1 = Math.floor(Math.random()*9)+1;
-                const n2 = Math.floor(Math.random()*9)+1;
-                const ans = n1+n2;
-                const fake = ans + (Math.random()>.5?1:-1);
-                area.innerHTML = `<div style="font-size:3rem; margin-bottom:20px;">${n1} + ${n2} = ?</div>`;
-                
-                const mkBtn = (val) => {
-                    const b = document.createElement('button');
-                    b.className = "btn";
-                    b.innerText = val;
-                    b.onclick = () => {
-                        if(val === ans) { addScore(50); b.style.background="lime"; }
-                        else { addScore(-20); b.style.background="red"; }
-                        setTimeout(()=>renderGameUI(game), 500);
-                    };
-                    return b;
-                };
-                area.appendChild(mkBtn(Math.random()>.5 ? ans : fake));
-                area.appendChild(mkBtn(Math.random()>.5 ? fake : ans)); // 簡易実装
-            }
-            else {
-                // その他のゲーム用汎用UI
-                const b = document.createElement('button');
-                b.className = "act-btn huge";
-                b.innerText = "ACTION";
-                b.onpointerdown = (e) => { e.preventDefault(); addScore(1); b.style.transform="scale(0.9)"; };
-                b.onpointerup = () => b.style.transform="scale(1)";
-                area.appendChild(b);
-            }
+            });
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    isReady = true;
+                    setStatus("● サーバー接続完了 (準備OK)", "ok");
+                }
+            });
+
+        } catch (e) {
+            setStatus("設定エラー: Configが正しくありません。", "error");
         }
+
+        // --- 画面操作 ---
+        window.go = (id) => {
+            document.querySelectorAll('.screen').forEach(e => e.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        };
+
+        window.tab = (id, el) => {
+            ['home','chat','conf'].forEach(t => document.getElementById('view-'+t).style.display='none');
+            document.getElementById('view-'+id).style.display='block';
+            document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
+            el.classList.add('active');
+        };
+
+        // --- 登録 ---
+        window.doRegister = async () => {
+            if(!isReady) return alert("サーバー接続を待っています...");
+            const u = document.getElementById('reg-user').value.trim();
+            const p = document.getElementById('reg-pass').value.trim();
+            const n = document.getElementById('reg-name').value.trim() || u;
+
+            if(!u || !p) return alert("ユーザー名とパスワードを入力してください");
+
+            try {
+                // ID重複チェック
+                const ref = doc(db, "users", u);
+                const snap = await getDoc(ref);
+                if(snap.exists()) return alert("そのIDは既に使われています");
+
+                // データ作成
+                const data = { username: u, password: p, name: n, createdAt: serverTimestamp() };
+                await setDoc(ref, data);
+                
+                currentUser = data;
+                startApp();
+                showToast("✨ 登録完了！");
+            } catch(e) { 
+                console.error(e);
+                if(e.code === 'permission-denied') alert("エラー: Firestoreのルールで書き込みが許可されていません");
+                else alert("登録エラー: " + e.message);
+            }
+        };
+
+        // --- ログイン ---
+        window.doLogin = async () => {
+            if(!isReady) return alert("サーバー接続を待っています...");
+            const u = document.getElementById('log-user').value.trim();
+            const p = document.getElementById('log-pass').value.trim();
+
+            try {
+                const ref = doc(db, "users", u);
+                const snap = await getDoc(ref);
+                if(snap.exists() && snap.data().password === p) {
+                    currentUser = snap.data();
+                    startApp();
+                    showToast("ログイン成功");
+                } else {
+                    alert("IDまたはパスワードが違います");
+                }
+            } catch(e) { 
+                console.error(e);
+                alert("ログインエラー: " + e.message); 
+            }
+        };
+
+        function startApp() {
+            window.go('scr-main');
+            document.getElementById('head-name').innerText = currentUser.name;
+            document.getElementById('conf-id').innerText = "ID: " + currentUser.username;
+            
+            // ローカルデータ読み込み
+            const raw = localStorage.getItem('kb_save_v36');
+            if(raw) {
+                const d = JSON.parse(raw);
+                document.getElementById('val-coins').innerText = d.coins || 0;
+                document.getElementById('val-dia').innerText = d.diamonds || 0;
+            }
+            startListeners();
+        }
+
+        // --- リアルタイム通信 (インデックス不要) ---
+        function startListeners() {
+            // お知らせ (limitのみ)
+            onSnapshot(query(collection(db, "announcements"), limit(5)), (snap) => {
+                const div = document.getElementById('news-list');
+                div.innerHTML = "";
+                const list = [];
+                snap.forEach(d => list.push(d.data()));
+                list.sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0)); // JSでソート
+                
+                if(list.length===0) div.innerHTML = "お知らせはありません";
+                list.forEach(d => {
+                    const date = d.createdAt ? new Date(d.createdAt.seconds*1000).toLocaleDateString() : "";
+                    div.innerHTML += `<div class="list-item" style="display:block;"><small style="color:#94a3b8">${date}</small><div style="margin-top:5px;">${d.text}</div></div>`;
+                });
+            });
+
+            // チャット (limitのみ)
+            onSnapshot(query(collection(db, "chat"), limit(30)), (snap) => {
+                const div = document.getElementById('chat-list');
+                div.innerHTML = "";
+                const list = [];
+                snap.forEach(d => list.push(d.data()));
+                list.sort((a,b) => (a.createdAt?.seconds||0) - (b.createdAt?.seconds||0)); // 古い順
+
+                list.forEach(d => {
+                    const isMe = d.username === currentUser.username;
+                    div.innerHTML += `<div class="msg ${isMe?'me':'other'}"><span class="sender">${d.sender}</span>${d.text}</div>`;
+                });
+                div.parentElement.scrollTop = div.parentElement.scrollHeight;
+            });
+        }
+
+        // --- 機能 ---
+        window.sendChat = async () => {
+            const t = document.getElementById('chat-in').value.trim();
+            if(!t) return;
+            await addDoc(collection(db, "chat"), { text: t, sender: currentUser.name, username: currentUser.username, createdAt: serverTimestamp() });
+            document.getElementById('chat-in').value = "";
+        };
+
+        window.saveCloud = async () => {
+            const raw = localStorage.getItem('kb_save_v36');
+            if(!raw) return alert("データがありません");
+            await updateDoc(doc(db, "users", currentUser.username), { backupData: raw });
+            showToast("保存しました");
+        };
+
+        window.loadCloud = async () => {
+            const s = await getDoc(doc(db, "users", currentUser.username));
+            if(s.data().backupData) {
+                localStorage.setItem('kb_save_v36', s.data().backupData);
+                alert("復元しました。再読み込みします");
+                location.reload();
+            } else alert("クラウドにデータがありません");
+        };
+
+        function showToast(m) { const t=document.getElementById('toast'); t.innerText=m; t.style.display='block'; setTimeout(()=>t.style.display='none',3000); }
     </script>
 </body>
 </html>
