@@ -3,140 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PARTY BOX: ULTIMATE 5</title>
-    <!-- 必要なライブラリ -->
+    <title>PARTY BOX: SENSOR FIX</title>
+    
+    <!-- ライブラリ -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <!-- フォント -->
-    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@800&family=Rubik:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- デザイン -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=M+PLUS+Rounded+1c:wght@800&display=swap" rel="stylesheet">
     
     <style>
-        :root { --bg: #1a1a1a; --cyan: #00f2ff; --pink: #ff00ff; --yellow: #ffea00; --green: #00ff66; }
+        :root { --bg: #121212; --primary: #00ff88; --accent: #ff0055; --ui: #ffffff; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; background: var(--bg); color: white; font-family: 'M PLUS Rounded 1c', sans-serif; overflow: hidden; height: 100vh; user-select: none; text-align: center; touch-action: manipulation; }
-
-        /* スクリーン管理 */
-        .screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at center, #333 0%, #000 120%); transition: opacity 0.3s, transform 0.3s; z-index: 1; padding: 20px; }
-        .hidden { opacity: 0; pointer-events: none; transform: scale(0.95); z-index: -10; }
-
-        /* テキスト */
-        h1 { font-family: 'Rubik', sans-serif; font-size: 3.5rem; color: var(--cyan); text-shadow: 4px 4px 0 var(--pink); margin: 0; letter-spacing: 2px; }
-        h2 { font-size: 2rem; margin: 10px; color: white; }
-        .round-info { font-size: 1.5rem; color: var(--yellow); font-family: 'Rubik'; margin-bottom: 10px; }
-        .big-timer { font-size: 6rem; font-family: 'Rubik'; font-weight: bold; color: white; text-shadow: 0 0 20px var(--cyan); }
-
-        /* ボタンデザイン */
-        .btn { background: linear-gradient(135deg, #ff00cc, #3333ff); border: none; color: white; padding: 18px 40px; font-size: 1.5rem; border-radius: 50px; cursor: pointer; margin: 15px; box-shadow: 0 10px 20px rgba(255, 0, 204, 0.4); font-family: inherit; transition: transform 0.1s, filter 0.1s; position: relative; overflow: hidden; }
-        .btn:active { transform: scale(0.95); filter: brightness(1.2); }
-        .btn-cyan { background: linear-gradient(135deg, #00ccff, #00ffcc); color: #000; box-shadow: 0 10px 20px rgba(0, 255, 255, 0.4); }
-
-        /* クライアント用UI */
-        .c-layer { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .c-header { position: absolute; top: 10px; width: 100%; text-align: center; font-size: 1.2rem; color: #888; pointer-events: none; }
         
-        /* アクションボタン（共通） */
-        .act-btn { width: 140px; height: 140px; border-radius: 50%; border: none; font-size: 2rem; font-weight: 900; color: white; box-shadow: 0 8px 0 rgba(0,0,0,0.5), 0 0 20px rgba(255,255,255,0.2); transition: transform 0.05s; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 10px; cursor: pointer; }
-        .act-btn:active { transform: translateY(8px); box-shadow: none; }
-        .bg-red { background: #ff4757; text-shadow: 0 2px 0 #a00; }
-        .bg-blue { background: #2ed573; text-shadow: 0 2px 0 #080; }
-        .bg-huge { width: 240px; height: 240px; font-size: 3.5rem; background: radial-gradient(#ff6b81, #c0392b); }
+        body {
+            margin: 0; background: var(--bg); color: var(--ui);
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            overflow: hidden; height: 100vh; text-align: center;
+            user-select: none; touch-action: manipulation;
+        }
 
-        /* グリッドレイアウト（クイズなど） */
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; max-width: 400px; }
-        .grid-btn { height: 100px; border-radius: 15px; border: none; background: #444; color: white; font-size: 1.8rem; font-weight: bold; box-shadow: 0 6px 0 #222; transition: transform 0.1s; }
-        .grid-btn:active { transform: translateY(6px); box-shadow: none; }
+        /* 画面切り替え */
+        .screen {
+            position: fixed; inset: 0;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: radial-gradient(circle at center, #2a2a2a 0%, #000 100%);
+            transition: opacity 0.3s; z-index: 1; padding: 20px;
+        }
+        .hidden { opacity: 0; pointer-events: none; z-index: -10; }
 
-        /* ランキングリスト */
-        .rank-list { width: 90%; max-width: 500px; background: rgba(255,255,255,0.1); border-radius: 15px; padding: 20px; text-align: left; overflow-y: auto; max-height: 60vh; }
-        .rank-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.2); font-size: 1.2rem; }
-        .rank-top { color: var(--yellow); font-weight: bold; font-size: 1.5rem; }
+        /* UIパーツ */
+        h1 { font-family: 'Fredoka', sans-serif; font-size: 3.5rem; color: var(--primary); margin: 0; letter-spacing: 2px; text-shadow: 4px 4px 0 rgba(0,0,0,0.5); }
+        h2 { margin: 10px; font-size: 1.8rem; }
+        p { color: #aaa; font-size: 1rem; margin: 5px; }
 
-        /* アニメーション */
-        .pulse { animation: pulse 0.5s infinite alternate; }
-        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
+        .btn {
+            background: linear-gradient(135deg, var(--primary), #00ccff);
+            border: none; color: #000; padding: 15px 40px;
+            font-size: 1.4rem; border-radius: 50px; cursor: pointer;
+            margin: 15px; font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.3);
+            transition: transform 0.1s;
+        }
+        .btn:active { transform: scale(0.95); }
+        .btn-red { background: linear-gradient(135deg, #ff0055, #ff5500); color: white; box-shadow: 0 5px 15px rgba(255, 0, 85, 0.3); }
+
+        /* インプット */
+        input {
+            font-size: 1.5rem; padding: 15px; width: 250px; text-align: center;
+            border-radius: 15px; border: 2px solid #555; background: #222; color: white;
+            margin-bottom: 15px; outline: none;
+        }
+        input:focus { border-color: var(--primary); }
+
+        /* ゲーム画面（ホスト） */
+        .big-timer { font-size: 6rem; font-family: 'Fredoka'; color: var(--ui); margin: 20px; }
+        .leaderboard { width: 100%; max-width: 500px; background: rgba(255,255,255,0.1); border-radius: 15px; padding: 10px; }
+        .rank-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 1.2rem; }
+
+        /* ゲーム画面（クライアント） */
+        .game-area { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        
+        /* アクションボタン */
+        .act-btn {
+            width: 160px; height: 160px; border-radius: 50%;
+            border: 8px solid rgba(255,255,255,0.1);
+            background: #333; color: white;
+            font-size: 2rem; font-weight: 900;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: 0 10px 0 rgba(0,0,0,0.3);
+            transition: transform 0.05s; cursor: pointer;
+            -webkit-user-select: none;
+        }
+        .act-btn:active { transform: translateY(10px); box-shadow: none; }
+        .act-btn.huge { width: 260px; height: 260px; font-size: 3rem; background: var(--accent); border-color: #ff88aa; }
+        
+        /* センサーデバッグ用 */
+        #sensor-debug { position: absolute; bottom: 10px; left: 10px; font-size: 0.8rem; color: #555; text-align: left; pointer-events: none; }
     </style>
 </head>
 <body>
 
-    <!-- ================== HOST SCREENS ================== -->
-    
-    <!-- トップ画面 -->
-    <div id="s-top" class="screen">
-        <h1>PARTY BOX<br>ULTIMATE</h1>
-        <p>5ラウンド勝負 × 全員参加バトル</p>
-        <div style="margin-top: 30px;">
-            <button id="btn-host" class="btn">💻 ホストではじめる</button>
-            <button id="btn-client" class="btn btn-cyan">📱 スマホで参加</button>
+    <!-- ================= HOST SCREENS ================= -->
+    <div id="h-top" class="screen">
+        <h1>PARTY BOX</h1>
+        <p>20 MINI GAMES BATTLE</p>
+        <div style="margin-top:30px;">
+            <button id="btn-start-host" class="btn">💻 ホストではじめる</button>
+            <button id="btn-goto-client" class="btn btn-red">📱 スマホで参加</button>
         </div>
     </div>
 
-    <!-- ロビー画面 -->
-    <div id="s-lobby" class="screen hidden">
+    <div id="h-lobby" class="screen hidden">
         <h2>ROOM ID</h2>
-        <div id="disp-id" style="font-size: 5rem; font-family:'Rubik'; color:var(--cyan);">----</div>
-        <div id="qrcode" style="background:white; padding:15px; border-radius:15px; margin: 20px;"></div>
-        <p>エントリー人数: <span id="p-count" style="font-size:2rem; font-weight:bold; color:var(--pink)">0</span> 人</p>
-        <button onclick="startTotalGame()" class="btn btn-cyan">バトルスタート！</button>
+        <div id="disp-id" style="font-size:5rem; font-family:'Fredoka'; color:var(--primary);">----</div>
+        <div id="qrcode" style="background:white; padding:15px; border-radius:15px; margin:20px;"></div>
+        <p>参加人数: <span id="p-count" style="color:var(--primary); font-weight:bold; font-size:1.5rem;">0</span> 人</p>
+        <button id="btn-game-start" class="btn">ゲームスタート！</button>
     </div>
 
-    <!-- ゲームプレイ画面 -->
-    <div id="s-game" class="screen hidden">
-        <div class="round-info" id="g-round">ROUND 1/5</div>
-        <h2 id="g-title" style="font-size: 3rem; margin: 5px 0; color:var(--cyan);">GAME TITLE</h2>
-        <p id="g-desc" style="font-size:1.5rem;">説明文</p>
-        
-        <div style="flex-grow: 1; display: flex; align-items: center; justify-content: center; flex-direction: column;">
-            <div id="g-timer" class="big-timer">READY</div>
-            <div id="g-leader" style="font-size: 1.8rem; margin-top: 20px; color: #aaa;"></div>
-        </div>
+    <div id="h-game" class="screen hidden">
+        <h2 id="g-round" style="color:var(--primary);">ROUND 1</h2>
+        <h1 id="g-title" style="font-size:3rem;">GAME TITLE</h1>
+        <p id="g-desc">Description</p>
+        <div id="g-timer" class="big-timer">READY</div>
+        <div id="g-info" style="font-size:1.5rem; color:#aaa;"></div>
     </div>
 
-    <!-- ラウンド結果画面 -->
-    <div id="s-round-result" class="screen hidden">
-        <h2>ROUND RESULT</h2>
-        <div id="round-ranking" class="rank-list"></div>
-        <div style="margin-top: 20px;">
-            <button onclick="nextRound()" class="btn btn-cyan">次のラウンドへ</button>
-        </div>
+    <div id="h-result" class="screen hidden">
+        <h1>RESULT</h1>
+        <div id="ranking-container" class="leaderboard"></div>
+        <button id="btn-next-round" class="btn">次のラウンドへ</button>
     </div>
 
-    <!-- 最終結果画面 -->
-    <div id="s-final" class="screen hidden">
-        <h1 style="color:var(--yellow);">CHAMPION</h1>
-        <div id="winner-name" style="font-size: 4rem; font-weight: bold; margin: 20px;">???</div>
-        <div id="final-ranking" class="rank-list" style="height: 200px;"></div>
-        <button onclick="location.reload()" class="btn">タイトルに戻る</button>
-    </div>
-
-
-    <!-- ================== CLIENT SCREENS ================== -->
-    
-    <!-- ログイン画面 -->
+    <!-- ================= CLIENT SCREENS ================= -->
     <div id="c-login" class="screen hidden">
         <h2>ROOM ID</h2>
-        <input id="inp-id" style="font-size:2rem; padding:10px; width:200px; text-align:center; border-radius:10px; border:none; text-transform:uppercase;" placeholder="ABCD">
-        <br><br>
-        <input id="inp-name" style="font-size:1.5rem; padding:10px; width:200px; text-align:center; border-radius:10px; border:none;" placeholder="名前">
-        <br><br>
-        <button id="btn-join" class="btn btn-cyan">参加する</button>
-        <p style="font-size:0.8rem; margin-top:20px; color:#888;">※PC/スマホ対応</p>
+        <input id="inp-rid" type="text" maxlength="4" placeholder="ABCD" style="text-transform:uppercase;">
+        <input id="inp-name" type="text" maxlength="8" placeholder="ニックネーム">
+        <br>
+        <p style="font-size:0.9rem; color:#f88;">※参加ボタンを押すと<br>センサー許可の確認が出ます</p>
+        <button id="btn-join" class="btn btn-red">参加する</button>
     </div>
 
-    <!-- プレイルーム -->
     <div id="c-play" class="screen hidden">
-        <div id="c-header" class="c-header">待機中...</div>
-        <div id="c-area" class="c-layer"></div>
+        <div id="c-status" style="position:absolute; top:20px; font-size:1.2rem; color:#888;">待機中...</div>
+        <div id="c-area" class="game-area"></div>
+        <div id="sensor-debug">Sensor: OFF</div>
     </div>
 
-
-    <!-- ================== SCRIPT ================== -->
+    <!-- ================= SCRIPT ================= -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, set, get, onValue, update, remove, onDisconnect, runTransaction, child } 
                from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // ★重要: ここにご自身のFirebase Configを貼り付けてください★
-        // 設定がないと通信対戦は動きません。
+        // Firebase設定
         const firebaseConfig = {
             apiKey: "AIzaSyDbZzTMvUkG2LXIGY4ux0KBTmnAdqP236s",
             authDomain: "game-4f2d9.firebaseapp.com",
@@ -146,508 +148,37 @@
             messagingSenderId: "574316347824",
             appId: "1:574316347824:web:cf686040628e25ad615675"
         };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-        let app, db;
-        try {
-            app = initializeApp(firebaseConfig);
-            db = getDatabase(app);
-        } catch(e) {
-            console.error("Firebase init error", e);
-            alert("Firebaseの設定が正しくありません。コード内のfirebaseConfigを確認してください。");
-        }
+        // UIヘルパー
+        const $ = id => document.getElementById(id);
+        const show = id => {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            $(id).classList.remove('hidden');
+        };
 
-        // --- ゲームデータ定義 (20種類) ---
-        const GAMES = [
-            { id:'mash', name:'連打バトル', desc:'とにかくボタンを連打しろ！', type:'tap' },
-            { id:'shake', name:'シェイク！', desc:'スマホを全力で振れ！', type:'shake' },
-            { id:'stop', name:'5秒で止めろ', desc:'5.00秒ピッタリを目指せ！', type:'stop' },
-            { id:'red', name:'早押し！', desc:'色が「赤」になったら押せ！', type:'reaction' },
-            { id:'charge', name:'パワー充填', desc:'長押しして100%を目指せ！', type:'charge' },
-            { id:'math', name:'計算バトル', desc:'正しい答えを選べ！', type:'quiz_math' },
-            { id:'color', name:'色彩感覚', desc:'文字の「意味」の色を選べ！', type:'quiz_color' },
-            { id:'rps', name:'後出し勝利', desc:'勝てる手を選べ！', type:'quiz_rps' },
-            { id:'hl', name:'HIGH & LOW', desc:'次の数字は大きい？小さい？', type:'quiz_hl' },
-            { id:'count', name:'10回押せ', desc:'正確に10回だけ押して決定！', type:'count' },
-            { id:'dont', name:'押すな！', desc:'絶対にボタンを押すな！', type:'dont' },
-            { id:'odd', name:'仲間外れ', desc:'違う文字を探せ！', type:'odd' },
-            { id:'leftright', name:'左右連打', desc:'LとRを交互に押せ！', type:'lr' },
-            { id:'slot', name:'スロット', desc:'「7」で止めろ！', type:'slot' },
-            { id:'bomb', name:'解除コード', desc:'表示された順にボタンを押せ！', type:'seq' },
-            { id:'swipe', name:'スクロール', desc:'上にスワイプし続けろ！', type:'swipe' },
-            { id:'balance', name:'バランス', desc:'水平(0°)をキープしろ！', type:'balance' },
-            { id:'luck', name:'運試し', desc:'当たりを選べ！', type:'luck' },
-            { id:'barrage', name:'弾幕回避', desc:'左右に動いて避けろ！(連打)', type:'tap_move' },
-            { id:'reading', name:'空気を読め', desc:'誰も押さないなら押せ！', type:'reading' }
-        ];
-
-        // --- 変数 ---
+        // 変数
         let myId = "P" + Math.random().toString(36).substr(2, 5);
         let roomId = "";
         let currentRound = 1;
         const TOTAL_ROUNDS = 5;
-        
-        // --- ユーティリティ ---
-        const $ = id => document.getElementById(id);
-        const show = id => {
-            document.querySelectorAll('.screen').forEach(e => e.classList.add('hidden'));
-            $(id).classList.remove('hidden');
-        };
+        let sensorActive = false;
 
-        // ================= HOST =================
-        $('btn-host').addEventListener('click', () => {
+        // ゲーム定義
+        const GAMES = [
+            {id:'tap', n:'連打バトル', d:'画面を壊れるほど連打しろ！', t:'tap'},
+            {id:'shake', n:'シェイク！', d:'スマホを全力で振れ！', t:'shake'},
+            {id:'stop', n:'5秒止め', d:'5.00秒ピッタリで止めろ！', t:'stop'},
+            {id:'charge', n:'パワー充填', d:'長押しして100%を目指せ！', t:'charge'},
+            {id:'math', n:'計算クイズ', d:'正しい答えを選べ！', t:'quiz_math'},
+            {id:'color', n:'色彩感覚', d:'文字の「色」を選べ！', t:'quiz_color'},
+            {id:'count', n:'10回押せ', d:'正確に10回だけ押して決定！', t:'count'},
+            {id:'dont', n:'押すな！', d:'絶対にボタンを押すな！', t:'dont'},
+            {id:'luck', n:'運試し', d:'当たりを引け！', t:'luck'}
+        ];
+
+        // ---------------- HOST LOGIC ----------------
+        $('btn-start-host').addEventListener('click', () => {
             roomId = Math.random().toString(36).substr(2, 4).toUpperCase();
-            const rRef = ref(db, `rooms/${roomId}`);
-            set(rRef, { status: 'lobby', round: 1 });
-            onDisconnect(rRef).remove();
-
-            $('disp-id').innerText = roomId;
-            $('qrcode').innerHTML = "";
-            new QRCode($('qrcode'), { text: `${location.origin}${location.pathname}?room=${roomId}`, width: 128, height: 128 });
-            show('s-lobby');
-
-            onValue(ref(db, `rooms/${roomId}/players`), snap => {
-                $('p-count').innerText = snap.exists() ? Object.keys(snap.val()).length : 0;
-            });
-        });
-
-        // ホスト用グローバル関数
-        window.startTotalGame = () => {
-            // スコア初期化
-            get(ref(db, `rooms/${roomId}/players`)).then(snap => {
-                if(!snap.exists()) return alert("参加者がいません");
-                const updates = {};
-                snap.forEach(p => updates[`rooms/${roomId}/players/${p.key}/totalScore`] = 0);
-                update(ref(db), updates).then(() => {
-                    currentRound = 1;
-                    startRound();
-                });
-            });
-        };
-
-        window.nextRound = () => {
-            currentRound++;
-            if(currentRound > TOTAL_ROUNDS) {
-                showFinalResult();
-            } else {
-                startRound();
-            }
-        };
-
-        function startRound() {
-            // ゲーム抽選
-            const game = GAMES[Math.floor(Math.random() * GAMES.length)];
-            const roundDuration = 15; // 15秒に延長
-
-            // DB更新
-            update(ref(db, `rooms/${roomId}`), {
-                status: 'game',
-                game: game,
-                round: currentRound,
-                endTime: Date.now() + 3000 + (roundDuration * 1000)
-            });
-
-            // ラウンドスコアリセット
-            get(ref(db, `rooms/${roomId}/players`)).then(snap => {
-                const updates = {};
-                snap.forEach(p => updates[`rooms/${roomId}/players/${p.key}/roundScore`] = 0);
-                update(ref(db), updates);
-            });
-
-            // 画面表示
-            show('s-game');
-            $('g-round').innerText = `ROUND ${currentRound} / ${TOTAL_ROUNDS}`;
-            $('g-title').innerText = game.name;
-            $('g-desc').innerText = game.desc;
-            $('g-timer').innerText = "READY";
-            $('g-leader').innerText = "";
-
-            // カウントダウン
-            setTimeout(() => {
-                $('g-timer').innerText = "GO!";
-                runGameTimer(roundDuration);
-            }, 3000);
-        }
-
-        function runGameTimer(seconds) {
-            let left = seconds;
-            const timer = setInterval(() => {
-                left -= 0.1;
-                $('g-timer').innerText = left.toFixed(1);
-
-                // 途中経過（トップランナー表示）
-                if(Math.floor(left*10)%5 === 0) { // 0.5秒おき
-                    get(ref(db, `rooms/${roomId}/players`)).then(snap => {
-                        let top = {name:'-', score:-999};
-                        snap.forEach(p => {
-                            const s = p.val().roundScore || 0;
-                            if(s > top.score) top = {name:p.val().name, score:s};
-                        });
-                        $('g-leader').innerText = `TOP: ${top.name} (${top.score})`;
-                    });
-                }
-
-                if(left <= 0) {
-                    clearInterval(timer);
-                    endRound();
-                }
-            }, 100);
-        }
-
-        function endRound() {
-            // 集計とトータルスコア加算
-            get(ref(db, `rooms/${roomId}/players`)).then(snap => {
-                const players = [];
-                const updates = {};
-                snap.forEach(p => {
-                    const d = p.val();
-                    const rs = d.roundScore || 0;
-                    const newTotal = (d.totalScore || 0) + rs;
-                    updates[`rooms/${roomId}/players/${p.key}/totalScore`] = newTotal;
-                    players.push({ name: d.name, round: rs, total: newTotal });
-                });
-                
-                // DB更新
-                update(ref(db), updates);
-                update(ref(db, `rooms/${roomId}`), { status: 'result' });
-
-                // ランキング表示
-                players.sort((a,b) => b.round - a.round);
-                show('s-round-result');
-                $('round-ranking').innerHTML = players.map((p,i) => `
-                    <div class="rank-item">
-                        <span class="${i===0?'rank-top':''}">${i+1}. ${p.name}</span>
-                        <span>+${p.round} (計:${p.total})</span>
-                    </div>
-                `).join('');
-                
-                confetti({ particleCount: 150, spread: 70 });
-            });
-        }
-
-        function showFinalResult() {
-            get(ref(db, `rooms/${roomId}/players`)).then(snap => {
-                const players = [];
-                snap.forEach(p => players.push(p.val()));
-                players.sort((a,b) => b.totalScore - a.totalScore);
-                
-                show('s-final');
-                $('winner-name').innerText = players[0].name;
-                $('final-ranking').innerHTML = players.map((p,i) => `
-                    <div class="rank-item">
-                        <span class="${i===0?'rank-top':''}">${i+1}. ${p.name}</span>
-                        <span>${p.totalScore} pt</span>
-                    </div>
-                `).join('');
-                
-                // 派手な演出
-                const endConfetti = setInterval(() => {
-                    confetti({ particleCount: 50, spread: 60, origin: { x: Math.random(), y: 0.6 } });
-                }, 500);
-                setTimeout(() => clearInterval(endConfetti), 3000);
-            });
-        }
-
-
-        // ================= CLIENT =================
-        const params = new URLSearchParams(location.search);
-        if(params.get('room')) { $('inp-id').value = params.get('room'); show('c-login'); }
-        $('btn-client').addEventListener('click', () => show('c-login'));
-
-        $('btn-join').addEventListener('click', async () => {
-            const rid = $('inp-id').value.toUpperCase().trim();
-            const name = $('inp-name').value || "名無し";
-            if(!rid) return;
-            
-            try {
-                const snap = await get(child(ref(db), `rooms/${rid}`));
-                if(!snap.exists()) return alert("部屋が見つかりません");
-                
-                roomId = rid;
-                const pRef = ref(db, `rooms/${roomId}/players/${myId}`);
-                set(pRef, { name: name, totalScore: 0, roundScore: 0 });
-                onDisconnect(pRef).remove();
-                
-                show('c-play');
-                initClientListener();
-                
-                // センサー許可リクエスト（iOS用）
-                if(typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                    DeviceMotionEvent.requestPermission().catch(e=>console.log(e));
-                }
-            } catch(e) { console.error(e); alert("接続エラー"); }
-        });
-
-        function initClientListener() {
-            onValue(ref(db, `rooms/${roomId}`), snap => {
-                const data = snap.val();
-                if(!data) return location.reload();
-
-                const area = $('c-area');
-                const head = $('c-header');
-
-                if(data.status === 'lobby') {
-                    head.innerText = "ホストの開始待ち...";
-                    area.innerHTML = `<div class="pulse" style="font-size:3rem;">⏳</div>`;
-                }
-                else if (data.status === 'game') {
-                    head.innerText = `R${data.round}: ${data.game.name}`;
-                    // ゲーム開始時刻まで待機 (サーバー時刻同期は簡易的に実装)
-                    const wait = data.endTime - (15000) - Date.now() - 3000; 
-                    // ※簡易ロジック: endTimeから逆算せず、単純に状態変化でUI描画
-                    renderClientGame(data.game, area);
-                }
-                else if (data.status === 'result') {
-                    head.innerText = "結果発表";
-                    area.innerHTML = `<div style="font-size:3rem;">🏆</div>`;
-                }
-            });
-        }
-
-        // --- クライアント側ゲームUI構築 ---
-        function renderClientGame(game, container) {
-            container.innerHTML = "";
-            let score = 0;
-            
-            // スコア加算関数
-            const add = (pt=1) => {
-                score += pt;
-                // トランザクションで安全に加算
-                runTransaction(ref(db, `rooms/${roomId}/players/${myId}/roundScore`), (current) => (current||0) + pt);
-                if(navigator.vibrate) navigator.vibrate(20); // 振動フィードバック
-            };
-            
-            // UIヘルパー: ボタン作成
-            const mkBtn = (cls, txt, onClick) => {
-                const b = document.createElement('button');
-                b.className = cls;
-                b.innerHTML = txt;
-                // PC(mousedown)とスマホ(touchstart)の両対応として pointerdown を使う
-                b.addEventListener('pointerdown', (e) => {
-                    e.preventDefault(); // 拡大などのブラウザ動作防止
-                    onClick(b);
-                });
-                return b;
-            };
-
-            // ゲーム分岐
-            switch(game.type) {
-                case 'tap': // 連打
-                case 'tap_move':
-                    container.appendChild(mkBtn("act-btn bg-huge", "PUSH!", () => {
-                        add(1);
-                        const b = container.querySelector('button');
-                        b.style.transform = "scale(0.9)";
-                        setTimeout(()=>b.style.transform="scale(1)", 50);
-                    }));
-                    break;
-
-                case 'shake': // シェイク
-                    container.innerHTML = `<div style="font-size:5rem;" class="pulse">📲</div><p>振れ！</p>`;
-                    let last = {x:0,y:0,z:0};
-                    const hdl = (e) => {
-                        const acc = e.accelerationIncludingGravity;
-                        if(acc) {
-                            const d = Math.abs(acc.x+acc.y+acc.z - last.x-last.y-last.z);
-                            if(d > 20) add(1);
-                            last = {x:acc.x, y:acc.y, z:acc.z};
-                        }
-                    };
-                    window.addEventListener('devicemotion', hdl);
-                    // 15秒後にリスナー削除（簡易）
-                    setTimeout(()=>window.removeEventListener('devicemotion', hdl), 16000);
-                    break;
-
-                case 'stop': // 5秒止め
-                    const startT = Date.now();
-                    container.appendChild(mkBtn("act-btn bg-blue", "STOP", (btn) => {
-                        const diff = Math.abs(5000 - (Date.now() - startT));
-                        const pt = Math.max(0, 1000 - diff);
-                        add(Math.floor(pt));
-                        btn.disabled = true;
-                        btn.innerHTML = (diff/1000).toFixed(2) + "秒差";
-                    }));
-                    break;
-
-                case 'reaction': // 早押し
-                    const rBtn = mkBtn("act-btn bg-huge", "待て...", (btn) => {
-                        if(btn.style.backgroundColor === 'red') {
-                            const ms = Date.now() - btn.dataset.t;
-                            const pts = Math.max(0, 1000 - ms);
-                            add(pts);
-                            btn.innerText = pts + "pt";
-                            btn.disabled = true;
-                        } else {
-                            add(-200); // お手付き
-                            btn.innerText = "早すぎ!";
-                            setTimeout(()=>btn.innerText="待て...", 500);
-                        }
-                    });
-                    rBtn.style.background = "#333";
-                    container.appendChild(rBtn);
-                    
-                    const wait = 2000 + Math.random() * 5000;
-                    setTimeout(() => {
-                        if(!rBtn.disabled) {
-                            rBtn.style.background = "red";
-                            rBtn.innerText = "押せ！";
-                            rBtn.dataset.t = Date.now();
-                        }
-                    }, wait);
-                    break;
-
-                case 'charge': // 長押し
-                    const cBar = document.createElement('div');
-                    cBar.style.cssText = "width:200px; height:30px; border:2px solid white; margin-bottom:20px; position:relative;";
-                    const cFill = document.createElement('div');
-                    cFill.style.cssText = "width:0%; height:100%; background:cyan;";
-                    cBar.appendChild(cFill);
-                    container.appendChild(cBar);
-
-                    let pow = 0;
-                    let intv;
-                    const cBtn = mkBtn("act-btn bg-huge", "HOLD", () => {}); // pointerdownは個別設定
-                    
-                    cBtn.addEventListener('pointerdown', (e) => {
-                        e.preventDefault();
-                        pow = 0;
-                        intv = setInterval(() => {
-                            pow += 3;
-                            cFill.style.width = Math.min(100, pow) + "%";
-                        }, 50);
-                    });
-                    cBtn.addEventListener('pointerup', () => {
-                        clearInterval(intv);
-                        if(pow >= 90 && pow <= 100) add(500);
-                        else if(pow > 100) add(0);
-                        else add(pow);
-                        pow = 0; cFill.style.width = "0%";
-                    });
-                    container.appendChild(cBtn);
-                    break;
-                
-                case 'quiz_math': // 計算
-                case 'quiz_color': // 色
-                case 'quiz_rps': // じゃんけん
-                case 'quiz_hl': // HighLow
-                case 'odd': // 仲間はずれ
-                    // 汎用クイズUI
-                    renderQuiz(game.type, container, add);
-                    break;
-
-                case 'lr': // 左右
-                    const box = document.createElement('div');
-                    box.style.display = 'flex';
-                    let nextKey = 'L';
-                    box.appendChild(mkBtn("act-btn bg-red", "L", () => { if(nextKey=='L'){add(1); nextKey='R';} }));
-                    box.appendChild(mkBtn("act-btn bg-blue", "R", () => { if(nextKey=='R'){add(1); nextKey='L';} }));
-                    container.appendChild(box);
-                    break;
-
-                case 'count': // 10回押し
-                    let count = 0;
-                    const cntBtn = mkBtn("act-btn bg-huge", "0", (b) => {
-                        count++;
-                        b.innerText = count;
-                    });
-                    const okBtn = mkBtn("btn btn-cyan", "決定", (b) => {
-                        if(count === 10) add(500); else add(-100);
-                        container.innerHTML = "<div>送信完了</div>";
-                    });
-                    container.appendChild(cntBtn);
-                    container.appendChild(okBtn);
-                    break;
-
-                case 'swipe': // スワイプ
-                    const swArea = document.createElement('div');
-                    swArea.style.cssText = "width:300px; height:300px; border:4px dashed #666; display:flex; align-items:center; justify-content:center; font-size:2rem;";
-                    swArea.innerText = "⬆️ SWIPE";
-                    let sy = 0;
-                    swArea.addEventListener('pointerdown', e => sy = e.clientY);
-                    swArea.addEventListener('pointermove', e => {
-                        if(sy > 0 && sy - e.clientY > 50) {
-                            add(1);
-                            sy = e.clientY;
-                        }
-                    });
-                    swArea.addEventListener('pointerup', () => sy = 0);
-                    container.appendChild(swArea);
-                    break;
-
-                default:
-                    container.innerHTML = `<p>画面を見て待機せよ！</p>`;
-                    break;
-            }
-        }
-
-        // --- クイズロジック ---
-        function renderQuiz(type, container, addScore) {
-            container.innerHTML = "";
-            const grid = document.createElement('div');
-            grid.className = "grid-2";
-            
-            // 問題生成
-            let q = "", opts = [], ans = "";
-            
-            if(type === 'quiz_math') {
-                const a = Math.floor(Math.random()*10);
-                const b = Math.floor(Math.random()*10);
-                q = `${a} + ${b} = ?`;
-                ans = a+b;
-                opts = [ans, ans + (Math.random()>0.5?1:-1)].sort(()=>Math.random()-0.5);
-            }
-            else if (type === 'quiz_color') {
-                const colors = [{n:'赤',c:'red'}, {n:'青',c:'blue'}, {n:'緑',c:'green'}];
-                const t = colors[Math.floor(Math.random()*3)];
-                q = `<span style="color:${colors[Math.floor(Math.random()*3)].c}; font-size:3rem;">${t.n}</span>`;
-                ans = t.c;
-                opts = colors.map(c=>c.c); // 3択
-                grid.style.gridTemplateColumns = "1fr 1fr 1fr";
-            }
-            else if (type === 'quiz_rps') {
-                const h = ['👊','✌️','✋'];
-                const e = h[Math.floor(Math.random()*3)];
-                q = `<span style="font-size:4rem">${e}</span>`;
-                const win = {'👊':'✋', '✌️':'👊', '✋':'✌️'};
-                ans = win[e];
-                opts = h;
-                grid.style.gridTemplateColumns = "1fr 1fr 1fr";
-            }
-            else if (type === 'odd') {
-                const c = ['A','B'];
-                const major = Math.random()>0.5 ? 'A':'B';
-                const minor = major==='A'?'B':'A';
-                opts = [major, major, major, minor].sort(()=>Math.random()-0.5);
-                q = "仲間外れを選べ";
-                ans = minor;
-            }
-
-            // 表示
-            const qDiv = document.createElement('div');
-            qDiv.innerHTML = q;
-            qDiv.style.cssText = "font-size:2rem; margin-bottom:20px; font-weight:bold;";
-            container.appendChild(qDiv);
-            container.appendChild(grid);
-
-            opts.forEach(o => {
-                const b = document.createElement('button');
-                b.className = "grid-btn";
-                b.style.backgroundColor = (type==='quiz_color') ? o : '#444';
-                b.innerHTML = (type==='quiz_color') ? '' : o;
-                b.addEventListener('pointerdown', (e) => {
-                    e.preventDefault();
-                    if(String(o) === String(ans)) {
-                        addScore(50);
-                        // 次の問題へリロード
-                        setTimeout(() => renderQuiz(type, container, addScore), 200);
-                    } else {
-                        addScore(-20);
-                        b.style.opacity = 0.5;
-                    }
-                });
-                grid.appendChild(b);
-            });
-        }
-
-    </script>
-</body>
-</html>
+            const rRef = ref(db, `rooms/${roomId}`
