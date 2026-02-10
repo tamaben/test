@@ -3,70 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PARTY BOX 100: ULTIMATE</title>
+    <title>PARTY BOX 100: EVOLUTION</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+1p:wght@800&family=Rowdies:wght@700&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #111; --neon-cyan: #0ff; --neon-pink: #f0f; --neon-yellow: #ff0; --ui-panel: rgba(255,255,255,0.1); }
-        body { margin: 0; background: var(--bg); color: white; font-family: 'M PLUS 1p', sans-serif; overflow: hidden; height: 100vh; user-select: none; text-align: center; }
+        :root { --bg: #111; --neon-cyan: #0ff; --neon-pink: #f0f; --neon-yellow: #ff0; }
+        body { margin: 0; background: var(--bg); color: white; font-family: 'M PLUS 1p', sans-serif; overflow: hidden; height: 100vh; user-select: none; text-align: center; touch-action: none; }
 
         /* 共通スクリーン */
         .screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle, #222 0%, #000 100%); transition: opacity 0.3s; z-index: 1; }
         .hidden { opacity: 0; pointer-events: none; z-index: -10; }
 
-        /* タイポグラフィ */
-        h1 { font-family: 'Rowdies', cursive; font-size: 4rem; color: var(--neon-cyan); text-shadow: 4px 4px 0 var(--neon-pink); margin: 10px; letter-spacing: 2px; }
-        h2 { font-size: 2rem; color: white; margin: 10px; }
-        p { color: #ccc; font-size: 1.2rem; }
-
-        /* ボタン */
-        .btn { background: linear-gradient(45deg, #ff00cc, #3333ff); border: none; color: white; padding: 15px 40px; font-size: 1.5rem; border-radius: 50px; cursor: pointer; margin: 10px; box-shadow: 0 0 15px var(--neon-pink); font-family: inherit; transition: 0.1s; }
-        .btn:active { transform: scale(0.95); filter: brightness(1.2); }
+        /* デザインパーツ */
+        h1 { font-family: 'Rowdies', cursive; font-size: 4rem; color: var(--neon-cyan); text-shadow: 4px 4px 0 var(--neon-pink); margin: 10px; }
+        h2 { font-size: 2rem; margin: 10px; }
+        .btn { background: linear-gradient(45deg, #ff00cc, #3333ff); border: none; color: white; padding: 15px 40px; font-size: 1.5rem; border-radius: 50px; cursor: pointer; margin: 10px; box-shadow: 0 0 15px var(--neon-pink); font-family: inherit; }
+        .btn:active { transform: scale(0.95); }
         .btn-cyan { background: linear-gradient(45deg, #00ccff, #00ffcc); box-shadow: 0 0 15px var(--neon-cyan); color: black; }
 
-        /* ホスト: ルーレット */
-        .wheel-container { position: relative; width: 400px; height: 400px; margin: 20px; }
-        .wheel { width: 100%; height: 100%; border-radius: 50%; border: 10px solid white; background: conic-gradient(#f0f 0deg 90deg, #0ff 90deg 180deg, #ff0 180deg 270deg, #0f0 270deg 360deg); transition: transform 0.1s linear; }
+        /* ホスト画面系 */
+        .wheel-container { position: relative; width: 350px; height: 350px; margin: 20px; }
+        .wheel { width: 100%; height: 100%; border-radius: 50%; border: 10px solid white; background: conic-gradient(#f0f 0deg 90deg, #0ff 90deg 180deg, #ff0 180deg 270deg, #0f0 270deg 360deg); }
         .arrow { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); border-left: 20px solid transparent; border-right: 20px solid transparent; border-top: 40px solid white; z-index: 10; }
-
-        /* ホスト: ゲーム画面 (モード別) */
+        
         #scene-battle { background: #300; }
-        .boss-img { font-size: 12rem; animation: float 2s infinite ease-in-out; filter: drop-shadow(0 0 30px red); }
-        .hp-bar { width: 80%; height: 30px; background: #333; border: 2px solid white; margin-top: 20px; border-radius: 15px; overflow: hidden; }
+        .boss-img { font-size: 10rem; animation: float 2s infinite ease-in-out; }
+        .hp-bar { width: 80%; height: 30px; background: #333; border: 2px solid white; border-radius: 15px; overflow: hidden; }
         .hp-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #f00, #ff0); transition: width 0.2s; }
-        
-        #scene-race { background: #002; justify-content: flex-start; padding-top: 50px; }
-        .track-lane { width: 100%; height: 60px; border-bottom: 2px dashed #555; position: relative; display: flex; align-items: center; }
-        .racer { position: absolute; left: 0; font-size: 3rem; transition: left 0.5s linear; }
-        
-        #scene-generic { background: #222; }
-        .big-instruction { font-size: 5rem; font-weight: 900; color: var(--neon-yellow); margin: 20px; }
+        #scene-race { background: #002; justify-content: flex-start; padding-top: 50px; overflow-y: hidden; }
+        .track-lane { width: 100%; height: 50px; border-bottom: 1px dashed #555; position: relative; display: flex; align-items: center; }
+        .racer { position: absolute; left: 0; font-size: 2.5rem; transition: left 0.5s linear; }
 
-        /* クライアント: コントローラー */
+        /* クライアント操作エリア */
         .ctrl-area { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #222; }
-        .c-btn { width: 250px; height: 250px; border-radius: 50%; border: none; font-size: 2.5rem; color: white; font-weight: bold; box-shadow: 0 10px 0 rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        
+        /* 1. Normal Button */
+        .c-btn { width: 220px; height: 220px; border-radius: 50%; border: none; font-size: 2rem; color: white; font-weight: bold; box-shadow: 0 10px 0 rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; justify-content: center; user-select: none; -webkit-user-select: none; }
         .c-btn:active { transform: translateY(10px); box-shadow: none; }
         .bg-red { background: #ff4757; box-shadow: 0 10px 0 #c0392b; }
         .bg-blue { background: #3742fa; box-shadow: 0 10px 0 #2f3542; }
-        .bg-stop { background: var(--neon-yellow); color: black; box-shadow: 0 10px 0 #d4a017; animation: pulse 0.5s infinite; }
+        .bg-stop { background: var(--neon-yellow); color: black; box-shadow: 0 10px 0 #d4a017; }
 
-        /* アニメーション */
+        /* 2. Swipe Area */
+        .swipe-zone { width: 90%; height: 70%; border: 4px dashed var(--neon-cyan); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 5rem; color: #555; background: rgba(0,255,255,0.05); }
+        .swipe-anim { animation: flyUp 0.5s ease-out; color: var(--neon-cyan); }
+        
+        /* 3. Charge Button */
+        .charge-btn { background: #e67e22; box-shadow: 0 10px 0 #d35400; transition: transform 0.1s; }
+        .charging { animation: vibrate 0.1s infinite; background: #fff !important; color: #e67e22 !important; box-shadow: 0 0 30px #e67e22 !important; }
+
+        /* 4. Mash Buttons */
+        .mash-container { display: flex; gap: 20px; }
+        .mash-btn { width: 140px; height: 140px; font-size: 3rem; border-radius: 20px; border: none; box-shadow: 0 8px 0 rgba(0,0,0,0.5); }
+        .mash-l { background: #2ecc71; box-shadow: 0 8px 0 #27ae60; }
+        .mash-r { background: #9b59b6; box-shadow: 0 8px 0 #8e44ad; }
+        .mash-btn:active { transform: translateY(8px); box-shadow: none; }
+
+        /* Animations */
         @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-20px);} }
-        @keyframes pulse { 0%{transform:scale(1);} 50%{transform:scale(1.05);} 100%{transform:scale(1);} }
+        @keyframes flyUp { 0%{transform:translateY(0); opacity:1;} 100%{transform:translateY(-200px); opacity:0;} }
+        @keyframes vibrate { 0%{transform:translate(1px, 1px);} 100%{transform:translate(-1px, -1px);} }
         .shake { animation: shake 0.3s; }
         @keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 100% { transform: translate(-1px, -2px) rotate(-1deg); } }
-
     </style>
 </head>
 <body>
 
     <div id="s-top" class="screen">
-        <h1>PARTY BOX<br>100</h1>
-        <p>100種類のゲーム × 全員参加バトル</p>
+        <h1>PARTY BOX<br>EVO</h1>
+        <p>100種類のゲーム × 6つの操作</p>
         <div style="margin-top:20px;">
-            <button id="btn-host" class="btn">💻 ホストではじめる</button>
-            <button id="btn-client" class="btn btn-cyan">📱 スマホで参加</button>
+            <button id="btn-host" class="btn">💻 ホスト</button>
+            <button id="btn-client" class="btn btn-cyan">📱 スマホ参加</button>
         </div>
     </div>
 
@@ -75,23 +84,18 @@
         <div id="disp-id" style="font-size:5rem; color:var(--neon-yellow); font-family:'Rowdies';">----</div>
         <div id="qrcode" style="background:white; padding:15px; border-radius:10px;"></div>
         <p>参加人数: <span id="p-count" style="font-size:2rem; font-weight:bold; color:var(--neon-pink)">0</span> 人</p>
-        <div style="margin-top:20px;">
-            <button onclick="startRoulette()" class="btn">運命のルーレット</button>
-            <button onclick="showGameList()" class="btn btn-cyan">リストから選ぶ</button>
-        </div>
+        <button onclick="startRoulette()" class="btn">運命のルーレット</button>
+        <button onclick="showGameList()" class="btn btn-cyan">リストから選ぶ</button>
     </div>
 
     <div id="s-roulette" class="screen hidden">
-        <h1>NEXT GAME IS...</h1>
-        <div class="wheel-container">
-            <div class="arrow"></div>
-            <div id="wheel" class="wheel"></div>
-        </div>
-        <h2 id="stopper-msg" style="color:var(--neon-yellow); animation:pulse 1s infinite;">誰かが止めるのを待っています...</h2>
+        <h1>NEXT GAME</h1>
+        <div class="wheel-container"><div class="arrow"></div><div id="wheel" class="wheel"></div></div>
+        <h2 id="stopper-msg" style="color:var(--neon-yellow);">STOPボタン待ち...</h2>
     </div>
 
     <div id="scene-battle" class="screen hidden">
-        <h2 id="battle-title">BOSS BATTLE</h2>
+        <h2 id="battle-title">BOSS</h2>
         <div id="boss-display" class="boss-img">👾</div>
         <div class="hp-bar"><div id="boss-hp" class="hp-fill"></div></div>
         <div id="battle-timer" style="font-size:3rem; margin-top:20px;">15.0</div>
@@ -104,13 +108,13 @@
 
     <div id="scene-generic" class="screen hidden">
         <h2 id="gen-title">GAME</h2>
-        <div id="gen-instruction" class="big-instruction">READY?</div>
+        <div id="gen-instruction" style="font-size:3rem; font-weight:bold; color:var(--neon-yellow); margin:20px;">READY?</div>
         <div id="gen-timer" style="font-size:3rem;"></div>
         <div id="gen-ranking" style="font-size:1.5rem; text-align:left; margin-top:30px; color:#aaa;"></div>
     </div>
 
     <div id="s-list" class="screen hidden" style="justify-content:flex-start; overflow-y:auto; padding:50px;">
-        <h2>GAME LIST (1-100)</h2>
+        <h2>GAME LIST</h2>
         <button onclick="show('s-lobby')" class="btn">戻る</button>
         <div id="game-list-container" style="display:flex; flex-wrap:wrap; justify-content:center; gap:10px;"></div>
     </div>
@@ -122,12 +126,12 @@
     </div>
 
     <div id="s-c-login" class="screen hidden">
-        <h2>ROOM ID</h2>
+        <h2>ID入力</h2>
         <input id="inp-id" style="font-size:1.5rem; padding:10px; width:200px; text-align:center; text-transform:uppercase;" placeholder="ABCD">
         <br><br>
         <input id="inp-name" style="font-size:1.2rem; padding:10px; width:200px; text-align:center;" placeholder="名前">
         <br><br>
-        <button id="btn-join" class="btn btn-cyan">参加する</button>
+        <button id="btn-join" class="btn btn-cyan">参加</button>
     </div>
 
     <div id="s-c-play" class="screen hidden">
@@ -137,7 +141,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, set, get, onValue, update, remove, onDisconnect, increment, child, runTransaction } 
+        import { getDatabase, ref, set, get, onValue, update, remove, onDisconnect, runTransaction, child } 
                from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
@@ -153,42 +157,37 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // --- 100種類のゲームデータ (簡易生成) ---
-        // type: battle(協力連打), race(対戦連打), shake(振る), luck(運), stop(タイミング)
-        const GAME_DB = [];
+        // --- ゲーム定義: 6つの動作タイプ ---
+        // tap(連打), shake(振る), stop(タイミング), swipe(スワイプ), charge(長押し), mash(左右交互)
         const ACTIONS = [
-            {t:'battle', n:'ドラゴン討伐', d:'全員で連打して倒せ！', i:'🐉'},
-            {t:'battle', n:'隕石破壊', d:'地球を守れ！連打！', i:'☄️'},
-            {t:'battle', n:'巨大メカ戦', d:'システムを破壊しろ！', i:'🤖'},
-            {t:'race', n:'F1グランプリ', d:'最速を目指せ！', i:'🏎️'},
-            {t:'race', n:'100m走', d:'誰よりも速く！', i:'🏃'},
-            {t:'race', n:'競泳バトル', d:'水をかけわけ進め！', i:'🏊'},
-            {t:'shake', n:'プロテイン', d:'ダマになるな！振れ！', i:'🥤'},
+            {t:'tap', n:'ドラゴン討伐', d:'ひたすら連打！', i:'🐉'},
+            {t:'tap', n:'隕石破壊', d:'撃ち落とせ！', i:'☄️'},
+            {t:'shake', n:'プロテイン', d:'スマホを振れ！', i:'🥤'},
             {t:'shake', n:'炭酸ファイト', d:'限界まで振れ！', i:'🍾'},
-            {t:'shake', n:'極寒サバイバル', d:'震えて暖を取れ！', i:'🥶'},
-            {t:'stop', n:'時限爆弾', d:'5.00秒で止めろ！', i:'💣'},
-            {t:'stop', n:'ダルマさんが', d:'合図で止まれ！', i:'🗿'},
-            {t:'luck', n:'ロシアン', d:'当たりを引くな！', i:'🔫'},
-            {t:'luck', n:'宝箱選び', d:'金貨を探せ！', i:'💎'}
+            {t:'stop', n:'時限爆弾', d:'5.00秒で止めろ', i:'💣'},
+            {t:'stop', n:'ダルマさん', d:'合図で止まれ！', i:'🗿'},
+            // NEW ACTIONS
+            {t:'swipe', n:'手裏剣道場', d:'上にスワイプして投げろ！', i:'🥷'},
+            {t:'swipe', n:'ゴミ箱シュート', d:'ゴミを投げ入れろ！', i:'🗑️'},
+            {t:'swipe', n:'居合斬り', d:'一瞬で上に切り上げろ！', i:'⚔️'},
+            {t:'charge', n:'波動砲', d:'長押しで溜めて放て！', i:'⚡'},
+            {t:'charge', n:'風船割り', d:'長押しで膨らませろ！', i:'🎈'},
+            {t:'charge', n:'シャンパン', d:'溜めてコルクを飛ばせ！', i:'🍾'},
+            {t:'mash', n:'100m走', d:'左右交互に連打しろ！', i:'🏃'},
+            {t:'mash', n:'崖登り', d:'左右の手で登れ！', i:'🧗'},
+            {t:'mash', n:'クロール', d:'水をかけわけろ！', i:'🏊'}
         ];
-        
-        // 100個に水増し生成
+
+        const GAME_DB = [];
         for(let i=0; i<100; i++) {
             const base = ACTIONS[i % ACTIONS.length];
-            GAME_DB.push({
-                id: i,
-                type: base.t,
-                title: `${base.i} ${base.n} ${Math.floor(i/ACTIONS.length)+1}`,
-                desc: base.d,
-                icon: base.i
-            });
+            GAME_DB.push({ id: i, type: base.t, title: base.n, desc: base.d, icon: base.i });
         }
 
         // --- 変数 ---
         let myId = "P" + Math.random().toString(36).substr(2, 5);
         let roomId = "";
         let players = {};
-        let gameLoop = null;
         let sensorActive = false;
 
         const $ = id => document.getElementById(id);
@@ -197,7 +196,7 @@
             $(id).classList.remove('hidden');
         };
 
-        // ================= HOST LOGIC =================
+        // --- HOST ---
         $('btn-host').addEventListener('click', () => {
             roomId = Math.random().toString(36).substr(2, 4).toUpperCase();
             const rRef = ref(db, `rooms/${roomId}`);
@@ -215,7 +214,6 @@
             });
         });
 
-        // リスト表示
         window.showGameList = () => {
             show('s-list');
             const cont = $('game-list-container');
@@ -223,174 +221,113 @@
             GAME_DB.forEach(g => {
                 const b = document.createElement('button');
                 b.className = "btn";
-                b.style.fontSize = "0.8rem";
-                b.style.width = "150px";
+                b.style.fontSize = "0.8rem"; b.style.width = "150px";
                 b.innerHTML = `${g.icon}<br>${g.title}`;
                 b.onclick = () => initGame(g);
                 cont.appendChild(b);
             });
         };
 
-        // ルーレット
         window.startRoulette = () => {
             const pIds = Object.keys(players);
             if(pIds.length === 0) return alert("参加者がいません");
-            
             show('s-roulette');
             const stopperId = pIds[Math.floor(Math.random() * pIds.length)];
-            const stopperName = players[stopperId].name;
-            
-            update(ref(db, `rooms/${roomId}`), {
-                status: 'roulette',
-                stopper: stopperId,
-                stopperName: stopperName,
-                spin: true
-            });
+            update(ref(db, `rooms/${roomId}`), { status: 'roulette', stopper: stopperId, stopperName: players[stopperId].name, spin: true });
 
-            // 回転アニメーション
             const wheel = $('wheel');
             let deg = 0;
-            const anim = setInterval(() => {
-                deg = (deg + 20) % 360;
-                wheel.style.transform = `rotate(${deg}deg)`;
-            }, 20);
-
-            $('stopper-msg').innerText = `${stopperName} さんがストップボタンを持っています！`;
-
-            // 停止監視
+            const anim = setInterval(() => { deg = (deg + 20) % 360; wheel.style.transform = `rotate(${deg}deg)`; }, 20);
+            
             const unsub = onValue(ref(db, `rooms/${roomId}/spin`), snap => {
                 if(snap.val() === false) {
-                    clearInterval(anim);
-                    unsub();
-                    const finalDeg = deg + 720 + Math.floor(Math.random()*360);
+                    clearInterval(anim); unsub();
                     wheel.style.transition = "transform 3s ease-out";
-                    wheel.style.transform = `rotate(${finalDeg}deg)`;
-                    
-                    setTimeout(() => {
-                        const randomGame = GAME_DB[Math.floor(Math.random()*GAME_DB.length)];
-                        initGame(randomGame);
-                    }, 4000);
+                    wheel.style.transform = `rotate(${deg + 720 + Math.floor(Math.random()*360)}deg)`;
+                    setTimeout(() => initGame(GAME_DB[Math.floor(Math.random()*GAME_DB.length)]), 4000);
                 }
             });
         };
 
-        // ゲーム初期化
         function initGame(game) {
-            // スコアリセット
-            const updates = {};
-            Object.keys(players).forEach(pid => updates[`rooms/${roomId}/players/${pid}/score`] = 0);
-            update(ref(db), updates);
-
-            // ゲームごとの初期値設定
-            let maxScore = 0;
-            if(game.type === 'battle') maxScore = Object.keys(players).length * 50; // HP
+            update(ref(db, `rooms/${roomId}`), { status: 'game', gameData: game, gameVal: 100, state: 'play' });
             
-            update(ref(db, `rooms/${roomId}`), {
-                status: 'game',
-                gameData: game,
-                gameVal: maxScore, // HPなどの共有値
-                state: 'play'
-            });
+            // 全員のスコア0
+            const u = {}; Object.keys(players).forEach(p => u[`rooms/${roomId}/players/${p}/score`] = 0);
+            update(ref(db), u);
 
-            // 画面切り替え
-            if(game.type === 'battle') {
+            if(game.type === 'tap') { // BATTLE MODE
                 show('scene-battle');
                 $('battle-title').innerText = game.title;
                 $('boss-display').innerText = game.icon;
-                $('boss-hp').style.width = "100%";
-                startBattleLoop(maxScore);
-            } else if (game.type === 'race') {
+                startTimer(20, () => endGame('TIME UP'));
+                onValue(ref(db, `rooms/${roomId}/gameVal`), s => {
+                    const hp = s.val();
+                    $('boss-hp').style.width = hp + "%";
+                    if(hp <= 0) endGame('VICTORY!');
+                    else if(hp < 100) { $('boss-display').classList.add('shake'); setTimeout(()=>$('boss-display').classList.remove('shake'),100); }
+                });
+            } 
+            else if (game.type === 'mash') { // RACE MODE
                 show('scene-race');
                 $('race-title').innerText = game.title;
-                setupRace();
-                startRaceLoop();
-            } else {
+                const area = $('race-track-area'); area.innerHTML = "";
+                Object.keys(players).forEach(pid => {
+                    area.innerHTML += `<div class='track-lane'><span>${players[pid].name}</span><div id='car-${pid}' class='racer'>${game.icon}</div></div>`;
+                });
+                startTimer(20, ()=>endGame('FINISH'));
+                onValue(ref(db, `rooms/${roomId}/players`), s => {
+                    let win = null;
+                    s.forEach(p => {
+                        const sc = p.val().score || 0;
+                        const el = document.getElementById(`car-${p.key}`);
+                        if(el) { el.style.left = Math.min(90, sc*2) + "%"; if(sc >= 45) win = p.val().name; }
+                    });
+                    if(win) endGame(`${win} WINS!`);
+                });
+            }
+            else { // GENERIC (Swipe, Shake, Stop, Charge)
                 show('scene-generic');
                 $('gen-title').innerText = game.title;
                 $('gen-instruction').innerText = game.desc;
-                startGenericLoop(game.type);
+                startTimer(15, ()=>endGame('FINISH!'));
+                onValue(ref(db, `rooms/${roomId}/players`), s => {
+                    const l = []; s.forEach(p => l.push({n:p.val().name, s:p.val().score||0}));
+                    l.sort((a,b)=>b.s-a.s);
+                    $('gen-ranking').innerHTML = l.slice(0,3).map((p,i)=>`#${i+1} ${p.n}: ${p.s}`).join('<br>');
+                });
             }
         }
 
-        // --- BATTLE ---
-        function startBattleLoop(maxHp) {
-            let timer = 20.0;
-            const tInt = setInterval(() => {
-                timer -= 0.1;
-                $('battle-timer').innerText = timer.toFixed(1);
-                if(timer <= 0) { clearInterval(tInt); endGame('TIME UP'); }
+        let timerInt;
+        function startTimer(sec, cb) {
+            clearInterval(timerInt);
+            let t = sec;
+            const el = $('scene-battle').classList.contains('hidden') ? ($('scene-race').classList.contains('hidden') ? $('gen-timer') : null) : $('battle-timer');
+            if(el) el.innerText = t.toFixed(1);
+            
+            timerInt = setInterval(() => {
+                t -= 0.1;
+                if(el) el.innerText = t.toFixed(1);
+                if(t <= 0) { clearInterval(timerInt); cb(); }
             }, 100);
-
-            onValue(ref(db, `rooms/${roomId}/gameVal`), snap => {
-                const hp = snap.val();
-                if(hp <= 0) { clearInterval(tInt); endGame('VICTORY!'); return; }
-                const pct = (hp / maxHp) * 100;
-                $('boss-hp').style.width = pct + "%";
-                $('boss-display').classList.add('shake');
-                setTimeout(()=>$('boss-display').classList.remove('shake'), 100);
-            });
         }
-
-        // --- RACE ---
-        function setupRace() {
-            const area = $('race-track-area');
-            area.innerHTML = "";
-            Object.keys(players).forEach((pid, i) => {
-                const div = document.createElement('div');
-                div.className = 'track-lane';
-                div.innerHTML = `<span style="font-size:0.8rem; position:absolute; top:-10px;">${players[pid].name}</span><div id="car-${pid}" class="racer">🏎️</div>`;
-                area.appendChild(div);
-            });
-        }
-        function startRaceLoop() {
-            onValue(ref(db, `rooms/${roomId}/players`), snap => {
-                const d = snap.val();
-                let winner = null;
-                Object.keys(d).forEach(pid => {
-                    const s = d[pid].score || 0;
-                    const car = document.getElementById(`car-${pid}`);
-                    if(car) {
-                        const pct = Math.min(90, s * 2);
-                        car.style.left = pct + "%";
-                        if(pct >= 90) winner = d[pid].name;
-                    }
-                });
-                if(winner) endGame(`${winner} WINS!`);
-            });
-        }
-
-        // --- GENERIC (SHAKE / STOP) ---
-        function startGenericLoop(type) {
-            let timer = 15.0;
-            const tInt = setInterval(() => {
-                timer -= 0.1;
-                $('gen-timer').innerText = timer.toFixed(1);
-                if(timer <= 0) { clearInterval(tInt); endGame('FINISH!'); }
-            }, 100);
-
-            onValue(ref(db, `rooms/${roomId}/players`), snap => {
-                const list = [];
-                snap.forEach(p => list.push({n:p.val().name, s:p.val().score||0}));
-                list.sort((a,b)=>b.s-a.s);
-                $('gen-ranking').innerHTML = list.slice(0,3).map((p,i)=>`#${i+1} ${p.n}: ${p.s}`).join('<br>');
-            });
-        }
-
         function endGame(msg) {
+            clearInterval(timerInt);
             update(ref(db, `rooms/${roomId}`), { status: 'result' });
             show('s-result');
             $('winner-name').innerText = msg;
-            confetti({ particleCount: 200, spread: 100 });
+            confetti();
         }
 
-        // ================= CLIENT =================
+        // --- CLIENT ---
         const params = new URLSearchParams(location.search);
         if(params.get('room')) { $('inp-id').value = params.get('room'); show('s-c-login'); }
         $('btn-client').addEventListener('click', () => show('s-c-login'));
 
         $('btn-join').addEventListener('click', async () => {
             const rid = $('inp-id').value.toUpperCase().trim();
-            const name = $('inp-name').value || "NoName";
+            const name = $('inp-name').value || "Guest";
             if(!rid) return;
             try {
                 const snap = await get(child(ref(db), `rooms/${rid}`));
@@ -402,62 +339,82 @@
                 show('s-c-play');
                 initController();
                 requestSensor();
-            } catch(e) { alert("接続エラー"); }
+            } catch(e) { alert("Error"); }
         });
 
         function initController() {
             onValue(ref(db, `rooms/${roomId}`), snap => {
                 const data = snap.val();
-                if(!data) return location.reload();
+                if(!data) return;
+                const area = $('c-area'); area.innerHTML = ""; $('c-msg').innerText = "";
                 
-                const area = $('c-area');
-                area.innerHTML = "";
-                $('c-msg').innerText = "";
-
                 if(data.status === 'roulette') {
                     if(data.stopper === myId && data.spin) {
-                        const btn = document.createElement('button');
-                        btn.className = "c-btn bg-stop";
-                        btn.innerText = "STOP!";
-                        btn.onclick = () => update(ref(db, `rooms/${roomId}`), { spin: false });
-                        area.appendChild(btn);
+                        const b = document.createElement('button'); b.className = "c-btn bg-stop"; b.innerText = "STOP!";
+                        b.onclick = () => update(ref(db, `rooms/${roomId}`), { spin: false });
+                        area.appendChild(b);
                         navigator.vibrate(200);
-                    } else {
-                        $('c-msg').innerText = `${data.stopperName}さんがルーレット中...`;
-                    }
-                } 
-                else if (data.status === 'game' && data.state === 'play') {
+                    } else $('c-msg').innerText = "ルーレット中...";
+                }
+                else if(data.status === 'game' && data.state === 'play') {
                     const g = data.gameData;
                     $('c-msg').innerText = g.desc;
 
-                    if(g.type === 'battle' || g.type === 'race') {
-                        const btn = document.createElement('button');
-                        btn.className = g.type === 'battle' ? "c-btn bg-red" : "c-btn bg-blue";
-                        btn.innerHTML = g.type === 'battle' ? "ATTACK<br>👊" : "GAS<br>💨";
-                        btn.addEventListener('pointerdown', (e) => {
-                            e.preventDefault();
-                            btn.style.transform = "scale(0.9)";
-                            navigator.vibrate(20);
-                            if(g.type === 'battle') runTransaction(ref(db, `rooms/${roomId}/gameVal`), h=>(h||0)-1);
-                            else runTransaction(ref(db, `rooms/${roomId}/players/${myId}/score`), s=>(s||0)+1);
-                        });
-                        btn.addEventListener('pointerup', ()=>btn.style.transform = "scale(1)");
-                        area.appendChild(btn);
+                    // 1. TAP (連打)
+                    if(g.type === 'tap') {
+                        const b = document.createElement('button'); b.className = "c-btn bg-red"; b.innerText = "ATTACK!";
+                        b.onpointerdown = (e) => { e.preventDefault(); b.style.transform = "scale(0.9)"; navigator.vibrate(20); runTransaction(ref(db, `rooms/${roomId}/gameVal`), h=>(h||0)-1); };
+                        b.onpointerup = () => b.style.transform = "scale(1)";
+                        area.appendChild(b);
                     }
-                    else if (g.type === 'shake') {
-                        area.innerHTML = `<div style="font-size:5rem; animation:shake 0.5s infinite">📱</div>`;
+                    // 2. SWIPE (スワイプ)
+                    else if(g.type === 'swipe') {
+                        const z = document.createElement('div'); z.className = "swipe-zone"; z.innerText = "⬆️";
+                        let sy = 0;
+                        z.ontouchstart = (e) => sy = e.touches[0].clientY;
+                        z.ontouchend = (e) => {
+                            if(sy - e.changedTouches[0].clientY > 50) { // Up Swipe
+                                z.innerHTML = g.icon; z.classList.add('swipe-anim'); navigator.vibrate(50);
+                                runTransaction(ref(db, `rooms/${roomId}/players/${myId}/score`), s=>(s||0)+1);
+                                setTimeout(()=>{ z.classList.remove('swipe-anim'); z.innerText="⬆️"; }, 500);
+                            }
+                        };
+                        area.appendChild(z);
+                    }
+                    // 3. CHARGE (長押し)
+                    else if(g.type === 'charge') {
+                        const b = document.createElement('button'); b.className = "c-btn charge-btn"; b.innerText = "HOLD";
+                        let st = 0;
+                        b.onpointerdown = (e) => { e.preventDefault(); st = Date.now(); b.classList.add('charging'); navigator.vibrate(50); };
+                        b.onpointerup = (e) => {
+                            e.preventDefault(); b.classList.remove('charging');
+                            const dur = Date.now() - st;
+                            const pt = Math.min(Math.floor(dur/100), 20); // Max 20pt
+                            if(pt>1) runTransaction(ref(db, `rooms/${roomId}/players/${myId}/score`), s=>(s||0)+pt);
+                        };
+                        area.appendChild(b);
+                    }
+                    // 4. MASH (左右交互)
+                    else if(g.type === 'mash') {
+                        const box = document.createElement('div'); box.className = "mash-container";
+                        const l = document.createElement('button'); l.className = "mash-btn mash-l"; l.innerText = "L";
+                        const r = document.createElement('button'); r.className = "mash-btn mash-r"; r.innerText = "R";
+                        const hit = () => { navigator.vibrate(20); runTransaction(ref(db, `rooms/${roomId}/players/${myId}/score`), s=>(s||0)+1); };
+                        l.onpointerdown = (e) => { e.preventDefault(); hit(); };
+                        r.onpointerdown = (e) => { e.preventDefault(); hit(); };
+                        box.appendChild(l); box.appendChild(r);
+                        area.appendChild(box);
+                    }
+                    // 5. SHAKE (振る)
+                    else if(g.type === 'shake') {
+                        area.innerHTML = `<div style="font-size:5rem; animation:shake 0.5s infinite">👋</div>`;
                         startSensor();
                     }
-                    else if (g.type === 'stop') {
-                        const btn = document.createElement('button');
-                        btn.className = "c-btn bg-stop";
-                        btn.innerText = "STOP";
-                        btn.onclick = () => {
-                            btn.disabled = true;
-                            // 本来はサーバー時間との差分計算が必要だが簡易実装
-                            runTransaction(ref(db, `rooms/${roomId}/players/${myId}/score`), s=>(s||0)+10); 
-                        };
-                        area.appendChild(btn);
+                    // 6. STOP (タイミング)
+                    else if(g.type === 'stop') {
+                        const b = document.createElement('button'); b.className = "c-btn bg-stop"; b.innerText = "STOP";
+                        b.onclick = () => { b.disabled = true; runTransaction(ref(db, `rooms/${roomId}/players/${myId}/score`), s=>(s||0)+10); };
+                        area.appendChild(b);
                     }
                 }
             });
@@ -472,15 +429,12 @@
             if(sensorActive) return;
             sensorActive = true;
             let last = {x:0,y:0,z:0};
-            window.addEventListener('devicemotion', function h(e){
-                if(!sensorActive) window.removeEventListener('devicemotion', h);
+            window.addEventListener('devicemotion', e => {
+                if(!sensorActive) return;
                 const acc = e.accelerationIncludingGravity;
                 if(!acc) return;
                 const d = Math.abs(acc.x+acc.y+acc.z - last.x-last.y-last.z);
-                if(d > 20) {
-                    runTransaction(ref(db, `rooms/${roomId}/players/${myId}/score`), s=>(s||0)+1);
-                    if(navigator.vibrate) navigator.vibrate(30);
-                }
+                if(d > 20) { runTransaction(ref(db, `rooms/${roomId}/players/${myId}/score`), s=>(s||0)+1); navigator.vibrate(30); }
                 last = {x:acc.x, y:acc.y, z:acc.z};
             });
         }
