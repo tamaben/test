@@ -3,191 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PARTY BOX: OMEGA</title>
+    <title>PARTY BOX: ULTRA</title>
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=M+PLUS+Rounded+1c:wght@500;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0a0a0a;
-            --glass: rgba(255, 255, 255, 0.05);
-            --neon-blue: #00f3ff;
-            --neon-pink: #ff0099;
-            --neon-green: #00ff66;
-            --neon-yellow: #ffee00;
+            --bg: #050510;
+            --primary: #00f0ff; /* Cyber Blue */
+            --secondary: #ff0055; /* Cyber Pink */
+            --accent: #ffee00; /* Cyber Yellow */
             --text: #fff;
-        }
-        * { box-sizing: border-box; touch-action: none; user-select: none; -webkit-user-select: none; }
-        body {
-            margin: 0; background: var(--bg); color: var(--text);
-            font-family: 'Roboto', sans-serif; overflow: hidden;
+            --font-head: 'Russo One', sans-serif;
+            --font-body: 'M PLUS Rounded 1c', sans-serif;
         }
 
-        /* --- 共通UI --- */
+        * { box-sizing: border-box; touch-action: none; user-select: none; -webkit-user-select: none; }
+        body {
+            margin: 0; padding: 0; background: var(--bg); color: var(--text);
+            font-family: var(--font-body); overflow: hidden; height: 100vh; width: 100vw;
+        }
+
+        /* UI Utilities */
         .screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
-            transition: opacity 0.3s;
+            background: radial-gradient(circle at center, #1a1b2e 0%, #000 100%);
+            transition: opacity 0.4s, transform 0.4s; opacity: 1; z-index: 10;
         }
-        .hidden { display: none !important; }
-        
-        h1, h2 { font-family: 'Black Ops One', cursive; text-transform: uppercase; margin: 0; letter-spacing: 2px; }
-        h1 { font-size: 4rem; text-shadow: 0 0 20px var(--neon-blue); background: linear-gradient(to right, var(--neon-blue), var(--neon-pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        .btn {
-            background: var(--glass); border: 1px solid var(--neon-blue); color: var(--neon-blue);
-            padding: 15px 40px; font-size: 1.2rem; margin: 10px; cursor: pointer;
-            font-family: 'Black Ops One', cursive; transition: 0.2s; text-transform: uppercase;
-            box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
-        }
-        .btn:active { transform: scale(0.95); background: var(--neon-blue); color: #000; }
-        .btn-pink { border-color: var(--neon-pink); color: var(--neon-pink); }
-        .btn-green { border-color: var(--neon-green); color: var(--neon-green); }
+        .hidden { opacity: 0; pointer-events: none; z-index: -1; transform: scale(0.9); }
 
-        /* --- HOST UI --- */
-        .menu-grid {
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;
-            max-width: 800px; padding: 20px;
+        h1 { font-family: var(--font-head); font-size: 3.5rem; text-align: center; margin: 0; text-shadow: 0 0 20px var(--primary); line-height: 1; }
+        h2 { font-family: var(--font-head); color: var(--secondary); font-size: 2rem; margin: 10px; text-transform: uppercase; }
+        p { font-size: 1.2rem; color: #aaa; text-align: center; margin: 10px; max-width: 90%; }
+
+        .btn {
+            background: rgba(255,255,255,0.05); border: 2px solid var(--primary); color: var(--primary);
+            padding: 20px 40px; font-size: 1.5rem; font-family: var(--font-head);
+            cursor: pointer; margin: 15px; border-radius: 50px; transition: 0.2s;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2); width: 80%; max-width: 400px;
+        }
+        .btn:active { transform: scale(0.95); background: var(--primary); color: #000; }
+        .btn-pink { border-color: var(--secondary); color: var(--secondary); }
+        .btn-pink:active { background: var(--secondary); }
+
+        /* HOST SPECIFIC */
+        .game-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px;
+            width: 90%; max-width: 1000px; padding: 20px; overflow-y: auto; max-height: 60vh;
         }
         .game-card {
-            background: #222; border: 1px solid #444; padding: 20px; text-align: center;
-            cursor: pointer; transition: 0.3s; border-radius: 10px;
+            background: #222; border: 1px solid #444; border-radius: 10px; padding: 15px;
+            text-align: center; cursor: pointer; transition: 0.3s;
         }
-        .game-card:hover { border-color: var(--neon-yellow); transform: translateY(-5px); box-shadow: 0 0 15px var(--neon-yellow); }
-        .icon { font-size: 3rem; margin-bottom: 10px; display: block; }
-        
-        #host-stage { justify-content: flex-start; padding-top: 40px; }
-        .stage-visual { font-size: 5rem; font-weight: bold; margin: 20px 0; text-align: center; width: 80%; }
-        .timer-bar { width: 100%; height: 10px; background: #333; position: fixed; top: 0; }
-        .timer-fill { height: 100%; background: var(--neon-green); width: 100%; transition: width linear 0.1s; }
+        .game-card:hover { border-color: var(--accent); background: #333; transform: translateY(-5px); }
+        .g-icon { font-size: 2.5rem; display: block; margin-bottom: 5px; }
+        .g-name { font-size: 0.8rem; font-weight: bold; }
 
-        /* クイズ作成モーダル */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .input-box { background: #333; border: none; color: white; padding: 10px; width: 300px; margin: 5px; font-size: 1.2rem; }
-
-        /* --- CLIENT UI --- */
-        #client-area { width: 100%; height: 100%; }
-        .ctrl-btn { width: 100%; height: 100%; border: none; font-size: 2rem; font-weight: bold; color: white; }
-        .c-red { background: #ff4757; } .c-blue { background: #2e86de; } 
-        .c-green { background: #2ed573; } .c-yellow { background: #ffa502; color: #000; }
+        .timer-bar { width: 100%; height: 15px; background: #222; position: fixed; top: 0; }
+        .timer-fill { height: 100%; background: var(--primary); width: 100%; transition: width linear 0.1s; }
+        .main-vis { font-size: 5rem; font-weight: bold; font-family: var(--font-head); text-shadow: 0 0 30px var(--primary); }
         
-        /* エフェクト */
-        @keyframes flash { 0% { background: white; } 100% { background: var(--bg); } }
-        .flash-effect { animation: flash 0.2s; }
-        @keyframes shake { 0% { transform: translate(2px, 2px); } 100% { transform: translate(-2px, -2px); } }
-        .shake-screen { animation: shake 0.1s infinite; }
+        /* CLIENT CONTROLS */
+        #ctrl-area { width: 100%; height: 100%; display: flex; flex-direction: column; }
+        .big-btn { 
+            flex: 1; width: 100%; border: none; font-size: 3rem; font-weight: bold; 
+            color: white; display: flex; align-items: center; justify-content: center;
+        }
+        .bg-red { background: #ff4757; } .bg-blue { background: #2e86de; } 
+        .bg-green { background: #2ed573; } .bg-yellow { background: #ffa502; color: black; }
+        
+        /* Motion Indicators */
+        .motion-instruction { font-size: 2rem; padding: 20px; text-align: center; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 0.7; } 50% { opacity: 1; transform: scale(1.05); } 100% { opacity: 0.7; } }
     </style>
 </head>
 <body>
 
-<div id="host-view" class="hidden">
+<div id="screen-landing" class="screen">
+    <h1>PARTY BOX<br><span style="color:var(--secondary)">ULTRA</span></h1>
+    <p>究極のスマホ・パーティゲーム</p>
+    <div id="landing-buttons">
+        <button class="btn" onclick="App.modeHost()">👑 部屋を作る (HOST)</button>
+        <button class="btn btn-pink" onclick="App.modeClient()">📱 部屋に入る (JOIN)</button>
+    </div>
+    <div id="client-connect-ui" class="hidden" style="width:100%; text-align:center;">
+        <input type="text" id="room-id-input" placeholder="ROOM ID" style="padding:15px; font-size:1.5rem; text-align:center; width:60%; border-radius:10px; border:none;">
+        <br>
+        <button class="btn" onclick="Client.manualJoin()">接続</button>
+        <p id="conn-status">接続待機中...</p>
+        <div id="fallback-host" class="hidden">
+            <p style="color:var(--secondary)">部屋が見つかりません。<br>あなたがホストになりますか？</p>
+            <button class="btn" onclick="App.modeHost()">👑 今すぐ部屋を作る</button>
+        </div>
+    </div>
+</div>
+
+<div id="host-app" class="hidden">
     <div id="h-lobby" class="screen">
-        <h1>PARTY BOX: OMEGA</h1>
-        <div style="background: white; padding: 10px; margin: 20px;">
+        <h2>ROOM ID</h2>
+        <h1 id="host-id-disp" style="color:var(--accent); font-size:5rem; letter-spacing:5px;">...</h1>
+        <div style="background:white; padding:10px; border-radius:10px; margin:20px;">
             <div id="qrcode"></div>
         </div>
-        <p>スマホで参加せよ / Players: <span id="p-count" style="color:var(--neon-green); font-size:1.5rem">0</span></p>
-        <button class="btn" onclick="Host.toMenu()">START SYSTEM</button>
+        <p>参加者: <span id="p-count" style="color:var(--primary); font-size:2rem; font-weight:bold;">0</span> 人</p>
+        <button class="btn" onclick="Host.toMenu()">ゲーム選択へ</button>
     </div>
 
     <div id="h-menu" class="screen hidden">
-        <h2>SELECT MODULE</h2>
-        <div class="menu-grid" id="game-list"></div>
-        <div style="margin-top: 20px;">
-            <button class="btn btn-green" onclick="Host.startRandom()">🎲 RANDOM (∞ MODE)</button>
-        </div>
-    </div>
-
-    <div id="h-quiz-setup" class="modal hidden">
-        <h2>QUIZ SETUP</h2>
-        <button class="btn btn-green" onclick="Host.startQuiz('random')">📚 ランダム出題 (DB)</button>
-        <div style="margin: 20px 0; border-top: 1px solid #555; width: 50%;"></div>
-        <h3>📝 オリジナル問題作成</h3>
-        <input type="text" id="q-text" class="input-box" placeholder="問題文 (例: 私の好きな食べ物は？)">
-        <input type="text" id="q-ans-correct" class="input-box" placeholder="正解 (例: カレー)" style="border-bottom: 2px solid var(--neon-green)">
-        <input type="text" id="q-ans-2" class="input-box" placeholder="不正解1">
-        <input type="text" id="q-ans-3" class="input-box" placeholder="不正解2">
-        <input type="text" id="q-ans-4" class="input-box" placeholder="不正解3">
-        <button class="btn btn-pink" onclick="Host.startQuiz('custom')">この問題で出題</button>
-        <button class="btn" onclick="Host.toMenu()">戻る</button>
+        <h2>SELECT GAME</h2>
+        <div class="game-grid" id="game-list"></div>
+        <button class="btn btn-pink" onclick="Host.startRandom()">🎲 ランダム・ツアー</button>
     </div>
 
     <div id="h-stage" class="screen hidden">
         <div class="timer-bar"><div id="timer-fill" class="timer-fill"></div></div>
-        <div id="stage-title" style="color: #888; margin-bottom: 10px;">TITLE</div>
-        <div id="stage-main" class="stage-visual">READY</div>
-        <div id="stage-sub" style="font-size: 1.5rem; color: var(--neon-yellow);"></div>
+        <div id="stage-title" style="color:#aaa; position:absolute; top:30px;">TITLE</div>
+        <div id="stage-visual" class="main-vis">READY</div>
+        <div id="stage-sub" style="font-size:2rem; color:var(--accent); text-align:center; white-space:pre;"></div>
     </div>
 
     <div id="h-result" class="screen hidden">
-        <h1 style="color: var(--neon-green)">WINNER</h1>
-        <div id="res-winner" style="font-size: 4rem; margin: 30px 0;">PLAYER</div>
-        <button class="btn" onclick="Host.toMenu()">MENU</button>
+        <h1 style="color:var(--primary)">WINNER</h1>
+        <div id="winner-name" style="font-size:4rem; margin:30px 0;">???</div>
+        <button class="btn" onclick="Host.toMenu()">メニューに戻る</button>
     </div>
 </div>
 
-<div id="client-view" class="hidden">
-    <div id="c-login" class="screen">
-        <h2>CONNECT</h2>
-        <input type="text" id="username" placeholder="NAME" style="padding: 15px; font-size: 1.2rem; text-align: center; width: 80%;">
-        <button class="btn" onclick="Client.join()">ENTER</button>
-        <p style="font-size: 0.8rem; color: #666;">※iPhoneはマナーモードを解除してください</p>
+<div id="client-app" class="hidden">
+    <div id="c-name" class="screen">
+        <h2>PLAYER NAME</h2>
+        <input type="text" id="username" maxlength="8" placeholder="名前を入力" style="padding:15px; font-size:1.5rem; text-align:center; width:80%;">
+        <br>
+        <p style="font-size:0.9rem; color:#ff4757;">※iPhoneの方は次の画面で<br>「センサー許可」を押してください</p>
+        <button class="btn" onclick="Client.submitName()">OK</button>
+    </div>
+
+    <div id="c-perm" class="screen hidden">
+        <h2>センサー準備</h2>
+        <p>体を動かすゲームのために<br>モーションセンサーを使います。</p>
+        <button class="btn btn-pink" onclick="Client.reqPerm()">許可してスタート</button>
     </div>
 
     <div id="c-wait" class="screen hidden">
-        <h2 style="animation: pulse 1s infinite">WAITING...</h2>
+        <h2 style="animation:pulse 1s infinite">WAITING...</h2>
+        <p>ホストの画面を見てください</p>
     </div>
 
-    <div id="c-ctrl" class="screen hidden" style="background: black;">
-        </div>
+    <div id="c-ctrl" class="screen hidden" style="background:#000;">
+        <div id="ctrl-area"></div>
+    </div>
 </div>
 
 <script>
-/* ==================== 1. クイズデータベース (拡張可能) ==================== */
-// ここに問題をカンマ区切りで増やせば無限に追加可能です。
-// { q: "問題文", a: ["正解", "誤答1", "誤答2", "誤答3"] }
-const QUIZ_DB = [
-    {q:"「日本一高い山」は？", a:["富士山","北岳","阿蘇山","高尾山"]},
-    {q:"元素記号「O」は何を表す？", a:["酸素","金","銀","鉄"]},
-    {q:"1000円札の肖像画は？(2024)", a:["北里柴三郎","野口英世","福沢諭吉","渋沢栄一"]},
-    {q:"「パン」は元々どこの国の言葉？", a:["ポルトガル","フランス","英語","ドイツ"]},
-    {q:"インターネット上の住所にあたるものは？", a:["IPアドレス","MACアドレス","郵便番号","DNS"]},
-    {q:"「義務教育」は中学校まで。○か×か？", a:["○","×","△","？"]},
-    {q:"徳川家康が幕府を開いた場所は？", a:["江戸","京都","大阪","鎌倉"]},
-    {q:"次の中で「果物」ではなく「野菜」なのは？", a:["イチゴ","リンゴ","ミカン","ブドウ"]},
-    {q:"QRコードの「QR」の意味は？", a:["Quick Response","Quiz Rally","Quality Rank","Queen Road"]},
-    {q:"五千円札の肖像画は？(2024)", a:["津田梅子","樋口一葉","紫式部","清少納言"]},
-    // ...ここに150問分追加してください...
-    {q:"水の化学式は？", a:["H2O","CO2","O2","HO"]},
-    {q:"サッカーの1チームの人数は？", a:["11人","9人","10人","12人"]},
-    {q:"現在(2026)の日本の元号は？", a:["令和","平成","昭和","大正"]},
-    {q:"パソコンの「マウス」を動かすと動く矢印の名前は？", a:["カーソル","ポインター","アンカー","アイコン"]},
-    {q:"「人間は考える◯◯である」", a:["葦(あし)","足","石","牛"]},
-    {q:"日本で一番広い都道府県は？", a:["北海道","岩手県","福島県","長野県"]},
-    {q:"１日は何秒？", a:["86400秒","3600秒","60000秒","100000秒"]},
-    {q:"ドラえもんの誕生日は？", a:["2112年9月3日","2012年9月3日","1990年9月3日","2200年1月1日"]},
-    {q:"干支の最初は？", a:["子(ね)","丑(うし)","寅(とら)","申(さる)"]},
-    {q:"世界で一番人口が多い国は？(2024推計)", a:["インド","中国","アメリカ","インドネシア"]}
-];
-
-/* ==================== 2. ゲームリスト ==================== */
+/* ==================== GAME DATA ==================== */
 const GAMES = [
-    { id: 'quiz', name: 'クイズバトル', icon: '🎓', type: 'quiz' },
-    { id: 'mash', name: '連打デスマッチ', icon: '🔥', type: 'tap' },
-    { id: 'shake', name: 'シェイク・イット', icon: '📱', type: 'shake' },
-    { id: 'timer', name: '10秒ジャスト', icon: '⏱️', type: 'tap' },
-    { id: 'bomb', name: '爆弾回しゲーム', icon: '💣', type: 'pass' },
-    { id: 'reflex', name: '反射神経テスト', icon: '⚡', type: 'tap' },
-    { id: 'gyro', name: 'バランス王', icon: '⚖️', type: 'gyro' },
-    { id: 'swipe', name: 'サムライ・フリック', icon: '⚔️', type: 'swipe' },
-    { id: 'survivor', name: '赤を押すな！', icon: '🚫', type: 'tap' }, // 指示と違う色を押すと脱落
-    { id: 'color', name: '色探し', icon: '🎨', type: 'camera' }, // (擬似) 指定された色と同じボタンを押せ
-    { id: 'werewolf', name: 'ワンナイト人狼', icon: '🐺', type: 'werewolf' },
-    { id: 'poll', name: '多数決アンケート', icon: '📊', type: 'poll' }
+    // --- Body / Sensor Games ---
+    { id: 'squat', name: 'スクワット・バトル', icon: '🏋️', type: 'motion', mode:'squat', desc: 'スマホを持ってしゃがんで立て！' },
+    { id: 'run', name: 'その場ダッシュ', icon: '🏃', type: 'motion', mode:'shake_hard', desc: 'その場で猛烈に足踏みしろ！' },
+    { id: 'spin', name: 'スピン・マスター', icon: '🌪️', type: 'gyro', mode:'spin', desc: 'その場でぐるぐる回転しろ！(目は回すな)' },
+    { id: 'ninja', name: '忍者ウォーク', icon: '🥷', type: 'gyro', mode:'balance', desc: 'スマホを揺らさずに歩き続けろ！' },
+    { id: 'zen', name: '禅バランス', icon: '🙏', type: 'gyro', mode:'flat', desc: 'スマホを手のひらで水平に保て！' },
+    { id: 'jump', name: 'タイミング・ジャンプ', icon: '🦘', type: 'motion', mode:'jump', desc: '「JUMP!」の合図でスマホごと跳べ！' },
+    
+    // --- Touch / Mind Games ---
+    { id: 'mash', name: 'ハイパー連打', icon: '🔥', type: 'tap', desc: '画面が壊れない程度に連打せよ！' },
+    { id: 'color', name: 'カラー・ハント', icon: '🎨', type: 'color', desc: '指定された色と同じボタンを押せ！' },
+    { id: 'bomb', name: 'シェイク・ボム', icon: '💣', type: 'pass', desc: '振ってパス！爆発したら負け' },
+    { id: 'quiz', name: 'サバイバル・クイズ', icon: '🧠', type: 'quiz', desc: '早押しクイズバトル！' },
+    { id: 'werewolf', name: 'ワンナイト人狼', icon: '🐺', type: 'werewolf', desc: '嘘つきを見つけ出せ' }
 ];
 
-/* ==================== 3. サウンドエンジン (シンセサイザー) ==================== */
+/* ==================== SOUND & UTIL ==================== */
 const AudioSys = {
     ctx: new (window.AudioContext || window.webkitAudioContext)(),
     play: (type) => {
@@ -197,176 +184,158 @@ const AudioSys = {
         const t = AudioSys.ctx.currentTime;
         osc.connect(gain); gain.connect(AudioSys.ctx.destination);
 
-        if(type === 'bgm_start') { // ドラムロール風
-            osc.type = 'square'; osc.frequency.setValueAtTime(100, t);
-            osc.frequency.linearRampToValueAtTime(800, t+2);
-            gain.gain.setValueAtTime(0.1, t); gain.gain.linearRampToValueAtTime(0, t+2);
-            osc.start(); osc.stop(t+2);
-        } else if (type === 'win') { // ファンファーレ
-            [440, 554, 659, 880].forEach((f, i) => {
-                const o = AudioSys.ctx.createOscillator();
-                const g = AudioSys.ctx.createGain();
-                o.type = 'triangle'; o.frequency.value = f;
+        if(type==='tap') {
+            osc.frequency.setValueAtTime(400, t); osc.type='triangle';
+            gain.gain.setValueAtTime(0.1, t); gain.gain.linearRampToValueAtTime(0, t+0.1);
+            osc.start(); osc.stop(t+0.1);
+        } else if(type==='win') {
+            [523, 659, 783, 1046].forEach((f,i) => {
+                const o=AudioSys.ctx.createOscillator(); const g=AudioSys.ctx.createGain();
                 o.connect(g); g.connect(AudioSys.ctx.destination);
-                g.gain.setValueAtTime(0.1, t + i*0.1);
-                g.gain.exponentialRampToValueAtTime(0.001, t + i*0.1 + 0.5);
-                o.start(t + i*0.1); o.stop(t + i*0.1 + 0.5);
+                o.type='square'; o.frequency.value=f;
+                g.gain.setValueAtTime(0.1, t+i*0.1); g.gain.exponentialRampToValueAtTime(0.001, t+i*0.1+0.4);
+                o.start(t+i*0.1); o.stop(t+i*0.1+0.4);
             });
-        } else if (type === 'lose') { // ブザー
-            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, t);
-            osc.frequency.linearRampToValueAtTime(100, t+0.5);
-            gain.gain.setValueAtTime(0.2, t); gain.gain.linearRampToValueAtTime(0, t+0.5);
-            osc.start(); osc.stop(t+0.5);
-        } else if (type === 'bomb') { // 爆発
-            const bufferSize = AudioSys.ctx.sampleRate * 1; 
-            const buffer = AudioSys.ctx.createBuffer(1, bufferSize, AudioSys.ctx.sampleRate);
-            const data = buffer.getChannelData(0);
-            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-            const noise = AudioSys.ctx.createBufferSource();
-            noise.buffer = buffer;
-            noise.connect(gain);
-            gain.gain.setValueAtTime(0.5, t); gain.gain.exponentialRampToValueAtTime(0.001, t+1);
-            noise.start();
+        } else if(type==='alert') {
+            osc.frequency.setValueAtTime(150, t); osc.type='sawtooth';
+            gain.gain.setValueAtTime(0.2, t); gain.gain.linearRampToValueAtTime(0, t+0.3);
+            osc.start(); osc.stop(t+0.3);
         }
     }
 };
+const Utils = { id: () => Math.random().toString(36).substr(2, 4).toUpperCase() };
 
-/* ==================== 4. HOST LOGIC ==================== */
+/* ==================== APP ROUTING ==================== */
+const App = {
+    init: () => {
+        const params = new URLSearchParams(location.search);
+        const roomId = params.get('room');
+        if(roomId) {
+            document.getElementById('landing-buttons').classList.add('hidden');
+            document.getElementById('client-connect-ui').classList.remove('hidden');
+            document.getElementById('room-id-input').value = roomId;
+            Client.init(roomId);
+        }
+    },
+    modeHost: () => {
+        document.getElementById('screen-landing').classList.add('hidden');
+        Host.init();
+    },
+    modeClient: () => {
+        document.getElementById('landing-buttons').classList.add('hidden');
+        document.getElementById('client-connect-ui').classList.remove('hidden');
+    }
+};
+
+/* ==================== HOST LOGIC ==================== */
 const Host = {
-    peer: null, conns: {}, players: {}, 
-    game: null, loop: null, 
+    peer: null, connMap: {}, players: {}, game: null, loop: null,
     
     init: () => {
-        document.getElementById('host-view').classList.remove('hidden');
-        Host.peer = new Peer(Utils.id());
+        document.getElementById('host-app').classList.remove('hidden');
+        const myId = Utils.id();
+        document.getElementById('host-id-disp').innerText = myId;
+        
+        Host.peer = new Peer(myId);
         Host.peer.on('open', id => {
-            const url = `${location.href.split('?')[0]}?host=${id}`;
-            new QRCode(document.getElementById("qrcode"), { text: url, width: 128, height: 128 });
+            const url = `${location.href.split('?')[0]}?room=${id}`;
+            new QRCode(document.getElementById("qrcode"), { text: url, width: 150, height: 150 });
         });
-        Host.peer.on('connection', c => {
-            c.on('open', () => {
-                Host.conns[c.peer] = c;
-                c.on('data', d => Host.handleData(c.peer, d));
-                c.on('close', () => { delete Host.players[c.peer]; Host.updateCount(); });
+        Host.peer.on('connection', conn => {
+            conn.on('open', () => {
+                Host.connMap[conn.peer] = conn;
+                conn.on('data', data => Host.handleData(conn.peer, data));
+                conn.on('close', () => { delete Host.players[conn.peer]; Host.updateLobby(); });
             });
         });
         Host.renderMenu();
     },
 
-    updateCount: () => document.getElementById('p-count').innerText = Object.keys(Host.players).length,
-
-    renderMenu: () => {
-        const grid = document.getElementById('game-list');
-        grid.innerHTML = GAMES.map(g => 
-            `<div class="game-card" onclick="Host.preGame('${g.id}')">
-                <span class="icon">${g.icon}</span>${g.name}
-            </div>`
-        ).join('');
+    updateLobby: () => {
+        document.getElementById('p-count').innerText = Object.keys(Host.players).length;
     },
 
-    handleData: (id, d) => {
-        if(d.act === 'join') {
-            Host.players[id] = { name: d.name, score: 0, alive: true };
-            Host.updateCount();
-            AudioSys.play('win'); // Join sound
+    handleData: (pid, data) => {
+        if(data.act === 'join') {
+            Host.players[pid] = { name: data.name, score: 0, id: pid };
+            Host.updateLobby();
+            AudioSys.play('tap');
+        } else if (Host.game) {
+            Host.gameInput(pid, data);
         }
-        else if(Host.game) Host.gameInput(id, d);
+    },
+
+    renderMenu: () => {
+        const list = document.getElementById('game-list');
+        list.innerHTML = GAMES.map(g => `
+            <div class="game-card" onclick="Host.startGame('${g.id}')">
+                <span class="g-icon">${g.icon}</span>
+                <span class="g-name">${g.name}</span>
+            </div>
+        `).join('');
     },
 
     toMenu: () => {
-        Host.show('h-menu');
-        Host.broadcast({act:'reset'});
-    },
-
-    preGame: (id) => {
-        if(id === 'quiz') {
-            Host.show('h-quiz-setup');
-        } else {
-            const g = GAMES.find(x => x.id === id);
-            Host.launch(g);
-        }
-    },
-
-    startQuiz: (mode) => {
-        const g = GAMES.find(x => x.id === 'quiz');
-        if(mode === 'random') {
-            const q = QUIZ_DB[Math.floor(Math.random() * QUIZ_DB.length)];
-            g.data = q;
-        } else {
-            g.data = {
-                q: document.getElementById('q-text').value || "テスト問題",
-                a: [
-                    document.getElementById('q-ans-correct').value || "正解",
-                    document.getElementById('q-ans-2').value || "ダミー1",
-                    document.getElementById('q-ans-3').value || "ダミー2",
-                    document.getElementById('q-ans-4').value || "ダミー3"
-                ]
-            };
-        }
-        Host.launch(g);
+        Host.switchScreen('h-menu');
+        Host.broadcast({act: 'reset'});
     },
 
     startRandom: () => {
         const g = GAMES[Math.floor(Math.random() * GAMES.length)];
-        if(g.id === 'quiz') Host.startQuiz('random');
-        else Host.launch(g);
+        Host.startGame(g.id);
     },
 
-    launch: (gameObj) => {
-        Host.game = gameObj;
-        Host.show('h-stage');
-        document.getElementById('stage-title').innerText = gameObj.name;
-        document.getElementById('stage-main').innerText = "READY?";
-        document.getElementById('stage-sub').innerText = "";
-        document.getElementById('h-quiz-setup').classList.add('hidden');
+    startGame: (gameId) => {
+        const g = GAMES.find(x => x.id === gameId);
+        Host.game = g;
+        Host.switchScreen('h-stage');
         
-        // 全員リセット
-        Object.values(Host.players).forEach(p => { p.score=0; p.alive=true; });
+        // Reset Scores
+        Object.values(Host.players).forEach(p => p.score = 0);
+        
+        document.getElementById('stage-title').innerText = g.name;
+        document.getElementById('stage-visual').innerText = "READY";
+        document.getElementById('stage-sub').innerText = g.desc;
 
-        // コントローラー配布
-        let payload = { act: 'init', type: gameObj.type };
-        if(gameObj.type === 'quiz') {
-            // シャッフル
-            const choices = [...gameObj.data.a].sort(() => Math.random() - 0.5);
-            payload.choices = choices;
-            Host.quizAns = gameObj.data.a[0]; // 正解を保持
-        }
-        Host.broadcast(payload);
+        // Init Client Controllers
+        Host.broadcast({ act: 'init_game', type: g.type, mode: g.mode });
 
-        AudioSys.play('bgm_start');
-        setTimeout(() => Host.runGame(), 2000);
+        setTimeout(() => {
+            document.getElementById('stage-visual').innerText = "GO!";
+            AudioSys.play('win');
+            Host.runGameLoop();
+        }, 3000);
     },
 
-    runGame: () => {
+    runGameLoop: () => {
+        let time = 15;
         const g = Host.game;
-        const main = document.getElementById('stage-main');
-        const sub = document.getElementById('stage-sub');
-        main.innerText = "START!";
-        
-        let time = 10;
-        if(g.id === 'quiz') {
-            main.innerHTML = `<div style="font-size:2rem; text-align:left;">${g.data.q}</div>`;
-            time = 15;
-        }
-        if(g.id === 'bomb') {
-            main.innerText = "💣";
-            time = 15 + Math.random()*15; // ランダム時間
-        }
+        if(g.id === 'ninja' || g.id === 'zen') time = 20;
         
         const maxTime = time;
+        const vis = document.getElementById('stage-visual');
+        const sub = document.getElementById('stage-sub');
+
         Host.loop = setInterval(() => {
             time -= 0.1;
             document.getElementById('timer-fill').style.width = (time/maxTime*100) + "%";
 
-            // リアルタイム更新系
-            if(g.id === 'mash') {
+            // Live Updates
+            if(g.id === 'squat' || g.id === 'run' || g.id === 'mash' || g.id === 'spin') {
+                // Show top scorer
                 const top = Object.values(Host.players).sort((a,b)=>b.score-a.score)[0];
-                if(top) sub.innerText = `${top.name}: ${top.score}`;
+                if(top) vis.innerText = `${top.name}: ${Math.floor(top.score)}`;
+            }
+            if(g.id === 'ninja' || g.id === 'zen') {
+                // Show survivor count
+                const survivors = Object.values(Host.players).filter(p => p.score >= 0).length;
+                vis.innerText = `生存: ${survivors}`;
+                if(survivors === 0) time = 0;
             }
 
             if(time <= 0) {
                 clearInterval(Host.loop);
-                Host.finish();
+                Host.endGame();
             }
         }, 100);
     },
@@ -374,149 +343,233 @@ const Host = {
     gameInput: (pid, d) => {
         const p = Host.players[pid];
         const g = Host.game;
-
-        if(g.id === 'mash' && d.act === 'tap') {
+        
+        // --- Logic for each game type ---
+        if(g.id === 'mash' && d.act === 'tap') p.score++;
+        if(g.id === 'squat' && d.act === 'squat') p.score++; // Client detects squat
+        if(g.id === 'run' && d.act === 'shake') p.score++;
+        if(g.id === 'spin' && d.act === 'spin') p.score += d.val; // Add degrees
+        if(g.id === 'jump' && d.act === 'jump') p.score++;
+        
+        // Ninja/Zen: Score is 0 initially. If they fail, score becomes -1 (dead)
+        if((g.id === 'ninja' || g.id === 'zen') && d.act === 'fail') {
+            p.score = -1;
+            Host.connMap[pid].send({act:'vib', pattern:[200,100,200]}); // Dead vibe
+        }
+        
+        if(g.id === 'color' && d.act === 'tap') {
+            // Server should ideally set color, simplified here:
             p.score++;
-            // バイブレーションフィードバック
-            if(p.score % 10 === 0) Host.conns[pid].send({act:'vib', p:[50]});
         }
-        if(g.id === 'shake' && d.act === 'shake') p.score++;
         if(g.id === 'quiz' && d.act === 'ans') {
-            if(d.val === Host.quizAns) {
-                p.score = 100 + timeBonus(); // 早いほうが点高い
-                AudioSys.play('win');
-                main.innerText = `${p.name} 正解！`;
-                clearInterval(Host.loop);
-                setTimeout(Host.finish, 2000);
-            } else {
-                p.score = -10;
-                Host.conns[pid].send({act:'vib', p:[200, 100, 200]}); // ブブー！振動
-            }
-        }
-        if(g.id === 'bomb' && d.act === 'shake') {
-            // 爆弾を他の人に移すロジック（簡易的）
-            Host.broadcast({act:'vib', p:[50]}); // 全員に振動通知
+            p.score++; // Simplified: First answer logic would go here
         }
     },
 
-    finish: () => {
-        clearInterval(Host.loop);
+    endGame: () => {
+        Host.switchScreen('h-result');
+        const sorted = Object.values(Host.players).sort((a,b) => b.score - a.score);
+        const winner = sorted[0];
+        
+        if(Host.game.id === 'ninja' || Host.game.id === 'zen') {
+            const survivors = Object.values(Host.players).filter(p => p.score >= 0);
+            if(survivors.length > 0) document.getElementById('winner-name').innerText = survivors.map(p=>p.name).join('\n');
+            else document.getElementById('winner-name').innerText = "全滅...";
+        } else {
+             document.getElementById('winner-name').innerText = winner ? winner.name : "NO WINNER";
+        }
+        
         AudioSys.play('win');
-        
-        const g = Host.game;
-        let winner = "NO ONE";
-        const sorted = Object.values(Host.players).sort((a,b)=>b.score-a.score);
-        
-        if(g.id === 'bomb') {
-            AudioSys.play('bomb');
-            Host.broadcast({act:'vib', p:[1000]}); // 長い振動
-            winner = "EXPLODED!";
-        } else if(sorted.length > 0) {
-            winner = sorted[0].name;
-        }
-
-        document.getElementById('res-winner').innerText = winner;
-        Host.show('h-result');
-        Host.broadcast({act:'end'});
+        Host.broadcast({act: 'end'});
     },
 
-    broadcast: (d) => Object.values(Host.conns).forEach(c => c.send(d)),
-    show: (id) => {
-        document.querySelectorAll('.screen').forEach(e => e.classList.add('hidden'));
-        document.querySelectorAll('.modal').forEach(e => e.classList.add('hidden'));
+    broadcast: (d) => Object.values(Host.connMap).forEach(c => c.send(d)),
+    switchScreen: (id) => {
+        document.querySelectorAll('#host-app .screen').forEach(s => s.classList.add('hidden'));
         document.getElementById(id).classList.remove('hidden');
     }
 };
 
-function timeBonus() { return Math.floor(parseFloat(document.getElementById('timer-fill').style.width)); }
-
-/* ==================== 5. CLIENT LOGIC ==================== */
+/* ==================== CLIENT LOGIC ==================== */
 const Client = {
-    peer: null, conn: null, 
-    init: () => {
-        const h = new URLSearchParams(location.search).get('host');
-        if(h) {
-            document.getElementById('client-view').classList.remove('hidden');
-            Client.peer = new Peer();
-            Client.peer.on('open', id => {
-                Client.conn = Client.peer.connect(h);
-                Client.conn.on('data', Client.handle);
+    peer: null, conn: null, myId: null, 
+    roomId: null, sensorActive: false,
+    
+    init: (id) => {
+        Client.roomId = id;
+        Client.manualJoin();
+    },
+
+    manualJoin: () => {
+        const rid = document.getElementById('room-id-input').value || Client.roomId;
+        if(!rid) return;
+        
+        document.getElementById('conn-status').innerText = "接続中...";
+        
+        Client.peer = new Peer();
+        Client.peer.on('error', err => {
+            console.log(err);
+            Client.handleConnectError();
+        });
+        
+        // 5秒経っても繋がらなければエラー扱い
+        const timeout = setTimeout(() => {
+            if(!Client.conn || !Client.conn.open) Client.handleConnectError();
+        }, 5000);
+
+        Client.peer.on('open', id => {
+            Client.conn = Client.peer.connect(rid);
+            Client.conn.on('open', () => {
+                clearTimeout(timeout);
+                document.getElementById('client-app').classList.remove('hidden');
+                document.getElementById('screen-landing').classList.add('hidden');
+                Client.conn.on('data', Client.handleData);
             });
-        } else {
-            Host.init();
-        }
-    },
-
-    join: () => {
-        const n = document.getElementById('username').value || "Guest";
-        Client.conn.send({act:'join', name:n});
-        Client.show('c-wait');
-        Client.initSensors();
-    },
-
-    handle: (d) => {
-        if(d.act === 'init') Client.buildCtrl(d);
-        if(d.act === 'reset' || d.act === 'end') Client.show('c-wait');
-        if(d.act === 'vib') {
-            // ★バイブレーション実行★
-            if(navigator.vibrate) navigator.vibrate(d.p);
-        }
-    },
-
-    buildCtrl: (d) => {
-        Client.show('c-ctrl');
-        const area = document.getElementById('c-ctrl');
-        area.innerHTML = '';
-
-        if(d.type === 'tap') {
-            area.innerHTML = `<button class="ctrl-btn c-red" onpointerdown="Client.send('tap')">連打!!</button>`;
-        }
-        else if(d.type === 'shake' || d.type === 'pass') {
-            area.innerHTML = `<div class="ctrl-btn c-blue" style="display:flex;align-items:center;justify-content:center">SHAKE!</div>`;
-        }
-        else if(d.type === 'quiz') {
-            const colors = ['c-red', 'c-blue', 'c-green', 'c-yellow'];
-            let html = `<div style="display:grid; grid-template-columns:1fr 1fr; height:100%">`;
-            d.choices.forEach((c, i) => {
-                html += `<button class="ctrl-btn ${colors[i]}" onclick="Client.send('ans', '${c}')">${c}</button>`;
-            });
-            html += `</div>`;
-            area.innerHTML = html;
-        }
-        else if(d.type === 'swipe') {
-            area.innerHTML = `<div class="ctrl-btn" style="background:#333;display:flex;align-items:center;justify-content:center">SWIPE!</div>`;
-            // 簡易フリック検知実装
-        }
-    },
-
-    send: (act, val) => {
-        Client.conn.send({act:act, val:val});
-        if(act === 'tap') navigator.vibrate(30); // タップ時の触覚フィードバック
-    },
-
-    initSensors: () => {
-        // シェイク検知
-        let lx=0, ly=0, lz=0;
-        window.addEventListener('devicemotion', e => {
-            const a = e.accelerationIncludingGravity;
-            if(!a) return;
-            const d = Math.abs(a.x+a.y+a.z - lx-ly-lz);
-            if(d > 20) {
-                Client.send('shake');
-                navigator.vibrate(50);
-            }
-            lx=a.x; ly=a.y; lz=a.z;
+            Client.conn.on('error', Client.handleConnectError);
         });
     },
 
-    show: (id) => {
-        document.querySelectorAll('#client-view .screen').forEach(e => e.classList.add('hidden'));
+    handleConnectError: () => {
+        document.getElementById('conn-status').innerText = "接続失敗";
+        document.getElementById('conn-status').style.color = "#ff4757";
+        document.getElementById('fallback-host').classList.remove('hidden');
+        AudioSys.play('alert');
+    },
+
+    submitName: () => {
+        const name = document.getElementById('username').value || "GUEST";
+        // iOS Check
+        if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+            Client.switchScreen('c-perm');
+        } else {
+            Client.finishJoin(name);
+        }
+    },
+
+    reqPerm: () => {
+        DeviceMotionEvent.requestPermission().then(res => {
+            if(res === 'granted') Client.finishJoin(document.getElementById('username').value);
+        }).catch(e => alert(e));
+    },
+
+    finishJoin: (name) => {
+        Client.conn.send({act: 'join', name: name});
+        Client.switchScreen('c-wait');
+        Client.initSensors();
+    },
+
+    handleData: (d) => {
+        if(d.act === 'init_game') Client.setupController(d);
+        if(d.act === 'end' || d.act === 'reset') Client.switchScreen('c-wait');
+        if(d.act === 'vib' && navigator.vibrate) navigator.vibrate(d.pattern);
+    },
+
+    setupController: (d) => {
+        Client.switchScreen('c-ctrl');
+        const area = document.getElementById('ctrl-area');
+        area.innerHTML = '';
+        Client.gameMode = d.mode; // Set current sensor mode
+
+        if(d.type === 'tap') {
+            area.innerHTML = `<button class="big-btn bg-red" ontouchstart="Client.send('tap'); navigator.vibrate(20);">連打!!</button>`;
+        } else if (d.type === 'motion' || d.type === 'gyro') {
+            area.innerHTML = `<div class="motion-instruction">${d.mode === 'squat' ? 'スマホを持って<br>スクワット！' : '体を動かせ！'}</div>`;
+        } else if (d.type === 'color') {
+            area.innerHTML = `
+                <div style="display:grid; grid-template-columns:1fr 1fr; height:100%;">
+                    <div class="bg-red" onclick="Client.send('tap')"></div>
+                    <div class="bg-blue" onclick="Client.send('tap')"></div>
+                    <div class="bg-green" onclick="Client.send('tap')"></div>
+                    <div class="bg-yellow" onclick="Client.send('tap')"></div>
+                </div>`;
+        } else if (d.type === 'quiz') {
+            area.innerHTML = `
+                <div style="display:grid; grid-template-columns:1fr 1fr; height:100%;">
+                    <button class="big-btn bg-red" onclick="Client.send('ans')">A</button>
+                    <button class="big-btn bg-blue" onclick="Client.send('ans')">B</button>
+                    <button class="big-btn bg-green" onclick="Client.send('ans')">C</button>
+                    <button class="big-btn bg-yellow" onclick="Client.send('ans')">D</button>
+                </div>`;
+        }
+    },
+
+    send: (act, val) => Client.conn.send({act:act, val:val}),
+
+    // --- SENSOR LOGIC ---
+    initSensors: () => {
+        let lastY = 0, lastX = 0, lastZ = 0;
+        let squatState = 'up'; // up -> down -> up = 1 squat
+        let lastAlpha = 0;
+
+        // Acceleration (Squat, Run, Jump)
+        window.addEventListener('devicemotion', e => {
+            if(document.getElementById('c-ctrl').classList.contains('hidden')) return;
+
+            const acc = e.accelerationIncludingGravity;
+            const lin = e.acceleration;
+            if(!acc) return;
+
+            // SQUAT (Y-axis gravity change)
+            if(Client.gameMode === 'squat') {
+                // Standing ~9.8, Squatting (going down) < 8, Bottom ~10, Going up > 12
+                if(squatState === 'up' && lin.y < -3) { squatState = 'down'; }
+                if(squatState === 'down' && lin.y > 2) { 
+                    squatState = 'up'; 
+                    Client.send('squat'); 
+                    navigator.vibrate(50);
+                }
+            }
+            
+            // RUN (Shake hard)
+            if(Client.gameMode === 'shake_hard') {
+                const delta = Math.abs(acc.x+acc.y+acc.z - lastX-lastY-lastZ);
+                if(delta > 30) { Client.send('shake'); }
+                lastX=acc.x; lastY=acc.y; lastZ=acc.z;
+            }
+
+            // JUMP (Sharp vertical spike)
+            if(Client.gameMode === 'jump') {
+                if(lin.y > 8 || lin.y < -8) { // Sharp movement
+                     Client.send('jump');
+                     navigator.vibrate(20);
+                }
+            }
+        });
+
+        // Gyro (Ninja, Zen, Spin)
+        window.addEventListener('deviceorientation', e => {
+            if(document.getElementById('c-ctrl').classList.contains('hidden')) return;
+            
+            // NINJA / ZEN (Stability)
+            if(Client.gameMode === 'balance' || Client.gameMode === 'flat') {
+                const limit = Client.gameMode === 'flat' ? 10 : 20; // Flat is harder
+                if(Math.abs(e.beta) > limit || Math.abs(e.gamma) > limit) {
+                    // Send fail rarely to avoid spam
+                    if(Math.random() > 0.9) Client.send('fail'); 
+                }
+            }
+
+            // SPIN (Compass rotation)
+            if(Client.gameMode === 'spin') {
+                if(lastAlpha !== 0) {
+                    let d = e.alpha - lastAlpha;
+                    if(d > 180) d -= 360;
+                    if(d < -180) d += 360;
+                    // Send rotation amount
+                    if(Math.abs(d) > 2) Client.send('spin', {val: Math.abs(d)/360});
+                }
+                lastAlpha = e.alpha;
+            }
+        });
+    },
+
+    switchScreen: (id) => {
+        document.querySelectorAll('#client-app .screen').forEach(s => s.classList.add('hidden'));
         document.getElementById(id).classList.remove('hidden');
     }
 };
 
-const Utils = { id: () => Math.random().toString(36).substr(2, 5).toUpperCase() };
-window.onload = Client.init;
+window.onload = App.init;
 </script>
 </body>
 </html>
