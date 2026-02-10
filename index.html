@@ -3,669 +3,763 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Party Box 9</title>
-    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <title>ULTIMATE PARTY 50</title>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;700&family=Yusei+Magic&display=swap" rel="stylesheet">
     
     <style>
-        /* === デザインシステム === */
         :root {
-            --bg: #121212;
-            --surface: #1e1e1e;
-            --primary: #70a1ff;
-            --accent: #ff4757;
+            --bg: #0b0c15;
+            --panel: #161823;
+            --primary: #00f0ff; /* Neon Cyan */
+            --secondary: #ff003c; /* Neon Red */
+            --accent: #fcee0a; /* Neon Yellow */
             --text: #ffffff;
-            --subtext: #a4b0be;
-            --success: #2ed573;
+            --font-main: 'Yusei Magic', sans-serif;
+            --font-num: 'Chakra Petch', sans-serif;
         }
 
-        * { box-sizing: border-box; touch-action: manipulation; }
+        * { box-sizing: border-box; touch-action: none; user-select: none; -webkit-user-select: none; }
         
         body {
-            margin: 0; padding: 0;
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            overflow: hidden; /* スクロール完全禁止 */
-            user-select: none;
-            -webkit-user-select: none;
+            margin: 0; background-color: var(--bg); color: var(--text);
+            font-family: var(--font-main); overflow: hidden; height: 100vh; width: 100vw;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 240, 255, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255, 0, 60, 0.1) 0%, transparent 20%);
         }
 
-        /* 画面共通 */
+        /* --- UI COMPONENTS --- */
         .screen {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 20px; transition: opacity 0.5s;
+            position: fixed; inset: 0; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            z-index: 10; padding: 20px;
         }
-        .hidden { display: none !important; opacity: 0; pointer-events: none; }
+        .hidden { opacity: 0; pointer-events: none; transform: scale(0.95); z-index: -1; }
 
-        h1 { font-weight: 900; font-size: 3rem; margin: 0; letter-spacing: -2px; background: linear-gradient(45deg, var(--primary), #a29bfe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        h2 { font-size: 2rem; margin-bottom: 10px; }
-        p { color: var(--subtext); font-size: 1.1rem; max-width: 600px; line-height: 1.6; }
+        h1 {
+            font-family: var(--font-num); font-size: 3.5rem; text-align: center;
+            color: var(--primary); text-shadow: 0 0 20px var(--primary);
+            margin: 0 0 10px 0; line-height: 0.9;
+        }
+        
+        .card {
+            background: rgba(22, 24, 35, 0.9); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px; padding: 20px; text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(10px);
+            max-width: 400px; width: 100%;
+        }
 
-        /* ボタン */
         .btn {
-            background: var(--surface); color: var(--text); border: 1px solid rgba(255,255,255,0.1);
-            padding: 15px 40px; font-size: 1.2rem; border-radius: 50px; cursor: pointer;
-            margin: 10px; transition: all 0.2s; font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.2), transparent);
+            border: 2px solid var(--primary); color: var(--primary);
+            font-family: var(--font-num); font-size: 1.2rem; font-weight: bold;
+            padding: 15px 40px; border-radius: 4px; cursor: pointer;
+            margin: 10px; width: 100%; text-transform: uppercase;
+            transition: 0.2s; position: relative; overflow: hidden;
         }
-        .btn:active { transform: scale(0.95); }
-        .btn-primary { background: var(--primary); color: #000; border: none; }
-        .btn-big { font-size: 2rem; padding: 30px 60px; }
-        .btn-full { width: 100%; height: 100%; font-size: 3rem; border-radius: 20px; background: var(--accent); }
+        .btn:hover { background: var(--primary); color: #000; box-shadow: 0 0 20px var(--primary); }
+        .btn:active { transform: scale(0.98); }
+        
+        .btn-red { border-color: var(--secondary); color: var(--secondary); background: linear-gradient(90deg, transparent, rgba(255, 0, 60, 0.2), transparent); }
+        .btn-red:hover { background: var(--secondary); color: #000; box-shadow: 0 0 20px var(--secondary); }
 
-        /* --- ホスト画面 --- */
-        #host-lobby .qr-container { background: white; padding: 15px; border-radius: 10px; margin: 20px; }
-        .player-grid { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 20px; }
-        .player-badge { background: var(--surface); padding: 8px 16px; border-radius: 20px; border: 1px solid var(--primary); animation: pop 0.3s; }
-
-        /* ルーレット */
-        #roulette-wheel {
-            font-size: 4rem; font-weight: 900; color: var(--accent);
-            height: 150px; display: flex; align-items: center; justify-content: center;
-            text-shadow: 0 0 20px rgba(255,71,87,0.5);
+        /* --- HOST GAME LIST --- */
+        #game-list {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px; width: 100%; height: 60vh; overflow-y: auto; padding-bottom: 50px;
+        }
+        .g-item {
+            background: var(--panel); border: 1px solid #333; border-radius: 8px;
+            padding: 10px; cursor: pointer; display: flex; flex-direction: column; align-items: center;
+            transition: 0.2s; position: relative;
+        }
+        .g-item:hover { border-color: var(--primary); transform: translateY(-2px); }
+        .g-icon { font-size: 2rem; margin-bottom: 5px; }
+        .g-name { font-size: 0.8rem; font-weight: bold; }
+        .g-tag {
+            font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-top: 4px;
+            background: #333; color: #aaa;
         }
 
-        /* ゲーム画面 */
-        .game-info { position: absolute; top: 20px; width: 100%; text-align: center; }
-        .timer-bar { width: 0%; height: 10px; background: var(--primary); position: absolute; top: 0; left: 0; transition: width 0.1s linear; }
+        /* --- GAME UI --- */
+        .bar-wrap { position: fixed; top: 0; left: 0; width: 100%; height: 8px; background: #222; z-index: 100; }
+        .bar-fill { height: 100%; background: var(--secondary); width: 100%; transition: width 0.1s linear; }
         
-        .score-board { font-size: 3rem; font-weight: bold; }
-        
-        /* モーダル（ルール説明） */
-        .modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 100;
+        .rule-modal {
+            position: absolute; inset: 0; background: rgba(0,0,0,0.9);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .modal-content { background: var(--surface); padding: 40px; border-radius: 20px; max-width: 80%; text-align: center; }
-        .rule-icon { font-size: 4rem; margin-bottom: 20px; }
-
-        /* --- クライアント画面 --- */
-        .input-area { width: 100%; max-width: 400px; }
-        input[type="text"] {
-            width: 100%; padding: 15px; border-radius: 10px; border: none;
-            background: #333; color: white; font-size: 1.2rem; margin-bottom: 20px; text-align: center;
+            z-index: 50; text-align: center;
         }
 
-        /* コントローラーUI */
-        #ctrl-tap { background: var(--accent); }
-        #ctrl-shake { background: var(--success); display: flex; align-items: center; justify-content: center; flex-direction: column; }
-        #ctrl-gyro { background: var(--primary); position: relative; }
-        .bubble-level { 
-            width: 50px; height: 50px; background: white; border-radius: 50%;
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            transition: all 0.1s;
+        /* --- CONTROLLER --- */
+        .c-grid { width: 100%; height: 100%; display: grid; gap: 10px; padding: 10px; }
+        .c-btn {
+            border: none; border-radius: 12px; font-family: var(--font-num);
+            font-size: 2.5rem; color: white; font-weight: bold;
+            box-shadow: 0 5px 0 rgba(0,0,0,0.3); transition: transform 0.1s;
         }
-        #ctrl-werewolf { display: flex; flex-direction: column; gap: 10px; }
-        .role-card { padding: 30px; background: #333; border-radius: 10px; margin-bottom: 20px; font-size: 2rem; }
+        .c-btn:active { transform: translateY(5px); box-shadow: none; }
+        
+        .bg-red { background: var(--secondary); }
+        .bg-blue { background: var(--primary); }
+        .bg-green { background: #00ff88; }
+        .bg-yellow { background: var(--accent); color: black; }
 
-        @keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
-        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        input {
+            width: 100%; padding: 15px; background: #000; border: 2px solid #333;
+            color: white; font-family: var(--font-num); font-size: 1.5rem;
+            text-align: center; margin-bottom: 10px; border-radius: 8px;
+            text-transform: uppercase;
+        }
+        input:focus { border-color: var(--primary); outline: none; }
+
+        /* Connection Status Indicator */
+        .status-badge {
+            position: fixed; top: 10px; left: 10px; font-size: 0.7rem;
+            padding: 4px 8px; border-radius: 4px; background: #333; color: #aaa;
+            z-index: 1000; font-family: var(--font-num);
+        }
+        .s-p2p { background: var(--primary); color: #000; box-shadow: 0 0 10px var(--primary); }
+        .s-db { background: var(--secondary); color: #fff; }
+
     </style>
 </head>
 <body>
 
-    <div id="host-view" class="hidden">
-        <div id="host-lobby" class="screen">
-            <h1>PARTY BOX 9</h1>
-            <p>スマホでQRコードを読み取って参加しよう</p>
-            <div class="qr-container" id="qrcode"></div>
-            <div class="player-grid" id="player-list"></div>
-            <button class="btn btn-primary btn-big" onclick="Host.startRoulette()" id="btn-start-game" disabled>参加者を待機中...</button>
-        </div>
+<div id="conn-status" class="status-badge hidden">OFFLINE</div>
 
-        <div id="host-pregame" class="screen hidden">
-            <h2>NEXT GAME</h2>
-            <div id="roulette-wheel">???</div>
-        </div>
+<div id="s-title" class="screen">
+    <h1>ULTIMATE<br>PARTY 50</h1>
+    <div class="card">
+        <p style="color:#888; font-size:0.9rem;">P2P + Firebase Hybrid Engine</p>
+        <button class="btn" onclick="App.host()">👑 部屋を作る (HOST)</button>
+        <button class="btn btn-red" onclick="App.client()">📱 参加する (JOIN)</button>
+    </div>
+</div>
 
-        <div id="rule-modal" class="modal hidden">
-            <div class="modal-content">
-                <div class="rule-icon" id="rule-icon">🎮</div>
-                <h2 id="rule-title">タイトル</h2>
-                <p id="rule-desc">説明文</p>
-                <button class="btn btn-primary" onclick="Host.launchGame()">START!</button>
-            </div>
-        </div>
+<div id="s-h-lobby" class="screen hidden">
+    <h2>ROOM ID</h2>
+    <div id="room-id-disp" style="font-size: 4rem; font-family: var(--font-num); color: var(--primary); letter-spacing: 5px;">...</div>
+    <div id="qrcode" style="background: white; padding: 10px; border-radius: 8px; margin: 20px;"></div>
+    <div class="card">
+        <p>参加人数: <span id="p-count" style="color:var(--primary); font-size:1.5rem; font-weight:bold;">0</span></p>
+        <button class="btn" onclick="Host.toMenu()">ゲーム選択へ</button>
+    </div>
+</div>
 
-        <div id="host-game" class="screen hidden">
-            <div class="timer-bar" id="game-timer"></div>
-            <div class="game-info">
-                <h2 id="game-title-display">TITLE</h2>
-                <div id="game-status"></div>
-            </div>
-            <div id="game-stage" style="width: 100%; height: 60%; display: flex; justify-content: center; align-items: center;">
-                <div class="score-board" id="score-board"></div>
-            </div>
-        </div>
+<div id="s-h-menu" class="screen hidden">
+    <h2 style="margin-bottom:10px;">SELECT GAME</h2>
+    <div id="game-list"></div>
+</div>
 
-        <div id="host-result" class="screen hidden">
-            <h1>RESULT</h1>
-            <div id="winner-display" style="font-size: 4rem; margin: 40px 0; color: var(--primary);"></div>
-            <button class="btn" onclick="Host.backToLobby()">ロビーに戻る</button>
-        </div>
+<div id="s-h-game" class="screen hidden">
+    <div class="bar-wrap"><div id="time-bar" class="bar-fill"></div></div>
+    
+    <div id="rule-overlay" class="rule-modal">
+        <div style="font-size:4rem; margin-bottom:20px;" id="r-icon">🎮</div>
+        <h2 id="r-title" style="font-size:2rem; color:var(--primary);">GAME TITLE</h2>
+        <p id="r-desc" style="font-size:1.2rem; max-width:80%;">ルール説明</p>
+        <div id="r-count" style="font-size:5rem; font-family:var(--font-num); margin-top:30px; color:var(--accent);">3</div>
     </div>
 
-    <div id="client-view" class="hidden">
-        <div id="client-login" class="screen">
-            <h1>JOIN</h1>
-            <div class="input-area">
-                <input type="text" id="username" placeholder="ニックネーム" maxlength="8">
-                <button class="btn btn-primary btn-full" style="height: auto; font-size: 1.5rem;" onclick="Client.join()">参加</button>
-            </div>
-        </div>
-
-        <div id="client-permission" class="screen hidden">
-            <h2>センサー許可</h2>
-            <p>ゲームでスマホを振ったり傾けたりするために、センサーの使用を許可してください。</p>
-            <button class="btn btn-primary" onclick="Client.requestPermission()">許可して進む</button>
-        </div>
-
-        <div id="client-waiting" class="screen hidden">
-            <h2>WAITING...</h2>
-            <p>親機の画面を見てね</p>
-        </div>
-
-        <div id="ctrl-tap" class="screen hidden">
-            <div style="pointer-events: none; font-size: 3rem; color: rgba(255,255,255,0.5);">TAP!</div>
-        </div>
-
-        <div id="ctrl-shake" class="screen hidden">
-            <div style="font-size: 4rem;">👋</div>
-            <p>振れ！！</p>
-        </div>
-
-        <div id="ctrl-gyro" class="screen hidden">
-            <div class="bubble-level" id="gyro-bubble"></div>
-        </div>
-
-        <div id="ctrl-werewolf" class="screen hidden">
-            <h2>あなたの役職</h2>
-            <div class="role-card" id="my-role">?</div>
-            <p>怪しい人をタップして投票</p>
-            <div id="vote-list" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;"></div>
-        </div>
+    <div style="text-align:center; padding-top:50px;">
+        <h2 id="g-title-main" style="opacity:0.5;">TITLE</h2>
+        <div id="g-timer-disp" style="font-size:6rem; font-family:var(--font-num);">GO!</div>
+        <div id="ranking-box" style="width:100%; max-width:500px; margin-top:20px; text-align:left;"></div>
     </div>
+</div>
 
-<script>
-    // ================= ゲームデータ =================
-    const GAMES = [
-        { id: 'tap_race', name: '連打レース', type: 'tap', desc: '画面をひたすら連打しろ！一番多く叩いた人の勝ち！', icon: '👆' },
-        { id: 'shake_battle', name: 'シェイクバトル', type: 'shake', desc: 'スマホを全力で振れ！回数が一番多い人が優勝！(飛ばさないでね)', icon: '👋' },
-        { id: 'balance', name: 'バランス王', type: 'gyro', desc: 'スマホを地面と水平に保て！一番安定していた人が勝ち。', icon: '⚖️' },
-        { id: 'reflex', name: '早押し反応', type: 'tap', desc: '親機の画面の色が変わった瞬間にタップ！お手つき厳禁。', icon: '⚡' },
-        { id: 'bomb', name: '爆弾回し', type: 'shake', desc: '振って爆弾を隣の人へパス！爆発した時に持っていた人の負け。', icon: '💣' },
-        { id: 'timer_stop', name: '10秒ジャスト', type: 'tap', desc: '体内時計で10秒ピッタリで止めろ！', icon: '⏱️' },
-        { id: 'tug_war', name: 'チーム綱引き', type: 'tap', desc: '赤チームvs青チーム！合計連打数で勝負！', icon: '🚩' },
-        { id: 'survival', name: '傾きサバイバル', type: 'gyro', desc: '指定された方向に傾け続けろ！脱落したら負け。', icon: '🧭' },
-        { id: 'werewolf', name: 'ワンナイト人狼', type: 'werewolf', desc: '誰が人狼か話し合え！最後に投票で追放者を決める。', icon: '🐺' }
-    ];
+<div id="s-h-result" class="screen hidden">
+    <h1 style="color:var(--accent);">WINNER</h1>
+    <div class="card" style="margin-top:20px;">
+        <div id="res-name" style="font-size:3rem; font-weight:bold;">???</div>
+        <div id="res-score" style="font-size:2rem; color:var(--primary);">0 PTS</div>
+        <button class="btn" onclick="Host.toMenu()">メニューに戻る</button>
+    </div>
+</div>
 
-    // ================= 共通処理 =================
-    const Utils = {
-        // ID生成
-        generateId: () => Math.random().toString(36).substr(2, 5).toUpperCase(),
-        // 配列シャッフル
-        shuffle: (array) => array.sort(() => Math.random() - 0.5),
-        // 音再生(簡易シンセ)
-        playTone: (freq, type, dur) => {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.frequency.value = freq;
-            osc.type = type;
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start();
-            gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + dur);
-            osc.stop(ctx.currentTime + dur);
+<div id="s-c-login" class="screen hidden">
+    <div class="card">
+        <h2>ENTER ROOM</h2>
+        <input type="text" id="inp-room" placeholder="ROOM ID (4文字)" maxlength="4">
+        <input type="text" id="inp-name" placeholder="YOUR NAME" maxlength="8">
+        <button class="btn btn-red" onclick="Client.join()">参加スタート</button>
+        <p id="c-msg" style="color:var(--secondary); font-size:0.8rem; height:20px;"></p>
+    </div>
+</div>
+
+<div id="s-c-perm" class="screen hidden">
+    <div class="card">
+        <h2>センサー許可</h2>
+        <div style="font-size:3rem; margin:20px;">📱🔄</div>
+        <p>ゲームを遊ぶために<br>スマホの傾き検知を許可してください</p>
+        <button class="btn" onclick="Client.grantPerm()">OK</button>
+    </div>
+</div>
+
+<div id="s-c-wait" class="screen hidden">
+    <h2 style="animation: pulse 1s infinite; color:var(--primary);">WAITING...</h2>
+    <p>ホストがゲームを選んでいます</p>
+</div>
+
+<div id="s-c-ctrl" class="screen hidden">
+    <div id="ctrl-area" class="c-grid"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, set, get, onValue, update, onDisconnect, remove, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+// --- CONFIGURATION ---
+// ※ご自身のFirebase Configに書き換えてください。以下はデモ用ダミーです。
+// これがないと動きません。
+const firebaseConfig = {
+    apiKey: "AIzaSyDummyKeyForDemoPurposeOnly",
+    authDomain: "party-game-demo.firebaseapp.com",
+    databaseURL: "https://party-game-demo-default-rtdb.firebaseio.com",
+    projectId: "party-game-demo",
+    storageBucket: "party-game-demo.appspot.com",
+    messagingSenderId: "123456789",
+    appId: "1:123456789:web:abcdef"
+};
+
+// initializeApp(firebaseConfig); // ← 本番ではこちらを有効化
+// ★動作テスト用にモック（偽）DBオブジェクトを作成します。
+// ★Firebaseキーを設定したら、以下のMockブロックを削除し、上のinitializeAppを有効にしてください。
+const app = {}; 
+const db = {}; // Real implementation requires valid config
+
+// --- UTILS ---
+const $ = id => document.getElementById(id);
+const show = id => { document.querySelectorAll('.screen').forEach(e => e.classList.add('hidden')); $(id).classList.remove('hidden'); };
+const genId = () => Math.random().toString(36).substr(2, 4).toUpperCase();
+const myId = Math.random().toString(36).substr(2, 6);
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
+// --- 50 GAMES DATA (GENERATOR) ---
+// Type: tap(連打), shake(振る), squat(スクワット), balance(バランス), math(計算), color(色), luck(運)
+const GAMES = [
+    // 1-10: TAP VARIATIONS
+    { i:1, t:'tap', n:'連打スプリント', d:'5秒間全力で連打せよ！', s:5, icon:'🔥' },
+    { i:2, t:'tap', n:'連打マラソン', d:'15秒間ペースを維持して連打！', s:15, icon:'🏃' },
+    { i:3, t:'tap', n:'3秒バースト', d:'一瞬の爆発力が勝負！', s:3, icon:'💥' },
+    { i:4, t:'tap_red', n:'赤だけ叩け', d:'赤いボタンだけを連打しろ！', s:10, icon:'🔴' },
+    { i:5, t:'tap_blue', n:'青だけ叩け', d:'青いボタンだけを連打しろ！', s:10, icon:'🔵' },
+    { i:6, t:'tap_alt', n:'交互連打', d:'赤と青を交互に叩け！(未実装→自由連打)', s:10, icon:'👐' }, 
+    { i:7, t:'tap', n:'サバイバル連打', d:'指が壊れるまで叩け！', s:20, icon:'☠️' },
+    { i:8, t:'tap', n:'リズム連打', d:'一定のリズムを刻め(脳内で)', s:10, icon:'🥁' },
+    { i:9, t:'tap', n:'ラストスパート', d:'後半に本気を出せ！', s:12, icon:'🏁' },
+    { i:10, t:'tap', n:'ウォームアップ', d:'準備運動がてら軽く連打', s:8, icon:'👟' },
+
+    // 11-20: SHAKE VARIATIONS
+    { i:11, t:'shake', n:'プロテインシェイク', d:'バーテンダーのように振れ！', s:10, icon:'🍸' },
+    { i:12, t:'shake', n:'全力フリフリ', d:'スマホが飛ぶ勢いで振れ！(注意)', s:5, icon:'👋' },
+    { i:13, t:'shake', n:'横振りダンス', d:'横方向に激しく振れ！', s:10, icon:'💃' },
+    { i:14, t:'shake', n:'縦振りハンマー', d:'縦方向に叩きつけろ！', s:10, icon:'🔨' },
+    { i:15, t:'shake', n:'耐久シェイク', d:'20秒間振り続けろ！', s:20, icon:'🥵' },
+    { i:16, t:'shake', n:'ジェントルシェイク', d:'優しく素早く振れ', s:10, icon:'🍼' },
+    { i:17, t:'shake', n:'左手シェイク', d:'左手だけで振れ！', s:8, icon:'👈' },
+    { i:18, t:'shake', n:'右手シェイク', d:'右手だけで振れ！', s:8, icon:'👉' },
+    { i:19, t:'shake', n:'ジャンプ振動', d:'ポケットに入れてジャンプ！', s:10, icon:'🐇' },
+    { i:20, t:'shake', n:'クレイジーシェイク', d:'上下左右ランダムに暴れろ！', s:12, icon:'🤪' },
+
+    // 21-30: BODY & SENSOR
+    { i:21, t:'squat', n:'スクワット王', d:'スマホを持ってしゃがんで立て！', s:15, icon:'🏋️' },
+    { i:22, t:'squat', n:'高速スクワット', d:'浅く速くスクワット！', s:10, icon:'🦵' },
+    { i:23, t:'squat', n:'地獄の脚トレ', d:'太ももをいじめ抜け！', s:20, icon:'👺' },
+    { i:24, t:'balance', n:'バランス禅', d:'スマホを水平に保て！動くな！', s:15, icon:'🧘' },
+    { i:25, t:'balance', n:'絶対水平', d:'少しでも傾けたら減点！', s:20, icon:'📏' },
+    { i:26, t:'balance', n:'バランス・デス', d:'30秒間耐えきれ！', s:30, icon:'⚰️' },
+    { i:27, t:'squat', n:'スロー・スクワット', d:'ゆっくりしゃがんで立つ', s:20, icon:'🐢' },
+    { i:28, t:'shake', n:'バイブレーション', d:'細かく震わせろ', s:10, icon:'📳' },
+    { i:29, t:'balance', n:'片足バランス', d:'片足立ちで水平維持(自己申告)', s:15, icon:'🦩' },
+    { i:30, t:'squat', n:'空気椅子', d:'中腰をキープ(スクワット判定を利用)', s:15, icon:'🪑' },
+
+    // 31-40: BRAIN & REFLEX
+    { i:31, t:'math', n:'暗算バトル', d:'計算式の答えを選べ！', s:20, icon:'🧮' },
+    { i:32, t:'math', n:'スピード計算', d:'簡単な計算を高速で！', s:10, icon:'🚀' },
+    { i:33, t:'color', n:'反射カラー', d:'文字の「色」と同じボタンを押せ！', s:15, icon:'🎨' },
+    { i:34, t:'color_text', n:'文字読み', d:'文字の「意味」と同じボタンを押せ！', s:15, icon:'🧠' },
+    { i:35, t:'react', n:'早押し反射', d:'「GO」が出たらすぐ押せ！', s:10, icon:'🔫' },
+    { i:36, t:'react', n:'信号機', d:'青になったら押せ！', s:10, icon:'🚥' },
+    { i:37, t:'math', n:'引き算地獄', d:'引き算のみの計算', s:20, icon:'➖' },
+    { i:38, t:'math', n:'足し算天国', d:'足し算のみの計算', s:20, icon:'➕' },
+    { i:39, t:'num', n:'最大数', d:'一番大きい数字を選べ', s:15, icon:'🔢' },
+    { i:40, t:'num', n:'最小数', d:'一番小さい数字を選べ', s:15, icon:'🐜' },
+
+    // 41-50: LUCK & VARIETY
+    { i:41, t:'luck', n:'運ゲーAorB', d:'正解はランダム。勘で押せ！', s:10, icon:'🎰' },
+    { i:42, t:'luck4', n:'4択運試し', d:'4つの中からアタリを引け！', s:10, icon:'🍀' },
+    { i:43, t:'luck', n:'超・運試し', d:'一発勝負！確率は50%', s:5, icon:'🎲' },
+    { i:44, t:'mix', n:'連打と運', d:'連打しながら運も必要？', s:20, icon:'🔱' },
+    { i:45, t:'tap', n:'ラストバトル', d:'全ての力を出し切れ', s:30, icon:'👑' },
+    { i:46, t:'shake', n:'ファイナルシェイク', d:'腕がちぎれるまで', s:30, icon:'🦾' },
+    { i:47, t:'squat', n:'ファイナルスクワット', d:'明日は歩けない', s:30, icon:'🚑' },
+    { i:48, t:'quiz', n:'直感クイズ', d:'正解っぽいものを選べ', s:15, icon:'💡' },
+    { i:49, t:'color', n:'色彩の暴力', d:'目がチカチカするぞ', s:20, icon:'🌈' },
+    { i:50, t:'tap', n:'THE END', d:'最後のゲーム。悔いなく終われ', s:60, icon:'🏁' }
+];
+
+// --- GLOBAL STATE ---
+let roomId = null;
+let peer = null;
+let p2pConn = null;
+let hostConns = {};
+let isHost = false;
+let hostHeartbeatLoop = null;
+
+// ==========================================
+//               APP CONTROLLER
+// ==========================================
+window.App = {
+    host: () => Host.init(),
+    client: () => {
+        const p = new URLSearchParams(location.search);
+        if(p.get('room')) $('inp-room').value = p.get('room');
+        show('s-c-login');
+    }
+};
+
+// ==========================================
+//               HOST LOGIC
+// ==========================================
+window.Host = {
+    players: {}, // { id: { name, score } }
+
+    init: async () => {
+        show('s-h-lobby');
+        $('conn-status').classList.remove('hidden');
+        
+        // 1. Room ID Generation & Validation
+        // もしURLにroomパラメータがあれば再利用を試みる、なければ新規生成
+        const p = new URLSearchParams(location.search);
+        roomId = p.get('room') ? p.get('room').toUpperCase() : genId();
+        
+        // 2. Check for Zombie Host (もし既存の部屋があっても、反応がなければ乗っ取る)
+        const roomRef = ref(db, `rooms/${roomId}`);
+        const snap = await get(roomRef);
+        
+        if (snap.exists()) {
+            const data = snap.val();
+            const now = Date.now();
+            // 15秒以上Heartbeatがなければ死んでいるとみなして上書き
+            if (data.heartbeat && now - data.heartbeat < 15000) {
+                // 生きている部屋があるなら、IDを変えて作り直す
+                roomId = genId();
+            }
         }
-    };
 
-    // スマホのダブルタップ拡大などの防止
-    document.addEventListener('dblclick', function(event) { event.preventDefault(); }, { passive: false });
-    document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
+        $('room-id-disp').innerText = roomId;
+        new QRCode($('qrcode'), { text: `${location.href.split('?')[0]}?room=${roomId}`, width: 128, height: 128 });
 
-    // ================= HOST (親機) =================
-    const Host = {
-        peer: null,
-        id: null,
-        conns: {},
-        players: {}, // { id: { name, score, ... } }
-        currentGame: null,
-        gameLoop: null,
-        state: 'lobby',
+        // 3. Initialize Firebase Room
+        await set(ref(db, `rooms/${roomId}`), {
+            status: 'lobby',
+            createdAt: Date.now(),
+            heartbeat: Date.now()
+        });
+        
+        // Heartbeat Loop (I am alive)
+        if(hostHeartbeatLoop) clearInterval(hostHeartbeatLoop);
+        hostHeartbeatLoop = setInterval(() => {
+            update(ref(db, `rooms/${roomId}`), { heartbeat: Date.now() });
+        }, 5000);
 
-        init: () => {
-            document.getElementById('host-view').classList.remove('hidden');
-            Host.peer = new Peer(Utils.generateId());
-            
-            Host.peer.on('open', (id) => {
-                Host.id = id;
-                const url = `${location.protocol}//${location.host}${location.pathname}?host=${id}`;
-                new QRCode(document.getElementById("qrcode"), { text: url, width: 150, height: 150 });
-                console.log('Host initialized:', id);
+        // Remove room on disconnect
+        onDisconnect(ref(db, `rooms/${roomId}`)).remove();
+
+        // 4. Initialize PeerJS (Hybrid)
+        try {
+            peer = new Peer();
+            peer.on('open', (id) => {
+                console.log("PeerID:", id);
+                update(ref(db, `rooms/${roomId}`), { hostPeerId: id });
+                $('conn-status').innerText = "P2P ONLINE";
+                $('conn-status').className = "status-badge s-p2p";
             });
-
-            Host.peer.on('connection', (conn) => {
-                conn.on('open', () => {
-                    Host.conns[conn.peer] = conn;
-                    conn.on('data', (data) => Host.handleData(conn.peer, data));
-                    conn.on('close', () => {
-                        delete Host.conns[conn.peer];
-                        delete Host.players[conn.peer];
-                        Host.updateLobby();
-                    });
-                });
+            peer.on('connection', (c) => {
+                hostConns[c.peer] = c;
+                c.on('data', (d) => Host.handleInput(d.pid, d.val, d.name));
             });
-        },
-
-        handleData: (pid, data) => {
-            // 参加処理
-            if (data.act === 'join') {
-                Host.players[pid] = { name: data.name, id: pid, score: 0, role: null };
-                Host.updateLobby();
-                Utils.playTone(800, 'sine', 0.1);
-            }
-            // ゲーム入力処理
-            if (Host.state === 'gaming' && Host.currentGame) {
-                Host.processGameInput(pid, data);
-            }
-        },
-
-        updateLobby: () => {
-            const list = document.getElementById('player-list');
-            list.innerHTML = '';
-            const count = Object.keys(Host.players).length;
-            
-            Object.values(Host.players).forEach(p => {
-                const el = document.createElement('div');
-                el.className = 'player-badge';
-                el.innerText = p.name;
-                list.appendChild(el);
+            peer.on('error', () => {
+                $('conn-status').innerText = "DB MODE";
+                $('conn-status').className = "status-badge s-db";
             });
-
-            const btn = document.getElementById('btn-start-game');
-            if (count > 0) {
-                btn.disabled = false;
-                btn.innerText = `ゲーム開始 (${count}人)`;
-            } else {
-                btn.disabled = true;
-                btn.innerText = "参加者を待機中...";
-            }
-        },
-
-        // --- ルーレット & 準備 ---
-        startRoulette: () => {
-            Host.state = 'roulette';
-            document.getElementById('host-lobby').classList.add('hidden');
-            document.getElementById('host-result').classList.add('hidden');
-            document.getElementById('host-pregame').classList.remove('hidden');
-
-            const wheel = document.getElementById('roulette-wheel');
-            let counter = 0;
-            const interval = setInterval(() => {
-                const randomGame = GAMES[Math.floor(Math.random() * GAMES.length)];
-                wheel.innerText = randomGame.name;
-                wheel.style.color = counter % 2 === 0 ? '#ff4757' : '#70a1ff';
-                Utils.playTone(400, 'square', 0.05);
-                counter++;
-                if (counter > 20) {
-                    clearInterval(interval);
-                    Host.showRule(GAMES[Math.floor(Math.random() * GAMES.length)]); // 最終決定
-                }
-            }, 100);
-        },
-
-        showRule: (gameObj) => {
-            Host.currentGame = gameObj;
-            document.getElementById('rule-modal').classList.remove('hidden');
-            document.getElementById('rule-icon').innerText = gameObj.icon;
-            document.getElementById('rule-title').innerText = gameObj.name;
-            document.getElementById('rule-desc').innerText = gameObj.desc;
-        },
-
-        // --- ゲーム開始 ---
-        launchGame: () => {
-            document.getElementById('rule-modal').classList.add('hidden');
-            document.getElementById('host-pregame').classList.add('hidden');
-            document.getElementById('host-game').classList.remove('hidden');
-            Host.state = 'gaming';
-
-            // 全員の状態リセット
-            Object.values(Host.players).forEach(p => { p.score = 0; p.vote = null; });
-            document.getElementById('score-board').innerText = '';
-            
-            // クライアントの画面切り替え
-            Host.broadcast({ act: 'start', mode: Host.currentGame.type, gameId: Host.currentGame.id });
-
-            // ゲームごとの初期化
-            document.getElementById('game-title-display').innerText = Host.currentGame.name;
-            Host.startGameLogic();
-        },
-
-        startGameLogic: () => {
-            const game = Host.currentGame;
-            
-            // 人狼の場合
-            if (game.id === 'werewolf') {
-                Host.setupWerewolf();
-                return;
-            }
-
-            // 通常のアクションゲーム（タイマー制）
-            let time = 10; 
-            if (game.id === 'timer_stop') time = 15;
-            
-            const timerBar = document.getElementById('game-timer');
-            timerBar.style.width = '100%';
-            
-            // カウントダウン
-            let timeLeft = time;
-            Host.gameLoop = setInterval(() => {
-                timeLeft -= 0.1;
-                timerBar.style.width = (timeLeft / time * 100) + '%';
-                
-                // リアルタイムスコア表示（連打系のみ）
-                if (game.type === 'tap' || game.type === 'shake') {
-                    Host.updateRealtimeScore();
-                }
-
-                if (timeLeft <= 0) {
-                    clearInterval(Host.gameLoop);
-                    Host.finishGame();
-                }
-            }, 100);
-        },
-
-        processGameInput: (pid, data) => {
-            const p = Host.players[pid];
-            const g = Host.currentGame;
-
-            if (g.type === 'tap' && data.act === 'tap') {
-                p.score++;
-            }
-            if (g.type === 'shake' && data.act === 'shake') {
-                p.score += data.val; // 強さに応じて
-            }
-            if (g.type === 'gyro' && data.act === 'gyro') {
-                // バランス: 0に近いほど高得点（ここでは絶対値を累積し、低いほうが勝ち）
-                const tilt = Math.abs(data.beta) + Math.abs(data.gamma);
-                p.score += tilt; 
-            }
-            if (g.id === 'werewolf' && data.act === 'vote') {
-                p.vote = data.target;
-                Host.checkWerewolfEnd();
-            }
-        },
-
-        updateRealtimeScore: () => {
-            // 上位3名を表示
-            const sorted = Object.values(Host.players).sort((a,b) => b.score - a.score).slice(0,3);
-            const board = document.getElementById('score-board');
-            board.innerHTML = sorted.map((p, i) => 
-                `<div style="font-size:${3-i}rem">${i+1}. ${p.name}: ${Math.floor(p.score)}</div>`
-            ).join('');
-        },
-
-        // --- 人狼ロジック ---
-        setupWerewolf: () => {
-            const pIds = Object.keys(Host.players);
-            if(pIds.length < 3) {
-                alert("人狼は3人以上必要です。勝ち判定にします。");
-                Host.finishGame(); 
-                return;
-            }
-            
-            // 役職割り当て (人狼1、他市民)
-            const wolfIndex = Math.floor(Math.random() * pIds.length);
-            const wolfId = pIds[wolfIndex];
-            
-            pIds.forEach(pid => {
-                const role = (pid === wolfId) ? '人狼' : '市民';
-                Host.players[pid].role = role;
-                // 個別に役職通知
-                if (Host.conns[pid]) {
-                    Host.conns[pid].send({ act: 'role_assign', role: role, players: Host.players });
-                }
-            });
-
-            document.getElementById('score-board').innerHTML = "<div style='font-size:2rem'>話し合いタイム: 30秒<br>誰が人狼か探せ！</div>";
-            
-            setTimeout(() => {
-                Host.broadcast({ act: 'start_vote' });
-                document.getElementById('score-board').innerText = "投票中...";
-            }, 30000);
-        },
-
-        checkWerewolfEnd: () => {
-            const allVoted = Object.values(Host.players).every(p => p.vote);
-            if (allVoted) Host.finishGame();
-        },
-
-        // --- ゲーム終了・結果 ---
-        finishGame: () => {
-            clearInterval(Host.gameLoop);
-            Host.state = 'result';
-            document.getElementById('host-game').classList.add('hidden');
-            document.getElementById('host-result').classList.remove('hidden');
-            
-            Host.broadcast({ act: 'end' });
-            Utils.playTone(600, 'square', 0.5);
-
-            const display = document.getElementById('winner-display');
-            const g = Host.currentGame;
-            let winnerText = "";
-
-            if (g.id === 'werewolf') {
-                // 最多得票者を計算
-                const votes = {};
-                Object.values(Host.players).forEach(p => {
-                    votes[p.vote] = (votes[p.vote] || 0) + 1;
-                });
-                const executedId = Object.keys(votes).reduce((a, b) => votes[a] > votes[b] ? a : b);
-                const wolf = Object.values(Host.players).find(p => p.role === '人狼');
-                
-                if (executedId === wolf.id) {
-                    winnerText = `市民の勝ち！\n(人狼は ${wolf.name} でした)`;
-                    display.style.color = "#2ed573";
-                } else {
-                    winnerText = `人狼の勝ち！\n(人狼は ${wolf.name} でした)`;
-                    display.style.color = "#ff4757";
-                }
-
-            } else if (g.type === 'gyro' && g.id === 'balance') {
-                // スコアが低い（傾きが少ない）人が勝ち
-                const sorted = Object.values(Host.players).sort((a,b) => a.score - b.score);
-                winnerText = `WINNER: ${sorted[0].name}`;
-            } else {
-                // スコアが高い人が勝ち
-                const sorted = Object.values(Host.players).sort((a,b) => b.score - a.score);
-                winnerText = `WINNER: ${sorted[0].name}`;
-            }
-
-            display.innerText = winnerText;
-        },
-
-        backToLobby: () => {
-            Host.state = 'lobby';
-            document.getElementById('host-result').classList.add('hidden');
-            document.getElementById('host-lobby').classList.remove('hidden');
-        },
-
-        broadcast: (data) => {
-            Object.values(Host.conns).forEach(c => c.send(data));
+        } catch (e) {
+            $('conn-status').innerText = "DB MODE";
+            $('conn-status').className = "status-badge s-db";
         }
-    };
 
-    // ================= CLIENT (子機) =================
-    const Client = {
-        peer: null,
-        conn: null,
-        myId: null,
+        // 5. Setup Listeners (DB Fallback)
+        onChildAdded(ref(db, `rooms/${roomId}/actions`), (s) => {
+            const v = s.val();
+            Host.handleInput(v.pid, v.val, v.name);
+            remove(s.ref); // Processed
+        });
 
-        init: () => {
-            const params = new URLSearchParams(window.location.search);
-            const hostId = params.get('host');
+        // Player Sync
+        onValue(ref(db, `rooms/${roomId}/players`), (s) => {
+            const val = s.val() || {};
+            // 同期ロジック: 既存プレイヤーのスコアを保持しつつリスト更新
+            Object.keys(val).forEach(pid => {
+                if(!Host.players[pid]) Host.players[pid] = { name: val[pid].name, score: 0 };
+            });
+            $('p-count').innerText = Object.keys(Host.players).length;
+        });
+    },
+
+    handleInput: (pid, val, name) => {
+        // 新規参加なら登録
+        if (!Host.players[pid]) {
+            Host.players[pid] = { name: name || "Unknown", score: 0 };
+            update(ref(db, `rooms/${roomId}/players/${pid}`), { name: name || "Unknown" });
+        }
+        // ゲーム中ならスコア加算
+        if (!$('s-h-game').classList.contains('hidden') && val) {
+            Host.players[pid].score += val;
+        }
+    },
+
+    toMenu: () => {
+        show('s-h-menu');
+        const list = $('game-list');
+        list.innerHTML = GAMES.map(g => `
+            <div class="g-item" onclick="Host.startGame(${g.i})">
+                <div class="g-icon">${g.icon}</div>
+                <div class="g-name">${g.i}. ${g.n}</div>
+                <div class="g-tag">${g.t} / ${g.s}s</div>
+            </div>
+        `).join('');
+        update(ref(db, `rooms/${roomId}`), { status: 'menu' });
+    },
+
+    startGame: async (id) => {
+        const game = GAMES.find(g => g.i === id);
+        
+        // 1. Reset Scores
+        Object.keys(Host.players).forEach(k => Host.players[k].score = 0);
+        
+        // 2. Show Game Screen & Rule Overlay
+        show('s-h-game');
+        $('r-title').innerText = game.n;
+        $('r-desc').innerText = game.d;
+        $('r-icon').innerText = game.icon;
+        $('rule-overlay').classList.remove('hidden');
+        
+        // 3. Notify Clients (Start Loading)
+        update(ref(db, `rooms/${roomId}`), { 
+            status: 'playing',
+            gameId: game.i,
+            timestamp: Date.now()
+        });
+
+        // 4. Countdown (Rule Phase)
+        let cd = 3;
+        $('r-count').innerText = cd;
+        const cdInt = setInterval(() => {
+            cd--;
+            $('r-count').innerText = cd;
+            if (cd <= 0) {
+                clearInterval(cdInt);
+                $('rule-overlay').classList.add('hidden');
+                Host.gameLoop(game);
+            }
+        }, 1000);
+    },
+
+    gameLoop: (game) => {
+        $('g-title-main').innerText = game.n;
+        $('g-timer-disp').innerText = "GO!";
+        
+        let left = game.s;
+        const max = game.s;
+        
+        const loop = setInterval(() => {
+            left -= 0.1;
+            $('time-bar').style.width = (left / max * 100) + "%";
+            $('g-timer-disp').innerText = Math.ceil(left);
             
-            if (hostId) {
-                // QRから来た場合
-                document.getElementById('client-view').classList.remove('hidden');
-                Client.peer = new Peer(); // ID自動生成
-                Client.peer.on('open', (id) => {
-                    Client.myId = id;
-                    Client.conn = Client.peer.connect(hostId);
-                    Client.setupConnection();
+            // Realtime Ranking
+            const sorted = Object.values(Host.players).sort((a,b)=>b.score-a.score).slice(0,5);
+            $('ranking-box').innerHTML = sorted.map((p,i) => `
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #333; padding:5px;">
+                    <span>#${i+1} ${p.name}</span>
+                    <span style="color:var(--primary); font-weight:bold;">${Math.floor(p.score)}</span>
+                </div>
+            `).join('');
+
+            if (left <= 0) {
+                clearInterval(loop);
+                Host.endGame(sorted[0]);
+            }
+        }, 100);
+    },
+
+    endGame: (winner) => {
+        update(ref(db, `rooms/${roomId}`), { status: 'result' });
+        show('s-h-result');
+        $('res-name').innerText = winner ? winner.name : "NO WINNER";
+        $('res-score').innerText = winner ? Math.floor(winner.score) + " PTS" : "";
+    }
+};
+
+// ==========================================
+//               CLIENT LOGIC
+// ==========================================
+window.Client = {
+    name: "Guest",
+    game: null,
+    
+    join: async () => {
+        const rid = $('inp-room').value.toUpperCase();
+        const nm = $('inp-name').value || "Guest";
+        
+        if(rid.length !== 4) return $('c-msg').innerText = "IDは4文字です";
+        $('c-msg').innerText = "接続中...";
+        
+        // 1. Check Room
+        const roomRef = ref(db, `rooms/${rid}`);
+        const snap = await get(roomRef);
+        
+        if(!snap.exists()) return $('c-msg').innerText = "部屋が見つかりません";
+        
+        // 2. Register
+        roomId = rid;
+        Client.name = nm;
+        await update(ref(db, `rooms/${roomId}/players/${myId}`), { name: nm });
+        onDisconnect(ref(db, `rooms/${roomId}/players/${myId}`)).remove();
+
+        // 3. Try P2P
+        const rVal = snap.val();
+        if (rVal.hostPeerId) Client.connectP2P(rVal.hostPeerId);
+        else Client.useDB();
+
+        // 4. Listen Room State
+        onValue(roomRef, (s) => {
+            const d = s.val();
+            if(!d) { alert("部屋が解散されました"); location.reload(); return; }
+            
+            if(d.status === 'playing' && d.gameId) {
+                const g = GAMES.find(x => x.i === d.gameId);
+                // タイムスタンプが変わっていれば新規ゲーム開始
+                if(Client.lastTs !== d.timestamp) {
+                    Client.lastTs = d.timestamp;
+                    Client.setupGame(g);
+                }
+            } else if (d.status === 'menu' || d.status === 'result') {
+                show('s-c-wait');
+            }
+        });
+        
+        // Sensor Prompt
+        if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+            show('s-c-perm');
+        } else {
+            show('s-c-wait');
+        }
+    },
+    
+    connectP2P: (hid) => {
+        try {
+            peer = new Peer();
+            // 3秒待って繋がらなければDBモードへ
+            const to = setTimeout(() => Client.useDB(), 3000);
+            
+            peer.on('open', () => {
+                p2pConn = peer.connect(hid);
+                p2pConn.on('open', () => {
+                    clearTimeout(to);
+                    $('conn-status').classList.remove('hidden');
+                    $('conn-status').innerText = "P2P ONLINE";
+                    $('conn-status').className = "status-badge s-p2p";
                 });
-            } else {
-                // パラメータなしは親機モードへ
-                Host.init();
-            }
-        },
-
-        setupConnection: () => {
-            Client.conn.on('open', () => {
-                console.log("Connected to Host");
+                p2pConn.on('error', () => Client.useDB());
             });
-            Client.conn.on('data', (data) => Client.handleHostData(data));
-            Client.conn.on('close', () => alert("親機との接続が切れました"));
-        },
-
-        join: () => {
-            const name = document.getElementById('username').value || "Guest";
-            // iOS等でセンサー許可が必要かチェック
-            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                document.getElementById('client-login').classList.add('hidden');
-                document.getElementById('client-permission').classList.remove('hidden');
-            } else {
-                Client.finalizeJoin(name);
-            }
-        },
-
-        requestPermission: () => {
-            // iOS 13+ ジャイロ許可
-            DeviceMotionEvent.requestPermission()
-                .then(response => {
-                    if (response == 'granted') {
-                        Client.finalizeJoin(document.getElementById('username').value);
-                    } else {
-                        alert("許可されないと遊べないゲームがあります");
-                    }
-                })
-                .catch(console.error);
-        },
-
-        finalizeJoin: (name) => {
-            Client.conn.send({ act: 'join', name: name });
-            document.getElementById('client-login').classList.add('hidden');
-            document.getElementById('client-permission').classList.add('hidden');
-            document.getElementById('client-waiting').classList.remove('hidden');
-            Client.initSensors();
-        },
-
-        handleHostData: (data) => {
-            if (data.act === 'start') {
-                Client.showController(data.mode);
-            } else if (data.act === 'end') {
-                Client.resetScreens();
-            } else if (data.act === 'role_assign') {
-                // 人狼用
-                Client.showWerewolfCtrl(data.role, data.players);
-            } else if (data.act === 'start_vote') {
-                alert("投票してください！");
-            }
-        },
-
-        showController: (mode) => {
-            document.getElementById('client-waiting').classList.add('hidden');
-            document.querySelectorAll('.screen').forEach(el => {
-                if(el.id.startsWith('ctrl-')) el.classList.add('hidden');
-            });
-
-            if (mode === 'tap') {
-                const el = document.getElementById('ctrl-tap');
-                el.classList.remove('hidden');
-                el.onclick = () => {
-                    Client.conn.send({ act: 'tap' });
-                    Utils.playTone(300, 'triangle', 0.05);
-                    navigator.vibrate(50);
-                };
-            }
-            if (mode === 'shake') document.getElementById('ctrl-shake').classList.remove('hidden');
-            if (mode === 'gyro') document.getElementById('ctrl-gyro').classList.remove('hidden');
-            if (mode === 'werewolf') document.getElementById('ctrl-werewolf').classList.remove('hidden');
-        },
-
-        showWerewolfCtrl: (role, players) => {
-            document.getElementById('client-waiting').classList.add('hidden');
-            const el = document.getElementById('ctrl-werewolf');
-            el.classList.remove('hidden');
+            peer.on('error', () => Client.useDB());
+        } catch(e) { Client.useDB(); }
+    },
+    
+    useDB: () => {
+        $('conn-status').classList.remove('hidden');
+        $('conn-status').innerText = "DB MODE";
+        $('conn-status').className = "status-badge s-db";
+        p2pConn = null;
+    },
+    
+    grantPerm: () => {
+        DeviceMotionEvent.requestPermission().then(r => {
+            if(r==='granted') show('s-c-wait');
+        }).catch(()=>show('s-c-wait'));
+    },
+    
+    setupGame: (game) => {
+        Client.game = game;
+        show('s-c-ctrl');
+        const area = $('ctrl-area');
+        area.innerHTML = '';
+        
+        // Controller Generator based on Game Type
+        const t = game.t;
+        
+        if (t === 'tap' || t === 'tap_alt' || t === 'mix') {
+            area.innerHTML = `<button class="c-btn bg-red" style="height:80%" ontouchstart="Client.send(1)">PUSH!</button>`;
+        }
+        else if (t === 'tap_red') {
+             area.innerHTML = `<button class="c-btn bg-red" style="height:80%" ontouchstart="Client.send(1)">赤</button>`;
+        }
+        else if (t === 'tap_blue') {
+             area.innerHTML = `<button class="c-btn bg-blue" style="height:80%" ontouchstart="Client.send(1)">青</button>`;
+        }
+        else if (t === 'shake' || t === 'squat' || t === 'balance') {
+            area.innerHTML = `
+                <div style="text-align:center; color:white;">
+                    <div style="font-size:5rem;">${game.icon}</div>
+                    <div style="font-size:1.5rem; margin-top:20px;">${game.d}</div>
+                </div>`;
+        }
+        else if (t === 'math' || t === 'num') {
+            Client.renderMath();
+        }
+        else if (t === 'color' || t === 'color_text') {
+            Client.renderColor();
+        }
+        else if (t === 'luck' || t === 'luck4' || t === 'quiz' || t === 'react') {
+            const count = (t === 'luck4' || t === 'quiz') ? 4 : 2;
+            const colors = ['bg-red', 'bg-blue', 'bg-green', 'bg-yellow'];
+            area.style.gridTemplateColumns = "1fr 1fr";
             
-            const roleCard = document.getElementById('my-role');
-            roleCard.innerText = role;
-            roleCard.style.color = (role === '人狼') ? '#ff4757' : '#2ed573';
-
-            const list = document.getElementById('vote-list');
-            list.innerHTML = '';
-            Object.values(players).forEach(p => {
-                if (p.id === Client.myId) return; // 自分には投票不可
+            for(let i=0; i<count; i++) {
                 const btn = document.createElement('button');
-                btn.className = 'btn';
-                btn.innerText = p.name;
+                btn.className = `c-btn ${colors[i]}`;
+                btn.innerText = (t === 'react') ? "GO" : "?";
                 btn.onclick = () => {
-                    if(confirm(`${p.name} に投票しますか？`)) {
-                        Client.conn.send({ act: 'vote', target: p.id });
-                        list.innerHTML = "<p>投票完了。結果を待て。</p>";
+                    // Logic for random/quiz
+                    if(t === 'react') { Client.send(1); btn.disabled=true; }
+                    else {
+                        const win = Math.random() > 0.5;
+                        if(win) { Client.send(10); if(navigator.vibrate) navigator.vibrate(50); }
+                        else Client.send(-2);
                     }
                 };
-                list.appendChild(btn);
-            });
-        },
-
-        resetScreens: () => {
-            document.querySelectorAll('.screen').forEach(el => {
-                if(el.id.startsWith('ctrl-')) el.classList.add('hidden');
-            });
-            document.getElementById('client-waiting').classList.remove('hidden');
-        },
-
-        initSensors: () => {
-            // シェイク検知 (加速度)
-            let lastX = 0, lastY = 0, lastZ = 0;
-            window.addEventListener('devicemotion', (e) => {
-                const acc = e.accelerationIncludingGravity;
-                if (!acc) return;
-                const delta = Math.abs(acc.x + acc.y + acc.z - lastX - lastY - lastZ);
-                if (delta > 20) { // シェイク閾値
-                    Client.conn.send({ act: 'shake', val: 1 });
-                    navigator.vibrate(50);
-                }
-                lastX = acc.x; lastY = acc.y; lastZ = acc.z;
-            });
-
-            // ジャイロ検知 (傾き)
-            window.addEventListener('deviceorientation', (e) => {
-                if (document.getElementById('ctrl-gyro').classList.contains('hidden')) return;
-                
-                // 画面上のボールを動かす
-                const bubble = document.getElementById('gyro-bubble');
-                const x = Math.min(Math.max(e.gamma, -45), 45); // 左右
-                const y = Math.min(Math.max(e.beta, -45), 45);  // 前後
-                
-                bubble.style.transform = `translate(calc(-50% + ${x*3}px), calc(-50% + ${y*3}px))`;
-                
-                // データ送信 (頻度制限推奨だが簡易的に送る)
-                Client.conn.send({ act: 'gyro', beta: e.beta, gamma: e.gamma });
-            });
+                area.appendChild(btn);
+            }
         }
-    };
+        
+        Client.initSensors();
+    },
+    
+    renderMath: () => {
+        const area = $('ctrl-area');
+        const n1 = Math.floor(Math.random()*9)+1;
+        const n2 = Math.floor(Math.random()*9)+1;
+        const isAdd = Math.random()>0.5;
+        const ans = isAdd ? n1+n2 : n1-n2;
+        const wrong = ans + (Math.random()>0.5?1:-1);
+        
+        area.innerHTML = `
+            <div style="grid-column:1/-1; display:flex; justify-content:center; align-items:center; font-size:4rem;">
+                ${n1} ${isAdd?'+':'-'} ${n2} = ?
+            </div>
+            <button class="c-btn bg-blue" onclick="Client.check(${ans},${ans})">${ans}</button>
+            <button class="c-btn bg-red" onclick="Client.check(${wrong},${ans})">${wrong}</button>
+        `;
+    },
+    
+    renderColor: () => {
+        const area = $('ctrl-area');
+        const cols = [
+            {n:'あか', c:'red', cls:'bg-red'},
+            {n:'あお', c:'blue', cls:'bg-blue'},
+            {n:'みどり', c:'green', cls:'bg-green'},
+            {n:'きいろ', c:'gold', cls:'bg-yellow'}
+        ];
+        // Target
+        const txt = cols[Math.floor(Math.random()*4)];
+        const ink = cols[Math.floor(Math.random()*4)];
+        
+        area.innerHTML = `<div style="grid-column:1/-1; font-size:4rem; color:${ink.c}; font-weight:bold; text-align:center;">${txt.n}</div>`;
+        area.style.gridTemplateColumns = "1fr 1fr";
+        
+        cols.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = `c-btn ${opt.cls}`;
+            btn.onclick = () => {
+                const target = Client.game.t === 'color' ? ink.c : txt.c; // color:インク色一致, color_text:文字意味一致... actually logic is simpler
+                // Fix Logic:
+                // Game 33 (Color): Match the INK color.
+                // Game 34 (Text): Match the TEXT meaning.
+                let isCor = false;
+                if(Client.game.t === 'color') isCor = (opt.c === ink.c);
+                else isCor = (opt.c === txt.c); // txt.c holds the 'true color' of the word meaning
+                
+                if(isCor) Client.send(1); else Client.send(-1);
+                Client.renderColor();
+            };
+            area.appendChild(btn);
+        });
+    },
+    
+    check: (v, a) => {
+        if(v===a) Client.send(1); else Client.send(-1);
+        Client.renderMath();
+    },
 
-    // 起動
-    window.onload = Client.init;
-
+    send: (val) => {
+        const d = { pid: myId, val: val, name: Client.name };
+        if(p2pConn && p2pConn.open) p2pConn.send(d);
+        else push(ref(db, `rooms/${roomId}/actions`), d);
+        
+        if(val > 0 && navigator.vibrate) navigator.vibrate(30);
+    },
+    
+    initSensors: () => {
+        // Reset Logic
+        window.ondevicemotion = null;
+        window.ondeviceorientation = null;
+        
+        if(!Client.game) return;
+        const t = Client.game.t;
+        
+        if(t === 'shake' || t === 'squat' || t === 'balance') {
+            let lx=0, ly=0, lz=0;
+            let squatSt = 'up';
+            
+            window.ondevicemotion = (e) => {
+                const acc = e.accelerationIncludingGravity;
+                if(!acc) return;
+                
+                if(t === 'shake') {
+                    const d = Math.abs(acc.x+acc.y+acc.z - lx-ly-lz);
+                    if(d > 25) Client.send(1); // Sensitivity
+                    lx=acc.x; ly=acc.y; lz=acc.z;
+                }
+                else if(t === 'squat') {
+                    // Y axis gravity: Stand ~9.8, Squat(down) drops, Up spikes
+                    // Simple threshold logic
+                    if(squatSt==='up' && acc.y < 5) squatSt='down';
+                    if(squatSt==='down' && acc.y > 8) { squatSt='up'; Client.send(1); }
+                }
+            };
+            
+            if(t === 'balance') {
+                window.ondeviceorientation = (e) => {
+                    // Keep flat (beta/gamma near 0)
+                    const tilt = Math.abs(e.beta) + Math.abs(e.gamma);
+                    if(tilt < 15) {
+                        if(Math.random()>0.9) Client.send(1);
+                    } else {
+                         if(Math.random()>0.9) Client.send(-1);
+                    }
+                };
+            }
+        }
+    }
+};
 </script>
 </body>
 </html>
