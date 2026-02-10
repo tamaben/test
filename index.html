@@ -3,140 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PARTY BOX 100: EVOLUTION</title>
+    <title>PARTY BOX: 20 ACTIONS</title>
+    <!-- ライブラリ読み込み -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+1p:wght@800&family=Rowdies:wght@700&display=swap" rel="stylesheet">
+    
     <style>
-        :root { --bg: #111; --neon-cyan: #0ff; --neon-pink: #f0f; --neon-yellow: #ff0; }
+        :root { --bg: #111; --cyan: #0ff; --pink: #f0f; --yellow: #ff0; }
         body { margin: 0; background: var(--bg); color: white; font-family: 'M PLUS 1p', sans-serif; overflow: hidden; height: 100vh; user-select: none; text-align: center; touch-action: none; }
 
-        /* 共通スクリーン */
+        /* 画面共通 */
         .screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle, #222 0%, #000 100%); transition: opacity 0.3s; z-index: 1; }
         .hidden { opacity: 0; pointer-events: none; z-index: -10; }
 
-        /* デザインパーツ */
-        h1 { font-family: 'Rowdies', cursive; font-size: 4rem; color: var(--neon-cyan); text-shadow: 4px 4px 0 var(--neon-pink); margin: 10px; }
+        /* タイポグラフィ */
+        h1 { font-family: 'Rowdies', cursive; font-size: 3rem; color: var(--cyan); text-shadow: 3px 3px 0 var(--pink); margin: 0; }
         h2 { font-size: 2rem; margin: 10px; }
-        .btn { background: linear-gradient(45deg, #ff00cc, #3333ff); border: none; color: white; padding: 15px 40px; font-size: 1.5rem; border-radius: 50px; cursor: pointer; margin: 10px; box-shadow: 0 0 15px var(--neon-pink); font-family: inherit; }
+        p { color: #ccc; font-size: 1.2rem; }
+        .big-text { font-size: 4rem; font-weight: 900; color: var(--yellow); }
+
+        /* UIパーツ */
+        .btn { background: linear-gradient(45deg, #f0f, #33f); border: none; color: white; padding: 15px 30px; font-size: 1.2rem; border-radius: 50px; cursor: pointer; margin: 10px; box-shadow: 0 0 10px var(--pink); font-family: inherit; }
         .btn:active { transform: scale(0.95); }
-        .btn-cyan { background: linear-gradient(45deg, #00ccff, #00ffcc); box-shadow: 0 0 15px var(--neon-cyan); color: black; }
+        .btn-cyan { background: linear-gradient(45deg, #0cf, #0fc); color: black; box-shadow: 0 0 10px var(--cyan); }
 
-        /* ホスト画面系 */
-        .wheel-container { position: relative; width: 350px; height: 350px; margin: 20px; }
-        .wheel { width: 100%; height: 100%; border-radius: 50%; border: 10px solid white; background: conic-gradient(#f0f 0deg 90deg, #0ff 90deg 180deg, #ff0 180deg 270deg, #0f0 270deg 360deg); }
-        .arrow { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); border-left: 20px solid transparent; border-right: 20px solid transparent; border-top: 40px solid white; z-index: 10; }
+        /* HOST: ゲーム画面 */
+        #host-game-area { width: 100%; height: 60%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .ranking-box { text-align: left; font-size: 1.5rem; background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; min-width: 300px; }
+
+        /* CLIENT: コントローラー各種 */
+        .ctrl-layer { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
         
-        #scene-battle { background: #300; }
-        .boss-img { font-size: 10rem; animation: float 2s infinite ease-in-out; }
-        .hp-bar { width: 80%; height: 30px; background: #333; border: 2px solid white; border-radius: 15px; overflow: hidden; }
-        .hp-fill { width: 100%; height: 100%; background: linear-gradient(90deg, #f00, #ff0); transition: width 0.2s; }
-        #scene-race { background: #002; justify-content: flex-start; padding-top: 50px; overflow-y: hidden; }
-        .track-lane { width: 100%; height: 50px; border-bottom: 1px dashed #555; position: relative; display: flex; align-items: center; }
-        .racer { position: absolute; left: 0; font-size: 2.5rem; transition: left 0.5s linear; }
+        /* ボタン系 */
+        .c-btn { width: 120px; height: 120px; border-radius: 50%; border: 4px solid white; font-size: 2rem; background: #333; color: white; font-weight: bold; margin: 10px; touch-action: manipulation; box-shadow: 0 5px 0 #000; transition: transform 0.05s; display: flex; align-items: center; justify-content: center; }
+        .c-btn:active { transform: translateY(5px); box-shadow: none; background: #555; }
+        .c-btn.red { background: #e74c3c; border-color: #c0392b; }
+        .c-btn.blue { background: #3498db; border-color: #2980b9; }
+        .c-btn.green { background: #2ecc71; border-color: #27ae60; }
+        .c-btn.huge { width: 220px; height: 220px; font-size: 3rem; background: radial-gradient(#e74c3c, #c0392b); }
 
-        /* クライアント操作エリア */
-        .ctrl-area { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #222; }
+        /* スワイプ・エリア系 */
+        .swipe-area { width: 300px; height: 300px; border: 4px dashed #777; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #777; touch-action: none; }
         
-        /* 1. Normal Button */
-        .c-btn { width: 220px; height: 220px; border-radius: 50%; border: none; font-size: 2rem; color: white; font-weight: bold; box-shadow: 0 10px 0 rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; justify-content: center; user-select: none; -webkit-user-select: none; }
-        .c-btn:active { transform: translateY(10px); box-shadow: none; }
-        .bg-red { background: #ff4757; box-shadow: 0 10px 0 #c0392b; }
-        .bg-blue { background: #3742fa; box-shadow: 0 10px 0 #2f3542; }
-        .bg-stop { background: var(--neon-yellow); color: black; box-shadow: 0 10px 0 #d4a017; }
+        /* クイズ・選択肢系 */
+        .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; max-width: 400px; }
+        .choice-btn { height: 100px; border-radius: 15px; font-size: 1.5rem; border: none; background: #444; color: white; box-shadow: 0 5px 0 #222; }
+        .choice-btn:active { transform: translateY(5px); box-shadow: none; }
 
-        /* 2. Swipe Area */
-        .swipe-zone { width: 90%; height: 70%; border: 4px dashed var(--neon-cyan); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 5rem; color: #555; background: rgba(0,255,255,0.05); }
-        .swipe-anim { animation: flyUp 0.5s ease-out; color: var(--neon-cyan); }
-        
-        /* 3. Charge Button */
-        .charge-btn { background: #e67e22; box-shadow: 0 10px 0 #d35400; transition: transform 0.1s; }
-        .charging { animation: vibrate 0.1s infinite; background: #fff !important; color: #e67e22 !important; box-shadow: 0 0 30px #e67e22 !important; }
-
-        /* 4. Mash Buttons */
-        .mash-container { display: flex; gap: 20px; }
-        .mash-btn { width: 140px; height: 140px; font-size: 3rem; border-radius: 20px; border: none; box-shadow: 0 8px 0 rgba(0,0,0,0.5); }
-        .mash-l { background: #2ecc71; box-shadow: 0 8px 0 #27ae60; }
-        .mash-r { background: #9b59b6; box-shadow: 0 8px 0 #8e44ad; }
-        .mash-btn:active { transform: translateY(8px); box-shadow: none; }
-
-        /* Animations */
-        @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-20px);} }
-        @keyframes flyUp { 0%{transform:translateY(0); opacity:1;} 100%{transform:translateY(-200px); opacity:0;} }
-        @keyframes vibrate { 0%{transform:translate(1px, 1px);} 100%{transform:translate(-1px, -1px);} }
-        .shake { animation: shake 0.3s; }
-        @keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 100% { transform: translate(-1px, -2px) rotate(-1deg); } }
+        /* アニメーション */
+        @keyframes pulse { 0%{transform:scale(1);} 50%{transform:scale(1.05);} 100%{transform:scale(1);} }
+        .anim-shake { animation: shake 0.3s infinite; }
+        @keyframes shake { 0%{transform:translate(0,0);} 25%{transform:translate(2px,2px);} 50%{transform:translate(-2px,-2px);} 75%{transform:translate(2px,-2px);} }
     </style>
 </head>
 <body>
 
+    <!-- ================= HOST SCREENS ================= -->
     <div id="s-top" class="screen">
-        <h1>PARTY BOX<br>EVO</h1>
-        <p>100種類のゲーム × 6つの操作</p>
-        <div style="margin-top:20px;">
-            <button id="btn-host" class="btn">💻 ホスト</button>
-            <button id="btn-client" class="btn btn-cyan">📱 スマホ参加</button>
+        <h1>PARTY BOX<br>20 ACTIONS</h1>
+        <p>20種類の操作 × 全員参加バトル</p>
+        <div>
+            <button id="btn-host" class="btn">💻 ホストではじめる</button>
+            <button id="btn-client" class="btn btn-cyan">📱 スマホで参加</button>
         </div>
     </div>
 
     <div id="s-lobby" class="screen hidden">
         <h2>ROOM ID</h2>
-        <div id="disp-id" style="font-size:5rem; color:var(--neon-yellow); font-family:'Rowdies';">----</div>
-        <div id="qrcode" style="background:white; padding:15px; border-radius:10px;"></div>
-        <p>参加人数: <span id="p-count" style="font-size:2rem; font-weight:bold; color:var(--neon-pink)">0</span> 人</p>
-        <button onclick="startRoulette()" class="btn">運命のルーレット</button>
-        <button onclick="showGameList()" class="btn btn-cyan">リストから選ぶ</button>
+        <div id="disp-id" class="big-text">----</div>
+        <div id="qrcode" style="background:white; padding:10px; border-radius:10px; margin:20px;"></div>
+        <p>参加人数: <span id="p-count" style="color:var(--pink); font-weight:bold;">0</span> 人</p>
+        <button onclick="startGame()" class="btn btn-cyan">ゲームスタート！</button>
     </div>
 
-    <div id="s-roulette" class="screen hidden">
-        <h1>NEXT GAME</h1>
-        <div class="wheel-container"><div class="arrow"></div><div id="wheel" class="wheel"></div></div>
-        <h2 id="stopper-msg" style="color:var(--neon-yellow);">STOPボタン待ち...</h2>
-    </div>
-
-    <div id="scene-battle" class="screen hidden">
-        <h2 id="battle-title">BOSS</h2>
-        <div id="boss-display" class="boss-img">👾</div>
-        <div class="hp-bar"><div id="boss-hp" class="hp-fill"></div></div>
-        <div id="battle-timer" style="font-size:3rem; margin-top:20px;">15.0</div>
-    </div>
-
-    <div id="scene-race" class="screen hidden">
-        <h2 id="race-title">RACE</h2>
-        <div id="race-track-area" style="width:90%;"></div>
-    </div>
-
-    <div id="scene-generic" class="screen hidden">
-        <h2 id="gen-title">GAME</h2>
-        <div id="gen-instruction" style="font-size:3rem; font-weight:bold; color:var(--neon-yellow); margin:20px;">READY?</div>
-        <div id="gen-timer" style="font-size:3rem;"></div>
-        <div id="gen-ranking" style="font-size:1.5rem; text-align:left; margin-top:30px; color:#aaa;"></div>
-    </div>
-
-    <div id="s-list" class="screen hidden" style="justify-content:flex-start; overflow-y:auto; padding:50px;">
-        <h2>GAME LIST</h2>
-        <button onclick="show('s-lobby')" class="btn">戻る</button>
-        <div id="game-list-container" style="display:flex; flex-wrap:wrap; justify-content:center; gap:10px;"></div>
+    <div id="s-game" class="screen hidden">
+        <h2 id="g-title" style="color:var(--cyan); margin-bottom:5px;">GAME TITLE</h2>
+        <p id="g-desc">Description</p>
+        <div id="host-game-area">
+            <div id="g-timer" class="big-text" style="font-size:6rem;">10.0</div>
+            <div id="g-status" style="font-size:2rem; margin-top:20px;"></div>
+        </div>
     </div>
 
     <div id="s-result" class="screen hidden">
-        <h1>WINNER</h1>
-        <div id="winner-name" style="font-size:4rem; color:var(--neon-yellow); font-weight:bold;">???</div>
-        <button onclick="location.reload()" class="btn">タイトルへ</button>
+        <h1>RESULT</h1>
+        <div id="ranking-list" class="ranking-box"></div>
+        <button onclick="startGame()" class="btn">次のゲームへ</button>
     </div>
 
-    <div id="s-c-login" class="screen hidden">
-        <h2>ID入力</h2>
-        <input id="inp-id" style="font-size:1.5rem; padding:10px; width:200px; text-align:center; text-transform:uppercase;" placeholder="ABCD">
+    <!-- ================= CLIENT SCREENS ================= -->
+    <div id="c-login" class="screen hidden">
+        <h2>ROOM ID</h2>
+        <input id="inp-id" style="font-size:2rem; width:200px; text-align:center; text-transform:uppercase;" maxlength="4" placeholder="ABCD">
         <br><br>
-        <input id="inp-name" style="font-size:1.2rem; padding:10px; width:200px; text-align:center;" placeholder="名前">
+        <input id="inp-name" style="font-size:1.5rem; width:200px; text-align:center;" maxlength="8" placeholder="名前">
         <br><br>
-        <button id="btn-join" class="btn btn-cyan">参加</button>
+        <button id="btn-join" class="btn btn-cyan">参加する</button>
     </div>
 
-    <div id="s-c-play" class="screen hidden">
-        <div id="c-msg" style="font-size:1.5rem; margin-bottom:20px; color:#ccc;">待機中...</div>
-        <div id="c-area" class="ctrl-area"></div>
+    <div id="c-play" class="screen hidden">
+        <div id="c-header" style="position:absolute; top:10px; width:100%; font-size:1.2rem; color:#aaa;">待機中...</div>
+        <div id="c-container" class="ctrl-layer"></div>
     </div>
 
     <script type="module">
@@ -144,6 +112,7 @@
         import { getDatabase, ref, set, get, onValue, update, remove, onDisconnect, runTransaction, child } 
                from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
+        // Firebase設定 (書き換えてください)
         const firebaseConfig = {
             apiKey: "AIzaSyDbZzTMvUkG2LXIGY4ux0KBTmnAdqP236s",
             authDomain: "game-4f2d9.firebaseapp.com",
@@ -157,287 +126,25 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // --- ゲーム定義: 6つの動作タイプ ---
-        // tap(連打), shake(振る), stop(タイミング), swipe(スワイプ), charge(長押し), mash(左右交互)
-        const ACTIONS = [
-            {t:'tap', n:'ドラゴン討伐', d:'ひたすら連打！', i:'🐉'},
-            {t:'tap', n:'隕石破壊', d:'撃ち落とせ！', i:'☄️'},
-            {t:'shake', n:'プロテイン', d:'スマホを振れ！', i:'🥤'},
-            {t:'shake', n:'炭酸ファイト', d:'限界まで振れ！', i:'🍾'},
-            {t:'stop', n:'時限爆弾', d:'5.00秒で止めろ', i:'💣'},
-            {t:'stop', n:'ダルマさん', d:'合図で止まれ！', i:'🗿'},
-            // NEW ACTIONS
-            {t:'swipe', n:'手裏剣道場', d:'上にスワイプして投げろ！', i:'🥷'},
-            {t:'swipe', n:'ゴミ箱シュート', d:'ゴミを投げ入れろ！', i:'🗑️'},
-            {t:'swipe', n:'居合斬り', d:'一瞬で上に切り上げろ！', i:'⚔️'},
-            {t:'charge', n:'波動砲', d:'長押しで溜めて放て！', i:'⚡'},
-            {t:'charge', n:'風船割り', d:'長押しで膨らませろ！', i:'🎈'},
-            {t:'charge', n:'シャンパン', d:'溜めてコルクを飛ばせ！', i:'🍾'},
-            {t:'mash', n:'100m走', d:'左右交互に連打しろ！', i:'🏃'},
-            {t:'mash', n:'崖登り', d:'左右の手で登れ！', i:'🧗'},
-            {t:'mash', n:'クロール', d:'水をかけわけろ！', i:'🏊'}
-        ];
-
-        const GAME_DB = [];
-        for(let i=0; i<100; i++) {
-            const base = ACTIONS[i % ACTIONS.length];
-            GAME_DB.push({ id: i, type: base.t, title: base.n, desc: base.d, icon: base.i });
-        }
-
-        // --- 変数 ---
-        let myId = "P" + Math.random().toString(36).substr(2, 5);
-        let roomId = "";
-        let players = {};
-        let sensorActive = false;
-
-        const $ = id => document.getElementById(id);
-        const show = id => {
-            document.querySelectorAll('.screen').forEach(e => e.classList.add('hidden'));
-            $(id).classList.remove('hidden');
-        };
-
-        // --- HOST ---
-        $('btn-host').addEventListener('click', () => {
-            roomId = Math.random().toString(36).substr(2, 4).toUpperCase();
-            const rRef = ref(db, `rooms/${roomId}`);
-            set(rRef, { status: 'lobby', host: myId });
-            onDisconnect(rRef).remove();
-
-            $('disp-id').innerText = roomId;
-            $('qrcode').innerHTML = "";
-            new QRCode($('qrcode'), { text: `${location.origin}${location.pathname}?room=${roomId}`, width: 128, height: 128 });
-            show('s-lobby');
-
-            onValue(ref(db, `rooms/${roomId}/players`), snap => {
-                players = snap.val() || {};
-                $('p-count').innerText = Object.keys(players).length;
-            });
-        });
-
-        window.showGameList = () => {
-            show('s-list');
-            const cont = $('game-list-container');
-            cont.innerHTML = "";
-            GAME_DB.forEach(g => {
-                const b = document.createElement('button');
-                b.className = "btn";
-                b.style.fontSize = "0.8rem"; b.style.width = "150px";
-                b.innerHTML = `${g.icon}<br>${g.title}`;
-                b.onclick = () => initGame(g);
-                cont.appendChild(b);
-            });
-        };
-
-        window.startRoulette = () => {
-            const pIds = Object.keys(players);
-            if(pIds.length === 0) return alert("参加者がいません");
-            show('s-roulette');
-            const stopperId = pIds[Math.floor(Math.random() * pIds.length)];
-            update(ref(db, `rooms/${roomId}`), { status: 'roulette', stopper: stopperId, stopperName: players[stopperId].name, spin: true });
-
-            const wheel = $('wheel');
-            let deg = 0;
-            const anim = setInterval(() => { deg = (deg + 20) % 360; wheel.style.transform = `rotate(${deg}deg)`; }, 20);
-            
-            const unsub = onValue(ref(db, `rooms/${roomId}/spin`), snap => {
-                if(snap.val() === false) {
-                    clearInterval(anim); unsub();
-                    wheel.style.transition = "transform 3s ease-out";
-                    wheel.style.transform = `rotate(${deg + 720 + Math.floor(Math.random()*360)}deg)`;
-                    setTimeout(() => initGame(GAME_DB[Math.floor(Math.random()*GAME_DB.length)]), 4000);
-                }
-            });
-        };
-
-        function initGame(game) {
-            update(ref(db, `rooms/${roomId}`), { status: 'game', gameData: game, gameVal: 100, state: 'play' });
-            
-            // 全員のスコア0
-            const u = {}; Object.keys(players).forEach(p => u[`rooms/${roomId}/players/${p}/score`] = 0);
-            update(ref(db), u);
-
-            if(game.type === 'tap') { // BATTLE MODE
-                show('scene-battle');
-                $('battle-title').innerText = game.title;
-                $('boss-display').innerText = game.icon;
-                startTimer(20, () => endGame('TIME UP'));
-                onValue(ref(db, `rooms/${roomId}/gameVal`), s => {
-                    const hp = s.val();
-                    $('boss-hp').style.width = hp + "%";
-                    if(hp <= 0) endGame('VICTORY!');
-                    else if(hp < 100) { $('boss-display').classList.add('shake'); setTimeout(()=>$('boss-display').classList.remove('shake'),100); }
-                });
-            } 
-            else if (game.type === 'mash') { // RACE MODE
-                show('scene-race');
-                $('race-title').innerText = game.title;
-                const area = $('race-track-area'); area.innerHTML = "";
-                Object.keys(players).forEach(pid => {
-                    area.innerHTML += `<div class='track-lane'><span>${players[pid].name}</span><div id='car-${pid}' class='racer'>${game.icon}</div></div>`;
-                });
-                startTimer(20, ()=>endGame('FINISH'));
-                onValue(ref(db, `rooms/${roomId}/players`), s => {
-                    let win = null;
-                    s.forEach(p => {
-                        const sc = p.val().score || 0;
-                        const el = document.getElementById(`car-${p.key}`);
-                        if(el) { el.style.left = Math.min(90, sc*2) + "%"; if(sc >= 45) win = p.val().name; }
-                    });
-                    if(win) endGame(`${win} WINS!`);
-                });
-            }
-            else { // GENERIC (Swipe, Shake, Stop, Charge)
-                show('scene-generic');
-                $('gen-title').innerText = game.title;
-                $('gen-instruction').innerText = game.desc;
-                startTimer(15, ()=>endGame('FINISH!'));
-                onValue(ref(db, `rooms/${roomId}/players`), s => {
-                    const l = []; s.forEach(p => l.push({n:p.val().name, s:p.val().score||0}));
-                    l.sort((a,b)=>b.s-a.s);
-                    $('gen-ranking').innerHTML = l.slice(0,3).map((p,i)=>`#${i+1} ${p.n}: ${p.s}`).join('<br>');
-                });
-            }
-        }
-
-        let timerInt;
-        function startTimer(sec, cb) {
-            clearInterval(timerInt);
-            let t = sec;
-            const el = $('scene-battle').classList.contains('hidden') ? ($('scene-race').classList.contains('hidden') ? $('gen-timer') : null) : $('battle-timer');
-            if(el) el.innerText = t.toFixed(1);
-            
-            timerInt = setInterval(() => {
-                t -= 0.1;
-                if(el) el.innerText = t.toFixed(1);
-                if(t <= 0) { clearInterval(timerInt); cb(); }
-            }, 100);
-        }
-        function endGame(msg) {
-            clearInterval(timerInt);
-            update(ref(db, `rooms/${roomId}`), { status: 'result' });
-            show('s-result');
-            $('winner-name').innerText = msg;
-            confetti();
-        }
-
-        // --- CLIENT ---
-        const params = new URLSearchParams(location.search);
-        if(params.get('room')) { $('inp-id').value = params.get('room'); show('s-c-login'); }
-        $('btn-client').addEventListener('click', () => show('s-c-login'));
-
-        $('btn-join').addEventListener('click', async () => {
-            const rid = $('inp-id').value.toUpperCase().trim();
-            const name = $('inp-name').value || "Guest";
-            if(!rid) return;
-            try {
-                const snap = await get(child(ref(db), `rooms/${rid}`));
-                if(!snap.exists()) return alert("部屋がありません");
-                roomId = rid;
-                const pRef = ref(db, `rooms/${roomId}/players/${myId}`);
-                set(pRef, { name: name, score: 0 });
-                onDisconnect(pRef).remove();
-                show('s-c-play');
-                initController();
-                requestSensor();
-            } catch(e) { alert("Error"); }
-        });
-
-        function initController() {
-            onValue(ref(db, `rooms/${roomId}`), snap => {
-                const data = snap.val();
-                if(!data) return;
-                const area = $('c-area'); area.innerHTML = ""; $('c-msg').innerText = "";
-                
-                if(data.status === 'roulette') {
-                    if(data.stopper === myId && data.spin) {
-                        const b = document.createElement('button'); b.className = "c-btn bg-stop"; b.innerText = "STOP!";
-                        b.onclick = () => update(ref(db, `rooms/${roomId}`), { spin: false });
-                        area.appendChild(b);
-                        navigator.vibrate(200);
-                    } else $('c-msg').innerText = "ルーレット中...";
-                }
-                else if(data.status === 'game' && data.state === 'play') {
-                    const g = data.gameData;
-                    $('c-msg').innerText = g.desc;
-
-                    // 1. TAP (連打)
-                    if(g.type === 'tap') {
-                        const b = document.createElement('button'); b.className = "c-btn bg-red"; b.innerText = "ATTACK!";
-                        b.onpointerdown = (e) => { e.preventDefault(); b.style.transform = "scale(0.9)"; navigator.vibrate(20); runTransaction(ref(db, `rooms/${roomId}/gameVal`), h=>(h||0)-1); };
-                        b.onpointerup = () => b.style.transform = "scale(1)";
-                        area.appendChild(b);
-                    }
-                    // 2. SWIPE (スワイプ)
-                    else if(g.type === 'swipe') {
-                        const z = document.createElement('div'); z.className = "swipe-zone"; z.innerText = "⬆️";
-                        let sy = 0;
-                        z.ontouchstart = (e) => sy = e.touches[0].clientY;
-                        z.ontouchend = (e) => {
-                            if(sy - e.changedTouches[0].clientY > 50) { // Up Swipe
-                                z.innerHTML = g.icon; z.classList.add('swipe-anim'); navigator.vibrate(50);
-                                runTransaction(ref(db, `rooms/${roomId}/players/${myId}/score`), s=>(s||0)+1);
-                                setTimeout(()=>{ z.classList.remove('swipe-anim'); z.innerText="⬆️"; }, 500);
-                            }
-                        };
-                        area.appendChild(z);
-                    }
-                    // 3. CHARGE (長押し)
-                    else if(g.type === 'charge') {
-                        const b = document.createElement('button'); b.className = "c-btn charge-btn"; b.innerText = "HOLD";
-                        let st = 0;
-                        b.onpointerdown = (e) => { e.preventDefault(); st = Date.now(); b.classList.add('charging'); navigator.vibrate(50); };
-                        b.onpointerup = (e) => {
-                            e.preventDefault(); b.classList.remove('charging');
-                            const dur = Date.now() - st;
-                            const pt = Math.min(Math.floor(dur/100), 20); // Max 20pt
-                            if(pt>1) runTransaction(ref(db, `rooms/${roomId}/players/${myId}/score`), s=>(s||0)+pt);
-                        };
-                        area.appendChild(b);
-                    }
-                    // 4. MASH (左右交互)
-                    else if(g.type === 'mash') {
-                        const box = document.createElement('div'); box.className = "mash-container";
-                        const l = document.createElement('button'); l.className = "mash-btn mash-l"; l.innerText = "L";
-                        const r = document.createElement('button'); r.className = "mash-btn mash-r"; r.innerText = "R";
-                        const hit = () => { navigator.vibrate(20); runTransaction(ref(db, `rooms/${roomId}/players/${myId}/score`), s=>(s||0)+1); };
-                        l.onpointerdown = (e) => { e.preventDefault(); hit(); };
-                        r.onpointerdown = (e) => { e.preventDefault(); hit(); };
-                        box.appendChild(l); box.appendChild(r);
-                        area.appendChild(box);
-                    }
-                    // 5. SHAKE (振る)
-                    else if(g.type === 'shake') {
-                        area.innerHTML = `<div style="font-size:5rem; animation:shake 0.5s infinite">👋</div>`;
-                        startSensor();
-                    }
-                    // 6. STOP (タイミング)
-                    else if(g.type === 'stop') {
-                        const b = document.createElement('button'); b.className = "c-btn bg-stop"; b.innerText = "STOP";
-                        b.onclick = () => { b.disabled = true; runTransaction(ref(db, `rooms/${roomId}/players/${myId}/score`), s=>(s||0)+10); };
-                        area.appendChild(b);
-                    }
-                }
-            });
-        }
-
-        function requestSensor() {
-            if(typeof DeviceMotionEvent!=='undefined' && typeof DeviceMotionEvent.requestPermission==='function'){
-                document.body.addEventListener('click', ()=>DeviceMotionEvent.requestPermission(), {once:true});
-            }
-        }
-        function startSensor() {
-            if(sensorActive) return;
-            sensorActive = true;
-            let last = {x:0,y:0,z:0};
-            window.addEventListener('devicemotion', e => {
-                if(!sensorActive) return;
-                const acc = e.accelerationIncludingGravity;
-                if(!acc) return;
-                const d = Math.abs(acc.x+acc.y+acc.z - last.x-last.y-last.z);
-                if(d > 20) { runTransaction(ref(db, `rooms/${roomId}/players/${myId}/score`), s=>(s||0)+1); navigator.vibrate(30); }
-                last = {x:acc.x, y:acc.y, z:acc.z};
-            });
-        }
-    </script>
-</body>
-</html>
+        // --- 20種類のゲーム定義 ---
+        const GAMES = [
+            { id:'mash', name:'連打バトル', desc:'とにかくボタンを連打しろ！', type:'tap' },
+            { id:'shake', name:'シェイク！', desc:'スマホを全力で振れ！', type:'sensor_shake' },
+            { id:'stop', name:'5秒で止めろ', desc:'5.00秒ピッタリを目指せ！', type:'time_stop' },
+            { id:'reaction', name:'早押し！', desc:'色が「赤」になったら押せ！', type:'reaction' },
+            { id:'hold', name:'パワー充填', desc:'ボタンを長押ししてパワーを溜めろ！', type:'hold' },
+            { id:'swipe_u', name:'壁を登れ', desc:'上にスワイプし続けろ！', type:'swipe_up' },
+            { id:'alternating', name:'左右連打', desc:'赤と青を交互に押せ！', type:'alt_tap' },
+            { id:'math', name:'スピード計算', desc:'足し算の答えを選べ！', type:'math' },
+            { id:'rps', name:'後出しジャンケン', desc:'「勝てる手」を出せ！', type:'rps' },
+            { id:'color', name:'色彩感覚', desc:'文字の「色」と同じボタンを押せ！', type:'color' },
+            { id:'count', name:'10回押せ', desc:'正確に10回だけボタンを押せ！', type:'count' },
+            { id:'angle', name:'バランス', desc:'スマホを水平(0°)に保て！', type:'balance' },
+            { id:'sequence', name:'順番記憶', desc:'表示された数字の順に押せ！', type:'seq' },
+            { id:'highlow', name:'HIGH & LOW', desc:'次の数字は大きい？小さい？', type:'hl' },
+            { id:'dont', name:'押すな！', desc:'合図があるまで絶対に押すな！', type:'dont' },
+            { id:'odd', name:'仲間外れ', desc:'一つだけ違う文字を選べ！', type:'odd' },
+            { id:'slot', name:'スロット', desc:'「7」で止めろ！', type:'slot' },
+            { id:'charge', name:'寸止めチャージ', desc:'押して溜めて、枠内で離せ！', type:'charge' },
+            { id:'luck', name:'運命の宝箱', desc:'当たりを引け！(運ゲー)', type:'luck' },
+            { id:'barrage', nam
