@@ -7,172 +7,136 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-body: #0f172a;
-            --bg-glass: rgba(30, 41, 59, 0.75);
-            --primary: #6366f1; --primary-hover: #4f46e5;
-            --text-main: #f1f5f9; --text-sub: #94a3b8;
-            --border: rgba(255, 255, 255, 0.1);
+            --bg: #0b0f19; --card: rgba(30, 41, 59, 0.7); --nav: rgba(15, 23, 42, 0.9);
+            --primary: #6366f1; --primary-glow: rgba(99, 102, 241, 0.3);
+            --text: #f1f5f9; --text-sub: #94a3b8; --border: rgba(255, 255, 255, 0.1);
             --danger: #ef4444; --success: #10b981; --warning: #f59e0b;
             --nav-h: 72px; --radius: 20px;
         }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
-        body {
-            background: radial-gradient(circle at top left, #1e1b4b, #0f172a);
-            color: var(--text-main);
-            font-family: 'Inter', 'Noto Sans JP', sans-serif;
-            margin: 0; overflow: hidden; height: 100vh;
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { background: radial-gradient(circle at top right, #1e1b4b, #0b0f19); color: var(--text); font-family: 'Inter', 'Noto Sans JP', sans-serif; margin: 0; overflow: hidden; height: 100vh; }
 
-        /* アイコン(SVG) */
-        .icon { width: 24px; height: 24px; fill: currentColor; }
-        .icon-sm { width: 18px; height: 18px; fill: currentColor; }
+        /* Icons */
+        .icon { width: 22px; height: 22px; fill: currentColor; display: inline-block; vertical-align: middle; }
+        .icon-sm { width: 16px; height: 16px; fill: currentColor; }
 
-        /* 画面遷移 */
+        /* Screens */
         .screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; position: absolute; inset: 0; opacity: 0; transition: opacity 0.4s ease; pointer-events: none; }
         .screen.active { display: flex; opacity: 1; pointer-events: auto; z-index: 10; }
 
-        /* コンポーネント */
-        .card {
-            background: var(--bg-glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border); border-radius: var(--radius);
-            padding: 28px; width: 90%; max-width: 420px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-        }
-        .full-w { width: 100%; max-width: none; margin-bottom: 16px; padding: 20px; }
+        /* Common UI */
+        .card { background: var(--card); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: var(--radius); padding: 30px; width: 90%; max-width: 420px; box-shadow: 0 15px 50px rgba(0,0,0,0.4); }
+        .full-card { width: 100%; max-width: none; margin-bottom: 16px; padding: 20px; }
+        
+        h1, h2, h3 { margin: 0 0 10px; font-weight: 700; letter-spacing: 0.02em; }
+        p { color: var(--text-sub); font-size: 0.9rem; line-height: 1.6; margin-bottom: 20px; }
 
-        h1, h2 { margin: 0 0 8px; font-weight: 700; letter-spacing: 0.02em; }
-        p { color: var(--text-sub); font-size: 0.9rem; margin-bottom: 24px; line-height: 1.5; }
+        input, select, textarea { width: 100%; background: rgba(0,0,0,0.4); border: 1px solid var(--border); color: #fff; padding: 16px; border-radius: 14px; font-size: 16px; margin-bottom: 12px; transition: 0.3s; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-glow); }
 
-        input, select, textarea {
-            width: 100%; background: rgba(15, 23, 42, 0.6);
-            border: 1px solid var(--border); color: #fff;
-            padding: 16px; border-radius: 14px; font-size: 16px;
-            margin-bottom: 12px; outline: none; transition: 0.2s;
-        }
-        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25); }
-
-        .btn {
-            width: 100%; padding: 16px; border: none; border-radius: 14px;
-            font-weight: 600; font-size: 16px; cursor: pointer; color: white;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            transition: 0.2s; position: relative; overflow: hidden; margin-top: 5px;
-        }
-        .btn:active { transform: scale(0.98); }
-        .btn-primary { background: linear-gradient(135deg, var(--primary), #4338ca); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3); }
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 14px; font-weight: 600; font-size: 16px; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; margin-top: 5px; }
+        .btn:active { transform: scale(0.97); }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), #4338ca); box-shadow: 0 4px 15px var(--primary-glow); }
         .btn-success { background: linear-gradient(135deg, var(--success), #059669); }
         .btn-danger { background: var(--danger); }
-        .btn-ghost { background: transparent; color: var(--text-sub); border: 1px solid var(--border); margin-top: 10px; }
-        .btn-text { background: transparent; color: var(--primary); margin-top: 15px; font-size: 0.9rem; }
+        .btn-ghost { background: transparent; color: var(--text-sub); border: 1px solid var(--border); }
+        .btn-text { background: transparent; color: var(--primary); margin-top: 15px; font-size: 0.9rem; padding: 5px; width: auto; }
 
-        /* レイアウト */
-        .app-shell { width: 100%; height: 100%; display: flex; flex-direction: column; }
+        /* Layouts */
+        .app-shell { width: 100%; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
         @media (min-width: 768px) {
-            .app-shell { flex-direction: row; max-width: 1200px; margin: 0 auto; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
-            .nav-bar { 
-                width: 260px !important; height: 100% !important; flex-direction: column !important; 
-                padding: 40px 20px !important; border-top: none !important; border-right: 1px solid var(--border);
-                justify-content: flex-start !important;
-            }
-            .nav-item { width: 100%; height: 55px; flex-direction: row !important; gap: 16px; padding-left: 20px; margin-bottom: 8px; border-radius: 14px; }
-            .mobile-header { display: none !important; }
-            .content-area { padding-bottom: 20px !important; }
+            .app-shell { flex-direction: row; max-width: 1250px; margin: 0 auto; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+            .nav-bar { width: 260px !important; height: 100% !important; flex-direction: column !important; border-top: none !important; border-right: 1px solid var(--border); justify-content: flex-start !important; padding: 50px 20px !important; }
+            .nav-item { width: 100%; height: 56px; flex-direction: row !important; gap: 18px; padding-left: 20px; margin-bottom: 10px; border-radius: 14px; }
+            .content-area { padding-bottom: 30px !important; }
+            .header-mobile { display: none !important; }
         }
 
         .content-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: calc(var(--nav-h) + 20px); }
 
-        /* ナビゲーション */
-        .nav-bar {
-            position: absolute; bottom: 0; width: 100%; height: var(--nav-h);
-            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px);
-            border-top: 1px solid var(--border); display: flex; justify-content: space-around; z-index: 100;
-        }
-        .nav-item {
-            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: var(--text-sub); cursor: pointer; transition: 0.3s;
-        }
+        /* Navigation */
+        .nav-bar { position: absolute; bottom: 0; width: 100%; height: var(--nav-h); background: var(--nav); backdrop-filter: blur(25px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; z-index: 100; }
+        .nav-item { flex: 1; color: var(--text-sub); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.75rem; cursor: pointer; transition: 0.3s; }
         .nav-item.active { color: var(--primary); background: rgba(99, 102, 241, 0.1); }
 
-        /* リソースバー */
-        .resource-bar { 
-            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; 
-            background: rgba(0,0,0,0.3); padding: 15px; border-radius: 16px; 
-            margin-bottom: 20px; text-align: center; font-weight: bold; border: 1px solid var(--border);
-        }
-
-        /* チャット */
-        .msg-box { display: flex; flex-direction: column; gap: 12px; }
-        .msg { max-width: 85%; padding: 12px 16px; border-radius: 18px; font-size: 0.95rem; line-height: 1.5; position: relative; }
+        /* Chat System */
+        .chat-container { display: flex; flex-direction: column; gap: 14px; }
+        .msg { max-width: 85%; padding: 12px 18px; border-radius: 20px; font-size: 0.95rem; line-height: 1.5; position: relative; word-wrap: break-word; }
         .msg.me { align-self: flex-end; background: var(--primary); border-bottom-right-radius: 4px; color: white; }
-        .msg.other { align-self: flex-start; background: #334155; border-bottom-left-radius: 4px; color: #e2e8f0; }
+        .msg.other { align-self: flex-start; background: #334155; border-bottom-left-radius: 4px; color: #f1f5f9; }
         .msg-sender { font-size: 0.7rem; opacity: 0.7; margin-bottom: 4px; display: block; }
-        .msg-img { max-width: 100%; border-radius: 10px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.1); cursor: zoom-in; }
-        .msg-del {
-            position: absolute; top: -8px; right: -8px; width: 24px; height: 24px;
-            background: var(--danger); border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.4); z-index: 5;
-        }
+        
+        /* Image Adjustment */
+        .msg-img { max-width: 100%; max-height: 300px; width: auto; height: auto; border-radius: 12px; margin-top: 8px; cursor: zoom-in; display: block; border: 1px solid rgba(255,255,255,0.1); }
+        
+        .msg-del { position: absolute; top: -10px; right: -10px; width: 26px; height: 26px; background: var(--danger); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5); border: 2px solid var(--bg-body); z-index: 5; }
 
-        /* 通知・モーダル */
-        #toast { 
-            position: fixed; top: 30px; left: 50%; transform: translateX(-50%); 
-            background: var(--success); color: white; padding: 12px 28px; 
-            border-radius: 50px; font-weight: bold; display: none; z-index: 9999; 
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5); 
-        }
-        #img-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center; padding: 20px; }
-        #img-overlay img { max-width: 100%; max-height: 80vh; border-radius: 8px; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+        /* Other UI */
+        .resource-bar { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; background: rgba(0,0,0,0.4); padding: 16px; border-radius: 18px; margin-bottom: 20px; text-align: center; font-weight: 700; border: 1px solid var(--border); }
+        .list-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 16px; border-radius: 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        
+        #toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%); background: var(--success); color: white; padding: 14px 28px; border-radius: 50px; font-weight: 700; display: none; z-index: 10000; box-shadow: 0 15px 40px rgba(0,0,0,0.4); }
+        #img-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 10001; align-items: center; justify-content: center; padding: 20px; flex-direction: column; }
+        #img-overlay img { max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 8px; }
 
-        /* リスト */
-        .list-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 16px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-        .status-badge { font-size: 0.75rem; padding: 4px 8px; border-radius: 6px; background: rgba(255,255,255,0.1); }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; background: #94a3b8; }
+        .status-ok { background: #10b981; }
     </style>
 </head>
 <body>
 
     <div id="toast"></div>
 
-    <!-- 1. ログイン -->
+    <!-- 1. ログイン画面 -->
     <div id="screen-login" class="screen active">
         <div class="card">
-            <h1 style="text-align: center;">コトバト広場</h1>
-            <p style="text-align: center;">Cotobato Plaza</p>
+            <h1 style="text-align: center; margin-bottom: 5px;">コトバト広場</h1>
+            <p style="text-align: center; margin-bottom: 30px;">Community Plaza</p>
             
-            <input type="text" id="log-u" placeholder="ユーザー名" autocomplete="username">
+            <input type="text" id="log-u" placeholder="ユーザーID" autocomplete="username">
             <input type="password" id="log-p" placeholder="パスワード" autocomplete="current-password">
             
-            <button class="btn btn-primary" onclick="doLogin()">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M10 17l5-5-5-5v10z"/><path d="M0 24V0h24v24H0z" fill="none"/></svg> ログイン
+            <button class="btn btn-primary" onclick="window.doLogin()">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M10 17v-4h11v-2H10V7l-5 5 5 5zm-8 3h18v-2H2v-2h18V8H2V6h18a2 2 0 012 2v12a2 2 0 01-2 2H2v-2z"/></svg>
+                ログイン
             </button>
-            <button class="btn btn-text" onclick="go('screen-register')">新規アカウント作成</button>
+            <button class="btn btn-text" onclick="window.go('screen-register')">新規アカウントを作成する</button>
             
-            <div id="debug-box" style="margin-top:20px; padding:10px; background:rgba(0,0,0,0.3); border-radius:8px; font-size:0.75rem; color:var(--text-sub); text-align:left;">
-                <div id="st-auth">⌛ 認証システム: 待機中...</div>
-                <div id="st-db">⌛ データベース: 待機中...</div>
+            <div style="margin-top:25px; padding:12px; background:rgba(0,0,0,0.3); border-radius:10px; font-size:0.75rem; color:var(--text-sub);">
+                <div id="st-auth"><span class="status-dot"></span>認証システム: 接続中...</div>
+                <div id="st-db"><span class="status-dot"></span>データベース: 待機中...</div>
             </div>
         </div>
     </div>
 
-    <!-- 2. 登録 -->
+    <!-- 2. 登録画面 -->
     <div id="screen-register" class="screen">
         <div class="card">
             <h2 style="text-align: center;">新規登録</h2>
-            <p style="text-align: center;">IDを作成してデータを同期</p>
+            <p style="text-align: center;">データを同期するためのIDを作成</p>
+            
             <input type="text" id="reg-u" placeholder="希望ID (半角英数)" autocomplete="off">
-            <input type="password" id="reg-p" placeholder="パスワード" autocomplete="new-password">
-            <input type="text" id="reg-n" placeholder="表示名 (ニックネーム)" autocomplete="off">
-            <button class="btn btn-success" onclick="doRegister()">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm1-15c1.1 0 2 .9 2 2v4c0 1.1-.9 2-2 2H8c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h4z"/></svg> 登録して開始
+            <div id="cand-box" style="display:none; margin-bottom: 10px;">
+                <small style="color:var(--danger)">使用済みです。候補:</small>
+                <div id="cand-list" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:5px;"></div>
+            </div>
+            
+            <input type="password" id="reg-p" placeholder="パスワード">
+            <input type="text" id="reg-n" placeholder="表示名 (ニックネーム)">
+            
+            <button class="btn btn-success" onclick="window.doRegister()">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                登録してホームへ
             </button>
-            <button class="btn btn-ghost" onclick="go('screen-login')">戻る</button>
+            <button class="btn btn-text" onclick="window.go('screen-login')">ログイン画面へ戻る</button>
         </div>
     </div>
 
-    <!-- 3. メイン -->
+    <!-- 3. メインアプリ -->
     <div id="screen-main" class="screen" style="padding:0; background:transparent;">
         <div class="app-shell">
-            <div class="mobile-header" style="padding:15px 20px; background:rgba(15,23,42,0.95); border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
-                <div id="app-ttl" style="font-weight:800; font-size:1.2rem; background:linear-gradient(to right, #818cf8, #38bdf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Cotobato</div>
+            <div class="header-mobile" style="padding:18px 24px; background:rgba(15,23,42,0.9); border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+                <div id="app-ttl" style="font-weight:800; font-size:1.3rem; background:linear-gradient(to right, #818cf8, #38bdf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; cursor:pointer;">Cotobato</div>
                 <div id="head-user" style="font-size:0.8rem; color:var(--text-sub);">Guest</div>
             </div>
 
@@ -186,23 +150,24 @@
                         <div>Lv. <span id="v-lv">1</span></div>
                     </div>
 
-                    <button class="btn btn-primary" style="background:#fbbf24; color:#000; margin-bottom:20px;" onclick="openGifts()">
+                    <button class="btn btn-primary" style="background:var(--warning); color:#000; margin-bottom:24px;" onclick="window.openGifts()">
                         <svg class="icon" viewBox="0 0 24 24"><path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2z"/></svg>
                         プレゼントBOX
                     </button>
 
-                    <div class="card full-w">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div class="card full-card">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                             <h3>データ管理</h3>
-                            <span class="status-badge" id="lim-cloud">残2回</span>
+                            <span class="badge" id="lim-cloud">残2回</span>
                         </div>
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;">
-                            <button class="btn btn-primary" onclick="bkCloud()">クラウド保存</button>
-                            <button class="btn btn-ghost" style="margin:0;" onclick="rsCloud()">復元</button>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                            <button class="btn btn-primary" onclick="window.bkCloud()">クラウド保存</button>
+                            <button class="btn btn-ghost" onclick="window.rsCloud()">復元</button>
                         </div>
-                        <hr style="border-color:var(--border); margin:15px 0;">
-                        <button class="btn btn-ghost" onclick="bkLocal()">端末にバックアップ (残5回)</button>
-                        <div id="bk-hist" style="margin-top:10px; font-size:0.75rem; color:var(--text-sub);"></div>
+                        <div style="margin-top:20px; padding-top:20px; border-top:1px solid var(--border);">
+                            <button class="btn btn-ghost" style="font-size:0.85rem;" onclick="window.bkLocal()">端末にバックアップ (残5回)</button>
+                            <div id="bk-hist" style="margin-top:12px; font-size:0.75rem; color:var(--text-sub);"></div>
+                        </div>
                     </div>
 
                     <h3>お知らせ</h3>
@@ -211,100 +176,100 @@
 
                 <!-- チャット -->
                 <div id="tab-chat" style="display:none;">
-                    <div id="chat-box" class="chat-box" style="padding-bottom:20px;"></div>
-                    <div style="position:sticky; bottom:0; background:var(--bg-body); padding:10px; border-radius:12px; display:flex; gap:10px; border:1px solid var(--border);">
-                        <label class="btn btn-ghost" style="width:44px; padding:0; margin:0;">
+                    <div id="chat-box" class="chat-container"></div>
+                    <div style="position:sticky; bottom:0; background:var(--bg-body); padding:15px 0; display:flex; gap:10px; border-top: 1px solid var(--border);">
+                        <label class="btn btn-ghost" style="width:50px; padding:0; margin:0;">
                             <svg class="icon" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-                            <input type="file" id="chat-img" accept="image/*" style="display:none" onchange="prevImg(this)">
+                            <input type="file" id="chat-img" accept="image/*" style="display:none" onchange="window.prevImg(this)">
                         </label>
                         <input type="text" id="chat-in" placeholder="メッセージ..." style="margin:0;">
-                        <button class="btn btn-primary" style="width:50px; margin:0; padding:0;" onclick="sendChat()">
+                        <button class="btn btn-primary" style="width:60px; margin:0;" onclick="window.sendChat()">
                             <svg class="icon" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                         </button>
                     </div>
-                    <div id="img-prev" style="font-size:0.75rem; color:var(--primary); margin-top:5px;"></div>
+                    <div id="img-prev-txt" style="font-size:0.75rem; color:var(--primary); margin-top:5px;"></div>
                 </div>
 
                 <!-- 交換 -->
                 <div id="tab-trade" style="display:none;">
-                    <div class="card full-w">
-                        <h3>出品作成</h3>
-                        <div style="display:flex; gap:8px;">
-                            <select id="tr-gt" style="width:35%"><option value="coins">コイン</option><option value="diamonds">ダイヤ</option></select>
+                    <div class="card full-card">
+                        <h3>出品する</h3>
+                        <div style="display:grid; grid-template-columns: 1fr auto 1fr; gap:10px; align-items:center;">
+                            <select id="tr-gt"><option value="coins">コイン</option><option value="diamonds">ダイヤ</option></select>
+                            <span style="color:var(--text-sub)">⇄</span>
                             <input type="number" id="tr-gv" placeholder="量" style="margin:0;">
                         </div>
-                        <div style="text-align:center; margin:5px 0; color:var(--text-sub);">⇅</div>
-                        <div style="display:flex; gap:8px;">
-                            <select id="tr-wt" style="width:35%"><option value="coins">コイン</option><option value="diamonds">ダイヤ</option></select>
+                        <p style="text-align:center; margin:10px 0; font-size:0.7rem;">欲しいアイテムを指定</p>
+                        <div style="display:grid; grid-template-columns: 1fr auto 1fr; gap:10px; align-items:center;">
+                            <select id="tr-wt"><option value="coins">コイン</option><option value="diamonds">ダイヤ</option></select>
+                            <span style="color:var(--text-sub)">⇄</span>
                             <input type="number" id="tr-wv" placeholder="求" style="margin:0;">
                         </div>
-                        <button class="btn btn-success" onclick="mkTrade()">出品する</button>
+                        <button class="btn btn-success" style="margin-top:20px;" onclick="window.mkTrade()">掲示板へ出品</button>
                     </div>
                     <div id="trade-list"></div>
                 </div>
 
                 <!-- 設定 -->
                 <div id="tab-settings" style="display:none;">
-                    <div class="card full-w">
-                        <h3>アカウント</h3>
-                        <input type="text" id="set-name" placeholder="新しい表示名">
-                        <button class="btn btn-primary" onclick="updName()">変更保存</button>
-                        <button class="btn btn-danger" onclick="doLogout()">ログアウト</button>
+                    <div class="card full-card">
+                        <h3>プロフィール</h3>
+                        <input type="text" id="set-name" placeholder="表示名を変更">
+                        <button class="btn btn-primary" onclick="window.updName()">保存</button>
+                        <button class="btn btn-danger" style="margin-top:20px;" onclick="window.doLogout()">ログアウト</button>
                     </div>
-                    <div class="card full-w">
+                    <div class="card full-card">
                         <h3>運営認証</h3>
-                        <input type="password" id="adm-p" placeholder="パスワード">
-                        <button class="btn btn-ghost" onclick="authAdm()">認証</button>
-                        <p style="font-size:0.7rem; margin-top:10px; color:var(--text-sub);">※PC: Ctrl+Shift+Q / スマホ: タイトル7回タップ</p>
+                        <input type="password" id="adm-p" placeholder="管理者パスワード">
+                        <button class="btn btn-ghost" onclick="window.authAdm()">認証する</button>
+                        <p style="font-size:0.7rem; margin-top:10px;">※PC: Ctrl+Shift+Q / スマホ: タイトル7回タップ</p>
                     </div>
                 </div>
 
                 <!-- 運営 -->
                 <div id="tab-admin" style="display:none;">
-                    <div class="card full-w" style="border-color:var(--warning);">
+                    <div class="card full-card" style="border-color:var(--warning);">
                         <h3 style="color:var(--warning);">運営パネル</h3>
-                        <input type="text" id="adm-news" placeholder="お知らせ本文">
-                        <button class="btn btn-primary" onclick="postNews()">配信</button>
-                        <hr style="border-color:var(--border); margin:15px 0;">
-                        <input type="text" id="adm-gm" placeholder="プレゼント名">
-                        <button class="btn btn-success" onclick="alert('デモ機能です')">配布</button>
+                        <textarea id="adm-news-txt" placeholder="お知らせ内容" style="min-height:100px;"></textarea>
+                        <button class="btn btn-primary" onclick="window.postNews()">配信</button>
+                        <hr style="border-color:var(--border); margin:20px 0;">
+                        <input type="password" id="adm-np" placeholder="新パスワード">
+                        <button class="btn btn-ghost" onclick="window.chgPass()">パスワード変更</button>
                     </div>
                 </div>
 
             </div>
 
-            <!-- ナビゲーション -->
+            <!-- ナビ -->
             <div class="nav-bar">
-                <div class="nav-item active" onclick="tab('home',this)"><svg class="icon" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>ホーム</span></div>
-                <div class="nav-item" onclick="tab('chat',this)"><svg class="icon" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg><span>チャット</span></div>
-                <div class="nav-item" onclick="tab('trade',this)"><svg class="icon" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg><span>交換</span></div>
-                <div class="nav-item" onclick="tab('settings',this)"><svg class="icon" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.488.488 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg><span>設定</span></div>
-                <div class="nav-item" id="nav-adm" style="display:none;" onclick="tab('admin',this)"><svg class="icon" viewBox="0 0 24 24" style="fill:var(--warning)"><path d="M12 2L1 21h22L12 2zm0 3.45l8.55 14.8h-17.1L12 5.45zM11 10v6h2v-6h-2zm0 8v2h2v-2h-2z"/></svg><span style="color:var(--warning)">運営</span></div>
+                <div class="nav-item active" onclick="window.tab('home',this)"><svg class="icon" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>ホーム</span></div>
+                <div class="nav-item" onclick="window.tab('chat',this)"><svg class="icon" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg><span>チャット</span></div>
+                <div class="nav-item" onclick="window.tab('trade',this)"><svg class="icon" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg><span>交換</span></div>
+                <div class="nav-item" onclick="window.tab('settings',this)"><svg class="icon" viewBox="0 0 24 24"><path d="M12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg><span>設定</span></div>
+                <div class="nav-item" id="nav-adm" style="display:none;" onclick="window.tab('admin',this)"><svg class="icon" viewBox="0 0 24 24" style="fill:var(--warning)"><path d="M12 2L1 21h22L12 2z"/></svg><span style="color:var(--warning)">運営</span></div>
             </div>
         </div>
     </div>
 
-    <!-- モーダル・オーバーレイ -->
-    <div id="img-overlay">
+    <!-- モーダル・画像拡大 -->
+    <div id="img-overlay" onclick="window.closeImg()">
         <img id="full-img" src="">
-        <button class="btn btn-ghost" style="width:auto; margin-top:20px; border-color:white; color:white;" onclick="closeImg()">閉じる</button>
+        <button class="btn btn-ghost" style="width:auto; margin-top:20px; color:white; border-color:white;">閉じる</button>
     </div>
 
     <div id="quiz-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:9999; align-items:center; justify-content:center; padding:20px;">
         <div class="card">
-            <h2 style="color:#fbbf24;">関係者確認</h2>
-            <p>Q. 創始者の別の役職は？</p>
+            <h2 style="color:#fbbf24;">関係者確認試験</h2>
+            <p>Q. コトバト創始者の別の役職は？</p>
             <input type="text" id="q-ans">
-            <button class="btn btn-primary" onclick="chkQ()">回答</button>
+            <button class="btn btn-primary" onclick="window.chkQ()">回答</button>
             <button class="btn btn-ghost" onclick="document.getElementById('quiz-modal').style.display='none'">閉じる</button>
         </div>
     </div>
 
-    <div id="toast"></div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, onSnapshot, serverTimestamp, query, limit, where, deleteDoc, Timestamp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, onSnapshot, serverTimestamp, query, limit, where, deleteDoc, Timestamp, orderBy } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
         // ★Firebase Config★
@@ -323,169 +288,237 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        let user = null;
+        let currentUser = null;
         let isReady = false;
-        let localData = { coins: 0, diamonds: 0, playerLevel: 1 };
-        let imgData = null;
+        let localGameData = { coins: 0, diamonds: 0, playerLevel: 1 };
+        let currentImgData = null;
         const SAVE_KEY = "kb_save_v36";
         const META_KEY = "kb_meta";
         const SESS_KEY = "kb_sess";
 
-        // 1. 診断付き匿名認証
-        signInAnonymously(auth)
-            .then(() => {
-                document.getElementById('st-auth').innerText = "✔ 認証: 接続完了";
-                document.getElementById('st-auth').style.color = "#10b981";
-            })
-            .catch(e => {
-                document.getElementById('st-auth').innerText = "✖ 認証エラー: " + e.code;
-                document.getElementById('st-auth').style.color = "#ef4444";
-            });
+        // 1. Auth & Diagnostic
+        signInAnonymously(auth).then(() => {
+            const st = document.getElementById('st-auth');
+            st.innerHTML = '<span class="status-dot status-ok"></span>認証システム: 接続完了';
+            st.style.color = "#10b981";
+        }).catch(e => {
+            const st = document.getElementById('st-auth');
+            st.innerHTML = '<span class="status-dot" style="background:#ef4444"></span>認証エラー: ' + e.code;
+            st.style.color = "#ef4444";
+        });
 
         onAuthStateChanged(auth, async (u) => {
             if (u) {
                 isReady = true;
-                // DB導通チェック
+                // Check DB Access
                 try {
                     await getDoc(doc(db, "system", "check"));
-                    document.getElementById('st-db').innerText = "✔ DB: アクセス可能";
-                    document.getElementById('st-db').style.color = "#10b981";
+                    const st = document.getElementById('st-db');
+                    st.innerHTML = '<span class="status-dot status-ok"></span>データベース: 通信可能';
+                    st.style.color = "#10b981";
                 } catch (e) {
-                    document.getElementById('st-db').innerText = "✖ DBエラー: ルールまたは未作成";
-                    document.getElementById('st-db').style.color = "#ef4444";
+                    const st = document.getElementById('st-db');
+                    st.innerHTML = '<span class="status-dot" style="background:#ef4444"></span>DBエラー: ルール未設定';
+                    st.style.color = "#ef4444";
                 }
 
-                // 自動ログイン
+                // Auto Login
                 const sess = localStorage.getItem(SESS_KEY);
-                if (sess) autoLogin(sess);
+                if (sess) {
+                    const s = await getDoc(doc(db, "users", sess));
+                    if (s.exists()) {
+                        currentUser = s.data();
+                        startApp();
+                        showToast("お帰りなさい、" + currentUser.name);
+                    }
+                }
             }
         });
 
-        async function autoLogin(u){
-            try {
-                const s = await getDoc(doc(db, "users", u));
-                if(s.exists()){ user=s.data(); startApp(); showToast("お帰りなさい"); }
-            } catch(e){}
-        }
-
+        // 2. Global Window Functions (Ensures buttons work)
         window.go = id => {
-            document.querySelectorAll('.screen').forEach(e=>e.classList.remove('active'));
+            document.querySelectorAll('.screen').forEach(e => e.classList.remove('active'));
             document.getElementById(id).classList.add('active');
         };
+
         window.tab = (id, el) => {
-            ['home','chat','trade','settings','admin'].forEach(t=>document.getElementById('tab-'+t).style.display='none');
+            ['home','chat','trade','settings','admin'].forEach(t => {
+                const view = document.getElementById('tab-'+t);
+                if(view) view.style.display='none';
+            });
             document.getElementById('tab-'+id).style.display='block';
-            document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
             if(el) el.classList.add('active');
         };
 
         window.doRegister = async () => {
-            if(!isReady) return alert("接続待機中です");
-            const u=document.getElementById('reg-u').value.trim();
-            const p=document.getElementById('reg-p').value.trim();
-            const n=document.getElementById('reg-n').value.trim()||u;
-            if(!u||!p) return alert("必須項目を入力してください");
-            
+            if(!isReady) return alert("接続中です...");
+            const u = document.getElementById('reg-u').value.trim();
+            const p = document.getElementById('reg-p').value.trim();
+            const n = document.getElementById('reg-n').value.trim() || u;
+            if(!u || !p) return alert("必須項目を埋めてください");
+
             try {
                 const ref = doc(db, "users", u);
                 const s = await getDoc(ref);
-                if(s.exists()) return alert("そのIDは既に使用されています");
-                
-                const d = { username:u, password:p, name:n, isAdmin:false, quizCleared:false, bkCount:0, bkDate:"", history:[], createdAt:serverTimestamp() };
-                await setDoc(ref, d);
-                user=d; localStorage.setItem(SESS_KEY, u);
-                startApp(); showToast("登録完了！");
+                if(s.exists()){
+                    document.getElementById('cand-box').style.display='block';
+                    const list = document.getElementById('cand-list');
+                    list.innerHTML = "";
+                    [u+Math.floor(Math.random()*99), u+"_sub", "kb_"+u].forEach(c => {
+                        const span = document.createElement('span');
+                        span.className = 'cand';
+                        span.innerText = c;
+                        span.onclick = () => document.getElementById('reg-u').value = c;
+                        list.appendChild(span);
+                    });
+                    return;
+                }
+                const data = { username:u, password:p, name:n, isAdmin:false, quizCleared:false, bkCount:0, history:[], createdAt:serverTimestamp() };
+                await setDoc(ref, data);
+                currentUser = data;
+                localStorage.setItem(SESS_KEY, u);
+                startApp();
+                showToast("ようこそコトバト広場へ！");
             } catch(e){ alert("エラー: " + e.message); }
         };
 
         window.doLogin = async () => {
-            if(!isReady) return alert("接続待機中です");
-            const u=document.getElementById('login-u').value.trim();
-            const p=document.getElementById('login-p').value.trim();
+            if(!isReady) return alert("接続中です...");
+            const u = document.getElementById('log-u').value.trim();
+            const p = document.getElementById('log-p').value.trim();
             try {
                 const s = await getDoc(doc(db,"users",u));
-                if(s.exists() && s.data().password===p){
-                    user=s.data(); localStorage.setItem(SESS_KEY, u);
-                    startApp(); showToast("ログイン成功");
-                } else alert("IDかパスワードが違います");
-            } catch(e){ alert("ログインエラー: " + e.message); }
+                if(s.exists() && s.data().password === p){
+                    currentUser = s.data();
+                    localStorage.setItem(SESS_KEY, u);
+                    startApp();
+                    showToast("ログインしました");
+                } else alert("IDまたはパスワードが違います");
+            } catch(e){ alert("ログインエラー"); }
         };
 
-        window.doLogout = () => { localStorage.removeItem(SESS_KEY); location.reload(); };
+        window.doLogout = () => {
+            localStorage.removeItem(SESS_KEY);
+            location.reload();
+        };
 
         function startApp() {
             window.go('screen-main');
-            document.getElementById('head-user').innerText = user.name;
-            loadLocal(); startListeners(); updateMeta();
+            document.getElementById('head-user').innerText = currentUser.name;
+            loadLocal();
+            startListeners();
+            updateMeta();
         }
 
         function loadLocal() {
-            const r=localStorage.getItem(SAVE_KEY);
-            if(r) localData=JSON.parse(r);
+            const r = localStorage.getItem(SAVE_KEY);
+            if(r) localGameData = JSON.parse(r);
             updateUI();
         }
         function updateUI() {
-            document.getElementById('v-coin').innerText=localData.coins||0;
-            document.getElementById('v-dia').innerText=localData.diamonds||0;
-            document.getElementById('v-lv').innerText=localData.playerLevel||1;
+            document.getElementById('v-coin').innerText = localGameData.coins || 0;
+            document.getElementById('v-dia').innerText = localGameData.diamonds || 0;
+            document.getElementById('v-lv').innerText = localGameData.playerLevel || 1;
         }
 
         function startListeners() {
             // Chat
-            onSnapshot(query(collection(db,"chat"), limit(30), orderBy("createdAt","desc")), s=>{
-                const b=document.getElementById('chat-box'); b.innerHTML="";
-                const msgs=[]; s.forEach(d=>msgs.push({id:d.id, ...d.data()}));
-                msgs.reverse().forEach(m=>{
-                    const me = m.username===user.username;
-                    // 削除権限: 本人 or 運営
-                    const canDel = me || user.isAdmin;
-                    const delBtn = canDel ? `<div class="msg-del" onclick="delChat('${m.id}')"><svg class="icon-sm" viewBox="0 0 24 24" style="fill:white"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></div>` : '';
+            onSnapshot(query(collection(db,"chat"), limit(30), orderBy("createdAt","desc")), s => {
+                const b = document.getElementById('chat-box'); b.innerHTML = "";
+                const msgs = []; s.forEach(d => msgs.push({id:d.id, ...d.data()}));
+                msgs.reverse().forEach(m => {
+                    const isMe = m.username === currentUser.username;
+                    const canDel = isMe || currentUser.isAdmin;
+                    const delBtn = canDel ? `<div class="msg-del" onclick="window.delChat('${m.id}')"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></div>` : '';
                     
-                    b.innerHTML+=`
-                    <div style="align-self:${me?'flex-end':'flex-start'}; max-width:85%; position:relative;">
-                        <div class="msg ${me?'me':'other'}">
+                    const msgEl = document.createElement('div');
+                    msgEl.style.alignSelf = isMe ? 'flex-end' : 'flex-start';
+                    msgEl.style.maxWidth = '85%';
+                    msgEl.style.position = 'relative';
+                    msgEl.innerHTML = `
+                        <div class="msg ${isMe ? 'me' : 'other'}">
                             <span class="msg-sender">${m.sender}</span>
                             ${m.text}
-                            ${m.img?`<img src="${m.img}" class="msg-img" onclick="viewImg('${m.img}')">`:''}
+                            ${m.img ? `<img src="${m.img}" class="msg-img" onclick="window.viewImg('${m.img}')">` : ''}
                         </div>
                         ${delBtn}
-                    </div>`;
+                    `;
+                    b.appendChild(msgEl);
                 });
-                b.scrollTop=b.scrollHeight;
+                b.scrollTop = b.scrollHeight;
             });
 
             // News
-            onSnapshot(query(collection(db,"announcements"), limit(5), orderBy("createdAt","desc")), s=>{
-                const d=document.getElementById('news-box'); d.innerHTML="";
-                s.forEach(doc=>{
-                    const v=doc.data();
-                    d.innerHTML+=`<div class="list-item" style="display:block"><small style="color:var(--text-sub)">${new Date(v.createdAt?.seconds*1000).toLocaleDateString()}</small><div style="margin-top:4px">${v.text}</div></div>`;
+            onSnapshot(query(collection(db,"announcements"), limit(5), orderBy("createdAt","desc")), s => {
+                const d = document.getElementById('news-box'); d.innerHTML = "";
+                s.forEach(doc => {
+                    const v = doc.data();
+                    d.innerHTML += `<div class="list-item" style="display:block"><small style="color:var(--text-sub)">${new Date(v.createdAt?.seconds*1000).toLocaleDateString()}</small><div style="margin-top:5px">${v.text}</div></div>`;
                 });
-                if(s.empty) d.innerHTML="なし";
+                if(s.empty) d.innerHTML = "現在お知らせはありません";
             });
 
             // Trade
-            onSnapshot(query(collection(db,"trades"), where("status","==","open")), s=>{
-                const t=document.getElementById('trade-list'); t.innerHTML="";
-                s.forEach(doc=>{
-                    const v=doc.data(); const me=v.maker===user.username;
-                    t.innerHTML+=`<div class="list-item"><div><b>${v.makerName}</b><br>${v.giveV} ${v.giveT} ⇄ ${v.wantV} ${v.wantT}</div>${me?`<button class="btn btn-danger" style="width:auto; padding:6px 12px; margin:0;" onclick="delTrade('${doc.id}')">取消</button>`:`<button class="btn btn-success" style="width:auto; padding:6px 12px; margin:0;" onclick="doTrade('${doc.id}')">交換</button>`}</div>`;
+            onSnapshot(query(collection(db,"trades"), where("status","==","open")), s => {
+                const t = document.getElementById('trade-list'); t.innerHTML = "";
+                s.forEach(doc => {
+                    const v = doc.data(); const me = v.maker === currentUser.username;
+                    t.innerHTML += `<div class="list-item"><div><b>${v.makerName}</b><br>${v.giveV} ${v.giveT} ⇄ ${v.wantV} ${v.wantT}</div>${me ? `<button class="btn btn-danger" style="width:auto; padding:8px 14px; margin:0;" onclick="window.delTrade('${doc.id}')">取消</button>` : `<button class="btn btn-success" style="width:auto; padding:8px 14px; margin:0;" onclick="window.doTrade('${doc.id}')">交換</button>`}</div>`;
                 });
             });
         }
 
         // Functions
-        window.prevImg = i => { if(i.files[0]){const r=new FileReader(); r.onload=e=>{imgData=e.target.result; document.getElementById('img-prev').innerText="画像選択済み";}; r.readAsDataURL(i.files[0]);} };
+        window.prevImg = i => { if(i.files[0]){const r=new FileReader(); r.onload=e=>{currentImgData=e.target.result; document.getElementById('img-prev-txt').innerText="画像を選択しました";}; r.readAsDataURL(i.files[0]);} };
         window.viewImg = s => { document.getElementById('full-img').src=s; document.getElementById('img-overlay').style.display='flex'; };
         window.closeImg = () => document.getElementById('img-overlay').style.display='none';
         
         window.sendChat = async () => {
-            const t=document.getElementById('chat-in').value;
-            if(!t && !imgData) return;
-            await addDoc(collection(db,"chat"), {text:t, img:imgData, sender:user.name, username:user.username, createdAt:serverTimestamp()});
-            document.getElementById('chat-in').value=""; imgData=null; document.getElementById('img-prev').innerText="";
+            const t = document.getElementById('chat-in').value;
+            if(!t && !currentImgData) return;
+            await addDoc(collection(db,"chat"), { text:t, img:currentImgData, sender:currentUser.name, username:currentUser.username, createdAt:serverTimestamp() });
+            document.getElementById('chat-in').value = ""; currentImgData = null; document.getElementById('img-prev-txt').innerText = "";
         };
-        window.delChat = async (id) => { if(confirm("削除しますか？")) await deleteDoc(doc(db, "chat", id)); };
+        window.delChat = async (id) => { if(confirm("メッセージを削除しますか？")) await deleteDoc(doc(db, "chat", id)); };
+
+        // Admin & Quiz
+        window.openGifts = () => alert("プレゼント受取機能(デモ版)");
+        let taps=0; document.getElementById('app-ttl').onclick=()=>{taps++; if(taps>=7){taps=0; quiz();} setTimeout(()=>taps=0,2500);};
+        window.addEventListener('keydown', e=>{if(e.ctrlKey&&e.shiftKey&&e.key==='Q') quiz();});
+        function quiz(){
+            if(currentUser.quizCleared) return showToast("設定から認証を開始してください");
+            document.getElementById('quiz-modal').style.display='flex';
+        }
+        window.chkQ = async () => {
+            if(document.getElementById('q-ans').value === "Boss"){
+                await updateDoc(doc(db,"users",currentUser.username),{quizCleared:true});
+                currentUser.quizCleared = true; document.getElementById('quiz-modal').style.display='none'; alert("正解！試験合格です");
+            } else alert("不正解です");
+        };
+        window.authAdm = async () => {
+            if(!currentUser.quizCleared) return alert("まず試験に合格してください");
+            const p = document.getElementById('adm-p').value;
+            const c = await getDoc(doc(db, "system", "config"));
+            if(p === (c.data()?.pass || "cotobato-1234")){
+                document.getElementById('nav-adm').style.display='flex';
+                document.getElementById('tab-admin').style.display='block';
+                showToast("運営モードを有効にしました");
+            } else alert("パスワードが違います");
+        };
+
+        window.postNews = async () => {
+            const t = document.getElementById('adm-news-txt').value;
+            if(!t) return;
+            await addDoc(collection(db, "announcements"), { text: t, createdAt: serverTimestamp() });
+            document.getElementById('adm-news-txt').value = ""; showToast("お知らせを配信しました");
+        };
+        window.chgPass = async () => {
+            const p = document.getElementById('adm-np').value;
+            if(!p) return;
+            await setDoc(doc(db, "system", "config"), {pass:p}, {merge:true});
+            showToast("パスワードを変更しました");
+        };
 
         // Backup
         function updateMeta() {
@@ -493,106 +526,78 @@
             let meta = JSON.parse(localStorage.getItem(META_KEY))||{d:today, c:0};
             if(meta.d!==today){meta={d:today, c:0}; localStorage.setItem(META_KEY,JSON.stringify(meta));}
             document.getElementById('lim-local').innerText=`残${5-meta.c}/5`;
-            let cl = (user.lastBackupDate===today)?user.bkCount:0;
+            let cl = (currentUser.lastBackupDate===today)?currentUser.bkCount:0;
             document.getElementById('lim-cloud').innerText=`残${2-cl}/2`;
         }
         window.bkLocal = () => {
             let m=JSON.parse(localStorage.getItem(META_KEY));
-            if(m.c>=5) return alert("制限");
+            if(m.c>=5) return alert("回数制限です");
             let h=JSON.parse(localStorage.getItem(META_KEY+"_h"))||[];
             h.push({d:new Date().toLocaleString(), v:localStorage.getItem(SAVE_KEY)});
             if(h.length>5) h.shift();
             localStorage.setItem(META_KEY+"_h", JSON.stringify(h));
             m.c++; localStorage.setItem(META_KEY, JSON.stringify(m));
-            updateMeta(); renderHist(); showToast("保存完了");
+            updateMeta(); renderHist(); showToast("端末に保存完了");
         };
         window.bkCloud = async () => {
             const today=new Date().toLocaleDateString();
-            let c = (user.lastBackupDate===today)?user.bkCount:0;
+            let c = (currentUser.lastBackupDate===today)?currentUser.bkCount:0;
             if(c>=2) return alert("制限");
-            let h=user.history||[];
-            h.push({d:new Date().toLocaleString(), v:JSON.stringify(localData)});
+            let h=currentUser.history||[];
+            h.push({d:new Date().toLocaleString(), v:JSON.stringify(localGameData)});
             if(h.length>5) h.shift();
-            await updateDoc(doc(db,"users",user.username), {bkCount:c+1, lastBackupDate:today, history:h});
-            user.bkCount=c+1; user.lastBackupDate=today; user.history=h;
-            updateMeta(); showToast("クラウド保存");
+            await updateDoc(doc(db,"users",currentUser.username), {bkCount:c+1, lastBackupDate:today, history:h});
+            currentUser.bkCount=c+1; currentUser.lastBackupDate=today; currentUser.history=h;
+            updateMeta(); showToast("クラウド保存完了");
         };
         window.rsCloud = () => {
-            const h=user.history||[];
-            if(h.length===0) return alert("なし");
-            const html = h.map((v,i)=>`<div class="list-item"><span>${v.d}</span><button class="btn btn-primary" style="width:auto;margin:0;padding:6px 12px;" onclick="execRest('${i}')">復元</button></div>`).join('');
-            // 簡易表示
+            const h=currentUser.history||[];
+            if(h.length===0) return alert("履歴なし");
+            const html = h.map((v,i)=>`<div class="list-item"><span>${v.d}</span><button class="btn btn-primary" style="width:auto;margin:0;padding:8px 12px;" onclick="window.execRest('${i}')">復元</button></div>`).join('');
             document.getElementById('bk-hist').innerHTML = html;
         };
-        window.execRest = (i) => {
-            const d=user.history[i].v;
+        window.execRest = i => {
+            const d = currentUser.history[i].v;
             localStorage.setItem(SAVE_KEY, d);
-            localData=JSON.parse(d); updateUI(); showToast("復元完了");
+            localGameData = JSON.parse(d); updateUI(); showToast("データを復元しました");
         };
         function renderHist() {
             const h=JSON.parse(localStorage.getItem(META_KEY+"_h"))||[];
             document.getElementById('bk-hist').innerHTML = h.map(v=>`<div>${v.d}</div>`).reverse().join('');
         }
 
-        // Trade
+        // Trades
         window.mkTrade = async () => {
             const gt=document.getElementById('tr-gt').value, gv=parseInt(document.getElementById('tr-gv').value);
             const wt=document.getElementById('tr-wt').value, wv=parseInt(document.getElementById('tr-wv').value);
             if(!gv||!wv) return;
-            if((localData[gt]||0)<gv) return alert("不足");
-            localData[gt]-=gv; localStorage.setItem(SAVE_KEY,JSON.stringify(localData)); updateUI();
-            await addDoc(collection(db,"trades"), {maker:user.username, makerName:user.name, giveT:gt, giveV:gv, wantT:wt, wantV:wv, status:'open', createdAt:serverTimestamp()});
-            showToast("出品");
+            if((localGameData[gt]||0)<gv) return alert("アイテムが足りません");
+            localGameData[gt]-=gv; localStorage.setItem(SAVE_KEY,JSON.stringify(localGameData)); updateUI();
+            await addDoc(collection(db,"trades"), {maker:currentUser.username, makerName:currentUser.name, giveT:gt, giveV:gv, wantT:wt, wantV:wv, status:'open', createdAt:serverTimestamp()});
+            showToast("出品しました");
         };
-        window.doTrade = async (id) => {
+        window.doTrade = async id => {
             const s=await getDoc(doc(db,"trades",id)); const t=s.data();
-            if((localData[t.wantT]||0)<t.wantV) return alert("不足");
-            localData[t.wantT]-=t.wantV; localData[t.giveT]+=t.giveV;
-            localStorage.setItem(SAVE_KEY,JSON.stringify(localData)); updateUI();
+            if((localGameData[t.wantT]||0)<t.wantV) return alert("交換アイテムが不足");
+            localGameData[t.wantT]-=t.wantV; localGameData[t.giveT]+=t.giveV;
+            localStorage.setItem(SAVE_KEY,JSON.stringify(localGameData)); updateUI();
             await deleteDoc(doc(db,"trades",id));
             await addDoc(collection(db,"gifts"),{to:t.maker, type:t.wantT, val:t.wantV, msg:"交換成立", exp:Timestamp.fromDate(new Date(Date.now()+604800000))});
-            showToast("成立");
+            showToast("交換成立！");
         };
-        window.delTrade = async (id) => {
+        window.delTrade = async id => {
             const s=await getDoc(doc(db,"trades",id)); const t=s.data();
-            localData[t.giveT]+=t.giveV; localStorage.setItem(SAVE_KEY,JSON.stringify(localData)); updateUI();
-            await deleteDoc(doc(db,"trades",id)); showToast("取消");
+            localGameData[t.giveT]+=t.giveV; localStorage.setItem(SAVE_KEY,JSON.stringify(localGameData)); updateUI();
+            await deleteDoc(doc(db,"trades",id)); showToast("取消・返却しました");
         };
 
-        // Admin & Quiz
-        window.openGifts = () => alert("ギフト機能");
-        let taps=0; document.getElementById('app-ttl').onclick=()=>{taps++; if(taps>=7){taps=0; quiz();} setTimeout(()=>taps=0,2000);};
-        window.addEventListener('keydown', e=>{if(e.ctrlKey&&e.shiftKey&&e.key==='Q') quiz();});
-        function quiz(){
-            if(user.quizCleared) return showToast("認証してください");
-            document.getElementById('quiz-modal').style.display='flex';
-        }
-        window.chkQ = async () => {
-            if(document.getElementById('q-ans').value==="Boss"){
-                await updateDoc(doc(db,"users",user.username),{quizCleared:true});
-                user.quizCleared=true; document.getElementById('quiz-modal').style.display='none'; alert("合格");
-            } else alert("不正解");
+        function showToast(m){ const t=document.getElementById('toast'); t.innerText=m; t.style.display='block'; setTimeout(()=>t.style.display='none',3500); }
+        window.updName = async () => {
+            const n = document.getElementById('set-name').value.trim();
+            if(!n) return;
+            await updateDoc(doc(db, "users", currentUser.username), {name: n});
+            currentUser.name = n; document.getElementById('head-user').innerText = n; showToast("変更しました");
         };
-        window.authAdm = async () => {
-            if(!user.quizCleared) return alert("試験を受けてください");
-            const p=document.getElementById('adm-p').value;
-            const c=await getDoc(doc(db,"system","config"));
-            if(p===(c.data()?.pass||"cotobato-1234")){
-                document.getElementById('nav-adm').style.display='flex';
-                document.getElementById('tab-admin').style.display='block';
-                showToast("運営モード有効(30分)");
-            } else alert("違います");
-        };
-        
-        // Admin Fix
-        window.postNews = async () => {
-            const t = document.getElementById('adm-news').value;
-            if(!t) return;
-            await addDoc(collection(db, "announcements"), { text: t, createdAt: serverTimestamp() });
-            document.getElementById('adm-news').value=""; showToast("配信しました");
-        };
-
-        function showToast(m){const t=document.getElementById('toast');t.innerText=m;t.style.display='block';setTimeout(()=>t.style.display='none',3000);}
     </script>
 </body>
 </html>
