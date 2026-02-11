@@ -11,7 +11,6 @@
             --bg-sidebar: #161b22;
             --bg-card: #1c2128;
             --bg-input: #0d1117;
-            --bg-glass: rgba(22, 27, 34, 0.95);
             --primary: #58a6ff;
             --primary-dim: rgba(88, 166, 255, 0.1);
             --accent: #f78166;
@@ -29,11 +28,9 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { background: var(--bg-body); color: var(--text-main); font-family: 'Inter', 'Noto Sans JP', sans-serif; margin: 0; padding: 0; height: 100vh; overflow: hidden; }
 
-        /* アイコン(SVG) */
         .icon { width: 22px; height: 22px; fill: currentColor; display: inline-block; vertical-align: middle; }
         .icon-sm { width: 16px; height: 16px; }
 
-        /* 画面管理 */
         .screen { display: none; width: 100%; height: 100%; flex-direction: column; position: absolute; inset: 0; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
         .screen.active { display: flex; opacity: 1; pointer-events: auto; z-index: 10; }
 
@@ -44,15 +41,12 @@
 
         /* --- アプリレイアウト --- */
         .app-shell { display: flex; width: 100%; height: 100%; overflow: hidden; }
-        
-        /* サイドバー (PC) */
-        .sidebar { width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border); display: none; flex-direction: column; padding: 30px 20px; flex-shrink: 0; transition: transform 0.3s ease; }
-        .sidebar.active { display: flex; } /* ホームの時だけJSでこのクラスを付与 */
+        .sidebar { width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border); display: none; flex-direction: column; padding: 30px 20px; flex-shrink: 0; }
+        .sidebar.home-active { display: flex; }
 
         .main-content { flex: 1; display: flex; flex-direction: column; height: 100%; overflow: hidden; position: relative; }
         .scroll-area { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 20px; }
         
-        /* ヘッダー */
         .app-header { height: 60px; border-bottom: 1px solid var(--border); background: var(--bg-sidebar); display: flex; justify-content: space-between; align-items: center; padding: 0 20px; flex-shrink: 0; z-index: 100; }
         .back-btn { display: none; align-items: center; gap: 8px; color: var(--primary); cursor: pointer; font-weight: 600; font-size: 0.9rem; }
 
@@ -65,8 +59,16 @@
         .nav-link { display: flex; align-items: center; gap: 14px; padding: 14px 18px; color: var(--text-sub); border-radius: 10px; cursor: pointer; transition: 0.2s; margin-bottom: 6px; font-weight: 600; }
         .nav-link.active { background: var(--primary-dim); color: var(--primary); }
 
-        .bottom-nav { position: absolute; bottom: 0; width: 100%; height: var(--nav-h); background: var(--bg-sidebar); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 100; transform: translateY(100%); transition: transform 0.3s ease; }
-        .bottom-nav.active { transform: translateY(0); }
+        /* 自動で隠れるボトムナビ */
+        .bottom-nav { 
+            position: absolute; bottom: 0; width: 100%; height: var(--nav-h); 
+            background: var(--bg-sidebar); border-top: 1px solid var(--border); 
+            display: none; justify-content: space-around; align-items: center; 
+            z-index: 100; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .bottom-nav.home-active { display: flex; }
+        .bottom-nav.nav-hidden { transform: translateY(100%); }
+
         .b-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--text-sub); font-size: 0.65rem; cursor: pointer; height: 100%; }
         .b-nav-item.active { color: var(--primary); }
 
@@ -80,36 +82,34 @@
         .btn-danger { background: rgba(248, 81, 73, 0.1); color: var(--danger); border: 1px solid var(--danger); }
         .btn-sm { padding: 8px 16px; font-size: 0.8rem; width: auto; }
 
-        /* --- お知らせ --- */
+        /* お知らせデザイン */
         .news-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 16px; cursor: pointer; position: relative; }
         .news-card.pinned { border-color: var(--warning); }
         .pin-tag { position: absolute; top: 10px; left: 10px; background: var(--warning); color: #000; font-size: 0.6rem; font-weight: 900; padding: 2px 8px; border-radius: 4px; z-index: 5; }
         .news-img { width: 100%; aspect-ratio: 16/9; background: #000; object-fit: cover; border-bottom: 1px solid var(--border); }
         .news-info { padding: 15px; }
-        .news-ti { font-weight: 700; font-size: 1.05rem; margin-bottom: 4px; }
-        .news-del { position: absolute; top: 8px; right: 8px; width: 32px; height: 32px; background: rgba(0,0,0,0.6); color: var(--danger); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--danger); z-index: 10; cursor: pointer; }
+        .news-ti { font-weight: 700; font-size: 1.1rem; margin-bottom: 4px; }
+        .news-del { position: absolute; top: 8px; right: 8px; width: 34px; height: 34px; background: rgba(0,0,0,0.7); color: var(--danger); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--danger); z-index: 10; cursor: pointer; }
 
-        /* --- チャット構成 --- */
+        /* チャットデザイン */
         #tab-chat { display: flex; flex-direction: column; height: 100%; width: 100%; }
         .chat-scroll { flex: 1; overflow-y: auto; padding: 20px; }
         .chat-input-bar { flex-shrink: 0; padding: 15px 20px; background: var(--bg-sidebar); border-top: 1px solid var(--border); display: flex; gap: 10px; align-items: flex-end; }
-        
         .msg { padding: 12px 16px; border-radius: 16px; max-width: 85%; font-size: 0.95rem; line-height: 1.5; position: relative; margin-bottom: 12px; }
         .msg.me { align-self: flex-end; background: #1f6feb; color: white; border-bottom-right-radius: 2px; }
         .msg.other { align-self: flex-start; background: var(--bg-card); border: 1px solid var(--border); border-bottom-left-radius: 2px; }
         .chat-img-thumb { max-width: 100%; max-height: 350px; width: auto; height: auto; border-radius: 10px; margin-top: 10px; cursor: zoom-in; display: block; }
-        .msg-del-btn { position: absolute; top: -8px; right: -8px; width: 22px; height: 22px; background: var(--danger); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid var(--bg-body); z-index: 5; }
+        .msg-del { position: absolute; top: -8px; right: -8px; width: 22px; height: 22px; background: var(--danger); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid var(--bg-body); z-index: 5; }
 
-        /* --- リソース表示 --- */
         .res-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 25px; }
         .res-box { background: var(--bg-input); border: 1px solid var(--border); padding: 12px; border-radius: 12px; text-align: center; }
         .res-num { display: block; font-weight: 800; font-size: 1.1rem; }
         .res-lab { font-size: 0.6rem; color: var(--text-sub); font-weight: bold; }
 
-        #toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 14px 30px; border-radius: 50px; font-weight: 700; display: none; z-index: 10000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; backdrop-filter: blur(5px); }
         .modal-body { background: var(--bg-card); border: 1px solid var(--border); width: 100%; max-width: 600px; border-radius: 20px; padding: 0; overflow: hidden; position: relative; animation: pop 0.3s ease; }
         .modal-content { padding: 25px; max-height: 75vh; overflow-y: auto; }
+        #toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 14px 30px; border-radius: 50px; font-weight: 700; display: none; z-index: 10000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body>
@@ -127,7 +127,7 @@
                     <svg class="icon" viewBox="0 0 24 24"><path d="M10 17v-4h11v-2H10V7l-5 5 5 5zm-8 3h18v-2H2v-2h18V8H2V6h18a2 2 0 012 2v12a2 2 0 01-2 2H2v-2z"/></svg> ログイン
                 </button>
                 <button class="btn btn-ghost" style="margin-top:15px;" onclick="window.go('scr-register')">新規アカウント登録</button>
-                <div id="status-bar" style="margin-top:25px; font-size:0.75rem; color:var(--text-sub);">接続中...</div>
+                <div id="status-bar" style="margin-top:25px; font-size:0.75rem; color:var(--text-sub);">接続待機中...</div>
             </div>
         </div>
     </div>
@@ -138,9 +138,7 @@
             <div class="auth-card">
                 <h2>アカウント作成</h2>
                 <input type="text" id="reg-u" class="input" placeholder="ID (半角英数)">
-                <div id="cand-box" style="display:none; margin-bottom:15px; text-align:left;">
-                    <small style="color:var(--danger)">候補:</small><div id="cand-list"></div>
-                </div>
+                <div id="cand-box" style="display:none; margin-bottom:15px; text-align:left;"><div id="cand-list"></div></div>
                 <input type="password" id="reg-p" class="input" placeholder="パスワード">
                 <input type="text" id="reg-n" class="input" placeholder="表示名">
                 <button class="btn btn-primary" onclick="window.doRegister()">登録して開始</button>
@@ -152,7 +150,7 @@
     <!-- 3. メインアプリ -->
     <div id="scr-main" class="screen" style="padding:0;">
         <div class="app-shell">
-            <!-- PCサイドバー (ホーム時のみ表示) -->
+            <!-- PCサイドバー -->
             <aside id="sidebar-pc" class="sidebar">
                 <div style="font-weight:900; color:var(--primary); font-size:1.4rem; margin-bottom:40px;">COTOBATO</div>
                 <div class="nav-item active" data-id="home" onclick="window.tab('home',this)"><svg class="icon" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>ホーム</div>
@@ -165,56 +163,48 @@
             <!-- メインエリア -->
             <div class="main-content">
                 <header class="app-header">
-                    <div id="btn-back" class="back-btn" onclick="window.tab('home')">
-                        <svg class="icon" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg> 戻る
-                    </div>
-                    <span style="font-weight:900; color:var(--primary); font-size:1.2rem;">コトバト広場</span>
+                    <div id="btn-back" class="back-btn" onclick="window.tab('home')"><svg class="icon" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg> 戻る</div>
+                    <span style="font-weight:900; color:var(--primary); font-size:1.2rem;">Cotobato</span>
                     <span id="head-user" style="font-size:0.8rem; color:var(--text-sub)">Guest</span>
                 </header>
 
-                <!-- ホームタブ (通常スクロール) -->
-                <div class="scroll-area" id="view-scroll">
+                <div class="scroll-area" id="home-scroll">
+                    <!-- タブ: ホーム -->
                     <div id="tab-home">
                         <div class="res-grid">
                             <div class="res-box"><span class="res-lab">ランク</span><span class="res-num" id="v-lv">1</span></div>
                             <div class="res-box"><span class="res-lab">コイン</span><span class="res-num" id="v-coin" style="color:var(--warning)">0</span></div>
                             <div class="res-box"><span class="res-lab">ダイヤ</span><span class="res-num" id="v-dia" style="color:var(--primary)">0</span></div>
                         </div>
-
                         <button class="btn btn-primary" style="background:#d29922; color:#000; margin-bottom:30px; padding:18px;" onclick="window.fetchGifts()">
-                            <svg class="icon" viewBox="0 0 24 24"><path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2z"/></svg>
-                            プレゼントBOX
+                            <svg class="icon" viewBox="0 0 24 24"><path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2z"/></svg> プレゼントBOX
                         </button>
-
                         <div class="card">
-                            <h3 style="margin-top:0">データ管理</h3>
+                            <h3>データ同期</h3>
                             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
                                 <button class="btn btn-primary" onclick="window.bkCloud()">クラウド保存</button>
                                 <button class="btn btn-ghost" style="color:white; background:#334155" onclick="window.rsCloud()">復元する</button>
                             </div>
                         </div>
-
                         <h3 style="margin:30px 0 15px">お知らせ</h3>
                         <div id="news-box">読み込み中...</div>
                     </div>
 
+                    <!-- 他のタブ -->
                     <div id="tab-trade" style="display:none;">
                         <div class="card">
-                            <h3>交換所の出品</h3>
+                            <h3>出品</h3>
                             <div style="display:grid; grid-template-columns:1fr auto 1fr; gap:10px; align-items:center;">
                                 <select id="tr-gt" class="input" style="margin:0"><option value="coins">コイン</option><option value="diamonds">ダイヤ</option></select>
-                                <span>⇄</span>
-                                <input type="number" id="tr-gv" class="input" placeholder="個数" style="margin:0;">
+                                <span>⇄</span><input type="number" id="tr-gv" class="input" placeholder="個数" style="margin:0;">
                             </div>
-                            <div style="text-align:center; padding:10px; font-size:0.8rem; color:var(--text-sub);">欲しい条件</div>
-                            <div style="display:grid; grid-template-columns: 1fr auto 1fr; gap:10px; align-items:center;">
+                            <div style="text-align:center; padding:10px; font-size:0.8rem; color:var(--text-sub);">希望条件</div>
+                            <div style="display:grid; grid-template-columns:1fr auto 1fr; gap:10px; align-items:center;">
                                 <select id="tr-wt" class="input" style="margin:0"><option value="coins">コイン</option><option value="diamonds">ダイヤ</option></select>
-                                <span>⇄</span>
-                                <input type="number" id="tr-wv" class="input" placeholder="必要数" style="margin:0;">
+                                <span>⇄</span><input type="number" id="tr-wv" class="input" placeholder="必要数" style="margin:0;">
                             </div>
-                            <button class="btn btn-primary" style="margin-top:20px;" onclick="window.mkTrade()">掲示板へ掲載</button>
+                            <button class="btn btn-primary" style="margin-top:20px;" onclick="window.mkTrade()">出品を公開</button>
                         </div>
-                        <h3>現在の取引</h3>
                         <div id="trade-list"></div>
                     </div>
 
@@ -222,13 +212,13 @@
                         <div class="card">
                             <h3>設定</h3>
                             <input type="text" id="set-name" class="input" placeholder="ニックネーム">
-                            <button class="btn btn-primary" onclick="window.updName()">名前を保存</button>
+                            <button class="btn btn-primary" onclick="window.updName()">保存</button>
                             <hr style="border-color:var(--border); margin:25px 0;">
                             <button class="btn btn-danger" onclick="window.doLogout()">ログアウト</button>
                         </div>
                         <div class="card">
-                            <h3>運営認証</h3>
-                            <input type="password" id="adm-p" class="input" placeholder="パスワードを入力">
+                            <h3>認証</h3>
+                            <input type="password" id="adm-p" class="input" placeholder="運営コード">
                             <button class="btn btn-ghost" onclick="window.authAdm()">認証</button>
                         </div>
                     </div>
@@ -238,23 +228,16 @@
                             <h3>運営ツール</h3>
                             <input type="text" id="adm-news-ti" class="input" placeholder="タイトル">
                             <textarea id="adm-news-txt" class="input" placeholder="本文" style="min-height:100px;"></textarea>
-                            <label class="btn btn-ghost" style="margin-bottom:15px;">画像選択<input type="file" id="adm-news-img" accept="image/*" style="display:none" onchange="window.newsImgPrev(this)"></label>
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;">
+                            <label class="btn btn-ghost" style="margin-bottom:10px;">画像選択<input type="file" id="adm-news-img" accept="image/*" style="display:none" onchange="window.newsImgPrev(this)"></label>
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
                                 <input type="datetime-local" id="adm-pub" class="input">
-                                <label style="display:flex; align-items:center; gap:8px; border:1px solid var(--border); padding:0 15px; border-radius:10px;"><input type="checkbox" id="adm-pin" style="width:24px; height:24px;"><span>固定</span></label>
+                                <label style="display:flex; align-items:center; gap:8px; border:1px solid var(--border); border-radius:10px; padding:0 10px;"><input type="checkbox" id="adm-pin" style="width:20px;height:20px;">固定</label>
                             </div>
                             <button class="btn btn-primary" onclick="window.postNews()">ニュース配信</button>
                             <hr style="border-color:var(--border); margin:25px 0;">
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                                <select id="adm-gift-t" class="input"><option value="coins">コイン</option><option value="diamonds">ダイヤ</option></select>
-                                <input type="number" id="adm-gift-v" class="input" placeholder="量">
-                            </div>
-                            <input type="text" id="adm-gift-m" class="input" placeholder="メッセージ">
-                            <input type="datetime-local" id="adm-gift-e" class="input">
-                            <button class="btn btn-primary" style="background:var(--warning); color:#000" onclick="window.mkGift()">全員に配布</button>
-                            <hr style="border-color:var(--border); margin:25px 0;">
-                            <input type="password" id="adm-np" class="input" placeholder="新共通パスワード">
-                            <button class="btn btn-ghost" onclick="window.chgPass()">パスワード保存</button>
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><select id="adm-gift-t" class="input"><option value="coins">コイン</option><option value="diamonds">ダイヤ</option></select><input type="number" id="adm-gift-v" class="input" placeholder="量"></div>
+                            <input type="text" id="adm-gift-m" class="input" placeholder="メッセージ"><input type="datetime-local" id="adm-gift-e" class="input"><button class="btn btn-primary" style="background:var(--warning); color:#000" onclick="window.mkGift()">配布</button>
+                            <hr style="border-color:var(--border); margin:25px 0;"><input type="password" id="adm-np" class="input" placeholder="新PW"><button class="btn btn-ghost" onclick="window.chgPass()">保存</button>
                         </div>
                     </div>
                 </div>
@@ -271,10 +254,9 @@
                     </div>
                 </div>
 
-                <!-- ボトムナビ (スマホ・ホーム時のみ表示) -->
                 <nav id="bottom-nav" class="bottom-nav">
                     <div class="b-nav-item active" data-id="home" onclick="window.tab('home',this)"><svg class="icon" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>ホーム</div>
-                    <div class="b-nav-item" data-id="chat" onclick="window.tab('chat',this)"><svg class="icon" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>チャット</div>
+                    <div class="b-nav-item" data-id="chat" onclick="window.tab('chat',this)"><svg class="icon" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2z"/></svg>チャット</div>
                     <div class="b-nav-item" data-id="trade" onclick="window.tab('trade',this)"><svg class="icon" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>交換</div>
                     <div class="b-nav-item" data-id="settings" onclick="window.tab('settings',this)"><svg class="icon" viewBox="0 0 24 24"><path d="M12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>設定</div>
                 </nav>
@@ -282,8 +264,8 @@
         </div>
     </div>
 
-    <!-- モーダル・全画面表示 -->
-    <div id="modal-base" class="modal" onclick="if(event.target==this)window.closeMdl()">
+    <!-- モーダル -->
+    <div id="mdl-base" class="modal" onclick="if(event.target==this)window.closeMdl()">
         <div class="modal-body">
             <div class="modal-header"><h3 id="mdl-ti"></h3><button class="btn btn-ghost" style="width:30px; padding:0" onclick="window.closeMdl()">✕</button></div>
             <div id="mdl-con" class="modal-content"></div>
@@ -291,13 +273,7 @@
     </div>
     <div id="img-overlay" class="modal" onclick="this.style.display='none'"><img id="full-img" style="max-width:95%; max-height:90vh; border-radius:10px;"></div>
     <div id="quiz-modal" class="modal">
-        <div class="auth-card" style="background:var(--bg-card); width:90%">
-            <h2>関係者試験</h2>
-            <p>Q. コトバト創始者の別の役職は？</p>
-            <input type="text" id="q-ans" class="input">
-            <button class="btn btn-primary" onclick="window.chkQ()">回答送信</button>
-            <button class="btn btn-ghost" onclick="document.getElementById('quiz-modal').style.display='none'">閉じる</button>
-        </div>
+        <div class="auth-card" style="background:var(--bg-card); width:90%"><h2>関係者試験</h2><p>Q. コトバト創始者の別の役職は？</p><input type="text" id="q-ans" class="input"><button class="btn btn-primary" onclick="window.chkQ()">回答</button><button class="btn btn-ghost" onclick="document.getElementById('quiz-modal').style.display='none'">閉じる</button></div>
     </div>
 
     <script type="module">
@@ -305,6 +281,7 @@
         import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, onSnapshot, serverTimestamp, query, limit, where, deleteDoc, Timestamp, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
+        // ★Firebase Config★
         const firebaseConfig = {
             apiKey: "AIzaSyDguL7I5v4GxKf5FahdoFEtU5lNMYgxcNo",
             authDomain: "cotobato-c121f.firebaseapp.com",
@@ -320,20 +297,17 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        let currentUser = null;
-        let isReady = false;
+        let currentUser = null, isReady = false;
         let localData = { coins: 0, diamonds: 0, playerLevel: 1 };
-        let chatImgData = null;
-        let newsImgData = null;
-        const SAVE_KEY = "kb_save_v36";
-        const SESS_KEY = "kb_sess";
+        let chatImgData = null, newsImgData = null;
+        const KEY = "kb_save_v36", SESS = "kb_sess";
 
         signInAnonymously(auth).then(()=>{
             onAuthStateChanged(auth, async u => {
                 if(u){
                     isReady=true;
                     document.getElementById('status-bar').innerText="● オンライン";
-                    const sess = localStorage.getItem(SESS_KEY);
+                    const sess = localStorage.getItem(SESS);
                     if(sess) autoLogin(sess);
                 }
             });
@@ -344,10 +318,10 @@
             if(s.exists()){ currentUser=s.data(); startApp(); showToast("おかえりなさい！"); }
         }
 
-        window.go = id => {
-            document.querySelectorAll('.screen').forEach(e=>e.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        };
+        window.go = id => { document.querySelectorAll('.screen').forEach(e=>e.classList.remove('active')); document.getElementById(id).classList.add('active'); };
+
+        // 自動で隠れるバーの制御変数
+        let lastScrollTop = 0;
 
         window.tab = (id, el) => {
             ['home','chat','trade','settings','admin'].forEach(t=> { if(document.getElementById('tab-'+t)) document.getElementById('tab-'+t).style.display='none';});
@@ -359,12 +333,12 @@
             const backBtn = document.getElementById('btn-back');
             
             if (id === 'home') {
-                sidebar.classList.add('active');
-                bottomNav.classList.add('active');
+                sidebar.classList.add('home-active');
+                bottomNav.classList.add('home-active');
                 backBtn.style.display = 'none';
             } else {
-                sidebar.classList.remove('active');
-                bottomNav.classList.remove('active');
+                sidebar.classList.remove('home-active');
+                bottomNav.classList.remove('home-active');
                 backBtn.style.display = 'flex';
             }
 
@@ -375,6 +349,23 @@
                 if(target) target.classList.add('active');
             }
         };
+
+        // スクロール検知 (ホーム画面のボトムナビ自動隠蔽)
+        document.getElementById('home-scroll').addEventListener('scroll', function() {
+            if (window.innerWidth >= 768) return; // PC版は無視
+            let st = this.scrollTop;
+            const nav = document.getElementById('bottom-nav');
+            if (st > lastScrollTop && st > 100) {
+                nav.classList.add('nav-hidden');
+            } else {
+                nav.classList.remove('nav-hidden');
+            }
+            // 一番下までスクロールしたら表示
+            if (this.scrollHeight - this.scrollTop === this.clientHeight) {
+                nav.classList.remove('nav-hidden');
+            }
+            lastScrollTop = st <= 0 ? 0 : st;
+        }, false);
 
         window.doRegister = async () => {
             const u=document.getElementById('reg-u').value.trim();
@@ -394,19 +385,19 @@
             }
             const d = { username:u, password:p, name:n, isAdmin:false, quizCleared:false, history:[], createdAt:serverTimestamp() };
             await setDoc(ref, d);
-            currentUser=d; localStorage.setItem(SESS_KEY, u); startApp();
+            currentUser=d; localStorage.setItem(SESS, u); startApp();
         };
 
         window.doLogin = async () => {
             const u=document.getElementById('log-u').value.trim();
             const p=document.getElementById('log-p').value.trim();
             const s = await getDoc(doc(db,"users",u));
-            if(s.exists() && s.data().password===p){
-                currentUser=s.data(); localStorage.setItem(SESS_KEY, u); startApp();
-            } else alert("間違い");
+            if(s.exists() && s.data().password === p){
+                currentUser=s.data(); localStorage.setItem(SESS, u); startApp();
+            } else alert("ID/PWエラー");
         };
 
-        window.doLogout = () => { localStorage.removeItem(SESS_KEY); location.reload(); };
+        window.doLogout = () => { localStorage.removeItem(SESS); location.reload(); };
 
         function startApp() {
             window.go('scr-main');
@@ -416,7 +407,7 @@
         }
 
         function loadLocal() {
-            const r=localStorage.getItem(SAVE_KEY);
+            const r=localStorage.getItem(KEY);
             if(r) localData=JSON.parse(r);
             updateUI();
         }
@@ -427,6 +418,7 @@
         }
 
         function startListeners() {
+            // News
             onSnapshot(query(collection(db,"announcements"), limit(20)), s => {
                 const box = document.getElementById('news-box'); box.innerHTML = "";
                 let list = []; s.forEach(d => list.push({id:d.id, ...d.data()}));
@@ -436,13 +428,13 @@
                 list.forEach(n => {
                     const card = document.createElement('div');
                     card.className = `news-card ${n.pin?'pinned':''}`;
-                    const del = currentUser.isAdmin ? `<div class="news-del" onclick="window.delNews('${n.id}')"><svg class="icon-sm" style="fill:white" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></div>` : '';
+                    const del = currentUser.isAdmin ? `<div class="news-del" onclick="window.delNews('${n.id}')">✕</div>` : '';
                     card.innerHTML = `${n.pin?'<span class="pin-tag">TOP</span>':''}${n.img?`<img src="${n.img}" class="news-img">`:''}<div class="news-info"><div class="news-ti">${n.title}</div><small style="color:var(--text-sub)">${n.createdAt?new Date(n.createdAt.toMillis()).toLocaleDateString():''}</small></div>${del}`;
                     card.onclick = (e) => { if(!e.target.closest('.news-del')) window.openNews(n); };
                     box.appendChild(card);
                 });
             });
-
+            // Chat
             onSnapshot(query(collection(db,"chat"), limit(30), orderBy("createdAt","desc")), s=>{
                 const b=document.getElementById('chat-box'); b.innerHTML="";
                 let msgs=[]; s.forEach(d=>msgs.push({id:d.id, ...d.data()}));
@@ -452,12 +444,12 @@
                     const div = document.createElement('div');
                     div.style.display = 'flex'; div.style.flexDirection = 'column';
                     div.style.alignItems = me ? 'flex-end' : 'flex-start';
-                    div.innerHTML = `<div class="msg ${me?'me':'other'}"><small style="font-size:0.6rem; opacity:0.7; display:block; margin-bottom:3px">${m.sender}</small>${m.text}${m.img?`<img src="${m.img}" class="chat-img" onclick="window.viewImg(this.src)">`:''}${canDel?`<div class="msg-del" onclick="window.delChat('${m.id}')">✕</div>`:''}</div>`;
+                    div.innerHTML = `<div class="msg ${me?'me':'other'}"><small style="font-size:0.6rem; opacity:0.7; display:block; margin-bottom:3px">${m.sender}</small>${m.text}${m.img?`<img src="${m.img}" class="chat-img-thumb" onclick="window.viewImg(this.src)">`:''}${canDel?`<div class="msg-del" onclick="window.delChat('${m.id}')">✕</div>`:''}</div>`;
                     b.appendChild(div);
                 });
                 document.getElementById('chat-scroller').scrollTop=document.getElementById('chat-scroller').scrollHeight;
             });
-
+            // Trade
             onSnapshot(query(collection(db,"trades"), where("status","==","open")), s=>{
                 const t=document.getElementById('trade-list'); t.innerHTML="";
                 s.forEach(doc=>{
@@ -467,10 +459,7 @@
             });
         }
 
-        window.openNews = n => {
-            const html = `${n.img ? `<img src="${n.img}" style="width:100%; border-radius:10px; margin-bottom:15px;">` : ''}<div style="white-space:pre-wrap; line-height:1.7; color:#fff;">${n.text}</div>`;
-            window.openMdl(n.title, html);
-        };
+        window.openNews = n => window.openMdl(n.title, `<div style="white-space:pre-wrap; line-height:1.7; color:#fff;">${n.text}</div>`);
         window.delNews = async id => { if(confirm("削除しますか？")) await deleteDoc(doc(db,"announcements",id)); };
         
         window.fetchGifts = async () => {
@@ -483,7 +472,7 @@
                 if((g.to==='all' || g.to===currentUser.username) && (!g.claimedBy || !g.claimedBy.includes(currentUser.username))) {
                     c++;
                     const adminDel = currentUser.isAdmin ? `<button class="btn btn-danger btn-sm" onclick="window.delGift('${d.id}')">削除</button>` : '';
-                    h+=`<div class="list-item"><div><b>${g.val} ${g.type}</b><br><small>${g.msg}</small></div><div style="display:flex; gap:8px;"><button class="btn btn-primary btn-sm" onclick="window.claimGift('${d.id}')">受取</button>${adminDel}</div></div>`;
+                    h+=`<div class="card" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;"><div><b>${g.val} ${g.type}</b><br><small>${g.msg}</small></div><div style="display:flex; gap:8px;"><button class="btn btn-primary btn-sm" onclick="window.claimGift('${d.id}')">受取</button>${adminDel}</div></div>`;
                 }
             });
             window.openMdl("プレゼントBOX", c>0?h:"<p style='text-align:center'>なし</p>");
@@ -492,12 +481,12 @@
             const r=doc(db,"gifts",id); const s=await getDoc(r); const g=s.data();
             const arr=g.claimedBy||[]; arr.push(currentUser.username);
             await updateDoc(r, {claimedBy:arr});
-            localData[g.type]=(localData[g.type]||0)+g.val; localStorage.setItem(SAVE_KEY, JSON.stringify(localData));
+            localData[g.type]=(localData[g.type]||0)+g.val; localStorage.setItem(KEY, JSON.stringify(localData));
             updateUI(); window.fetchGifts(); showToast("受け取りました！");
         };
-        window.delGift = async id => { if(confirm("消しますか？")) { await deleteDoc(doc(db,"gifts",id)); window.fetchGifts(); } };
+        window.delGift = async id => { if(confirm("削除？")) { await deleteDoc(doc(db,"gifts",id)); window.fetchGifts(); } };
 
-        window.prevImg = i => { if(i.files[0]){const r=new FileReader(); r.onload=e=>chatImgData=e.target.result; r.readAsDataURL(i.files[0]); showToast("セット完了");} };
+        window.prevImg = i => { if(i.files[0]){const r=new FileReader(); r.onload=e=>chatImgData=e.target.result; r.readAsDataURL(i.files[0]); showToast("セットしました");} };
         window.newsImgPrev = i => { if(i.files[0]){const r=new FileReader(); r.onload=e=>newsImgData=e.target.result; r.readAsDataURL(i.files[0]);} };
         window.viewImg = s => { document.getElementById('full-img').src=s; document.getElementById('img-overlay').style.display='flex'; };
         
@@ -509,39 +498,38 @@
         window.delChat = async id => { if(confirm("削除？")) await deleteDoc(doc(db,"chat",id)); };
 
         window.bkCloud = async () => {
-            const h = currentUser.history || [];
+            let h = currentUser.history || [];
             h.push({d:new Date().toLocaleString(), v:JSON.stringify(localData)});
             if(h.length>5) h.shift();
             await updateDoc(doc(db,"users",currentUser.username), {history:h});
-            currentUser.history=h; showToast("保存成功");
+            currentUser.history=h; showToast("保存完了");
         };
         window.rsCloud = () => {
             const h=currentUser.history||[]; if(h.length===0) return alert("なし");
             const html = h.map((v,i)=>`<div class="list-item"><span>${v.d}</span><button class="btn btn-primary btn-sm" onclick="window.execRest('${i}')">復元</button></div>`).join('');
-            window.openMdl("復元", html);
+            window.openMdl("履歴", html);
         };
-        window.execRest = i => { localStorage.setItem(SAVE_KEY, currentUser.history[i].v); localData=JSON.parse(currentUser.history[i].v); updateUI(); window.closeMdl(); showToast("復元完了"); };
+        window.execRest = i => { localStorage.setItem(KEY, currentUser.history[i].v); localData=JSON.parse(currentUser.history[i].v); updateUI(); window.closeMdl(); showToast("復元完了"); };
 
         window.mkTrade = async () => {
             const gt=document.getElementById('tr-gt').value, gv=parseInt(document.getElementById('tr-gv').value);
             const wt=document.getElementById('tr-wt').value, wv=parseInt(document.getElementById('tr-wv').value);
             if(!gv||!wv) return; if(localData[gt]<gv) return alert("不足");
-            localData[gt]-=gv; localStorage.setItem(SAVE_KEY,JSON.stringify(localData)); updateUI();
+            localData[gt]-=gv; localStorage.setItem(KEY,JSON.stringify(localData)); updateUI();
             await addDoc(collection(db,"trades"), {maker:currentUser.username, makerName:currentUser.name, giveT:gt, giveV:gv, wantT:wt, wantV:wv, status:'open', createdAt:serverTimestamp()});
             showToast("出品完了");
         };
         window.doTrade = async id => {
             const s=await getDoc(doc(db,"trades",id)); const t=s.data(); if(localData[t.wantT]<t.wantV) return alert("不足");
-            localData[t.wantT]-=t.wantV; localData[t.giveT]+=t.giveV; localStorage.setItem(SAVE_KEY,JSON.stringify(localData)); updateUI();
+            localData[t.wantT]-=t.wantV; localData[t.giveT]+=t.giveV; localStorage.setItem(KEY,JSON.stringify(localData)); updateUI();
             await deleteDoc(doc(db,"trades",id));
-            await addDoc(collection(db,"gifts"),{to:t.maker, type:t.wantT, val:t.wantV, msg:"成立報酬", exp:Timestamp.fromDate(new Date(Date.now()+604800000)), createdAt:serverTimestamp()});
+            await addDoc(collection(db,"gifts"),{to:t.maker, type:t.wantT, val:t.wantV, msg:"交換成立", exp:Timestamp.fromDate(new Date(Date.now()+604800000)), createdAt:serverTimestamp()});
             showToast("成立");
         };
-        window.delTrade = async id => { await deleteDoc(doc(db,"trades",id)); showToast("取消"); };
 
         window.authAdm = async () => {
             const p=document.getElementById('adm-p').value; const c=await getDoc(doc(db,"system","config"));
-            if(p===(c.data()?.pass||"cotobato-1234")){ document.getElementById('nav-adm').style.display='flex'; window.tab('admin'); showToast("認証完了"); } else alert("間違い");
+            if(p===(c.data()?.pass||"cotobato-1234")){ document.getElementById('nav-adm').style.display='flex'; window.tab('admin'); showToast("認証"); } else alert("間違い");
         };
         window.postNews = async () => {
             const ti=document.getElementById('adm-news-ti').value, tx=document.getElementById('adm-news-txt').value, pub=document.getElementById('adm-pub').value, pin=document.getElementById('adm-pin').checked;
@@ -553,12 +541,12 @@
             const t=document.getElementById('adm-gift-t').value, v=parseInt(document.getElementById('adm-gift-v').value), m=document.getElementById('adm-gift-m').value, e=document.getElementById('adm-gift-e').value;
             if(!v||!e) return;
             await addDoc(collection(db,"gifts"), {to:'all', type:t, val:v, msg:m, exp:Timestamp.fromDate(new Date(e)), claimedBy:[], createdAt:serverTimestamp()});
-            showToast("配布");
+            showToast("配布完了");
         };
         window.chgPass = async () => {
             const p=document.getElementById('adm-np').value; if(!p) return;
             await setDoc(doc(db, "system", "config"), {pass:p}, {merge:true});
-            showToast("変更完了");
+            showToast("成功");
         };
 
         window.bkLocal = () => {
@@ -568,11 +556,11 @@
         window.updName = async () => { const n=document.getElementById('set-name').value; if(n){ await updateDoc(doc(db,"users",currentUser.username),{name:n}); currentUser.name=n; document.getElementById('head-user').innerText=n; showToast("保存"); } };
         window.openMdl = (t,c) => { document.getElementById('mdl-ti').innerText=t; document.getElementById('mdl-con').innerHTML=c; document.getElementById('modal-base').style.display='flex'; };
         window.closeMdl = () => document.getElementById('modal-base').style.display='none';
-        function showToast(m){const t=document.getElementById('toast');t.innerText=m;t.style.display='block';setTimeout(()=>t.style.display='none',3000);}
+        function showToast(m){const t=document.getElementById('toast');t.innerText=m;t.style.display='block';setTimeout(()=>t.style.display='none',2500);}
 
         let taps=0; document.getElementById('app-ttl').onclick=()=>{taps++; if(taps>=7){taps=0; document.getElementById('quiz-modal').style.display='flex';} setTimeout(()=>taps=0,2500);};
         window.addEventListener('keydown', e=>{if(e.ctrlKey&&e.shiftKey&&e.key==='Q') document.getElementById('quiz-modal').style.display='flex';});
-        window.chkQ = async () => { if(document.getElementById('q-ans').value==="Boss"){ await updateDoc(doc(db,"users",currentUser.username),{quizCleared:true}); document.getElementById('quiz-modal').style.display='none'; alert("合格！"); }else alert("×"); };
+        window.chkQ = async () => { if(document.getElementById('q-ans').value==="Boss"){ await updateDoc(doc(db,"users",currentUser.username),{quizCleared:true}); currentUser.quizCleared=true; document.getElementById('quiz-modal').style.display='none'; alert("合格"); }else alert("×"); };
     </script>
 </body>
 </html>
