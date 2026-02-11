@@ -54,13 +54,7 @@
         /* エラー時のスタイル */
         .input.error { border-color: var(--danger); animation: shake 0.3s; }
         @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
-        
-        /* 候補チップ */
-        .candidate-chip { 
-            display: inline-block; background: rgba(88, 166, 255, 0.1); border: 1px solid var(--primary); 
-            color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; 
-            cursor: pointer; margin-right: 5px; margin-bottom: 5px; transition: 0.2s;
-        }
+        .candidate-chip { display: inline-block; background: rgba(88, 166, 255, 0.1); border: 1px solid var(--primary); color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; margin-right: 5px; margin-bottom: 5px; transition: 0.2s; }
         .candidate-chip:active { background: var(--primary); color: #fff; }
 
         .app-layout { display: flex; width: 100%; height: 100%; overflow: hidden; }
@@ -180,7 +174,7 @@
                 <h2 class="mb-4">新規登録</h2>
                 <input type="text" id="reg-uid" class="input mb-2" placeholder="希望ID">
                 <div id="reg-candidates" style="text-align:left; margin-bottom:12px;"></div>
-                <input type="text" id="reg-name" class="input mb-4" placeholder="表示名">
+                <input type="text" id="reg-name" class="input mb-4" placeholder="表示名 (チャットでの名前)">
                 <input type="password" id="reg-pass" class="input mb-4" placeholder="パスワード">
                 <button class="btn btn-primary mb-4" onclick="app.register()">登録して開始</button>
                 <button class="btn btn-ghost" onclick="app.go('scr-login')">キャンセル</button>
@@ -410,6 +404,14 @@
         let myDeviceId = localStorage.getItem("kb_device_id") || crypto.randomUUID();
         localStorage.setItem("kb_device_id", myDeviceId);
 
+        // Helper to convert Firestore timestamp safely
+        const toDate = (ts) => {
+            if (!ts) return new Date();
+            if (ts.toDate) return ts.toDate();
+            if (ts instanceof Date) return ts;
+            return new Date();
+        };
+
         const app = {
             init: () => {
                 signInAnonymously(auth).then(() => {
@@ -450,33 +452,21 @@
                 const name = document.getElementById('reg-name').value.trim()||uid;
                 const pass = document.getElementById('reg-pass').value.trim();
                 
-                if(!uid || !pass) return app.toast("IDとパスワードは必須です");
-                
-                // Clear errors
+                if(!uid || !pass) return app.toast("必須");
                 uidInp.classList.remove('error');
                 document.getElementById('reg-candidates').innerHTML = "";
 
                 const s = await getDoc(doc(db,"users",uid));
                 if(s.exists()) {
-                    app.toast("このIDは既に使用されています");
+                    app.toast("既に使用されています");
                     uidInp.classList.add('error');
-                    
-                    // Generate candidates
-                    const base = uid.replace(/\d+$/, ''); // Remove trailing numbers
-                    const cands = [
-                        base + Math.floor(Math.random()*1000),
-                        base + "_" + new Date().getFullYear(),
-                        "user_" + base,
-                        base + "_jp"
-                    ];
-                    let html = "<div class='text-xs text-sub mb-1'>おすすめのID:</div>";
-                    cands.forEach(c => {
-                        html += `<span class="candidate-chip" onclick="document.getElementById('reg-uid').value='${c}'; document.getElementById('reg-uid').classList.remove('error'); this.parentElement.innerHTML='';">${c}</span>`;
-                    });
+                    const base = uid.replace(/\d+$/, ''); 
+                    const cands = [base + Math.floor(Math.random()*1000), base + "_" + new Date().getFullYear(), "user_" + base, base + "_jp"];
+                    let html = "<div class='text-xs text-sub mb-1'>おすすめ:</div>";
+                    cands.forEach(c => { html += `<span class="candidate-chip" onclick="document.getElementById('reg-uid').value='${c}'; document.getElementById('reg-uid').classList.remove('error'); this.parentElement.innerHTML='';">${c}</span>`; });
                     document.getElementById('reg-candidates').innerHTML = html;
                     return;
                 }
-
                 await setDoc(doc(db,"users",uid), { uid, username:uid, name, password:pass, coins:100, diamonds:0, level:1, isAdmin:false, createdAt:serverTimestamp(), history:[] });
                 localStorage.setItem(SESS_KEY, uid); app.loadUser(uid);
             },
@@ -484,12 +474,8 @@
                 listeners.push(onSnapshot(doc(db,"users",uid), s=>{
                     if(s.exists()){ 
                         currentUser=s.data(); app.renderHead(); 
-                        if(currentUser.history && currentUser.history.length > 0) {
-                            const last = currentUser.history[currentUser.history.length-1];
-                            document.getElementById('last-backup-info').innerText = "最終保存: " + last.d;
-                        } else {
-                            document.getElementById('last-backup-info').innerText = "履歴なし";
-                        }
+                        if(currentUser.history && currentUser.history.length > 0) document.getElementById('last-backup-info').innerText = "最終保存: " + currentUser.history[currentUser.history.length-1].d;
+                        else document.getElementById('last-backup-info').innerText = "履歴なし";
                         app.go('scr-main'); app.tab('home'); 
                     }
                 }));
@@ -565,11 +551,11 @@
             },
             buildMsgHTML: (m) => {
                 const isMe = m.username === currentUser.username;
-                return `<div class="msg-row ${isMe?'mine':'other'}">${!isMe?`<span class="msg-name" onclick="app.showProfile('${m.username}','${m.sender}')">${m.sender}</span>`:''}<div class="msg-bubble">${(isMe||currentUser.isAdmin)?`<div class="msg-del" onclick="app.delChat('${m.id}')">✕</div>`:''}${m.text?`<div>${m.text}</div>`:''}${m.img?`<img src="${m.img}" class="chat-img" onload="app.scrollChat()" onclick="document.getElementById('img-full').src=this.src;document.getElementById('img-viewer').style.display='flex'">`:''}</div></div>`;
+                const name = m.sender || m.name || "Unknown";
+                return `<div class="msg-row ${isMe?'mine':'other'}">${!isMe?`<span class="msg-name" onclick="app.showProfile('${m.username}','${name}')">${name}</span>`:''}<div class="msg-bubble">${(isMe||currentUser.isAdmin)?`<div class="msg-del" onclick="app.delChat('${m.id}')">✕</div>`:''}${m.text?`<div>${m.text}</div>`:''}${m.img?`<img src="${m.img}" class="chat-img" onload="app.scrollChat()" onclick="document.getElementById('img-full').src=this.src;document.getElementById('img-viewer').style.display='flex'">`:''}</div></div>`;
             },
             sendChat: async () => {
                 const i=document.getElementById('chat-in'), t=i.value.trim(); if(!t && !chatImg) return;
-                // Always use current user's name as sender
                 await addDoc(collection(db,"chat"), { text:t, img:chatImg, username:currentUser.username, sender:currentUser.name, createdAt:serverTimestamp() });
                 i.value=""; app.clearChatImg();
             },
@@ -658,7 +644,7 @@
                     const l = document.getElementById('news-list'); l.innerHTML="";
                     let items = []; s.forEach(d => items.push({id:d.id, ...d.data()}));
                     const now = new Date();
-                    items = items.filter(n => (n.publishAt ? n.publishAt.toDate() : n.createdAt.toDate()) <= now);
+                    items = items.filter(n => (n.publishAt ? toDate(n.publishAt) : toDate(n.createdAt)) <= now);
                     items.sort((a,b) => {
                         if(a.pin !== b.pin) return b.pin ? 1 : -1;
                         const da = a.publishAt ? a.publishAt.seconds : a.createdAt.seconds;
@@ -666,7 +652,7 @@
                         return db - da;
                     });
                     items.forEach(n => {
-                        const pub = n.publishAt ? n.publishAt.toDate() : n.createdAt.toDate();
+                        const pub = n.publishAt ? toDate(n.publishAt) : toDate(n.createdAt);
                         l.innerHTML += `<div class="news-item" onclick="app.openNews('${n.id}')">${n.img?`<img src="${n.img}" class="news-thumb">`:''}<div style="flex:1"><div class="font-bold">${n.pin?'<span class="pin-mark">固定</span>':''}${n.title}</div><div class="text-xs text-sub">${pub.toLocaleDateString()}</div></div><div class="hidden" id="nc-${n.id}">${n.body}</div><div class="hidden" id="ni-${n.id}">${n.img||''}</div></div>`;
                     });
                 }));
@@ -696,14 +682,14 @@
                     let items=[]; s.forEach(d=>items.push({id:d.id, ...d.data()}));
                     items.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
                     items.forEach(n=>{
-                        const pub=n.publishAt?n.publishAt.toDate():n.createdAt.toDate();
+                        const pub=n.publishAt?toDate(n.publishAt):toDate(n.createdAt);
                         l.innerHTML+=`<div class="adm-list-item"><div style="flex:1"><div class="font-bold text-sm">${n.pin?'<span class="adm-tag pin">固定</span>':''}${pub>new Date()?'<span class="adm-tag future">予約</span>':''}${n.img?'<span class="adm-tag img">画像</span>':''}${n.title}</div><div class="adm-detail">公開: ${pub.toLocaleString()}</div></div><div class="flex gap-2"><button class="btn btn-sm btn-primary" onclick='app.editNews(${JSON.stringify(n)})'>編集</button><button class="btn btn-sm btn-danger" onclick="app.delDoc('announcements','${n.id}')">削除</button></div></div>`;
                     });
                 });
                 onSnapshot(query(collection(db,"gifts"), orderBy("createdAt","desc"), limit(20)), s=>{
                     const l=document.getElementById('adm-list-gifts'); l.innerHTML="";
                     s.forEach(d=>{
-                        const g=d.data(), st=g.publishAt?g.publishAt.toDate().toLocaleString():"即時", ed=g.expireAt?g.expireAt.toDate().toLocaleString():"無期限";
+                        const g=d.data(), st=g.publishAt?toDate(g.publishAt).toLocaleString():"即時", ed=g.expireAt?toDate(g.expireAt).toLocaleString():"無期限";
                         l.innerHTML+=`<div class="adm-list-item"><div style="flex:1"><div class="font-bold text-sm">${g.val} ${g.type}</div><div class="adm-detail">${g.msg}</div><div class="adm-detail">期間: ${st} ～ ${ed}</div></div><div class="flex gap-2"><button class="btn btn-sm btn-primary" onclick='app.editGift(${JSON.stringify({id:d.id, ...g})})'>編集</button><button class="btn btn-sm btn-danger" onclick="app.delDoc('gifts','${d.id}')">削除</button></div></div>`;
                     });
                 });
@@ -711,7 +697,7 @@
             editNews: (n) => {
                 document.getElementById('adm-news-id').value=n.id; document.getElementById('adm-news-title').value=n.title;
                 document.getElementById('adm-news-body').value=n.body; document.getElementById('adm-news-pin').checked=n.pin;
-                if(n.publishAt){ const d=n.publishAt.toDate(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); document.getElementById('adm-news-date').value=d.toISOString().slice(0,16); } else document.getElementById('adm-news-date').value="";
+                if(n.publishAt){ const d=toDate(n.publishAt); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); document.getElementById('adm-news-date').value=d.toISOString().slice(0,16); } else document.getElementById('adm-news-date').value="";
                 newsImgOriginal=n.img; newsImg=null; if(n.img)document.getElementById('adm-news-file-status').innerText="画像あり(維持)";
                 document.getElementById('btn-news-post').innerText="更新(新規投稿)"; document.getElementById('btn-news-cancel').classList.remove('hidden'); document.querySelector('.scroll-view').scrollTop=0;
             },
@@ -734,7 +720,7 @@
             editGift: (g) => {
                 document.getElementById('adm-gift-id').value=g.id; document.getElementById('adm-gift-type').value=g.type;
                 document.getElementById('adm-gift-val').value=g.val; document.getElementById('adm-gift-msg').value=g.msg;
-                const fmt=(ts)=>{if(!ts)return""; const d=ts.toDate(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,16);};
+                const fmt=(ts)=>{if(!ts)return""; const d=toDate(ts); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,16);};
                 document.getElementById('adm-gift-start').value=fmt(g.publishAt); document.getElementById('adm-gift-end').value=fmt(g.expireAt);
                 document.getElementById('btn-gift-post').innerText="更新する"; document.getElementById('btn-gift-cancel').classList.remove('hidden');
                 document.querySelector('.scroll-view').scrollTop=0;
@@ -756,13 +742,67 @@
             },
             delDoc: async (c,i) => { if(confirm("削除しますか？")) await deleteDoc(doc(db,c,i)); },
 
+            // OTHER
+            handleFileSelect: (i, type) => {
+                if(i.files[0]){
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        const img = new Image(); img.onload = () => {
+                            const c = document.createElement('canvas'), MAX=800; let w=img.width, h=img.height;
+                            if(w>MAX){h*=MAX/w;w=MAX} c.width=w; c.height=h; c.getContext('2d').drawImage(img,0,0,w,h);
+                            const d = c.toDataURL('image/jpeg',0.7);
+                            if(type==='chat') { chatImg=d; document.getElementById('chat-preview').style.display='flex'; document.getElementById('chat-preview-img').src=d; }
+                            else if(type==='dm') { dmImg=d; document.getElementById('dm-preview').style.display='flex'; document.getElementById('dm-preview-img').src=d; }
+                            else { newsImg=d; document.getElementById('adm-news-file-status').innerText="選択済"; }
+                        }; img.src = e.target.result;
+                    }; reader.readAsDataURL(i.files[0]);
+                }
+            },
+            updateProfile: async () => { const n=document.getElementById('set-name').value; if(n){await updateDoc(doc(db,"users",currentUser.username),{name:n}); app.toast("保存しました");} },
+            
+            // Check Gifts - Fixed to be error-safe
+            checkGifts: async () => {
+                try {
+                    app.toast("確認中...");
+                    const s = await getDocs(query(collection(db,"gifts"), where("to","in",["all",currentUser.username])));
+                    let c=0, h=""; const now = new Date();
+                    s.forEach(d=>{ 
+                        try {
+                            const g=d.data(), cl=g.claimedBy||[];
+                            const st = g.publishAt ? toDate(g.publishAt) : toDate(g.createdAt);
+                            const ed = g.expireAt ? toDate(g.expireAt) : null;
+                            if(!cl.includes(currentUser.username) && st <= now && (!ed || ed > now)){ 
+                                c++; 
+                                h+=`<div class="card flex justify-between items-center" style="padding:10px"><div><b>${g.val} ${g.type}</b><br><small>${g.msg}</small><br><small style="color:var(--text-sub)">期限: ${ed?ed.toLocaleDateString():'無期限'}</small></div><button class="btn btn-sm btn-primary" style="width:auto" onclick="app.claimGift('${d.id}')">受取</button></div>`; 
+                            }
+                        } catch(e) { console.error("Gift parse error", e); }
+                    });
+                    app.mdl("プレゼントBOX", c>0?h:"<p class='text-center text-sub'>受け取れるプレゼントはありません</p>");
+                } catch(e) { app.toast("エラー: " + e.message); }
+            },
+            claimGift: async (id) => {
+                try {
+                    await runTransaction(db, async tr=>{
+                        const gd=await tr.get(doc(db,"gifts",id)); if(!gd.exists()) throw "Error";
+                        const g=gd.data(), now=new Date();
+                        const st = g.publishAt ? toDate(g.publishAt) : toDate(g.createdAt);
+                        const ed = g.expireAt ? toDate(g.expireAt) : null;
+                        if(st > now || (ed && ed < now)) throw "期間外";
+                        const cl=g.claimedBy||[]; if(cl.includes(currentUser.username)) throw "済";
+                        cl.push(currentUser.username); tr.update(doc(db,"gifts",id),{claimedBy:cl});
+                        tr.update(doc(db,"users",currentUser.username),{[g.type]:increment(g.val)});
+                        await app.updateUser({[g.type]:(currentUser[g.type]||0)+g.val}, "受取完了(バックアップ済)");
+                    });
+                    app.toast("受取完了"); app.closeModal();
+                } catch(e){ app.toast("エラー: "+e); }
+            },
             // TRADE
             subTrade: () => {
                 listeners.push(onSnapshot(query(collection(db,"trades"), where("status","==","open"), orderBy("createdAt","desc"), limit(50)), s=>{
                     const l=document.getElementById('trade-list'); l.innerHTML=""; const now=new Date();
                     s.forEach(d=>{
                         const t=d.data(), me=t.makerUid===currentUser.username;
-                        const exp=t.expireAt?t.expireAt.toDate():null; if(exp&&exp<now)return;
+                        const exp=t.expireAt?toDate(t.expireAt):null; if(exp&&exp<now)return;
                         l.innerHTML+=`<div class="card flex justify-between items-center" style="margin-bottom:8px"><div><div class="text-xs text-sub mb-1">${t.makerName} ${t.passcode?'<span style="color:var(--warning)">🔒コード</span>':''}</div><div class="font-bold">出: ${t.giveVal} ${t.giveType}</div><div class="font-bold" style="color:var(--primary)">求: ${t.wantVal} ${t.wantType}</div><div class="text-xs text-sub">期限: ${exp?exp.toLocaleDateString():'不明'}</div></div><button class="btn btn-sm ${me?'btn-danger':'btn-primary'}" style="width:auto" onclick="${me?`app.cancelTrade('${d.id}',${t.giveVal},'${t.giveType}')`:`app.doTrade('${d.id}',${t.wantVal},'${t.wantType}',${t.giveVal},'${t.giveType}','${t.makerUid}','${t.passcode||''}')`}">${me?'取消':'交換'}</button></div>`;
                     });
                 }));
@@ -783,7 +823,8 @@
                 try {
                     await runTransaction(db, async tr=>{
                         const td=await tr.get(doc(db,"trades",id)); if(!td.exists()) throw "Error";
-                        tr.update(doc(db,"users",currentUser.username),{[payT]:increment(-payV), [getT]:increment(getV)});
+                        const ref = doc(db, "users", currentUser.username);
+                        tr.update(ref,{[payT]:increment(-payV), [getT]:increment(getV)});
                         tr.update(doc(db,"users",maker),{[payT]:increment(payV)});
                         tr.delete(doc(db,"trades",id));
                     });
