@@ -7,93 +7,84 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* テーマカラー */
-            --bg-body: #0b0f19;
-            --bg-card: rgba(30, 41, 59, 0.7);
-            --bg-nav: rgba(15, 23, 42, 0.9);
-            --primary: #6366f1;
-            --primary-glow: rgba(99, 102, 241, 0.4);
-            --text-main: #f1f5f9;
-            --text-sub: #94a3b8;
+            --bg-body: #0f172a;
+            --bg-glass: rgba(30, 41, 59, 0.75);
+            --primary: #6366f1; --primary-hover: #4f46e5;
+            --text-main: #f1f5f9; --text-sub: #94a3b8;
             --border: rgba(255, 255, 255, 0.1);
-            --danger: #ef4444;
-            --success: #10b981;
-            
-            --nav-height: 70px;
-            --radius: 16px;
+            --danger: #ef4444; --success: #10b981; --warning: #f59e0b;
+            --nav-h: 72px; --radius: 20px;
         }
-
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
+        
         body {
-            background: radial-gradient(circle at top right, #1e1b4b, #0b0f19);
+            background: radial-gradient(circle at top left, #1e1b4b, #0f172a);
             color: var(--text-main);
             font-family: 'Inter', 'Noto Sans JP', sans-serif;
             margin: 0; overflow: hidden; height: 100vh;
         }
 
-        /* SVGアイコン */
-        .icon { width: 22px; height: 22px; fill: currentColor; }
+        /* アイコン(SVG) */
+        .icon { width: 24px; height: 24px; fill: currentColor; }
+        .icon-sm { width: 18px; height: 18px; fill: currentColor; }
 
-        /* 画面管理 */
-        .screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; position: absolute; inset: 0; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
+        /* 画面遷移 */
+        .screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; position: absolute; inset: 0; opacity: 0; transition: opacity 0.4s ease; pointer-events: none; }
         .screen.active { display: flex; opacity: 1; pointer-events: auto; z-index: 10; }
 
         /* コンポーネント */
         .card {
-            background: var(--bg-card);
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 24px; width: 90%; max-width: 420px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            background: var(--bg-glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 28px; width: 90%; max-width: 420px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
         }
-        .full-w { width: 100%; max-width: none; margin-bottom: 16px; }
+        .full-w { width: 100%; max-width: none; margin-bottom: 16px; padding: 20px; }
 
-        h1, h2, h3 { margin: 0 0 16px; font-weight: 700; letter-spacing: 0.02em; }
-        p { color: var(--text-sub); font-size: 0.9rem; margin-bottom: 20px; line-height: 1.5; }
+        h1, h2 { margin: 0 0 8px; font-weight: 700; letter-spacing: 0.02em; }
+        p { color: var(--text-sub); font-size: 0.9rem; margin-bottom: 24px; line-height: 1.5; }
 
         input, select, textarea {
-            width: 100%; background: rgba(0,0,0,0.3);
+            width: 100%; background: rgba(15, 23, 42, 0.6);
             border: 1px solid var(--border); color: #fff;
-            padding: 14px; border-radius: 12px; font-size: 16px;
+            padding: 16px; border-radius: 14px; font-size: 16px;
             margin-bottom: 12px; outline: none; transition: 0.2s;
         }
-        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25); }
 
         .btn {
-            width: 100%; padding: 14px; border: none; border-radius: 12px;
-            font-weight: 600; font-size: 15px; cursor: pointer; color: white;
+            width: 100%; padding: 16px; border: none; border-radius: 14px;
+            font-weight: 600; font-size: 16px; cursor: pointer; color: white;
             display: flex; align-items: center; justify-content: center; gap: 8px;
-            transition: 0.2s; position: relative; overflow: hidden;
+            transition: 0.2s; position: relative; overflow: hidden; margin-top: 5px;
         }
-        .btn:active { transform: scale(0.97); }
-        .btn-primary { background: linear-gradient(135deg, var(--primary), #4f46e5); box-shadow: 0 4px 15px var(--primary-glow); }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), #4338ca); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3); }
         .btn-success { background: linear-gradient(135deg, var(--success), #059669); }
         .btn-danger { background: var(--danger); }
-        .btn-ghost { background: transparent; color: var(--text-sub); border: 1px solid var(--border); }
-        .btn-text { background: transparent; color: var(--text-sub); margin-top: 10px; font-size: 0.85rem; }
+        .btn-ghost { background: transparent; color: var(--text-sub); border: 1px solid var(--border); margin-top: 10px; }
+        .btn-text { background: transparent; color: var(--primary); margin-top: 15px; font-size: 0.9rem; }
 
         /* レイアウト */
         .app-shell { width: 100%; height: 100%; display: flex; flex-direction: column; }
-        
         @media (min-width: 768px) {
             .app-shell { flex-direction: row; max-width: 1200px; margin: 0 auto; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
             .nav-bar { 
-                width: 240px !important; height: 100% !important; flex-direction: column !important; 
-                position: relative !important; justify-content: flex-start !important; 
-                padding: 40px 15px !important; border-top: none !important; border-right: 1px solid var(--border);
+                width: 260px !important; height: 100% !important; flex-direction: column !important; 
+                padding: 40px 20px !important; border-top: none !important; border-right: 1px solid var(--border);
+                justify-content: flex-start !important;
             }
-            .nav-item { width: 100%; height: 50px; flex-direction: row !important; gap: 15px; padding-left: 20px; margin-bottom: 8px; border-radius: 12px; }
-            .content-area { padding-bottom: 20px !important; }
+            .nav-item { width: 100%; height: 55px; flex-direction: row !important; gap: 16px; padding-left: 20px; margin-bottom: 8px; border-radius: 14px; }
             .mobile-header { display: none !important; }
+            .content-area { padding-bottom: 20px !important; }
         }
 
-        .content-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: calc(var(--nav-height) + 20px); }
+        .content-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: calc(var(--nav-h) + 20px); }
 
+        /* ナビゲーション */
         .nav-bar {
-            position: absolute; bottom: 0; width: 100%; height: var(--nav-height);
-            background: var(--bg-nav); backdrop-filter: blur(10px);
+            position: absolute; bottom: 0; width: 100%; height: var(--nav-h);
+            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px);
             border-top: 1px solid var(--border); display: flex; justify-content: space-around; z-index: 100;
         }
         .nav-item {
@@ -102,67 +93,39 @@
         }
         .nav-item.active { color: var(--primary); background: rgba(99, 102, 241, 0.1); }
 
-        /* --- チャット & 画像調整 --- */
-        .list-item {
-            background: rgba(255,255,255,0.03); border: 1px solid var(--border);
-            padding: 16px; border-radius: 12px; margin-bottom: 10px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        
-        .chat-box { display: flex; flex-direction: column; gap: 12px; }
-        .msg { max-width: 85%; padding: 12px 16px; border-radius: 18px; font-size: 0.95rem; line-height: 1.5; position: relative; }
-        .msg.me { align-self: flex-end; background: var(--primary); border-bottom-right-radius: 4px; color: white; }
-        .msg.other { align-self: flex-start; background: #334155; border-bottom-left-radius: 4px; color: #e2e8f0; }
-        .msg-sender { font-size: 0.7rem; opacity: 0.7; margin-bottom: 4px; display: block; }
-        
-        /* 画像のレスポンシブ対応 */
-        .msg-img { 
-            max-width: 100%; /* 親要素からはみ出さない */
-            max-height: 250px; /* 縦長すぎる画像を防ぐ */
-            width: auto; height: auto; 
-            border-radius: 12px; margin-top: 8px; 
-            cursor: zoom-in; /* クリック可能であることを示す */
-            display: block;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .msg-del {
-            position: absolute; top: -8px; right: -8px; width: 22px; height: 22px;
-            background: var(--danger); border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3); z-index: 5;
-        }
-        .msg-del svg { width: 12px; height: 12px; fill: white; }
-
+        /* リソースバー */
         .resource-bar { 
             display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; 
             background: rgba(0,0,0,0.3); padding: 15px; border-radius: 16px; 
             margin-bottom: 20px; text-align: center; font-weight: bold; border: 1px solid var(--border);
         }
-        
-        #toast { 
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%); 
-            background: var(--success); color: white; padding: 12px 24px; 
-            border-radius: 30px; font-weight: bold; display: none; z-index: 9999; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4); 
-        }
-        .cand-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-        .cand { background: #334155; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; border: 1px solid var(--primary); }
 
-        /* 画像拡大モーダル */
-        #img-overlay {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9);
-            z-index: 10000; align-items: center; justify-content: center;
-            flex-direction: column; padding: 20px;
+        /* チャット */
+        .msg-box { display: flex; flex-direction: column; gap: 12px; }
+        .msg { max-width: 85%; padding: 12px 16px; border-radius: 18px; font-size: 0.95rem; line-height: 1.5; position: relative; }
+        .msg.me { align-self: flex-end; background: var(--primary); border-bottom-right-radius: 4px; color: white; }
+        .msg.other { align-self: flex-start; background: #334155; border-bottom-left-radius: 4px; color: #e2e8f0; }
+        .msg-sender { font-size: 0.7rem; opacity: 0.7; margin-bottom: 4px; display: block; }
+        .msg-img { max-width: 100%; border-radius: 10px; margin-top: 8px; border: 1px solid rgba(255,255,255,0.1); cursor: zoom-in; }
+        .msg-del {
+            position: absolute; top: -8px; right: -8px; width: 24px; height: 24px;
+            background: var(--danger); border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.4); z-index: 5;
         }
-        #img-overlay img {
-            max-width: 100%; max-height: 80vh; border-radius: 8px; 
-            box-shadow: 0 0 50px rgba(0,0,0,0.5); object-fit: contain;
+
+        /* 通知・モーダル */
+        #toast { 
+            position: fixed; top: 30px; left: 50%; transform: translateX(-50%); 
+            background: var(--success); color: white; padding: 12px 28px; 
+            border-radius: 50px; font-weight: bold; display: none; z-index: 9999; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5); 
         }
-        #img-overlay .close-btn {
-            margin-top: 20px; background: rgba(255,255,255,0.1); color: white;
-            border: 1px solid rgba(255,255,255,0.3); border-radius: 30px;
-            padding: 10px 30px; cursor: pointer;
-        }
+        #img-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center; padding: 20px; }
+        #img-overlay img { max-width: 100%; max-height: 80vh; border-radius: 8px; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+
+        /* リスト */
+        .list-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 16px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .status-badge { font-size: 0.75rem; padding: 4px 8px; border-radius: 6px; background: rgba(255,255,255,0.1); }
     </style>
 </head>
 <body>
@@ -172,49 +135,44 @@
     <!-- 1. ログイン -->
     <div id="screen-login" class="screen active">
         <div class="card">
-            <h1 style="text-align: center; margin-bottom: 5px;">コトバト広場</h1>
+            <h1 style="text-align: center;">コトバト広場</h1>
             <p style="text-align: center;">Cotobato Plaza</p>
             
-            <label style="font-size:0.8rem; color:var(--text-sub);">ユーザー名</label>
-            <input type="text" id="log-u" placeholder="IDを入力" autocomplete="username">
-            
-            <label style="font-size:0.8rem; color:var(--text-sub);">パスワード</label>
+            <input type="text" id="log-u" placeholder="ユーザー名" autocomplete="username">
             <input type="password" id="log-p" placeholder="パスワード" autocomplete="current-password">
             
             <button class="btn btn-primary" onclick="doLogin()">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M10 17l5-5-5-5v10z"/><path d="M0 24V0h24v24H0z" fill="none"/></svg>
-                ログイン
+                <svg class="icon" viewBox="0 0 24 24"><path d="M10 17l5-5-5-5v10z"/><path d="M0 24V0h24v24H0z" fill="none"/></svg> ログイン
             </button>
-            <button class="btn btn-text" onclick="go('screen-register')">はじめての方はこちら（新規登録）</button>
+            <button class="btn btn-text" onclick="go('screen-register')">新規アカウント作成</button>
             
-            <div id="status" style="text-align:center; font-size:0.8rem; color:var(--warning); margin-top:15px;">● 接続待機中...</div>
+            <div id="debug-box" style="margin-top:20px; padding:10px; background:rgba(0,0,0,0.3); border-radius:8px; font-size:0.75rem; color:var(--text-sub); text-align:left;">
+                <div id="st-auth">⌛ 認証システム: 待機中...</div>
+                <div id="st-db">⌛ データベース: 待機中...</div>
+            </div>
         </div>
     </div>
 
     <!-- 2. 登録 -->
     <div id="screen-register" class="screen">
         <div class="card">
-            <h2 style="text-align: center;">新規アカウント</h2>
+            <h2 style="text-align: center;">新規登録</h2>
+            <p style="text-align: center;">IDを作成してデータを同期</p>
             <input type="text" id="reg-u" placeholder="希望ID (半角英数)" autocomplete="off">
-            <div id="cand-box" style="display:none;">
-                <small style="color:var(--danger)">※使用済みです。候補:</small>
-                <div class="cand-wrap" id="cand-list"></div>
-            </div>
             <input type="password" id="reg-p" placeholder="パスワード" autocomplete="new-password">
             <input type="text" id="reg-n" placeholder="表示名 (ニックネーム)" autocomplete="off">
             <button class="btn btn-success" onclick="doRegister()">
-                <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm1-15c1.1 0 2 .9 2 2v4c0 1.1-.9 2-2 2H8c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h4z"/></svg>
-                登録して開始
+                <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm1-15c1.1 0 2 .9 2 2v4c0 1.1-.9 2-2 2H8c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h4z"/></svg> 登録して開始
             </button>
-            <button class="btn btn-text" onclick="go('screen-login')">ログイン画面へ戻る</button>
+            <button class="btn btn-ghost" onclick="go('screen-login')">戻る</button>
         </div>
     </div>
 
-    <!-- 3. メインアプリ -->
+    <!-- 3. メイン -->
     <div id="screen-main" class="screen" style="padding:0; background:transparent;">
         <div class="app-shell">
             <div class="mobile-header" style="padding:15px 20px; background:rgba(15,23,42,0.95); border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
-                <div id="app-ttl" style="font-weight:800; font-size:1.2rem; background:linear-gradient(to right, #818cf8, #38bdf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; cursor:pointer;">Cotobato</div>
+                <div id="app-ttl" style="font-weight:800; font-size:1.2rem; background:linear-gradient(to right, #818cf8, #38bdf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Cotobato</div>
                 <div id="head-user" style="font-size:0.8rem; color:var(--text-sub);">Guest</div>
             </div>
 
@@ -234,22 +192,17 @@
                     </button>
 
                     <div class="card full-w">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
                             <h3>データ管理</h3>
-                            <span class="badge" id="lim-cloud">残2回</span>
+                            <span class="status-badge" id="lim-cloud">残2回</span>
                         </div>
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;">
                             <button class="btn btn-primary" onclick="bkCloud()">クラウド保存</button>
-                            <button class="btn btn-ghost" onclick="rsCloud()">復元</button>
+                            <button class="btn btn-ghost" style="margin:0;" onclick="rsCloud()">復元</button>
                         </div>
-                        <div style="margin-top:15px; padding-top:15px; border-top:1px solid var(--border);">
-                            <div style="display:flex; justify-content:space-between;">
-                                <small>ローカル保存</small>
-                                <span class="badge" id="lim-local">残5回</span>
-                            </div>
-                            <button class="btn btn-ghost" style="margin-top:5px; font-size:0.85rem;" onclick="bkLocal()">端末にバックアップ</button>
-                            <div id="bk-hist" style="margin-top:10px; font-size:0.75rem; color:var(--text-sub);"></div>
-                        </div>
+                        <hr style="border-color:var(--border); margin:15px 0;">
+                        <button class="btn btn-ghost" onclick="bkLocal()">端末にバックアップ (残5回)</button>
+                        <div id="bk-hist" style="margin-top:10px; font-size:0.75rem; color:var(--text-sub);"></div>
                     </div>
 
                     <h3>お知らせ</h3>
@@ -259,7 +212,7 @@
                 <!-- チャット -->
                 <div id="tab-chat" style="display:none;">
                     <div id="chat-box" class="chat-box" style="padding-bottom:20px;"></div>
-                    <div style="position:sticky; bottom:0; background:var(--bg-nav); padding:10px; border-radius:12px; display:flex; gap:10px; border:1px solid var(--border);">
+                    <div style="position:sticky; bottom:0; background:var(--bg-body); padding:10px; border-radius:12px; display:flex; gap:10px; border:1px solid var(--border);">
                         <label class="btn btn-ghost" style="width:44px; padding:0; margin:0;">
                             <svg class="icon" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
                             <input type="file" id="chat-img" accept="image/*" style="display:none" onchange="prevImg(this)">
@@ -278,14 +231,14 @@
                         <h3>出品作成</h3>
                         <div style="display:flex; gap:8px;">
                             <select id="tr-gt" style="width:35%"><option value="coins">コイン</option><option value="diamonds">ダイヤ</option></select>
-                            <input type="number" id="tr-gv" placeholder="出す量" style="margin:0;">
+                            <input type="number" id="tr-gv" placeholder="量" style="margin:0;">
                         </div>
                         <div style="text-align:center; margin:5px 0; color:var(--text-sub);">⇅</div>
                         <div style="display:flex; gap:8px;">
                             <select id="tr-wt" style="width:35%"><option value="coins">コイン</option><option value="diamonds">ダイヤ</option></select>
-                            <input type="number" id="tr-wv" placeholder="欲しい量" style="margin:0;">
+                            <input type="number" id="tr-wv" placeholder="求" style="margin:0;">
                         </div>
-                        <button class="btn btn-success" onclick="mkTrade()">掲示板に出す</button>
+                        <button class="btn btn-success" onclick="mkTrade()">出品する</button>
                     </div>
                     <div id="trade-list"></div>
                 </div>
@@ -293,37 +246,28 @@
                 <!-- 設定 -->
                 <div id="tab-settings" style="display:none;">
                     <div class="card full-w">
-                        <h3>プロフィール</h3>
+                        <h3>アカウント</h3>
                         <input type="text" id="set-name" placeholder="新しい表示名">
                         <button class="btn btn-primary" onclick="updName()">変更保存</button>
-                        <hr style="border-color:var(--border); margin:20px 0;">
                         <button class="btn btn-danger" onclick="doLogout()">ログアウト</button>
                     </div>
                     <div class="card full-w">
                         <h3>運営認証</h3>
                         <input type="password" id="adm-p" placeholder="パスワード">
                         <button class="btn btn-ghost" onclick="authAdm()">認証</button>
-                        <p style="font-size:0.7rem; margin-top:10px;">※PC: Ctrl+Shift+Q / スマホ: タイトル7回タップで試験開始</p>
+                        <p style="font-size:0.7rem; margin-top:10px; color:var(--text-sub);">※PC: Ctrl+Shift+Q / スマホ: タイトル7回タップ</p>
                     </div>
                 </div>
 
-                <!-- 運営パネル -->
+                <!-- 運営 -->
                 <div id="tab-admin" style="display:none;">
                     <div class="card full-w" style="border-color:var(--warning);">
-                        <h3 style="color:var(--warning);">運営コマンド</h3>
+                        <h3 style="color:var(--warning);">運営パネル</h3>
                         <input type="text" id="adm-news" placeholder="お知らせ本文">
                         <button class="btn btn-primary" onclick="postNews()">配信</button>
                         <hr style="border-color:var(--border); margin:15px 0;">
-                        <div style="display:flex; gap:5px;">
-                            <select id="adm-gt"><option value="coins">コイン</option><option value="diamonds">ダイヤ</option></select>
-                            <input type="number" id="adm-gv" placeholder="量" style="margin:0;">
-                        </div>
-                        <input type="text" id="adm-gm" placeholder="メッセージ">
-                        <input type="datetime-local" id="adm-ge">
-                        <button class="btn btn-success" onclick="mkGift()">プレゼント配布</button>
-                        <hr style="border-color:var(--border); margin:15px 0;">
-                        <input type="password" id="adm-np" placeholder="新パスワード">
-                        <button class="btn btn-ghost" onclick="chgPass()">PW変更</button>
+                        <input type="text" id="adm-gm" placeholder="プレゼント名">
+                        <button class="btn btn-success" onclick="alert('デモ機能です')">配布</button>
                     </div>
                 </div>
 
@@ -331,46 +275,32 @@
 
             <!-- ナビゲーション -->
             <div class="nav-bar">
-                <div class="nav-item active" onclick="tab('home',this)">
-                    <svg class="icon" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-                    <span>ホーム</span>
-                </div>
-                <div class="nav-item" onclick="tab('chat',this)">
-                    <svg class="icon" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-                    <span>チャット</span>
-                </div>
-                <div class="nav-item" onclick="tab('trade',this)">
-                    <svg class="icon" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
-                    <span>交換</span>
-                </div>
-                <div class="nav-item" onclick="tab('settings',this)">
-                    <svg class="icon" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.488.488 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
-                    <span>設定</span>
-                </div>
-                <div class="nav-item" id="nav-adm" style="display:none;" onclick="tab('admin',this)">
-                    <svg class="icon" viewBox="0 0 24 24" style="fill:var(--warning)"><path d="M12 2L1 21h22L12 2zm0 3.45l8.55 14.8h-17.1L12 5.45zM11 10v6h2v-6h-2zm0 8v2h2v-2h-2z"/></svg>
-                    <span style="color:var(--warning)">運営</span>
-                </div>
+                <div class="nav-item active" onclick="tab('home',this)"><svg class="icon" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>ホーム</span></div>
+                <div class="nav-item" onclick="tab('chat',this)"><svg class="icon" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg><span>チャット</span></div>
+                <div class="nav-item" onclick="tab('trade',this)"><svg class="icon" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg><span>交換</span></div>
+                <div class="nav-item" onclick="tab('settings',this)"><svg class="icon" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.488.488 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg><span>設定</span></div>
+                <div class="nav-item" id="nav-adm" style="display:none;" onclick="tab('admin',this)"><svg class="icon" viewBox="0 0 24 24" style="fill:var(--warning)"><path d="M12 2L1 21h22L12 2zm0 3.45l8.55 14.8h-17.1L12 5.45zM11 10v6h2v-6h-2zm0 8v2h2v-2h-2z"/></svg><span style="color:var(--warning)">運営</span></div>
             </div>
         </div>
     </div>
 
-    <!-- 画像拡大オーバーレイ -->
+    <!-- モーダル・オーバーレイ -->
     <div id="img-overlay">
         <img id="full-img" src="">
-        <button class="close-btn" onclick="closeImg()">閉じる</button>
+        <button class="btn btn-ghost" style="width:auto; margin-top:20px; border-color:white; color:white;" onclick="closeImg()">閉じる</button>
     </div>
 
-    <!-- モーダル群 -->
-    <div id="modal-base" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9000; align-items:center; justify-content:center; padding:20px;">
-        <div class="card" style="width:100%;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-                <h3 id="mdl-ti"></h3>
-                <button class="btn btn-ghost" style="width:auto; margin:0; padding:5px 10px;" onclick="closeMdl()">✕</button>
-            </div>
-            <div id="mdl-con"></div>
+    <div id="quiz-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:9999; align-items:center; justify-content:center; padding:20px;">
+        <div class="card">
+            <h2 style="color:#fbbf24;">関係者確認</h2>
+            <p>Q. 創始者の別の役職は？</p>
+            <input type="text" id="q-ans">
+            <button class="btn btn-primary" onclick="chkQ()">回答</button>
+            <button class="btn btn-ghost" onclick="document.getElementById('quiz-modal').style.display='none'">閉じる</button>
         </div>
     </div>
+
+    <div id="toast"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
@@ -401,21 +331,40 @@
         const META_KEY = "kb_meta";
         const SESS_KEY = "kb_sess";
 
-        signInAnonymously(auth).catch(e=>console.error(e));
-        onAuthStateChanged(auth, u=>{
-            if(u){
-                isReady=true;
-                document.getElementById('status').innerText="● 接続完了";
-                document.getElementById('status').style.color=getComputedStyle(document.documentElement).getPropertyValue('--success');
+        // 1. 診断付き匿名認証
+        signInAnonymously(auth)
+            .then(() => {
+                document.getElementById('st-auth').innerText = "✔ 認証: 接続完了";
+                document.getElementById('st-auth').style.color = "#10b981";
+            })
+            .catch(e => {
+                document.getElementById('st-auth').innerText = "✖ 認証エラー: " + e.code;
+                document.getElementById('st-auth').style.color = "#ef4444";
+            });
+
+        onAuthStateChanged(auth, async (u) => {
+            if (u) {
+                isReady = true;
+                // DB導通チェック
+                try {
+                    await getDoc(doc(db, "system", "check"));
+                    document.getElementById('st-db').innerText = "✔ DB: アクセス可能";
+                    document.getElementById('st-db').style.color = "#10b981";
+                } catch (e) {
+                    document.getElementById('st-db').innerText = "✖ DBエラー: ルールまたは未作成";
+                    document.getElementById('st-db').style.color = "#ef4444";
+                }
+
+                // 自動ログイン
                 const sess = localStorage.getItem(SESS_KEY);
-                if(sess) autoLogin(sess);
+                if (sess) autoLogin(sess);
             }
         });
 
         async function autoLogin(u){
             try {
                 const s = await getDoc(doc(db, "users", u));
-                if(s.exists()){ user=s.data(); startApp(); showToast("自動ログインしました"); }
+                if(s.exists()){ user=s.data(); startApp(); showToast("お帰りなさい"); }
             } catch(e){}
         }
 
@@ -431,32 +380,26 @@
         };
 
         window.doRegister = async () => {
-            if(!isReady) return alert("接続中...");
+            if(!isReady) return alert("接続待機中です");
             const u=document.getElementById('reg-u').value.trim();
             const p=document.getElementById('reg-p').value.trim();
             const n=document.getElementById('reg-n').value.trim()||u;
-            if(!u||!p) return alert("必須です");
+            if(!u||!p) return alert("必須項目を入力してください");
             
             try {
                 const ref = doc(db, "users", u);
                 const s = await getDoc(ref);
-                if(s.exists()){
-                    document.getElementById('cand-box').style.display='block';
-                    const l = document.getElementById('cand-list'); l.innerHTML="";
-                    [u+Math.floor(Math.random()*99), u+"_s", "k_"+u].forEach(c=>{
-                        l.innerHTML+=`<span class="cand" onclick="document.getElementById('reg-u').value='${c}'">${c}</span>`;
-                    });
-                    return;
-                }
+                if(s.exists()) return alert("そのIDは既に使用されています");
+                
                 const d = { username:u, password:p, name:n, isAdmin:false, quizCleared:false, bkCount:0, bkDate:"", history:[], createdAt:serverTimestamp() };
                 await setDoc(ref, d);
                 user=d; localStorage.setItem(SESS_KEY, u);
-                startApp(); showToast("登録完了");
-            } catch(e){alert("エラー:"+e.message);}
+                startApp(); showToast("登録完了！");
+            } catch(e){ alert("エラー: " + e.message); }
         };
 
         window.doLogin = async () => {
-            if(!isReady) return alert("接続中...");
+            if(!isReady) return alert("接続待機中です");
             const u=document.getElementById('login-u').value.trim();
             const p=document.getElementById('login-p').value.trim();
             try {
@@ -464,8 +407,8 @@
                 if(s.exists() && s.data().password===p){
                     user=s.data(); localStorage.setItem(SESS_KEY, u);
                     startApp(); showToast("ログイン成功");
-                } else alert("違います");
-            } catch(e){alert("エラー");}
+                } else alert("IDかパスワードが違います");
+            } catch(e){ alert("ログインエラー: " + e.message); }
         };
 
         window.doLogout = () => { localStorage.removeItem(SESS_KEY); location.reload(); };
@@ -488,14 +431,15 @@
         }
 
         function startListeners() {
-            // Chat Listener
+            // Chat
             onSnapshot(query(collection(db,"chat"), limit(30), orderBy("createdAt","desc")), s=>{
                 const b=document.getElementById('chat-box'); b.innerHTML="";
                 const msgs=[]; s.forEach(d=>msgs.push({id:d.id, ...d.data()}));
                 msgs.reverse().forEach(m=>{
                     const me = m.username===user.username;
-                    // 削除ボタン: 本人または管理者
-                    const delBtn = (me || user.isAdmin) ? `<div class="msg-del" onclick="delChat('${m.id}')"><svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></div>` : '';
+                    // 削除権限: 本人 or 運営
+                    const canDel = me || user.isAdmin;
+                    const delBtn = canDel ? `<div class="msg-del" onclick="delChat('${m.id}')"><svg class="icon-sm" viewBox="0 0 24 24" style="fill:white"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></div>` : '';
                     
                     b.innerHTML+=`
                     <div style="align-self:${me?'flex-end':'flex-start'}; max-width:85%; position:relative;">
@@ -510,6 +454,7 @@
                 b.scrollTop=b.scrollHeight;
             });
 
+            // News
             onSnapshot(query(collection(db,"announcements"), limit(5), orderBy("createdAt","desc")), s=>{
                 const d=document.getElementById('news-box'); d.innerHTML="";
                 s.forEach(doc=>{
@@ -519,6 +464,7 @@
                 if(s.empty) d.innerHTML="なし";
             });
 
+            // Trade
             onSnapshot(query(collection(db,"trades"), where("status","==","open")), s=>{
                 const t=document.getElementById('trade-list'); t.innerHTML="";
                 s.forEach(doc=>{
@@ -528,26 +474,18 @@
             });
         }
 
-        // Image View
-        window.viewImg = (src) => {
-            document.getElementById('full-img').src = src;
-            document.getElementById('img-overlay').style.display = 'flex';
-        };
-        window.closeImg = () => {
-            document.getElementById('img-overlay').style.display = 'none';
-        };
-
-        // Chat
-        window.prevImg = i => { if(i.files[0]){const r=new FileReader(); r.onload=e=>{imgData=e.target.result; document.getElementById('img-prev').innerText="画像あり";}; r.readAsDataURL(i.files[0]);} };
+        // Functions
+        window.prevImg = i => { if(i.files[0]){const r=new FileReader(); r.onload=e=>{imgData=e.target.result; document.getElementById('img-prev').innerText="画像選択済み";}; r.readAsDataURL(i.files[0]);} };
+        window.viewImg = s => { document.getElementById('full-img').src=s; document.getElementById('img-overlay').style.display='flex'; };
+        window.closeImg = () => document.getElementById('img-overlay').style.display='none';
+        
         window.sendChat = async () => {
             const t=document.getElementById('chat-in').value;
             if(!t && !imgData) return;
             await addDoc(collection(db,"chat"), {text:t, img:imgData, sender:user.name, username:user.username, createdAt:serverTimestamp()});
             document.getElementById('chat-in').value=""; imgData=null; document.getElementById('img-prev').innerText="";
         };
-        window.delChat = async (id) => {
-            if(confirm("削除しますか？")) await deleteDoc(doc(db, "chat", id));
-        };
+        window.delChat = async (id) => { if(confirm("削除しますか？")) await deleteDoc(doc(db, "chat", id)); };
 
         // Backup
         function updateMeta() {
@@ -583,12 +521,13 @@
             const h=user.history||[];
             if(h.length===0) return alert("なし");
             const html = h.map((v,i)=>`<div class="list-item"><span>${v.d}</span><button class="btn btn-primary" style="width:auto;margin:0;padding:6px 12px;" onclick="execRest('${i}')">復元</button></div>`).join('');
-            openMdl("クラウド履歴", html);
+            // 簡易表示
+            document.getElementById('bk-hist').innerHTML = html;
         };
         window.execRest = (i) => {
             const d=user.history[i].v;
             localStorage.setItem(SAVE_KEY, d);
-            localData=JSON.parse(d); updateUI(); closeMdl(); showToast("復元完了");
+            localData=JSON.parse(d); updateUI(); showToast("復元完了");
         };
         function renderHist() {
             const h=JSON.parse(localStorage.getItem(META_KEY+"_h"))||[];
@@ -621,17 +560,17 @@
         };
 
         // Admin & Quiz
-        window.openGifts = () => alert("ギフト機能(デモ)");
+        window.openGifts = () => alert("ギフト機能");
         let taps=0; document.getElementById('app-ttl').onclick=()=>{taps++; if(taps>=7){taps=0; quiz();} setTimeout(()=>taps=0,2000);};
         window.addEventListener('keydown', e=>{if(e.ctrlKey&&e.shiftKey&&e.key==='Q') quiz();});
         function quiz(){
-            if(user.quizCleared) return showToast("設定から認証してください");
-            openMdl("関係者試験", `<p>Q. 創始者の別の役職は？</p><input type="text" id="q-ans"><button class="btn btn-primary" onclick="chkQ()">回答</button>`);
+            if(user.quizCleared) return showToast("認証してください");
+            document.getElementById('quiz-modal').style.display='flex';
         }
         window.chkQ = async () => {
             if(document.getElementById('q-ans').value==="Boss"){
                 await updateDoc(doc(db,"users",user.username),{quizCleared:true});
-                user.quizCleared=true; closeMdl(); alert("合格");
+                user.quizCleared=true; document.getElementById('quiz-modal').style.display='none'; alert("合格");
             } else alert("不正解");
         };
         window.authAdm = async () => {
@@ -642,38 +581,17 @@
                 document.getElementById('nav-adm').style.display='flex';
                 document.getElementById('tab-admin').style.display='block';
                 showToast("運営モード有効(30分)");
-                setTimeout(()=>location.reload(), 1800000);
             } else alert("違います");
         };
         
-        // Admin Panel Functions (FIXED)
+        // Admin Fix
         window.postNews = async () => {
             const t = document.getElementById('adm-news').value;
             if(!t) return;
             await addDoc(collection(db, "announcements"), { text: t, createdAt: serverTimestamp() });
             document.getElementById('adm-news').value=""; showToast("配信しました");
         };
-        window.mkGift = async () => {
-            const t=document.getElementById('adm-gt').value, v=parseInt(document.getElementById('adm-gv').value);
-            const m=document.getElementById('adm-gm').value, e=document.getElementById('adm-ge').value;
-            if(!v || !e) return alert("入力不備");
-            // 全員配布用 (実装簡略化のためログのみ)
-            console.log("Create Gift:", t, v, m, e);
-            alert("ギフト作成(DB実装が必要)");
-        };
-        window.chgPass = async () => {
-            const p=document.getElementById('adm-np').value;
-            if(!p) return;
-            await setDoc(doc(db, "system", "config"), {pass:p}, {merge:true});
-            showToast("変更しました");
-        };
 
-        window.openMdl = (t,c) => {
-            document.getElementById('mdl-ti').innerText=t;
-            document.getElementById('mdl-con').innerHTML=c;
-            document.getElementById('modal-base').style.display='flex';
-        };
-        window.closeMdl = () => document.getElementById('modal-base').style.display='none';
         function showToast(m){const t=document.getElementById('toast');t.innerText=m;t.style.display='block';setTimeout(()=>t.style.display='none',3000);}
     </script>
 </body>
