@@ -19,7 +19,6 @@
             --danger: #ef4444;
             --success: #10b981;
             
-            /* サイズ定義 */
             --nav-height: 70px;
             --radius: 16px;
         }
@@ -35,13 +34,12 @@
 
         /* SVGアイコン */
         .icon { width: 22px; height: 22px; fill: currentColor; }
-        .icon-sm { width: 16px; height: 16px; fill: currentColor; }
 
         /* 画面管理 */
         .screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; position: absolute; inset: 0; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
         .screen.active { display: flex; opacity: 1; pointer-events: auto; z-index: 10; }
 
-        /* コンポーネント: カード */
+        /* コンポーネント */
         .card {
             background: var(--bg-card);
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -55,16 +53,14 @@
         h1, h2, h3 { margin: 0 0 16px; font-weight: 700; letter-spacing: 0.02em; }
         p { color: var(--text-sub); font-size: 0.9rem; margin-bottom: 20px; line-height: 1.5; }
 
-        /* 入力フォーム */
         input, select, textarea {
             width: 100%; background: rgba(0,0,0,0.3);
             border: 1px solid var(--border); color: #fff;
             padding: 14px; border-radius: 12px; font-size: 16px;
             margin-bottom: 12px; outline: none; transition: 0.2s;
         }
-        input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
 
-        /* ボタン */
         .btn {
             width: 100%; padding: 14px; border: none; border-radius: 12px;
             font-weight: 600; font-size: 15px; cursor: pointer; color: white;
@@ -77,9 +73,8 @@
         .btn-danger { background: var(--danger); }
         .btn-ghost { background: transparent; color: var(--text-sub); border: 1px solid var(--border); }
         .btn-text { background: transparent; color: var(--text-sub); margin-top: 10px; font-size: 0.85rem; }
-        .btn-text:hover { color: var(--text-main); text-decoration: underline; }
 
-        /* アプリレイアウト */
+        /* レイアウト */
         .app-shell { width: 100%; height: 100%; display: flex; flex-direction: column; }
         
         @media (min-width: 768px) {
@@ -96,7 +91,6 @@
 
         .content-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: calc(var(--nav-height) + 20px); }
 
-        /* ナビゲーション */
         .nav-bar {
             position: absolute; bottom: 0; width: 100%; height: var(--nav-height);
             background: var(--bg-nav); backdrop-filter: blur(10px);
@@ -108,7 +102,7 @@
         }
         .nav-item.active { color: var(--primary); background: rgba(99, 102, 241, 0.1); }
 
-        /* リスト & チャット */
+        /* --- チャット & 画像調整 --- */
         .list-item {
             background: rgba(255,255,255,0.03); border: 1px solid var(--border);
             padding: 16px; border-radius: 12px; margin-bottom: 10px;
@@ -116,24 +110,34 @@
         }
         
         .chat-box { display: flex; flex-direction: column; gap: 12px; }
-        .msg { max-width: 80%; padding: 12px 16px; border-radius: 18px; font-size: 0.95rem; line-height: 1.5; position: relative; }
+        .msg { max-width: 85%; padding: 12px 16px; border-radius: 18px; font-size: 0.95rem; line-height: 1.5; position: relative; }
         .msg.me { align-self: flex-end; background: var(--primary); border-bottom-right-radius: 4px; color: white; }
         .msg.other { align-self: flex-start; background: #334155; border-bottom-left-radius: 4px; color: #e2e8f0; }
         .msg-sender { font-size: 0.7rem; opacity: 0.7; margin-bottom: 4px; display: block; }
+        
+        /* 画像のレスポンシブ対応 */
+        .msg-img { 
+            max-width: 100%; /* 親要素からはみ出さない */
+            max-height: 250px; /* 縦長すぎる画像を防ぐ */
+            width: auto; height: auto; 
+            border-radius: 12px; margin-top: 8px; 
+            cursor: zoom-in; /* クリック可能であることを示す */
+            display: block;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
         .msg-del {
-            position: absolute; top: -8px; right: -8px; width: 20px; height: 20px;
+            position: absolute; top: -8px; right: -8px; width: 22px; height: 22px;
             background: var(--danger); border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3); z-index: 5;
         }
         .msg-del svg { width: 12px; height: 12px; fill: white; }
 
-        /* その他 */
         .resource-bar { 
             display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; 
             background: rgba(0,0,0,0.3); padding: 15px; border-radius: 16px; 
             margin-bottom: 20px; text-align: center; font-weight: bold; border: 1px solid var(--border);
         }
-        .badge { font-size: 0.7rem; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px; margin-left: auto; }
         
         #toast { 
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%); 
@@ -143,6 +147,22 @@
         }
         .cand-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
         .cand { background: #334155; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; border: 1px solid var(--primary); }
+
+        /* 画像拡大モーダル */
+        #img-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+            z-index: 10000; align-items: center; justify-content: center;
+            flex-direction: column; padding: 20px;
+        }
+        #img-overlay img {
+            max-width: 100%; max-height: 80vh; border-radius: 8px; 
+            box-shadow: 0 0 50px rgba(0,0,0,0.5); object-fit: contain;
+        }
+        #img-overlay .close-btn {
+            margin-top: 20px; background: rgba(255,255,255,0.1); color: white;
+            border: 1px solid rgba(255,255,255,0.3); border-radius: 30px;
+            padding: 10px 30px; cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -175,17 +195,13 @@
     <div id="screen-register" class="screen">
         <div class="card">
             <h2 style="text-align: center;">新規アカウント</h2>
-            <p style="text-align: center;">データ同期のためのIDを作成します</p>
-            
             <input type="text" id="reg-u" placeholder="希望ID (半角英数)" autocomplete="off">
             <div id="cand-box" style="display:none;">
                 <small style="color:var(--danger)">※使用済みです。候補:</small>
                 <div class="cand-wrap" id="cand-list"></div>
             </div>
-            
             <input type="password" id="reg-p" placeholder="パスワード" autocomplete="new-password">
             <input type="text" id="reg-n" placeholder="表示名 (ニックネーム)" autocomplete="off">
-            
             <button class="btn btn-success" onclick="doRegister()">
                 <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm1-15c1.1 0 2 .9 2 2v4c0 1.1-.9 2-2 2H8c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h4z"/></svg>
                 登録して開始
@@ -197,7 +213,6 @@
     <!-- 3. メインアプリ -->
     <div id="screen-main" class="screen" style="padding:0; background:transparent;">
         <div class="app-shell">
-            <!-- PC用ヘッダー/スマホ用ヘッダー -->
             <div class="mobile-header" style="padding:15px 20px; background:rgba(15,23,42,0.95); border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
                 <div id="app-ttl" style="font-weight:800; font-size:1.2rem; background:linear-gradient(to right, #818cf8, #38bdf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; cursor:pointer;">Cotobato</div>
                 <div id="head-user" style="font-size:0.8rem; color:var(--text-sub);">Guest</div>
@@ -338,6 +353,12 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- 画像拡大オーバーレイ -->
+    <div id="img-overlay">
+        <img id="full-img" src="">
+        <button class="close-btn" onclick="closeImg()">閉じる</button>
     </div>
 
     <!-- モーダル群 -->
@@ -481,7 +502,7 @@
                         <div class="msg ${me?'me':'other'}">
                             <span class="msg-sender">${m.sender}</span>
                             ${m.text}
-                            ${m.img?`<img src="${m.img}" style="max-width:100%; border-radius:8px; margin-top:5px;">`:''}
+                            ${m.img?`<img src="${m.img}" class="msg-img" onclick="viewImg('${m.img}')">`:''}
                         </div>
                         ${delBtn}
                     </div>`;
@@ -506,6 +527,15 @@
                 });
             });
         }
+
+        // Image View
+        window.viewImg = (src) => {
+            document.getElementById('full-img').src = src;
+            document.getElementById('img-overlay').style.display = 'flex';
+        };
+        window.closeImg = () => {
+            document.getElementById('img-overlay').style.display = 'none';
+        };
 
         // Chat
         window.prevImg = i => { if(i.files[0]){const r=new FileReader(); r.onload=e=>{imgData=e.target.result; document.getElementById('img-prev').innerText="画像あり";}; r.readAsDataURL(i.files[0]);} };
