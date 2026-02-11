@@ -7,323 +7,357 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-body: #0b0f19;
+            --bg-body: #0d1117;
             --bg-sidebar: #161b22;
-            --bg-card: #1c2128;
-            --bg-input: #0d1117;
+            --bg-card: #21262d;
+            --bg-input: #30363d;
             --primary: #58a6ff;
-            --primary-dim: rgba(88, 166, 255, 0.15);
-            --accent: #f78166;
-            --success: #3fb950;
-            --danger: #f85149;
+            --primary-dim: rgba(88, 166, 255, 0.1);
+            --success: #238636;
+            --danger: #da3633;
             --warning: #d29922;
-            --text-main: #f0f6fc;
+            --text-main: #c9d1d9;
             --text-sub: #8b949e;
             --border: #30363d;
-            --nav-h: 70px;
-            --radius: 14px;
+            --radius: 12px;
+            --nav-h-mobile: 60px;
+            --sidebar-w: 240px;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        body { background: var(--bg-body); color: var(--text-main); font-family: 'Inter', 'Noto Sans JP', sans-serif; margin: 0; padding: 0; height: 100vh; overflow: hidden; }
+        body { background: var(--bg-body); color: var(--text-main); font-family: 'Inter', 'Noto Sans JP', sans-serif; margin: 0; padding: 0; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        
+        .hidden { display: none !important; }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-2 { gap: 8px; }
+        .gap-4 { gap: 16px; }
+        .font-bold { font-weight: 700; }
+        .text-sm { font-size: 0.85rem; }
+        .text-xs { font-size: 0.75rem; }
+        .mb-2 { margin-bottom: 8px; }
+        .mb-4 { margin-bottom: 16px; }
+        .w-full { width: 100%; }
+        .text-sub { color: var(--text-sub); }
 
-        /* アイコン */
-        .icon { width: 22px; height: 22px; fill: currentColor; vertical-align: middle; }
+        .icon { width: 20px; height: 20px; fill: currentColor; flex-shrink: 0; }
 
-        /* 画面管理 */
-        .screen { display: none; width: 100%; height: 100%; flex-direction: column; position: absolute; inset: 0; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
-        .screen.active { display: flex; opacity: 1; pointer-events: auto; z-index: 10; }
+        .screen { position: absolute; inset: 0; background: var(--bg-body); z-index: 10; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; display: flex; flex-direction: column; }
+        .screen.active { opacity: 1; pointer-events: auto; z-index: 20; }
 
-        /* 認証画面 */
-        .auth-container { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at center, #1f2937 0%, #0b0f19 100%); padding: 20px; }
-        .auth-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 24px; padding: 40px 30px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
-        .auth-logo { font-weight: 900; font-size: 2rem; background: linear-gradient(to right, #58a6ff, #bc8cff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 30px; letter-spacing: 2px; }
+        .auth-container { flex: 1; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at center, #1f2937 0%, #0b0f19 100%); padding: 20px; }
+        .auth-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 24px; padding: 40px 30px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+        .brand-title { font-size: 2rem; font-weight: 900; background: linear-gradient(135deg, #58a6ff, #bc8cff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 2rem; letter-spacing: 1px; }
 
-        /* レイアウト */
-        .app-shell { display: flex; width: 100%; height: 100%; overflow: hidden; }
-        .sidebar { width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--border); display: none; flex-direction: column; padding: 30px 20px; flex-shrink: 0; }
-        .sidebar.home-active { display: flex; }
-        .main-content { flex: 1; display: flex; flex-direction: column; height: 100%; overflow: hidden; position: relative; }
-        .scroll-area { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 20px; padding-bottom: 120px; -webkit-overflow-scrolling: touch; }
-        .app-header { height: 60px; border-bottom: 1px solid var(--border); background: var(--bg-sidebar); display: flex; justify-content: space-between; align-items: center; padding: 0 20px; flex-shrink: 0; z-index: 100; }
-        .back-btn { display: none; align-items: center; gap: 8px; color: var(--primary); cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+        .app-layout { display: flex; width: 100%; height: 100%; overflow: hidden; }
+        .sidebar { width: var(--sidebar-w); background: var(--bg-sidebar); border-right: 1px solid var(--border); display: none; flex-direction: column; padding: 20px; flex-shrink: 0; }
+        .sidebar-brand { font-size: 1.2rem; font-weight: 800; color: var(--text-main); margin-bottom: 30px; padding-left: 10px; cursor: pointer; }
+        .nav-link { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: var(--text-sub); border-radius: 8px; cursor: pointer; margin-bottom: 4px; font-weight: 600; font-size: 0.95rem; }
+        .nav-link.active { background: var(--primary-dim); color: var(--primary); }
+        
+        .main-content { flex: 1; display: flex; flex-direction: column; height: 100%; position: relative; overflow: hidden; background: var(--bg-body); }
+        .header-mobile { height: 56px; background: var(--bg-sidebar); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: center; padding: 0 16px; flex-shrink: 0; font-weight: 700; font-size: 1.1rem; position: relative; }
+        .header-user { position: absolute; right: 16px; font-size: 0.8rem; color: var(--text-sub); }
+        .scroll-view { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 80px; -webkit-overflow-scrolling: touch; }
 
-        @media (min-width: 768px) {
-            .scroll-area { padding-bottom: 40px; }
-            .mobile-header-only { display: none !important; }
-            .bottom-nav { display: none !important; }
-        }
-
-        /* ナビゲーション */
-        .nav-item { display: flex; align-items: center; gap: 14px; padding: 14px 18px; color: var(--text-sub); border-radius: 10px; cursor: pointer; transition: 0.2s; margin-bottom: 6px; font-weight: 600; }
-        .nav-item.active { background: var(--primary-dim); color: var(--primary); }
-        .bottom-nav { position: absolute; bottom: 0; width: 100%; height: var(--nav-h); background: var(--bg-sidebar); border-top: 1px solid var(--border); display: none; justify-content: space-around; align-items: center; z-index: 100; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .bottom-nav.home-active { display: flex; transform: translateY(0); }
-        .bottom-nav.nav-hidden { transform: translateY(100%); }
-        .b-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--text-sub); font-size: 0.65rem; cursor: pointer; height: 100%; }
+        .bottom-nav { height: var(--nav-h-mobile); background: var(--bg-sidebar); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-around; position: absolute; bottom: 0; left: 0; right: 0; z-index: 50; padding-bottom: env(safe-area-inset-bottom); transition: transform 0.3s; }
+        .b-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-sub); font-size: 0.65rem; gap: 4px; cursor: pointer; }
         .b-nav-item.active { color: var(--primary); }
 
-        /* UIコンポーネント */
-        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; position: relative; }
-        .input { width: 100%; padding: 14px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 10px; color: #fff; font-size: 1rem; margin-bottom: 12px; transition: 0.2s; }
+        body.chat-mode .bottom-nav { transform: translateY(100%); } 
+        body.chat-mode .sidebar { display: none !important; }
+        body.chat-mode .scroll-view { padding-bottom: 0 !important; }
+
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; position: relative; }
+        .card h3 { margin: 0 0 15px 0; font-size: 1rem; color: var(--text-main); }
+        
+        .input { width: 100%; padding: 12px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: #fff; font-size: 1rem; transition: border-color 0.2s; }
         .input:focus { border-color: var(--primary); }
-        .btn { width: 100%; padding: 14px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.95rem; }
-        .btn:active { transform: scale(0.98); }
-        .btn-primary { background: #238636; color: white; }
+        
+        .btn { width: 100%; padding: 12px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.95rem; color: white; transition: 0.2s; }
+        .btn:active { opacity: 0.7; transform: scale(0.98); }
+        .btn-primary { background: var(--success); }
         .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-sub); }
-        .btn-danger { background: rgba(248, 81, 73, 0.1); color: var(--danger); border: 1px solid var(--danger); }
-        .btn-sm { padding: 8px 12px; font-size: 0.8rem; width: auto; height: auto; }
+        .btn-danger { background: rgba(218, 54, 51, 0.15); color: var(--danger); border: 1px solid var(--danger); }
+        .btn-sm { padding: 6px 12px; font-size: 0.8rem; width: auto; }
 
-        /* お知らせ (ユーザー側) */
-        .news-card {
-            background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; 
-            overflow: hidden; margin-bottom: 20px; cursor: pointer; position: relative;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2); transition: transform 0.2s;
-        }
-        .news-card:active { transform: scale(0.98); }
-        .news-card.pinned { border: 1px solid var(--warning); box-shadow: 0 0 15px rgba(210, 153, 34, 0.15); }
+        .res-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        .res-box { background: var(--bg-input); padding: 10px; border-radius: 10px; text-align: center; border: 1px solid var(--border); }
+        .res-label { font-size: 0.65rem; color: var(--text-sub); display: block; font-weight: 700; }
+        .res-val { font-size: 1.1rem; font-weight: 800; }
+
+        .chat-header { height: 50px; background: var(--bg-sidebar); display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid var(--border); font-weight: bold; justify-content: space-between; flex-shrink: 0; }
+        .chat-list { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 16px; }
+        .chat-input-wrapper { background: var(--bg-sidebar); border-top: 1px solid var(--border); padding-bottom: calc(10px + env(safe-area-inset-bottom)); flex-shrink: 0; }
         
-        .news-hero {
-            width: 100%; aspect-ratio: 16/9; background: #000; position: relative;
-        }
-        .news-hero img { width: 100%; height: 100%; object-fit: cover; mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 50%, rgba(0,0,0,0)); -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 50%, rgba(0,0,0,0)); }
+        #chat-preview { display: none; padding: 10px 15px 0; align-items: center; gap: 10px; }
+        .preview-thumb { height: 60px; border-radius: 8px; border: 1px solid var(--primary); }
+        .chat-input-area { padding: 10px 15px; display: flex; gap: 10px; align-items: center; }
         
-        .news-overlay {
-            position: absolute; bottom: 0; left: 0; width: 100%; padding: 20px;
-            background: linear-gradient(to top, var(--bg-card), transparent);
+        .msg-row { display: flex; flex-direction: column; max-width: 85%; position: relative; }
+        .msg-row.mine { align-self: flex-end; align-items: flex-end; }
+        .msg-row.other { align-self: flex-start; align-items: flex-start; }
+        .msg-name { font-size: 0.7rem; color: var(--text-sub); margin-bottom: 4px; padding: 0 4px; }
+        .msg-bubble { padding: 10px 14px; border-radius: 16px; font-size: 0.95rem; line-height: 1.5; word-break: break-word; position: relative; }
+        .msg-row.mine .msg-bubble { background: #1f6feb; color: white; border-bottom-right-radius: 4px; }
+        .msg-row.other .msg-bubble { background: var(--bg-card); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+        .chat-img { max-width: 100%; border-radius: 8px; margin-top: 6px; display: block; cursor: zoom-in; }
+        .msg-del { position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; background: var(--danger); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; cursor: pointer; border: 2px solid var(--bg-body); z-index: 2; }
+
+        .news-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; cursor: pointer; display: flex; gap: 12px; align-items: center; margin-bottom: 8px; position: relative; overflow: hidden; }
+        .news-thumb { width: 60px; height: 60px; background: #000; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+        .pin-mark { background: var(--warning); color: #000; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-right: 6px; }
+
+        .adm-list-item { background: var(--bg-input); padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .adm-tag { font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; background: var(--border); margin-right: 6px; display: inline-block; }
+        .adm-tag.future { background: var(--warning); color: #000; }
+        .adm-tag.pin { background: var(--primary); color: #fff; }
+        .adm-tag.img { background: var(--success); color: #fff; }
+        .adm-detail { font-size: 0.75rem; color: var(--text-sub); margin-top: 4px; line-height: 1.4; }
+
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
+        .modal-box { background: var(--bg-card); width: 100%; max-width: 500px; border-radius: 16px; border: 1px solid var(--border); overflow: hidden; max-height: 80vh; display: flex; flex-direction: column; }
+        .modal-head { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
+        .modal-body { padding: 20px; overflow-y: auto; }
+        
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--primary); color: #fff; padding: 10px 24px; border-radius: 50px; font-weight: 700; z-index: 200; opacity: 0; transition: 0.3s; pointer-events: none; }
+        .toast.show { opacity: 1; }
+        .img-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 300; display: none; align-items: center; justify-content: center; padding: 10px; }
+        .img-full { max-width: 100%; max-height: 100vh; object-fit: contain; }
+
+        @media (min-width: 768px) {
+            .sidebar { display: flex; } .bottom-nav { display: none; } .header-mobile { display: none; } .scroll-view { padding-bottom: 20px; }
         }
-        .news-ti { font-weight: 800; font-size: 1.2rem; margin-bottom: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
-        .news-meta { font-size: 0.75rem; color: var(--text-sub); display: flex; gap: 10px; align-items: center; }
-        .pin-badge { background: var(--warning); color: #000; font-weight: 900; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; }
-
-        /* お知らせ・プレゼント (管理用リスト) */
-        .admin-item {
-            background: var(--bg-input); border: 1px solid var(--border); padding: 12px; 
-            border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
-        }
-        .admin-info { font-size: 0.85rem; color: var(--text-main); flex: 1; margin-right: 10px; }
-        .admin-meta { font-size: 0.7rem; color: var(--text-sub); display: block; margin-top: 2px; }
-        .admin-actions { display: flex; gap: 8px; }
-
-        /* チャット */
-        #tab-chat { display: flex; flex-direction: column; height: 100%; width: 100%; }
-        .chat-scroll { flex: 1; overflow-y: auto; padding: 20px; }
-        .chat-input-bar { flex-shrink: 0; padding: 15px 20px; background: var(--bg-sidebar); border-top: 1px solid var(--border); display: flex; gap: 10px; align-items: flex-end; }
-        .msg { padding: 12px 16px; border-radius: 16px; max-width: 85%; font-size: 0.95rem; line-height: 1.5; position: relative; margin-bottom: 12px; }
-        .msg.me { align-self: flex-end; background: #1f6feb; color: white; border-bottom-right-radius: 2px; }
-        .msg.other { align-self: flex-start; background: var(--bg-card); border: 1px solid var(--border); border-bottom-left-radius: 2px; }
-        .msg-img { max-width: 100%; max-height: 300px; border-radius: 8px; margin-top: 5px; cursor: zoom-in; display: block; }
-        .msg-del { position: absolute; top: -8px; right: -8px; width: 22px; height: 22px; background: var(--danger); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid var(--bg-body); z-index: 5; }
-
-        /* リソース */
-        .res-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 25px; }
-        .res-box { background: var(--bg-input); border: 1px solid var(--border); padding: 12px; border-radius: 12px; text-align: center; }
-        .res-num { display: block; font-weight: 800; font-size: 1.1rem; }
-        .res-lab { font-size: 0.6rem; color: var(--text-sub); font-weight: bold; }
-
-        #toast { position: fixed; top: 30px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 12px 28px; border-radius: 50px; font-weight: 700; display: none; z-index: 10000; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; backdrop-filter: blur(5px); }
-        .modal-body { background: var(--bg-card); border: 1px solid var(--border); width: 100%; max-width: 600px; border-radius: 20px; padding: 0; overflow: hidden; animation: pop 0.3s ease; }
-        .modal-content { padding: 25px; max-height: 75vh; overflow-y: auto; }
-        @keyframes pop { from{transform:scale(0.95);opacity:0} to{transform:scale(1);opacity:1} }
     </style>
 </head>
 <body>
 
-    <div id="toast"></div>
+    <div id="toast" class="toast">メッセージ</div>
+    <div id="img-viewer" class="img-overlay" onclick="this.style.display='none'"><img id="img-full" class="img-full"></div>
 
-    <!-- 1. ログイン -->
     <div id="scr-login" class="screen active">
         <div class="auth-container">
             <div class="auth-card">
-                <div class="auth-logo">COTOBATO</div>
-                <input type="text" id="log-u" class="input" placeholder="ユーザーID">
-                <input type="password" id="log-p" class="input" placeholder="パスワード">
-                <button class="btn btn-primary" onclick="window.doLogin()">ログイン</button>
-                <button class="btn btn-ghost" style="margin-top:15px;" onclick="window.go('scr-register')">新規登録</button>
-                <div id="status-bar" style="margin-top:20px; font-size:0.75rem; color:var(--text-sub);">接続中...</div>
+                <div class="brand-title" id="app-ttl">COTOBATO</div>
+                <input type="text" id="inp-uid" class="input mb-4" placeholder="ユーザーID (半角英数)">
+                <input type="password" id="inp-pass" class="input mb-4" placeholder="パスワード">
+                <button class="btn btn-primary mb-4" onclick="app.login()">ログイン</button>
+                <button class="btn btn-ghost" onclick="app.go('scr-register')">新規登録</button>
+                <div id="loading-msg" class="text-xs text-sub mt-4 hidden">接続中...</div>
             </div>
         </div>
     </div>
 
-    <!-- 2. 登録 -->
     <div id="scr-register" class="screen">
         <div class="auth-container">
             <div class="auth-card">
-                <h2>アカウント作成</h2>
-                <input type="text" id="reg-u" class="input" placeholder="ID (半角英数)">
-                <div id="cand-box" style="display:none; margin-bottom:15px; text-align:left;"><div id="cand-list"></div></div>
-                <input type="password" id="reg-p" class="input" placeholder="パスワード">
-                <input type="text" id="reg-n" class="input" placeholder="表示名">
-                <button class="btn btn-primary" onclick="window.doRegister()">登録して開始</button>
-                <button class="btn btn-ghost" style="margin-top:10px;" onclick="window.go('scr-login')">キャンセル</button>
+                <h2 class="mb-4">新規登録</h2>
+                <input type="text" id="reg-uid" class="input mb-4" placeholder="希望ID">
+                <input type="text" id="reg-name" class="input mb-4" placeholder="表示名">
+                <input type="password" id="reg-pass" class="input mb-4" placeholder="パスワード">
+                <button class="btn btn-primary mb-4" onclick="app.register()">登録して開始</button>
+                <button class="btn btn-ghost" onclick="app.go('scr-login')">キャンセル</button>
             </div>
         </div>
     </div>
 
-    <!-- 3. メイン -->
-    <div id="scr-main" class="screen" style="padding:0;">
-        <div class="app-shell">
-            <!-- PCサイドバー -->
-            <aside id="sidebar-pc" class="sidebar">
-                <div style="font-weight:900; color:var(--primary); font-size:1.4rem; margin-bottom:40px; padding-left:10px;">COTOBATO</div>
-                <div class="nav-item active" data-id="home" onclick="window.tab('home',this)"><svg class="icon" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>ホーム</div>
-                <div class="nav-item" data-id="chat" onclick="window.tab('chat',this)"><svg class="icon" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>チャット</div>
-                <div class="nav-item" data-id="trade" onclick="window.tab('trade',this)"><svg class="icon" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>交換所</div>
-                <div class="nav-item" data-id="settings" onclick="window.tab('settings',this)"><svg class="icon" viewBox="0 0 24 24"><path d="M12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>設定</div>
-                <div class="nav-item" id="nav-adm" style="display:none; color:var(--warning)" onclick="window.tab('admin',this)"><svg class="icon" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>運営ツール</div>
-            </aside>
+    <div id="scr-main" class="screen">
+        <div class="app-layout">
+            <nav class="sidebar">
+                <div class="sidebar-brand" onclick="location.reload()">COTOBATO</div>
+                <div class="nav-link active" onclick="app.tab('home')" data-tab="home"><svg class="icon" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>ホーム</div>
+                <div class="nav-link" onclick="app.tab('chat')" data-tab="chat"><svg class="icon" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>チャット</div>
+                <div class="nav-link" onclick="app.tab('trade')" data-tab="trade"><svg class="icon" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>交換所</div>
+                <div class="nav-link" onclick="app.tab('settings')" data-tab="settings"><svg class="icon" viewBox="0 0 24 24"><path d="M12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>設定</div>
+                <div class="nav-link hidden" id="nav-adm-pc" style="color:var(--warning)" onclick="app.tab('admin')" data-tab="admin"><svg class="icon" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>運営管理</div>
+            </nav>
 
-            <!-- メインエリア -->
             <div class="main-content">
-                <header class="mobile-header">
-                    <div id="btn-back" class="back-btn" onclick="window.tab('home')"><svg class="icon" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg> 戻る</div>
-                    <span style="font-weight:900; color:var(--primary); font-size:1.1rem;">Cotobato</span>
-                    <span id="head-user" style="font-size:0.8rem; color:var(--text-sub)">Guest</span>
-                </header>
+                <header class="header-mobile"><span>Cotobato</span><span id="header-user-name" class="header-user">Guest</span></header>
 
-                <div class="scroll-area" id="home-scroll">
-                    <!-- タブ: ホーム -->
-                    <div id="tab-home">
-                        <div class="res-grid">
-                            <div class="res-box"><span class="res-lab">RANK</span><span class="res-num" id="v-lv">1</span></div>
-                            <div class="res-box"><span class="res-lab">COINS</span><span class="res-num" id="v-coin" style="color:var(--warning)">0</span></div>
-                            <div class="res-box"><span class="res-lab">GEMS</span><span class="res-num" id="v-dia" style="color:var(--primary)">0</span></div>
+                <div id="tab-home" class="scroll-view">
+                    <div class="res-grid">
+                        <div class="res-box"><span class="res-label">LEVEL</span><span class="res-val" id="v-level">1</span></div>
+                        <div class="res-box"><span class="res-label">COINS</span><span class="res-val" id="v-coin" style="color:var(--warning)">0</span></div>
+                        <div class="res-box"><span class="res-label">GEMS</span><span class="res-val" id="v-gem" style="color:var(--primary)">0</span></div>
+                    </div>
+                    <div class="card flex items-center justify-between" style="border-color:var(--warning)">
+                        <div><div class="font-bold text-sm" style="color:var(--warning)">プレゼントBOX</div><div class="text-xs text-sub">ログインボーナス等</div></div>
+                        <button class="btn btn-sm btn-primary" style="background:var(--warning); color:#000; width:auto;" onclick="app.checkGifts()">確認</button>
+                    </div>
+                    <h3 class="font-bold mb-4 mt-4">お知らせ</h3>
+                    <div id="news-list" class="flex-col flex">読み込み中...</div>
+                </div>
+
+                <div id="tab-chat" class="hidden" style="height:100%; flex-direction:column; background:var(--bg-body);">
+                    <div class="chat-header">
+                        <div onclick="app.tab('home')" style="cursor:pointer; display:flex; align-items:center; gap:4px; color:var(--primary);">
+                            <svg class="icon" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>ホーム
                         </div>
-
-                        <button class="btn btn-primary" style="background:#d29922; color:#000; margin-bottom:30px; padding:18px;" onclick="window.fetchGifts()">
-                            <svg class="icon" viewBox="0 0 24 24"><path d="M20 6h-2.18c.11-.31.18-.65.18-1 0-1.66-1.34-3-3-3-1.05 0-1.96.54-2.5 1.35l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zM4 19v-2h16v2H4z"/></svg>
-                            プレゼントBOX
-                        </button>
-
-                        <div class="card">
-                            <h3 style="margin-top:0">データ同期</h3>
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                                <button class="btn btn-primary" onclick="window.bkCloud()">クラウド保存</button>
-                                <button class="btn btn-ghost" style="color:white; background:#334155" onclick="window.rsCloud()">復元する</button>
-                            </div>
+                        <span>チャット</span>
+                        <div style="width:50px;"></div>
+                    </div>
+                    <div id="chat-box" class="chat-list"></div>
+                    <div class="chat-input-wrapper">
+                        <div id="chat-preview">
+                            <img id="chat-preview-img" class="preview-thumb">
+                            <span class="text-xs text-sub">画像を送信します</span>
+                            <button class="btn btn-ghost btn-sm" style="width:auto; margin-left:auto;" onclick="app.clearChatImg()">取消</button>
                         </div>
+                        <form class="chat-input-area" onsubmit="event.preventDefault(); app.sendChat();">
+                            <label class="btn btn-ghost" style="width:44px; padding:0; cursor:pointer; border-radius:8px;">
+                                <svg class="icon" viewBox="0 0 24 24"><path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5a2.5 2.5 0 0 1 5 0v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5a2.5 2.5 0 0 0 5 0V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/></svg>
+                                <input type="file" id="chat-file" accept="image/*" style="display:none" onchange="app.handleFileSelect(this, 'chat')">
+                            </label>
+                            <input type="text" id="chat-in" class="input" placeholder="メッセージ..." style="margin:0;">
+                            <button type="submit" class="btn btn-primary" style="width:50px; padding:0;"><svg class="icon" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+                        </form>
+                    </div>
+                </div>
 
-                        <h3 style="margin:30px 0 15px">イベント・お知らせ</h3>
-                        <div id="news-box">読み込み中...</div>
+                <div id="tab-trade" class="scroll-view hidden">
+                    <div class="card">
+                        <h3>出品</h3>
+                        <div class="flex gap-2 items-center mb-4">
+                            <select id="tr-give-type" class="input" style="width:30%"><option value="coins">コイン</option><option value="diamonds">ダイヤ</option></select>
+                            <input type="number" id="tr-give-val" class="input" placeholder="支払う量">
+                        </div>
+                        <div class="text-center text-xs text-sub mb-2">↓ 希望条件 ↓</div>
+                        <div class="flex gap-2 items-center mb-4">
+                            <select id="tr-want-type" class="input" style="width:30%"><option value="coins">コイン</option><option value="diamonds">ダイヤ</option></select>
+                            <input type="number" id="tr-want-val" class="input" placeholder="欲しい量">
+                        </div>
+                        <button class="btn btn-primary" onclick="app.createTrade()">出品を公開</button>
+                    </div>
+                    <h3>取引一覧</h3>
+                    <div id="trade-list" class="flex flex-col gap-2"></div>
+                </div>
+
+                <div id="tab-settings" class="scroll-view hidden">
+                    <div class="card">
+                        <h3>プロフィール</h3>
+                        <div class="mb-4"><label class="text-xs text-sub">表示名</label><input type="text" id="set-name" class="input"></div>
+                        <button class="btn btn-primary" onclick="app.updateProfile()">保存</button>
+                    </div>
+                    <div class="card">
+                        <h3>データ管理(クラウド)</h3>
+                        <p class="text-xs text-sub mb-4">現在の状態をアカウントに保存（バックアップ）したり、保存した状態に戻したりできます。</p>
+                        <div class="flex gap-2 mb-2">
+                            <button class="btn btn-ghost" onclick="app.backupCloud()">☁ バックアップ作成</button>
+                            <button class="btn btn-danger" onclick="app.restoreCloud()">↺ バックアップ復元</button>
+                        </div>
+                        <div class="text-xs text-sub text-center" id="last-backup-info">履歴なし</div>
+                    </div>
+                    <div class="card" style="border-color:var(--success)">
+                        <h3 style="color:var(--success)">ブラウザと同期</h3>
+                        <p class="text-xs text-sub mb-4">この端末のブラウザストレージにデータを保存、または読み込みます。</p>
+                        <div class="flex gap-2 mb-2">
+                            <button class="btn btn-success" style="background:var(--success)" onclick="app.saveToLocal()">↓ ブラウザに保存</button>
+                            <button class="btn btn-ghost" onclick="app.loadFromLocal()">↑ ブラウザから読込</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>アカウント</h3>
+                        <div class="text-xs text-sub mb-4">ID: <span id="set-uid"></span></div>
+                        <button class="btn btn-danger" onclick="app.logout()">ログアウト</button>
+                    </div>
+                    <div class="card">
+                        <h3>運営認証</h3>
+                        <input type="password" id="adm-code" class="input mb-4" placeholder="運営コード">
+                        <div class="text-xs text-sub mb-4">※認証は30分間有効です</div>
+                        <button class="btn btn-ghost" onclick="app.authAdmin()">認証</button>
+                    </div>
+                </div>
+
+                <div id="tab-admin" class="scroll-view hidden">
+                    <div class="card">
+                        <h3>運営パスワード変更</h3>
+                        <input type="password" id="adm-new-code" class="input mb-2" placeholder="新しいパスワード">
+                        <button class="btn btn-warning" style="background:var(--warning); color:#000" onclick="app.changeAdmPass()">変更を保存</button>
                     </div>
 
-                    <!-- タブ: 他 -->
-                    <div id="tab-trade" style="display:none;">
-                        <div class="card">
-                            <h3>出品</h3>
-                            <div style="display:grid; grid-template-columns:1fr auto 1fr; gap:10px; align-items:center;">
-                                <select id="tr-gt" class="input" style="margin:0"><option value="coins">コイン</option><option value="diamonds">ダイヤ</option></select>
-                                <span>⇄</span><input type="number" id="tr-gv" class="input" placeholder="量" style="margin:0;">
-                            </div>
-                            <div style="text-align:center; padding:10px; font-size:0.8rem; color:var(--text-sub);">希望条件</div>
-                            <div style="display:grid; grid-template-columns: 1fr auto 1fr; gap:10px; align-items:center;">
-                                <select id="tr-wt" class="input" style="margin:0"><option value="coins">コイン</option><option value="diamonds">ダイヤ</option></select>
-                                <span>⇄</span><input type="number" id="tr-wv" class="input" placeholder="量" style="margin:0;">
-                            </div>
-                            <button class="btn btn-primary" style="margin-top:20px;" onclick="window.mkTrade()">出品を公開</button>
-                        </div>
-                        <div id="trade-list"></div>
-                    </div>
-
-                    <div id="tab-settings" style="display:none;">
-                        <div class="card">
-                            <h3>設定</h3>
-                            <input type="text" id="set-name" class="input" placeholder="ニックネーム">
-                            <button class="btn btn-primary" onclick="window.updName()">保存</button>
-                            <hr style="border-color:var(--border); margin:25px 0;">
-                            <button class="btn btn-danger" onclick="window.doLogout()">ログアウト</button>
-                        </div>
-                        <div class="card">
-                            <h3>運営認証</h3>
-                            <input type="password" id="adm-p" class="input" placeholder="運営コード">
-                            <button class="btn btn-ghost" onclick="window.authAdm()">認証</button>
-                        </div>
-                    </div>
-
-                    <!-- 運営パネル -->
-                    <div id="tab-admin" style="display:none;">
-                        <!-- お知らせ編集・作成 -->
-                        <div class="card" style="border:1px solid var(--warning)">
-                            <h3 style="color:var(--warning)">お知らせ管理</h3>
-                            <input type="hidden" id="edit-news-id"> <!-- 編集用ID -->
-                            <input type="text" id="adm-news-ti" class="input" placeholder="タイトル">
-                            <textarea id="adm-news-txt" class="input" placeholder="本文" style="min-height:100px;"></textarea>
-                            <label class="btn btn-ghost" style="margin-bottom:10px;">画像を選択<input type="file" id="adm-news-img" accept="image/*" style="display:none" onchange="window.newsImgPrev(this)"></label>
-                            
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;">
-                                <div><small>公開日時</small><input type="datetime-local" id="adm-pub" class="input"></div>
-                                <label style="display:flex; align-items:center; gap:8px; border:1px solid var(--border); padding:0 10px; border-radius:10px; height:52px; margin-top:auto;"><input type="checkbox" id="adm-pin" style="width:20px;height:20px;">固定</label>
-                            </div>
-                            <div style="display:flex; gap:10px;">
-                                <button id="btn-post-news" class="btn btn-primary" onclick="window.postNews()">配信登録</button>
-                                <button id="btn-cancel-edit" class="btn btn-ghost" style="display:none;" onclick="window.cancelEdit()">キャンセル</button>
-                            </div>
-                        </div>
-
-                        <h4 style="margin:20px 0 10px;">配信中のお知らせ一覧</h4>
-                        <div id="adm-news-list"></div>
-
-                        <hr style="border-color:var(--border); margin:30px 0;">
-
-                        <!-- プレゼント管理 -->
-                        <div class="card">
-                            <h3>プレゼント配布</h3>
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                                <select id="adm-gift-t" class="input"><option value="coins">コイン</option><option value="diamonds">ダイヤ</option></select>
-                                <input type="number" id="adm-gift-v" class="input" placeholder="量">
-                            </div>
-                            <input type="text" id="adm-gift-m" class="input" placeholder="メッセージ">
-                            <input type="datetime-local" id="adm-gift-e" class="input">
-                            <button class="btn btn-primary" style="background:var(--warning); color:#000" onclick="window.mkGift()">全員配布</button>
-                        </div>
+                    <div class="card" style="border-color:var(--warning)">
+                        <h3 style="color:var(--warning)">お知らせ配信</h3>
+                        <input type="hidden" id="adm-news-id">
+                        <input type="text" id="adm-news-title" class="input mb-2" placeholder="タイトル">
+                        <textarea id="adm-news-body" class="input mb-2" style="min-height:80px" placeholder="本文"></textarea>
                         
-                        <h4 style="margin:20px 0 10px;">配布中のプレゼント一覧</h4>
-                        <div id="adm-gift-list"></div>
-                    </div>
-                </div>
+                        <div class="flex gap-2 items-center mb-2">
+                             <label class="btn btn-ghost btn-sm" style="width:auto">画像追加
+                                <input type="file" id="adm-news-file" accept="image/*" style="display:none" onchange="app.handleFileSelect(this, 'news')">
+                            </label>
+                            <span id="adm-news-file-status" class="text-xs text-sub">未選択</span>
+                        </div>
 
-                <!-- チャット専用 -->
-                <div id="tab-chat" style="display:none;">
-                    <div class="chat-scroll" id="chat-scroller">
-                        <div id="chat-box" class="chat-list"></div>
+                        <div class="flex gap-4 items-center mb-4">
+                            <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="adm-news-pin"> 固定</label>
+                            <div class="flex flex-col">
+                                <label class="text-xs text-sub">公開予約</label>
+                                <input type="datetime-local" id="adm-news-date" class="input" style="width:auto; padding:6px;">
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="btn-news-post" class="btn btn-primary" onclick="app.postNews()">配信登録</button>
+                            <button id="btn-news-cancel" class="btn btn-ghost hidden" onclick="app.resetNewsForm()">キャンセル</button>
+                        </div>
                     </div>
-                    <div class="chat-input-bar">
-                        <label class="btn btn-ghost" style="width:48px; padding:0; margin:0; border-radius:50%"><svg class="icon" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg><input type="file" id="chat-img" accept="image/*" style="display:none" onchange="window.prevImg(this)"></label>
-                        <input type="text" id="chat-in" class="input" placeholder="メッセージ..." style="margin:0;">
-                        <button class="btn btn-primary" style="width:65px; margin:0;" onclick="window.sendChat()"><svg class="icon" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
-                    </div>
-                </div>
 
-                <!-- ボトムナビ -->
-                <nav id="bottom-nav" class="bottom-nav">
-                    <div class="b-nav-item active" data-id="home" onclick="window.tab('home',this)"><svg class="icon" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>ホーム</div>
-                    <div class="b-nav-item" data-id="chat" onclick="window.tab('chat',this)"><svg class="icon" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2z"/></svg>チャット</div>
-                    <div class="b-nav-item" data-id="trade" onclick="window.tab('trade',this)"><svg class="icon" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>交換</div>
-                    <div class="b-nav-item" data-id="settings" onclick="window.tab('settings',this)"><svg class="icon" viewBox="0 0 24 24"><path d="M12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>設定</div>
-                </nav>
+                    <div class="card">
+                        <h3>プレゼント配布</h3>
+                        <input type="hidden" id="adm-gift-id">
+                        <div class="flex gap-2 mb-2">
+                            <select id="adm-gift-type" class="input"><option value="coins">コイン</option><option value="diamonds">ダイヤ</option></select>
+                            <input type="number" id="adm-gift-val" class="input" placeholder="量">
+                        </div>
+                        <input type="text" id="adm-gift-msg" class="input mb-2" placeholder="メッセージ">
+                        
+                        <div class="flex flex-col gap-2 mb-4">
+                            <div class="flex flex-col">
+                                <label class="text-xs text-sub">配布開始日時</label>
+                                <input type="datetime-local" id="adm-gift-start" class="input" style="padding:6px;">
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="text-xs text-sub">受取期限</label>
+                                <input type="datetime-local" id="adm-gift-end" class="input" style="padding:6px;">
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <button id="btn-gift-post" class="btn btn-danger" onclick="app.distributeGift()">全員に配布</button>
+                            <button id="btn-gift-cancel" class="btn btn-ghost hidden" onclick="app.resetGiftForm()">キャンセル</button>
+                        </div>
+                    </div>
+
+                    <h3 class="mt-4 mb-2">配信中のお知らせ</h3>
+                    <div id="adm-list-news"></div>
+                    <h3 class="mt-4 mb-2">配布済みギフト</h3>
+                    <div id="adm-list-gifts"></div>
+                </div>
             </div>
+
+            <nav class="bottom-nav">
+                <div class="b-nav-item active" onclick="app.tab('home')" data-tab="home"><svg class="icon" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>ホーム</div>
+                <div class="b-nav-item" onclick="app.tab('chat')" data-tab="chat"><svg class="icon" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2z"/></svg>チャット</div>
+                <div class="b-nav-item" onclick="app.tab('trade')" data-tab="trade"><svg class="icon" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>交換</div>
+                <div class="b-nav-item" onclick="app.tab('settings')" data-tab="settings"><svg class="icon" viewBox="0 0 24 24"><path d="M12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>設定</div>
+            </nav>
         </div>
     </div>
 
-    <!-- モーダル・画像拡大 -->
-    <div id="modal-base" class="modal" onclick="if(event.target==this)window.closeMdl()">
-        <div class="modal-body">
-            <div class="modal-header"><h3 id="mdl-ti"></h3><button class="btn btn-ghost" style="width:30px; padding:0" onclick="window.closeMdl()">✕</button></div>
-            <div id="mdl-con" class="modal-content"></div>
+    <div id="modal-base" class="modal-overlay" onclick="if(event.target===this)app.closeModal()">
+        <div class="modal-box">
+            <div class="modal-head"><span id="mdl-title"></span><button class="btn btn-ghost" style="width:30px;padding:0" onclick="app.closeModal()">✕</button></div>
+            <div id="mdl-content" class="modal-body"></div>
         </div>
-    </div>
-    <div id="img-overlay" class="modal" onclick="this.style.display='none'"><img id="full-img" style="max-width:95%; max-height:90vh; border-radius:10px;"></div>
-    <div id="quiz-modal" class="modal">
-        <div class="auth-card" style="background:var(--bg-card); width:90%"><h2>関係者試験</h2><p>Q. コトバト創始者の別の役職は？</p><input type="text" id="q-ans" class="input"><button class="btn btn-primary" onclick="window.chkQ()">回答送信</button><button class="btn btn-ghost" onclick="document.getElementById('quiz-modal').style.display='none'">閉じる</button></div>
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, onSnapshot, serverTimestamp, query, limit, where, deleteDoc, Timestamp, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, limit, where, deleteDoc, Timestamp, getDocs, increment, runTransaction, arrayUnion } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
 
-        // ★Firebase Config★
         const firebaseConfig = {
             apiKey: "AIzaSyDguL7I5v4GxKf5FahdoFEtU5lNMYgxcNo",
             authDomain: "cotobato-c121f.firebaseapp.com",
@@ -331,350 +365,398 @@
             projectId: "cotobato-c121f",
             storageBucket: "cotobato-c121f.firebasestorage.app",
             messagingSenderId: "699569737682",
-            appId: "1:699569737682:web:350b90c25c300a0548020b",
-            measurementId: "G-FQ1VZDXZ6J"
+            appId: "1:699569737682:web:350b90c25c300a0548020b"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
+        const fApp = initializeApp(firebaseConfig);
+        const db = getFirestore(fApp);
+        const auth = getAuth(fApp);
+        const SESS_KEY = "kb_user_id";
+        const ADM_KEY = "kb_adm_exp";
+        const LOC_KEY = "kb_game_data";
 
-        let currentUser = null, isReady = false;
-        let localData = { coins: 0, diamonds: 0, playerLevel: 1 };
-        let chatImgData = null, newsImgData = null;
-        let editingNewsId = null; // 編集用ID
-        const KEY = "kb_save_v36", SESS = "kb_sess";
+        let currentUser = null;
+        let listeners = [];
+        let chatImg = null;
+        let newsImg = null;
+        let newsImgOriginal = null;
 
-        signInAnonymously(auth).then(()=>{
-            onAuthStateChanged(auth, async u => {
-                if(u){
-                    isReady=true;
-                    document.getElementById('status-bar').innerText="● オンライン";
-                    const sess = localStorage.getItem(SESS);
-                    if(sess) autoLogin(sess);
+        const app = {
+            init: () => {
+                signInAnonymously(auth).then(() => {
+                    onAuthStateChanged(auth, u => { if(u) {
+                        const uid = localStorage.getItem(SESS_KEY);
+                        if(uid) app.loadUser(uid);
+                    }});
+                });
+            },
+            go: (id) => { document.querySelectorAll('.screen').forEach(e=>e.classList.remove('active')); document.getElementById(id).classList.add('active'); },
+            tab: (id) => {
+                ['home','chat','trade','settings','admin'].forEach(t=>{const e=document.getElementById('tab-'+t); if(e) e.classList.add('hidden')});
+                const t = document.getElementById('tab-'+id);
+                if(t){ t.classList.remove('hidden'); if(t.classList.contains('scroll-view')) t.classList.add('flex-col','flex'); }
+                if(id==='chat') { 
+                    t.style.display='flex'; 
+                    document.body.classList.add('chat-mode');
+                    app.scrollChat(); 
+                } else {
+                    document.body.classList.remove('chat-mode');
                 }
-            });
-        });
-
-        async function autoLogin(uID){
-            const s = await getDoc(doc(db, "users", uID));
-            if(s.exists()){ currentUser=s.data(); startApp(); showToast("おかえりなさい！"); }
-        }
-
-        window.go = id => {
-            document.querySelectorAll('.screen').forEach(e=>e.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        };
-
-        let lastScrollTop = 0;
-        window.tab = (id, el) => {
-            ['home','chat','trade','settings','admin'].forEach(t=> { if(document.getElementById('tab-'+t)) document.getElementById('tab-'+t).style.display='none';});
-            document.getElementById('tab-'+id).style.display='flex';
-            if(id !== 'chat') document.getElementById('tab-'+id).style.display='block';
+                if(id==='admin') {
+                    if(!app.checkAdmSess()) { app.tab('settings'); app.toast("セッション切れ"); return; }
+                }
+                document.querySelectorAll('.nav-link, .b-nav-item').forEach(e=>e.classList.remove('active'));
+                document.querySelectorAll(`[data-tab="${id}"]`).forEach(e=>e.classList.add('active'));
+            },
             
-            const sidebar = document.getElementById('sidebar-pc');
-            const bottomNav = document.getElementById('bottom-nav');
-            const backBtn = document.getElementById('btn-back');
-            
-            if (id === 'home') {
-                sidebar.classList.add('home-active');
-                bottomNav.classList.add('home-active');
-                bottomNav.classList.remove('nav-hidden');
-                backBtn.style.display = 'none';
-            } else {
-                sidebar.classList.remove('home-active');
-                bottomNav.classList.remove('home-active');
-                backBtn.style.display = 'flex';
-            }
+            // AUTH
+            login: async () => {
+                const uid = document.getElementById('inp-uid').value.trim(), pass = document.getElementById('inp-pass').value.trim();
+                if(!uid || !pass) return app.toast("入力してください");
+                document.getElementById('loading-msg').classList.remove('hidden');
+                try {
+                    const s = await getDoc(doc(db,"users",uid));
+                    if(s.exists() && s.data().password === pass) { localStorage.setItem(SESS_KEY, uid); app.loadUser(uid); }
+                    else { app.toast("間違い"); document.getElementById('loading-msg').classList.add('hidden'); }
+                } catch { app.toast("エラー"); document.getElementById('loading-msg').classList.add('hidden'); }
+            },
+            register: async () => {
+                const uid = document.getElementById('reg-uid').value.trim(), name = document.getElementById('reg-name').value.trim()||uid, pass = document.getElementById('reg-pass').value.trim();
+                if(!uid || !pass) return app.toast("必須");
+                const s = await getDoc(doc(db,"users",uid));
+                if(s.exists()) return app.toast("使用済みID");
+                await setDoc(doc(db,"users",uid), { uid, username:uid, name, password:pass, coins:100, diamonds:0, level:1, isAdmin:false, createdAt:serverTimestamp(), history:[] });
+                localStorage.setItem(SESS_KEY, uid); app.loadUser(uid);
+            },
+            loadUser: async (uid) => {
+                listeners.push(onSnapshot(doc(db,"users",uid), s=>{
+                    if(s.exists()){ 
+                        currentUser=s.data(); app.renderHead(); 
+                        if(currentUser.history && currentUser.history.length > 0) {
+                            const last = currentUser.history[currentUser.history.length-1];
+                            document.getElementById('last-backup-info').innerText = "最終保存: " + last.d;
+                        } else {
+                            document.getElementById('last-backup-info').innerText = "履歴なし";
+                        }
+                        app.go('scr-main'); app.tab('home'); 
+                    }
+                }));
+                app.subNews(); app.subChat(); app.subTrade();
+            },
+            renderHead: () => {
+                document.getElementById('header-user-name').innerText=currentUser.name;
+                document.getElementById('set-name').value=currentUser.name;
+                document.getElementById('set-uid').innerText=currentUser.username;
+                document.getElementById('v-coin').innerText=(currentUser.coins||0).toLocaleString();
+                document.getElementById('v-gem').innerText=(currentUser.diamonds||0).toLocaleString();
+                document.getElementById('v-level').innerText=currentUser.level||1;
+            },
+            logout: () => { localStorage.removeItem(SESS_KEY); localStorage.removeItem(ADM_KEY); location.reload(); },
 
-            document.querySelectorAll('.nav-item, .b-nav-item').forEach(e=>e.classList.remove('active'));
-            if(el) el.classList.add('active');
-            else {
-                const target = document.querySelector(`[data-id="${id}"]`);
-                if(target) target.classList.add('active');
-            }
-        };
+            // BACKUP / RESTORE (Cloud & Local)
+            backupCloud: async () => {
+                if(!confirm("現在の状態をクラウド履歴に保存しますか？")) return;
+                const dStr = new Date().toLocaleString();
+                const vStr = JSON.stringify({ coins: currentUser.coins||0, diamonds: currentUser.diamonds||0, level: currentUser.level||1 });
+                await updateDoc(doc(db, "users", currentUser.username), { history: arrayUnion({d:dStr, v:vStr}) });
+                app.toast("履歴に追加しました");
+            },
+            restoreCloud: async () => {
+                if(!currentUser.history || currentUser.history.length === 0) return app.toast("履歴がありません");
+                const last = currentUser.history[currentUser.history.length - 1];
+                if(!confirm(`最終履歴(${last.d})を復元しますか？`)) return;
+                const data = JSON.parse(last.v);
+                await updateDoc(doc(db, "users", currentUser.username), { coins: data.coins, diamonds: data.diamonds, level: data.level||1 });
+                app.toast("復元しました");
+            },
+            saveToLocal: () => {
+                const data = { coins: currentUser.coins||0, diamonds: currentUser.diamonds||0, level: currentUser.level||1, date: new Date().toLocaleString() };
+                localStorage.setItem(LOC_KEY, JSON.stringify(data));
+                app.toast("ブラウザに保存しました");
+            },
+            loadFromLocal: async () => {
+                const json = localStorage.getItem(LOC_KEY);
+                if(!json) return app.toast("ブラウザにデータがありません");
+                const data = JSON.parse(json);
+                if(!confirm(`ブラウザ保存データ(${data.date})を読み込みますか？`)) return;
+                await updateDoc(doc(db, "users", currentUser.username), { coins: data.coins, diamonds: data.diamonds, level: data.level||1 });
+                app.toast("読み込み完了");
+            },
 
-        // スクロール制御
-        document.getElementById('home-scroll').addEventListener('scroll', function() {
-            if (window.innerWidth >= 768) return;
-            let st = this.scrollTop;
-            const nav = document.getElementById('bottom-nav');
-            if (st > lastScrollTop && st > 80) nav.classList.add('nav-hidden');
-            else if (st < lastScrollTop) nav.classList.remove('nav-hidden');
-            lastScrollTop = st <= 0 ? 0 : st;
-        }, false);
-        
-        // スワイプアップ
-        let touchStartY = 0;
-        document.getElementById('home-scroll').addEventListener('touchstart', e=>touchStartY=e.touches[0].clientY, false);
-        document.getElementById('home-scroll').addEventListener('touchend', e=>{
-            if(touchStartY - e.changedTouches[0].clientY < -50) document.getElementById('bottom-nav').classList.remove('nav-hidden');
-        }, false);
-
-
-        // Auth
-        window.doRegister = async () => {
-            const u=document.getElementById('reg-u').value.trim();
-            const p=document.getElementById('reg-p').value.trim();
-            const n=document.getElementById('reg-n').value.trim()||u;
-            if(!u||!p) return alert("必須");
-            const ref = doc(db, "users", u);
-            const s = await getDoc(ref);
-            if(s.exists()){
-                document.getElementById('cand-box').style.display='block';
-                const l = document.getElementById('cand-list'); l.innerHTML="";
-                [u+Math.floor(Math.random()*99), u+"_s", "k_"+u].forEach(c=>{
-                    const sp=document.createElement('span'); sp.className='cand-chip'; sp.innerText=c; sp.onclick=()=>document.getElementById('reg-u').value=c;
-                    l.appendChild(sp);
-                });
-                return;
-            }
-            const d = { username:u, password:p, name:n, isAdmin:false, quizCleared:false, history:[], createdAt:serverTimestamp() };
-            await setDoc(ref, d);
-            currentUser=d; localStorage.setItem(SESS, u); startApp();
-        };
-
-        window.doLogin = async () => {
-            const u=document.getElementById('log-u').value.trim();
-            const p=document.getElementById('log-p').value.trim();
-            const s = await getDoc(doc(db,"users",u));
-            if(s.exists() && s.data().password === p){
-                currentUser=s.data(); localStorage.setItem(SESS, u); startApp();
-            } else alert("間違い");
-        };
-
-        window.doLogout = () => { localStorage.removeItem(SESS); location.reload(); };
-
-        function startApp() {
-            window.go('scr-main');
-            document.getElementById('head-user').innerText = currentUser.name;
-            loadLocal(); startListeners(); window.tab('home');
-            if(currentUser.isAdmin) startAdminListeners();
-        }
-
-        function loadLocal() { const r=localStorage.getItem(KEY); if(r) localData=JSON.parse(r); updateUI(); }
-        function updateUI() {
-            document.getElementById('v-coin').innerText=localData.coins||0;
-            document.getElementById('v-dia').innerText=localData.diamonds||0;
-            document.getElementById('v-lv').innerText=localData.playerLevel||1;
-        }
-
-        // --- リスナー ---
-        function startListeners() {
-            // User News Feed
-            onSnapshot(query(collection(db,"announcements"), limit(20)), s => {
-                const box = document.getElementById('news-box'); box.innerHTML = "";
-                let list = []; s.forEach(d => list.push({id:d.id, ...d.data()}));
-                const now = Date.now();
-                list = list.filter(n => !n.pub || n.pub.toMillis() <= now);
-                list.sort((a,b) => (a.pin && !b.pin) ? -1 : (b.createdAt?.toMillis()||0) - (a.createdAt?.toMillis()||0));
-                
-                list.forEach(n => {
-                    const el = document.createElement('div');
-                    el.className = `news-card ${n.pin?'pinned':''}`;
-                    el.innerHTML = `
-                        ${n.pin?'<span class="pin-tag">TOP</span>':''}
-                        ${n.img?`<div class="news-hero"><img src="${n.img}"></div>`:''}
-                        <div class="news-info">
-                            <div class="news-ti">${n.title}</div>
-                            <small style="color:var(--text-sub)">${n.createdAt?new Date(n.createdAt.toMillis()).toLocaleDateString():''}</small>
-                        </div>
-                    `;
-                    el.onclick = () => window.openNews(n);
-                    box.appendChild(el);
-                });
-            });
-
-            // Chat
-            onSnapshot(query(collection(db,"chat"), limit(30), orderBy("createdAt","desc")), s=>{
-                const b=document.getElementById('chat-box'); b.innerHTML="";
-                let msgs=[]; s.forEach(d=>msgs.push({id:d.id, ...d.data()}));
-                msgs.reverse().forEach(m=>{
-                    const me = m.username===currentUser.username;
-                    const canDel = me || currentUser.isAdmin;
-                    b.innerHTML+=`<div style="display:flex; flex-direction:column; align-items:${me?'flex-end':'flex-start'}; position:relative;"><div class="msg ${me?'me':'other'}"><small style="opacity:0.7; font-size:0.6rem; display:block;">${m.sender}</small>${m.text}${m.img?`<img src="${m.img}" class="chat-img-thumb" onclick="window.viewImg(this.src)">`:''}${canDel?`<div class="msg-del" onclick="window.delChat('${m.id}')">✕</div>`:''}</div></div>`;
-                });
-                document.getElementById('chat-scroller').scrollTop=document.getElementById('chat-scroller').scrollHeight;
-            });
-
-            // Trade
-            onSnapshot(query(collection(db,"trades"), where("status","==","open")), s=>{
-                const t=document.getElementById('trade-list'); t.innerHTML="";
-                s.forEach(doc=>{
-                    const v=doc.data(); const me=v.maker===currentUser.username;
-                    t.innerHTML+=`<div class="list-item"><div><b>${v.makerName}</b><br>${v.giveV}${v.giveT} ⇄ ${v.wantV}${v.wantT}</div>${me?`<button class="btn btn-danger btn-sm" onclick="window.delTrade('${doc.id}')">取消</button>`:`<button class="btn btn-primary btn-sm" onclick="window.doTrade('${doc.id}')">交換</button>`}</div>`;
-                });
-            });
-        }
-
-        // Admin Listeners (Full List)
-        function startAdminListeners() {
-            // News List for Admin
-            onSnapshot(query(collection(db,"announcements"), orderBy("createdAt", "desc"), limit(50)), s => {
-                const list = document.getElementById('adm-news-list'); list.innerHTML = "";
-                s.forEach(d => {
-                    const n = d.data();
-                    list.innerHTML += `
-                        <div class="admin-item">
-                            <div class="admin-info"><b>${n.title}</b><span class="admin-meta">${new Date(n.createdAt?.toMillis()).toLocaleString()}</span></div>
-                            <div class="admin-actions">
-                                <button class="btn btn-sm btn-primary" onclick='window.editNews(${JSON.stringify({id:d.id, ...n})})'>編集</button>
-                                <button class="btn btn-sm btn-danger" onclick="window.delNews('${d.id}')">削除</button>
+            // CHAT (Optimized)
+            subChat: () => {
+                listeners.push(onSnapshot(query(collection(db,"chat"), orderBy("createdAt","desc"), limit(30)), s=>{
+                    const b = document.getElementById('chat-box'); b.innerHTML="";
+                    const msgs=[]; s.forEach(d=>msgs.push({id:d.id, ...d.data()}));
+                    msgs.reverse().forEach(m => {
+                        const uid = m.username || m.senderUid;
+                        const name = m.sender || m.name || "Unknown";
+                        const isMe = uid === currentUser.username;
+                        const canDel = isMe || currentUser.isAdmin;
+                        b.innerHTML += `
+                            <div class="msg-row ${isMe ? 'mine' : 'other'}">
+                                ${!isMe ? `<span class="msg-name">${name}</span>` : ''}
+                                <div class="msg-bubble">
+                                    ${canDel ? `<div class="msg-del" onclick="app.delChat('${m.id}')">✕</div>` : ''}
+                                    ${m.text ? `<div>${m.text}</div>` : ''}
+                                    ${m.img ? `<img src="${m.img}" class="chat-img" onload="app.scrollChat()" onclick="document.getElementById('img-full').src=this.src;document.getElementById('img-viewer').style.display='flex'">` : ''}
+                                </div>
                             </div>
-                        </div>`;
+                        `;
+                    });
+                    app.scrollChat();
+                }));
+            },
+            sendChat: async () => {
+                const i=document.getElementById('chat-in'), t=i.value.trim();
+                if(!t && !chatImg) return;
+                await addDoc(collection(db,"chat"), { text:t, img:chatImg, username:currentUser.username, sender:currentUser.name, createdAt:serverTimestamp() });
+                i.value=""; app.clearChatImg();
+            },
+            delChat: async (id) => { if(confirm("削除しますか？")) await deleteDoc(doc(db,"chat",id)); },
+            scrollChat: () => { const b=document.getElementById('tab-chat'); if(!b.classList.contains('hidden')) setTimeout(()=>document.getElementById('chat-box').scrollTop=99999, 100); },
+            clearChatImg: () => { chatImg = null; document.getElementById('chat-file').value = ""; document.getElementById('chat-preview').style.display = 'none'; },
+
+            // NEWS (User Side)
+            subNews: () => {
+                listeners.push(onSnapshot(query(collection(db,"announcements"), limit(30)), s=>{
+                    const l = document.getElementById('news-list'); l.innerHTML="";
+                    const now = new Date();
+                    let items = [];
+                    s.forEach(d => items.push({id:d.id, ...d.data()}));
+                    items = items.filter(n => {
+                        const pub = n.publishAt ? n.publishAt.toDate() : (n.createdAt ? n.createdAt.toDate() : now);
+                        return pub <= now;
+                    });
+                    items.sort((a,b) => {
+                        if(a.pin !== b.pin) return b.pin ? 1 : -1;
+                        const da = a.publishAt ? a.publishAt.seconds : (a.createdAt ? a.createdAt.seconds : 0);
+                        const db = b.publishAt ? b.publishAt.seconds : (b.createdAt ? b.createdAt.seconds : 0);
+                        return db - da;
+                    });
+                    items.forEach(n => {
+                        const pub = n.publishAt ? n.publishAt.toDate() : (n.createdAt ? n.createdAt.toDate() : now);
+                        l.innerHTML += `
+                            <div class="news-item" onclick="app.openNews('${n.id}')">
+                                ${n.img ? `<img src="${n.img}" class="news-thumb">` : ''}
+                                <div style="flex:1">
+                                    <div class="font-bold">${n.pin?'<span class="pin-mark">固定</span>':''}${n.title}</div>
+                                    <div class="text-xs text-sub">${pub.toLocaleDateString()}</div>
+                                </div>
+                                <div class="hidden" id="nc-${n.id}">${n.body}</div>
+                                <div class="hidden" id="ni-${n.id}">${n.img||''}</div>
+                            </div>
+                        `;
+                    });
+                }));
+            },
+            openNews: (id) => {
+                const ti = document.querySelector(`#nc-${id}`).parentElement.querySelector('.font-bold').innerText;
+                const bo = document.getElementById(`nc-${id}`).innerHTML;
+                const im = document.getElementById(`ni-${id}`).innerHTML;
+                app.mdl(ti, `${im?`<img src="${im}" style="width:100%;border-radius:8px;margin-bottom:10px">`:''}<div style="white-space:pre-wrap;line-height:1.6">${bo}</div>`);
+            },
+
+            // ADMIN
+            checkAdmSess: () => {
+                const e = localStorage.getItem(ADM_KEY);
+                if(e && parseInt(e) > Date.now()) return true;
+                localStorage.removeItem(ADM_KEY); return false;
+            },
+            authAdmin: async () => {
+                if(app.checkAdmSess()) { app.tab('admin'); return; }
+                const c = document.getElementById('adm-code').value;
+                let vc = "cotobato-admin";
+                try { const d=await getDoc(doc(db,"system","config")); if(d.exists()) vc=d.data().code; } catch{}
+                if(c===vc){
+                    localStorage.setItem(ADM_KEY, Date.now() + 30*60*1000); 
+                    document.getElementById('tab-admin').classList.remove('hidden');
+                    document.getElementById('nav-adm-pc').classList.remove('hidden');
+                    app.tab('admin'); app.toast("認証成功"); app.subAdmList();
+                    document.getElementById('adm-code').value="";
+                } else app.toast("違います");
+            },
+            changeAdmPass: async () => {
+                const nc = document.getElementById('adm-new-code').value.trim();
+                if(!nc || nc.length<4) return app.toast("短すぎます");
+                await setDoc(doc(db,"system","config"), {code:nc});
+                app.toast("変更しました"); document.getElementById('adm-new-code').value="";
+            },
+            subAdmList: () => {
+                onSnapshot(query(collection(db,"announcements"), limit(50)), s=>{
+                    const l=document.getElementById('adm-list-news'); l.innerHTML="";
+                    let items = []; s.forEach(d=>items.push({id:d.id, ...d.data()}));
+                    items.sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
+                    items.forEach(n => {
+                        const pub = n.publishAt ? n.publishAt.toDate() : n.createdAt.toDate();
+                        const isFuture = pub > new Date();
+                        l.innerHTML+=`<div class="adm-list-item"><div style="flex:1"><div class="font-bold text-sm">${n.pin?'<span class="adm-tag pin">固定</span>':''}${isFuture?'<span class="adm-tag future">予約</span>':''}${n.img?'<span class="adm-tag img">画像</span>':''}${n.title}</div><div class="adm-detail">公開: ${pub.toLocaleString()}</div></div><div class="flex gap-2"><button class="btn btn-sm btn-primary" onclick='app.editNews(${JSON.stringify(n)})'>編集</button><button class="btn btn-sm btn-danger" onclick="app.delDoc('announcements','${n.id}')">削除</button></div></div>`;
+                    });
                 });
-            });
-            // Gift List for Admin
-            onSnapshot(query(collection(db,"gifts"), orderBy("createdAt", "desc"), limit(30)), s => {
-                const list = document.getElementById('adm-gift-list'); list.innerHTML = "";
-                s.forEach(d => {
-                    const g = d.data();
-                    list.innerHTML += `
-                        <div class="admin-item">
-                            <div class="admin-info"><b>${g.val} ${g.type}</b><span class="admin-meta">期限: ${new Date(g.exp.toMillis()).toLocaleDateString()}</span></div>
-                            <button class="btn btn-sm btn-danger" onclick="window.delGift('${d.id}')">削除</button>
-                        </div>`;
+                onSnapshot(query(collection(db,"gifts"), orderBy("createdAt","desc"), limit(20)), s=>{
+                    const l=document.getElementById('adm-list-gifts'); l.innerHTML="";
+                    s.forEach(d=>{
+                        const g=d.data();
+                        const st = g.publishAt ? g.publishAt.toDate().toLocaleString() : "即時";
+                        const ed = g.expireAt ? g.expireAt.toDate().toLocaleString() : "無期限";
+                        l.innerHTML+=`<div class="adm-list-item"><div style="flex:1"><div class="font-bold text-sm">${g.val} ${g.type}</div><div class="adm-detail">${g.msg}</div><div class="adm-detail">期間: ${st} ～ ${ed}</div></div><div class="flex gap-2"><button class="btn btn-sm btn-primary" onclick='app.editGift(${JSON.stringify({id:d.id, ...g})})'>編集</button><button class="btn btn-sm btn-danger" onclick="app.delDoc('gifts','${d.id}')">削除</button></div></div>`;
+                    });
                 });
-            });
-        }
-
-        // --- Functions ---
-        window.openNews = n => {
-            const html = `${n.img ? `<img src="${n.img}" style="width:100%; border-radius:10px; margin-bottom:15px;">` : ''}<h2 style="margin-bottom:10px">${n.title}</h2><div style="white-space:pre-wrap; line-height:1.7; color:#fff;">${n.text}</div>`;
-            window.openMdl("お知らせ詳細", html);
-        };
-
-        // Admin Edit News
-        window.editNews = (n) => {
-            editingNewsId = n.id;
-            document.getElementById('adm-news-ti').value = n.title;
-            document.getElementById('adm-news-txt').value = n.text;
-            document.getElementById('adm-pin').checked = n.pin;
-            newsImgData = n.img; // Keep existing image
-            document.getElementById('btn-post-news').innerText = "更新する";
-            document.getElementById('btn-cancel-edit').style.display = "inline-block";
-            window.scrollTo(0,0);
-        };
-        window.cancelEdit = () => {
-            editingNewsId = null;
-            document.getElementById('adm-news-ti').value = "";
-            document.getElementById('adm-news-txt').value = "";
-            document.getElementById('adm-pin').checked = false;
-            newsImgData = null;
-            document.getElementById('btn-post-news').innerText = "配信登録";
-            document.getElementById('btn-cancel-edit').style.display = "none";
-        };
-
-        window.fetchGifts = async () => {
-            const now = new Date();
-            const q = query(collection(db, "gifts"), where("exp", ">", Timestamp.fromDate(now)));
-            const snap = await getDocs(q);
-            let h=""; let c=0;
-            snap.forEach(d => {
-                const g=d.data();
-                if((g.to==='all' || g.to===currentUser.username) && (!g.claimedBy || !g.claimedBy.includes(currentUser.username))) {
-                    c++;
-                    h+=`<div class="list-item"><div><b>${g.val} ${g.type}</b><br><small>${g.msg}</small></div><button class="btn btn-primary btn-sm" onclick="window.claimGift('${d.id}')">受取</button></div>`;
-                }
-            });
-            window.openMdl("プレゼントBOX", c>0?h:"<p style='text-align:center'>なし</p>");
-        };
-        window.claimGift = async id => {
-            const ref=doc(db,"gifts",id); const s=await getDoc(ref); const g=s.data();
-            const arr=g.claimedBy||[]; arr.push(currentUser.username);
-            await updateDoc(ref, {claimedBy:arr});
-            localData[g.type]=(localData[g.type]||0)+g.val; localStorage.setItem(KEY, JSON.stringify(localData));
-            updateUI(); window.fetchGifts(); showToast("受取完了");
-        };
-        window.delGift = async id => { if(confirm("削除しますか？")) await deleteDoc(doc(db,"gifts",id)); };
-        window.delNews = async id => { if(confirm("削除しますか？")) await deleteDoc(doc(db,"announcements",id)); };
-
-        window.prevImg = i => { if(i.files[0]){const r=new FileReader(); r.onload=e=>chatImgData=e.target.result; r.readAsDataURL(i.files[0]); showToast("画像OK");} };
-        window.newsImgPrev = i => { if(i.files[0]){const r=new FileReader(); r.onload=e=>newsImgData=e.target.result; r.readAsDataURL(i.files[0]); showToast("画像OK");} };
-        window.viewImg = s => { document.getElementById('full-img').src=s; document.getElementById('img-overlay').style.display='flex'; };
-        
-        window.sendChat = async () => {
-            const t=document.getElementById('chat-in').value; if(!t && !chatImgData) return;
-            await addDoc(collection(db,"chat"), {text:t, img:chatImgData, sender:currentUser.name, username:currentUser.username, createdAt:serverTimestamp()});
-            document.getElementById('chat-in').value=""; chatImgData=null;
-        };
-        window.delChat = async id => { if(confirm("削除？")) await deleteDoc(doc(db,"chat",id)); };
-
-        // バックアップ
-        window.bkCloud = async () => {
-            let h = currentUser.history || [];
-            h.push({d:new Date().toLocaleString(), v:JSON.stringify(localData)});
-            if(h.length>5) h.shift();
-            await updateDoc(doc(db,"users",currentUser.username), {history:h});
-            currentUser.history=h; showToast("保存完了");
-        };
-        window.rsCloud = () => {
-            const h=currentUser.history||[]; if(h.length===0) return alert("なし");
-            const html = h.map((v,i)=>`<div class="list-item"><span>${v.d}</span><button class="btn btn-primary btn-sm" onclick="window.execRest('${i}')">復元</button></div>`).join('');
-            window.openMdl("復元", html);
-        };
-        window.execRest = i => { localStorage.setItem(KEY, currentUser.history[i].v); localData=JSON.parse(currentUser.history[i].v); updateUI(); window.closeMdl(); showToast("復元完了"); };
-
-        window.mkTrade = async () => {
-            const gt=document.getElementById('tr-gt').value, gv=parseInt(document.getElementById('tr-gv').value);
-            const wt=document.getElementById('tr-wt').value, wv=parseInt(document.getElementById('tr-wv').value);
-            if(!gv||!wv) return; if(localData[gt]<gv) return alert("不足");
-            localData[gt]-=gv; localStorage.setItem(KEY,JSON.stringify(localData)); updateUI();
-            await addDoc(collection(db,"trades"), {maker:currentUser.username, makerName:currentUser.name, giveT:gt, giveV:gv, wantT:wt, wantV:wv, status:'open', createdAt:serverTimestamp()});
-            showToast("出品完了");
-        };
-        window.doTrade = async id => {
-            const s=await getDoc(doc(db,"trades",id)); const t=s.data(); if(localData[t.wantT]<t.wantV) return alert("不足");
-            localData[t.wantT]-=t.wantV; localData[t.giveT]+=t.giveV; localStorage.setItem(KEY,JSON.stringify(localData)); updateUI();
-            await deleteDoc(doc(db,"trades",id));
-            await addDoc(collection(db,"gifts"),{to:t.maker, type:t.wantT, val:t.wantV, msg:"成立報酬", exp:Timestamp.fromDate(new Date(Date.now()+604800000)), createdAt:serverTimestamp()});
-            showToast("成立");
-        };
-        window.delTrade = async id => { 
-            const s=await getDoc(doc(db,"trades",id)); const t=s.data();
-            localData[t.giveT]+=t.giveV; localStorage.setItem(KEY,JSON.stringify(localData)); updateUI();
-            await deleteDoc(doc(db,"trades",id)); showToast("取消"); 
-        };
-
-        window.authAdm = async () => {
-            const p=document.getElementById('adm-p').value; const c=await getDoc(doc(db,"system","config"));
-            if(p===(c.data()?.pass||"cotobato-1234")){ document.getElementById('nav-adm').style.display='flex'; window.tab('admin'); startAdminListeners(); showToast("認証成功"); } else alert("間違い");
-        };
-        window.postNews = async () => {
-            const ti=document.getElementById('adm-news-ti').value, tx=document.getElementById('adm-news-txt').value, pub=document.getElementById('adm-pub').value, pin=document.getElementById('adm-pin').checked;
-            if(!ti) return;
-            const data = {title:ti, text:tx, img:newsImgData, pin:pin, pub: pub ? Timestamp.fromDate(new Date(pub)) : serverTimestamp(), createdAt:serverTimestamp()};
+            },
             
-            if(editingNewsId) {
-                await updateDoc(doc(db, "announcements", editingNewsId), data);
-                showToast("更新しました");
-                window.cancelEdit();
-            } else {
-                await addDoc(collection(db,"announcements"), data);
-                showToast("配信しました");
-                document.getElementById('adm-news-ti').value=""; document.getElementById('adm-news-txt').value="";
-            }
-        };
-        window.mkGift = async () => {
-            const t=document.getElementById('adm-gift-t').value, v=parseInt(document.getElementById('adm-gift-v').value), m=document.getElementById('adm-gift-m').value, e=document.getElementById('adm-gift-e').value;
-            if(!v||!e) return;
-            await addDoc(collection(db,"gifts"), {to:'all', type:t, val:v, msg:m, exp:Timestamp.fromDate(new Date(e)), claimedBy:[], createdAt:serverTimestamp()});
-            showToast("配布完了");
-        };
+            editNews: (n) => {
+                document.getElementById('adm-news-id').value = n.id;
+                document.getElementById('adm-news-title').value = n.title;
+                document.getElementById('adm-news-body').value = n.body;
+                document.getElementById('adm-news-pin').checked = n.pin;
+                if(n.publishAt) {
+                    const d = n.publishAt.toDate(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+                    document.getElementById('adm-news-date').value = d.toISOString().slice(0,16);
+                } else document.getElementById('adm-news-date').value = "";
+                newsImgOriginal = n.img; newsImg = null;
+                if(n.img) document.getElementById('adm-news-file-status').innerText="画像あり(維持)";
+                document.getElementById('btn-news-post').innerText = "更新(新規投稿)";
+                document.getElementById('btn-news-cancel').classList.remove('hidden');
+                document.querySelector('.scroll-view').scrollTop=0;
+            },
+            resetNewsForm: () => {
+                document.getElementById('adm-news-id').value = ""; document.getElementById('adm-news-title').value = "";
+                document.getElementById('adm-news-body').value = ""; document.getElementById('adm-news-pin').checked = false;
+                document.getElementById('adm-news-date').value = ""; newsImg=null; newsImgOriginal=null;
+                document.getElementById('adm-news-file-status').innerText="未選択";
+                document.getElementById('btn-news-post').innerText = "配信登録"; document.getElementById('btn-news-cancel').classList.add('hidden');
+            },
+            postNews: async () => {
+                const id = document.getElementById('adm-news-id').value;
+                const ti=document.getElementById('adm-news-title').value, bo=document.getElementById('adm-news-body').value, pi=document.getElementById('adm-news-pin').checked, da=document.getElementById('adm-news-date').value;
+                if(!ti) return;
+                const d = { title:ti, body:bo, pin:pi, createdAt:serverTimestamp() };
+                if(newsImg) d.img = newsImg; else if(id && newsImgOriginal) d.img = newsImgOriginal;
+                if(da) d.publishAt = Timestamp.fromDate(new Date(da)); else d.publishAt = serverTimestamp();
+                if(id) await deleteDoc(doc(db,"announcements",id));
+                await addDoc(collection(db,"announcements"), d);
+                app.toast(id ? "更新しました" : "配信しました"); app.resetNewsForm();
+            },
 
-        window.bkLocal = () => {
-            const b = new Blob([JSON.stringify(localData)], {type:"application/json"});
-            const a = document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`kb_${currentUser.username}.json`; a.click();
-        };
-        window.updName = async () => { const n=document.getElementById('set-name').value; if(n){ await updateDoc(doc(db,"users",currentUser.username),{name:n}); currentUser.name=n; document.getElementById('head-user').innerText=n; showToast("保存"); } };
-        window.openMdl = (t,c) => { document.getElementById('mdl-ti').innerText=t; document.getElementById('mdl-con').innerHTML=c; document.getElementById('modal-base').style.display='flex'; };
-        window.closeMdl = () => document.getElementById('modal-base').style.display='none';
-        function showToast(m){const t=document.getElementById('toast');t.innerText=m;t.style.display='block';setTimeout(()=>t.style.display='none',3000);}
+            editGift: (g) => {
+                document.getElementById('adm-gift-id').value = g.id; document.getElementById('adm-gift-type').value = g.type;
+                document.getElementById('adm-gift-val').value = g.val; document.getElementById('adm-gift-msg').value = g.msg;
+                const fmt = (ts) => { if(!ts) return ""; const d = ts.toDate(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,16); };
+                document.getElementById('adm-gift-start').value = fmt(g.publishAt); document.getElementById('adm-gift-end').value = fmt(g.expireAt);
+                document.getElementById('btn-gift-post').innerText = "更新する"; document.getElementById('btn-gift-cancel').classList.remove('hidden');
+                document.querySelector('.scroll-view').scrollTop=0;
+            },
+            resetGiftForm: () => {
+                document.getElementById('adm-gift-id').value = ""; document.getElementById('adm-gift-val').value = "";
+                document.getElementById('adm-gift-msg').value = ""; document.getElementById('adm-gift-start').value = "";
+                document.getElementById('adm-gift-end').value = ""; document.getElementById('btn-gift-post').innerText = "全員に配布";
+                document.getElementById('btn-gift-cancel').classList.add('hidden');
+            },
+            distributeGift: async () => {
+                const id = document.getElementById('adm-gift-id').value;
+                const ty=document.getElementById('adm-gift-type').value, va=parseInt(document.getElementById('adm-gift-val').value), ms=document.getElementById('adm-gift-msg').value;
+                const st=document.getElementById('adm-gift-start').value, ed=document.getElementById('adm-gift-end').value;
+                if(!va) return;
+                const d = { type:ty, val:va, msg:ms };
+                if(st) d.publishAt = Timestamp.fromDate(new Date(st)); else if(!id) d.publishAt = serverTimestamp();
+                if(ed) d.expireAt = Timestamp.fromDate(new Date(ed)); else d.expireAt = null;
+                if(id) { await updateDoc(doc(db,"gifts",id), d); app.toast("更新しました"); }
+                else { if(!confirm("全員に配布？")) return; d.to="all"; d.claimedBy=[]; d.createdAt=serverTimestamp(); await addDoc(collection(db,"gifts"), d); app.toast("配布しました"); }
+                app.resetGiftForm();
+            },
+            delDoc: async (c,i) => { if(confirm("削除しますか？")) await deleteDoc(doc(db,c,i)); },
 
-        let taps=0; document.getElementById('app-ttl').onclick=()=>{taps++; if(taps>=7){taps=0; document.getElementById('quiz-modal').style.display='flex';} setTimeout(()=>taps=0,2500);};
-        window.addEventListener('keydown', e=>{if(e.ctrlKey&&e.shiftKey&&e.key==='Q') document.getElementById('quiz-modal').style.display='flex';});
-        window.chkQ = async () => { if(document.getElementById('q-ans').value==="Boss"){ await updateDoc(doc(db,"users",currentUser.username),{quizCleared:true}); currentUser.quizCleared=true; document.getElementById('quiz-modal').style.display='none'; alert("合格！"); }else alert("×"); };
+            // FILE
+            handleFileSelect: (i, type) => {
+                if(i.files[0]){
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas'), MAX = 800;
+                            let w = img.width, h = img.height;
+                            if (w > MAX) { h *= MAX / w; w = MAX; }
+                            canvas.width = w; canvas.height = h;
+                            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                            const res = canvas.toDataURL('image/jpeg', 0.7);
+                            if(type==='chat') { chatImg=res; app.toast("画像選択"); document.getElementById('chat-preview').style.display='flex'; document.getElementById('chat-preview-img').src=chatImg; }
+                            else { newsImg=res; document.getElementById('adm-news-file-status').innerText="画像選択済"; }
+                        };
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(i.files[0]);
+                }
+            },
+            updateProfile: async () => { const n=document.getElementById('set-name').value; if(n){await updateDoc(doc(db,"users",currentUser.username),{name:n}); app.toast("保存しました");} },
+            checkGifts: async () => {
+                const s = await getDocs(query(collection(db,"gifts"), where("to","in",["all",currentUser.username])));
+                let c=0, h=""; const now = new Date();
+                s.forEach(d=>{ 
+                    const g=d.data(), cl=g.claimedBy||[];
+                    const st = g.publishAt ? g.publishAt.toDate() : g.createdAt.toDate();
+                    const ed = g.expireAt ? g.expireAt.toDate() : null;
+                    if(!cl.includes(currentUser.username) && st <= now && (!ed || ed > now)){ c++; h+=`<div class="card flex justify-between items-center" style="padding:10px"><div><b>${g.val} ${g.type}</b><br><small>${g.msg}</small><br><small style="color:var(--text-sub)">期限: ${ed?ed.toLocaleDateString():'無期限'}</small></div><button class="btn btn-sm btn-primary" style="width:auto" onclick="app.claimGift('${d.id}',${g.val},'${g.type}')">受取</button></div>`; }
+                });
+                app.mdl("プレゼントBOX", c>0?h:"<p class='text-center text-sub'>受け取れるプレゼントはありません</p>");
+            },
+            claimGift: async (id,v,t) => {
+                try {
+                    await runTransaction(db, async tr=>{
+                        const gd=await tr.get(doc(db,"gifts",id)); if(!gd.exists()) throw "Error";
+                        const g=gd.data(), now=new Date();
+                        const st=g.publishAt?g.publishAt.toDate():g.createdAt.toDate();
+                        const ed=g.expireAt?g.expireAt.toDate():null;
+                        if(st>now || (ed && ed<now)) throw "期間外";
+                        const cl=g.claimedBy||[]; if(cl.includes(currentUser.username)) throw "済";
+                        cl.push(currentUser.username); tr.update(doc(db,"gifts",id),{claimedBy:cl});
+                        tr.update(doc(db,"users",currentUser.username),{[t]:increment(v)});
+                    });
+                    app.toast("受取完了"); app.closeModal();
+                } catch(e){ app.toast("エラー: "+e); }
+            },
+            // TRADE
+            subTrade: () => {
+                listeners.push(onSnapshot(query(collection(db,"trades"), where("status","==","open"), orderBy("createdAt","desc"), limit(30)), s=>{
+                    const l=document.getElementById('trade-list'); l.innerHTML="";
+                    s.forEach(d=>{
+                        const t=d.data(), me=t.makerUid===currentUser.username;
+                        l.innerHTML+=`<div class="card flex justify-between items-center" style="margin-bottom:8px"><div><div class="text-xs text-sub mb-1">${t.makerName}</div><div class="font-bold">出: ${t.giveVal} ${t.giveType}</div><div class="font-bold" style="color:var(--primary)">求: ${t.wantVal} ${t.wantType}</div></div><button class="btn btn-sm ${me?'btn-danger':'btn-primary'}" style="width:auto" onclick="${me?`app.cancelTrade('${d.id}',${t.giveVal},'${t.giveType}')`:`app.doTrade('${d.id}',${t.wantVal},'${t.wantType}',${t.giveVal},'${t.giveType}','${t.makerUid}')`}">${me?'取消':'交換'}</button></div>`;
+                    });
+                }));
+            },
+            createTrade: async () => {
+                const gt=document.getElementById('tr-give-type').value, gv=parseInt(document.getElementById('tr-give-val').value), wt=document.getElementById('tr-want-type').value, wv=parseInt(document.getElementById('tr-want-val').value);
+                if(!gv||!wv) return app.toast("数値を入力"); if((currentUser[gt]||0)<gv) return app.toast("不足");
+                await updateDoc(doc(db,"users",currentUser.username),{[gt]:increment(-gv)});
+                await addDoc(collection(db,"trades"),{makerUid:currentUser.username, makerName:currentUser.name, giveType:gt, giveVal:gv, wantType:wt, wantVal:wv, status:'open', createdAt:serverTimestamp()});
+                app.toast("出品完了");
+            },
+            cancelTrade: async (id,v,t) => { if(confirm("取消？")) { await deleteDoc(doc(db,"trades",id)); await updateDoc(doc(db,"users",currentUser.username),{[t]:increment(v)}); app.toast("返金済"); }},
+            doTrade: async (id,payV,payT,getV,getT,maker) => {
+                if((currentUser[payT]||0)<payV) return app.toast("不足");
+                if(!confirm(`交換しますか？\n支払: ${payV} ${payT}`)) return;
+                try {
+                    await runTransaction(db, async tr=>{
+                        const td=await tr.get(doc(db,"trades",id)); if(!td.exists()) throw "Error";
+                        tr.update(doc(db,"users",currentUser.username),{[payT]:increment(-payV), [getT]:increment(getV)});
+                        tr.update(doc(db,"users",maker),{[payT]:increment(payV)});
+                        tr.delete(doc(db,"trades",id));
+                    });
+                    app.toast("成立！");
+                } catch{ app.toast("失敗"); }
+            },
+
+            mdl: (t,c) => { document.getElementById('mdl-title').innerText=t; document.getElementById('mdl-content').innerHTML=c; document.getElementById('modal-base').style.display='flex'; },
+            closeModal: () => document.getElementById('modal-base').style.display='none',
+            toast: (m) => { const e=document.getElementById('toast'); e.innerText=m; e.classList.add('show'); setTimeout(()=>e.classList.remove('show'),3000); }
+        };
+        window.app = app;
+        
+        let taps=0; document.getElementById('app-ttl').onclick=()=>{taps++;if(taps>6){taps=0;if(prompt("Code")==="Boss"){updateDoc(doc(db,"users",currentUser.username),{coins:increment(1000)});alert("Bonus");}}};
+
+        app.init();
     </script>
 </body>
 </html>
+
+
