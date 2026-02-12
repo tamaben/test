@@ -47,11 +47,21 @@
         .screen { position: absolute; inset: 0; background: var(--bg-body); z-index: 10; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; display: flex; flex-direction: column; }
         .screen.active { opacity: 1; pointer-events: auto; z-index: 20; }
 
+        /* Splash Screen */
+        #splash-screen {
+            position: fixed; inset: 0; background: var(--bg-body); z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease, visibility 0.5s;
+        }
+        #splash-screen.fade-out { opacity: 0; visibility: hidden; }
+        .splash-logo { font-size: 3rem; font-weight: 900; background: linear-gradient(135deg, #58a6ff, #bc8cff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 20px; letter-spacing: 2px; }
+        .loader { width: 40px; height: 40px; border: 4px solid var(--bg-input); border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
         .auth-container { flex: 1; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at center, #1f2937 0%, #0b0f19 100%); padding: 20px; }
         .auth-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 24px; padding: 40px 30px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
         .brand-title { font-size: 2rem; font-weight: 900; background: linear-gradient(135deg, #58a6ff, #bc8cff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 2rem; letter-spacing: 1px; }
 
-        /* エラー時のスタイル */
         .input.error { border-color: var(--danger); animation: shake 0.3s; }
         @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
         .candidate-chip { display: inline-block; background: rgba(88, 166, 255, 0.1); border: 1px solid var(--primary); color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; margin-right: 5px; margin-bottom: 5px; transition: 0.2s; }
@@ -86,6 +96,7 @@
         .btn-primary { background: var(--success); }
         .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-sub); }
         .btn-danger { background: rgba(218, 54, 51, 0.15); color: var(--danger); border: 1px solid var(--danger); }
+        .btn-warning { background: var(--warning); color: #000; }
         .btn-sm { padding: 6px 12px; font-size: 0.8rem; width: auto; }
 
         .res-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
@@ -98,9 +109,18 @@
         .chat-list { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 16px; }
         .chat-input-wrapper { background: var(--bg-sidebar); border-top: 1px solid var(--border); padding-bottom: calc(10px + env(safe-area-inset-bottom)); flex-shrink: 0; }
         #chat-preview { display: none; padding: 10px 15px 0; align-items: center; gap: 10px; }
-        .preview-thumb { height: 60px; border-radius: 8px; border: 1px solid var(--primary); }
-        .chat-input-area { padding: 10px 15px; display: flex; gap: 10px; align-items: center; }
+        .preview-thumb { height: 60px; border-radius: 8px; border: 1px solid var(--primary); object-fit: cover; }
         
+        /* 返信表示用 */
+        #chat-reply-preview, #dm-reply-preview { display: none; padding: 8px 15px 0; align-items: center; gap: 10px; background: var(--bg-card); border-bottom: 1px solid var(--border); border-top: 1px solid var(--border); }
+        .reply-thumb { height: 40px; border-radius: 4px; object-fit: cover; }
+        .reply-text-preview { font-size: 0.8rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+        .reply-name-preview { font-size: 0.7rem; color: var(--text-sub); margin-bottom: 2px; }
+        .reply-box-in-msg { font-size: 0.75rem; color: var(--text-sub); background: rgba(255,255,255,0.05); padding: 6px 8px; border-radius: 6px; margin-bottom: 6px; border-left: 3px solid var(--primary); display: flex; align-items: center; gap: 6px; cursor: pointer; }
+        .reply-box-in-msg img { height: 24px; border-radius: 4px; object-fit: cover; }
+        .reply-box-in-msg .reply-content { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        .chat-input-area { padding: 10px 15px; display: flex; gap: 10px; align-items: center; }
         .chat-switcher { display: flex; justify-content: center; gap: 10px; flex: 1; }
         .chat-sw-btn { padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; color: var(--text-sub); cursor: pointer; transition: 0.2s; }
         .chat-sw-btn.active { background: var(--primary-dim); color: var(--primary); font-weight: bold; }
@@ -109,11 +129,11 @@
         .msg-row.mine { align-self: flex-end; align-items: flex-end; }
         .msg-row.other { align-self: flex-start; align-items: flex-start; }
         .msg-name { font-size: 0.7rem; color: var(--text-sub); margin-bottom: 4px; padding: 0 4px; cursor: pointer; }
-        .msg-bubble { padding: 10px 14px; border-radius: 16px; font-size: 0.95rem; line-height: 1.5; word-break: break-word; position: relative; }
+        .msg-bubble { padding: 10px 14px; border-radius: 16px; font-size: 0.95rem; line-height: 1.5; word-break: break-word; position: relative; cursor: pointer; user-select: none; transition: opacity 0.2s; }
+        .msg-bubble:active { opacity: 0.8; }
         .msg-row.mine .msg-bubble { background: #1f6feb; color: white; border-bottom-right-radius: 4px; }
         .msg-row.other .msg-bubble { background: var(--bg-card); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
         .chat-img { max-width: 100%; border-radius: 8px; margin-top: 6px; display: block; cursor: zoom-in; }
-        .msg-del { position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; background: var(--danger); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; cursor: pointer; border: 2px solid var(--bg-body); z-index: 2; }
 
         .dm-item { display: flex; align-items: center; gap: 12px; padding: 15px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
         .dm-item:hover { background: var(--bg-input); }
@@ -122,9 +142,13 @@
         .dm-name { font-weight: bold; font-size: 0.95rem; }
         .dm-last { font-size: 0.8rem; color: var(--text-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+        /* Request Items */
+        .req-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid var(--border); }
+
         .news-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; cursor: pointer; display: flex; gap: 12px; align-items: center; margin-bottom: 8px; position: relative; overflow: hidden; }
         .news-thumb { width: 60px; height: 60px; background: #000; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
         .pin-mark { background: var(--warning); color: #000; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-right: 6px; }
+        
         .adm-list-item { background: var(--bg-input); padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
         .adm-tag { font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; background: var(--border); margin-right: 6px; display: inline-block; }
         .adm-tag.future { background: var(--warning); color: #000; }
@@ -140,6 +164,16 @@
         .modal-head { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
         .modal-body { padding: 20px; overflow-y: auto; }
         
+        /* ボトムシート風メニュー (返信用) */
+        .bottom-sheet { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; display: none; flex-direction: column; justify-content: flex-end; }
+        .bottom-sheet-content { background: var(--bg-card); border-top-left-radius: 16px; border-top-right-radius: 16px; padding: 20px; padding-bottom: calc(20px + env(safe-area-inset-bottom)); transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.1, 0.8, 0.3, 1); }
+        .bottom-sheet.show { display: flex; }
+        .bottom-sheet.show .bottom-sheet-content { transform: translateY(0); }
+        .sheet-btn { width: 100%; padding: 16px; text-align: left; background: transparent; border: none; border-bottom: 1px solid var(--border); color: var(--text-main); font-size: 1rem; cursor: pointer; display: flex; align-items: center; gap: 12px; }
+        .sheet-btn:last-child { border-bottom: none; }
+        .sheet-btn.danger { color: var(--danger); }
+        .sheet-btn:active { background: var(--bg-input); }
+
         .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--primary); color: #fff; padding: 10px 24px; border-radius: 50px; font-weight: 700; z-index: 2000; opacity: 0; transition: 0.3s; pointer-events: none; }
         .toast.show { opacity: 1; }
         .img-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 10px; }
@@ -147,13 +181,38 @@
 
         @media (min-width: 768px) {
             .sidebar { display: flex; } .bottom-nav { display: none; } .header-mobile { display: none; } .scroll-view { padding-bottom: 20px; }
+            .bottom-sheet { align-items: center; justify-content: center; }
+            .bottom-sheet-content { border-radius: 16px; width: 100%; max-width: 400px; padding-bottom: 20px; transform: scale(0.95); opacity: 0; transition: all 0.2s; }
+            .bottom-sheet.show .bottom-sheet-content { transform: scale(1); opacity: 1; }
         }
     </style>
 </head>
 <body>
 
+    <div id="splash-screen">
+        <div class="splash-logo">COTOBATO</div>
+        <div class="loader"></div>
+        <div style="margin-top:20px; color:var(--text-sub); font-size:0.8rem;">Loading...</div>
+    </div>
+
     <div id="toast" class="toast">メッセージ</div>
     <div id="img-viewer" class="img-overlay" onclick="this.style.display='none'"><img id="img-full" class="img-full"></div>
+
+    <!-- メッセージ操作メニュー (ボトムシート) -->
+    <div id="msg-action-sheet" class="bottom-sheet" onclick="if(event.target===this) app.closeMsgAction()">
+        <div class="bottom-sheet-content">
+            <div id="msg-action-target" class="text-xs text-sub mb-3" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding: 0 16px;"></div>
+            <button class="sheet-btn" onclick="app.prepareReply()">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg>返信する
+            </button>
+            <button id="btn-msg-del" class="sheet-btn danger hidden" onclick="app.execDelMsg()">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>削除する
+            </button>
+            <button class="sheet-btn" onclick="app.closeMsgAction()" style="justify-content:center; color:var(--text-sub); margin-top:10px; border-top:1px solid var(--border);">
+                キャンセル
+            </button>
+        </div>
+    </div>
 
     <div id="scr-login" class="screen active">
         <div class="auth-container">
@@ -217,7 +276,7 @@
                         </div>
                         <div class="chat-switcher">
                             <span class="chat-sw-btn active" id="sw-all" onclick="app.switchChatMode('all')">全体</span>
-                            <span class="chat-sw-btn" id="sw-dm" onclick="app.switchChatMode('dm')">個チャ</span>
+                            <span class="chat-sw-btn" id="sw-dm" onclick="app.switchChatMode('dm')">友達</span>
                         </div>
                         <div style="width:50px;"></div>
                     </div>
@@ -225,6 +284,16 @@
                     <div id="area-all-chat" style="display:flex; flex-direction:column; flex:1; overflow:hidden;">
                         <div id="chat-box" class="chat-list"></div>
                         <div class="chat-input-wrapper">
+                            <!-- 返信プレビュー -->
+                            <div id="chat-reply-preview">
+                                <div style="flex:1; overflow:hidden;">
+                                    <div class="reply-name-preview" id="chat-rep-name"></div>
+                                    <div class="reply-text-preview" id="chat-rep-text"></div>
+                                </div>
+                                <img id="chat-rep-img" class="reply-thumb hidden">
+                                <button class="btn btn-ghost btn-sm" style="width:auto; padding:4px;" onclick="app.cancelReply('all')">✕</button>
+                            </div>
+
                             <div id="chat-preview">
                                 <img id="chat-preview-img" class="preview-thumb">
                                 <span class="text-xs text-sub">画像を送信します</span>
@@ -242,8 +311,27 @@
                     </div>
 
                     <div id="area-dm-list" style="display:none; flex-direction:column; flex:1; overflow-y:auto; padding:10px;">
-                        <button class="btn btn-primary mb-4" onclick="app.searchAndStartDM()">＋ ID検索してチャット開始</button>
-                        <div id="dm-list-box"></div>
+                        <div class="card" style="padding:15px; margin-bottom:15px;">
+                            <div class="font-bold text-sm mb-2">友達追加</div>
+                            <button class="btn btn-primary" onclick="app.promptFriendRequest()">＋ IDで友達申請を送る</button>
+                        </div>
+                        
+                        <div id="friend-requests-box" class="card" style="padding:15px; margin-bottom:15px; border-color:var(--primary);">
+                            <div class="font-bold text-sm mb-2" style="color:var(--primary)">届いている申請</div>
+                            <div id="requests-list" class="mb-4">
+                                <div class="text-xs text-sub">読み込み中...</div>
+                            </div>
+                            
+                            <div class="font-bold text-sm mb-2" style="color:var(--text-sub)">送った申請</div>
+                            <div id="outgoing-list">
+                                <div class="text-xs text-sub">読み込み中...</div>
+                            </div>
+                        </div>
+
+                        <div class="font-bold text-sm mb-2 px-2">友達リスト</div>
+                        <div id="dm-list-box">
+                            <div class="text-xs text-sub text-center mt-4">読み込み中...</div>
+                        </div>
                     </div>
                 </div>
 
@@ -257,6 +345,16 @@
                     </div>
                     <div id="dm-talk-box" class="chat-list"></div>
                     <div class="chat-input-wrapper">
+                        <!-- DM返信プレビュー -->
+                        <div id="dm-reply-preview">
+                            <div style="flex:1; overflow:hidden;">
+                                <div class="reply-name-preview" id="dm-rep-name"></div>
+                                <div class="reply-text-preview" id="dm-rep-text"></div>
+                            </div>
+                            <img id="dm-rep-img" class="reply-thumb hidden">
+                            <button class="btn btn-ghost btn-sm" style="width:auto; padding:4px;" onclick="app.cancelReply('dm')">✕</button>
+                        </div>
+
                         <div id="dm-preview" style="display:none; padding:10px 15px 0; align-items:center; gap:10px;">
                             <img id="dm-preview-img" class="preview-thumb">
                             <span class="text-xs text-sub">画像</span>
@@ -303,6 +401,14 @@
                         <button class="btn btn-primary" onclick="app.updateProfile()">保存</button>
                     </div>
                     <div class="card">
+                        <h3>コトバト連携</h3>
+                        <p class="text-xs text-sub mb-4">ブラウザにあるゲーム「コトバト」のセーブデータと連携します。</p>
+                        <div class="flex gap-2 mb-2">
+                            <button class="btn btn-primary" onclick="app.importFromGame()">📥 ゲームデータを取り込む</button>
+                            <button class="btn btn-success" onclick="app.exportToGame()">📤 ゲームへデータを反映</button>
+                        </div>
+                    </div>
+                    <div class="card">
                         <h3>データ管理(クラウド)</h3>
                         <div class="flex gap-2 mb-2"><button class="btn btn-ghost" onclick="app.manualBackup()">☁ 手動バックアップ</button><button class="btn btn-danger" onclick="app.restoreCloudList()">↺ バックアップ復元</button></div>
                         <div class="text-xs text-sub text-center" id="last-backup-info">履歴なし</div>
@@ -327,7 +433,7 @@
                     <div class="card">
                         <h3>運営パスワード変更</h3>
                         <input type="password" id="adm-new-code" class="input mb-2" placeholder="新しいパスワード">
-                        <button class="btn btn-warning" style="background:var(--warning); color:#000" onclick="app.changeAdmPass()">変更を保存</button>
+                        <button class="btn btn-warning" onclick="app.changeAdmPass()">変更を保存</button>
                     </div>
                     <div class="card" style="border-color:var(--warning)">
                         <h3 style="color:var(--warning)">お知らせ配信</h3>
@@ -352,8 +458,8 @@
                         </div>
                         <div class="flex gap-2"><button id="btn-gift-post" class="btn btn-danger" onclick="app.distributeGift()">全員に配布</button><button id="btn-gift-cancel" class="btn btn-ghost hidden" onclick="app.resetGiftForm()">キャンセル</button></div>
                     </div>
-                    <h3 class="mt-4 mb-2">配信中のお知らせ</h3><div id="adm-list-news"></div>
-                    <h3 class="mt-4 mb-2">配布済みギフト</h3><div id="adm-list-gifts"></div>
+                    <h3 class="mt-4 mb-2">配信中のお知らせ</h3><div id="adm-list-news" class="text-xs text-sub">読み込み中...</div>
+                    <h3 class="mt-4 mb-2">配布済みギフト</h3><div id="adm-list-gifts" class="text-xs text-sub">読み込み中...</div>
                 </div>
             </div>
 
@@ -375,7 +481,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, onSnapshot, serverTimestamp, query, orderBy, limit, where, deleteDoc, Timestamp, getDocs, increment, runTransaction, arrayUnion } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, onSnapshot, serverTimestamp, query, limit, where, deleteDoc, Timestamp, getDocs, increment, runTransaction, arrayUnion } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
 
         const firebaseConfig = {
@@ -394,6 +500,7 @@
         const SESS_KEY = "kb_user_id";
         const ADM_KEY = "kb_adm_exp";
         const LOC_KEY = "kb_game_data_history";
+        const KB_SAVE_KEY = "kb_save_v60"; 
 
         let currentUser = null;
         let listeners = [];
@@ -403,21 +510,28 @@
         let dmUnsub = null;
         let myDeviceId = localStorage.getItem("kb_device_id") || crypto.randomUUID();
         localStorage.setItem("kb_device_id", myDeviceId);
+        
+        const appCache = { news: {}, gifts: {} };
+        const toDate = (ts) => { if (!ts) return new Date(); if (ts.toDate) return ts.toDate(); if (ts instanceof Date) return ts; return new Date(); };
 
-        // Helper to convert Firestore timestamp safely
-        const toDate = (ts) => {
-            if (!ts) return new Date();
-            if (ts.toDate) return ts.toDate();
-            if (ts instanceof Date) return ts;
-            return new Date();
-        };
+        let hasSyncedStart = false;
+
+        // 返信・メッセージアクション用ステート
+        let actionMsg = null;
+        let replyTarget = { all: null, dm: null }; // { id, name, text, img }
 
         const app = {
+            admListSubbed: false,
+
             init: () => {
                 signInAnonymously(auth).then(() => {
                     onAuthStateChanged(auth, u => { if(u) {
                         const uid = localStorage.getItem(SESS_KEY);
                         if(uid) app.loadUser(uid);
+                        else {
+                            document.getElementById('splash-screen').classList.add('fade-out');
+                            setTimeout(() => document.getElementById('splash-screen').style.display = 'none', 500);
+                        }
                     }});
                 });
             },
@@ -430,7 +544,15 @@
                     t.style.display='flex'; document.body.classList.add('chat-mode');
                     app.switchChatMode('all'); 
                 } else document.body.classList.remove('chat-mode');
-                if(id==='admin') { if(!app.checkAdmSess()) { app.tab('settings'); app.toast("セッション切れ"); return; } }
+                
+                if(id==='admin') { 
+                    if(!app.checkAdmSess()) { 
+                        app.tab('settings'); app.toast("セッション切れ"); return; 
+                    } else {
+                        app.subAdmList();
+                    }
+                }
+
                 document.querySelectorAll('.nav-link, .b-nav-item').forEach(e=>e.classList.remove('active'));
                 document.querySelectorAll(`[data-tab="${id}"]`).forEach(e=>e.classList.add('active'));
             },
@@ -467,27 +589,73 @@
                     document.getElementById('reg-candidates').innerHTML = html;
                     return;
                 }
-                await setDoc(doc(db,"users",uid), { uid, username:uid, name, password:pass, coins:100, diamonds:0, level:1, isAdmin:false, createdAt:serverTimestamp(), history:[] });
+                await setDoc(doc(db,"users",uid), { uid, username:uid, name, password:pass, coins:100, diamonds:0, level:1, isAdmin:false, createdAt:serverTimestamp(), history:[], friends:[] });
                 localStorage.setItem(SESS_KEY, uid); app.loadUser(uid);
             },
             loadUser: async (uid) => {
-                listeners.push(onSnapshot(doc(db,"users",uid), s=>{
+                listeners.push(onSnapshot(doc(db,"users",uid), async s=>{
                     if(s.exists()){ 
                         currentUser=s.data(); app.renderHead(); 
-                        if(currentUser.history && currentUser.history.length > 0) document.getElementById('last-backup-info').innerText = "最終保存: " + currentUser.history[currentUser.history.length-1].d;
-                        else document.getElementById('last-backup-info').innerText = "履歴なし";
+                        app.checkAdmSess();
+                        
+                        if(!hasSyncedStart) {
+                            const localGame = localStorage.getItem(KB_SAVE_KEY);
+                            if(localGame) {
+                                try {
+                                    const lg = JSON.parse(localGame);
+                                    if(lg.coins !== currentUser.coins || lg.diamonds !== currentUser.diamonds || (lg.playerLevel||1) !== (currentUser.level||1)) {
+                                        await app.updateUser({ coins: lg.coins, diamonds: lg.diamonds, level: lg.playerLevel || 1 }, "起動時同期: ゲームデータを反映しました");
+                                    }
+                                } catch(e) { console.error("Sync error", e); }
+                            }
+                            hasSyncedStart = true;
+                        }
+                        
+                        try {
+                            const localGame = localStorage.getItem(KB_SAVE_KEY);
+                            let lg = localGame ? JSON.parse(localGame) : {};
+                            if (lg.coins !== currentUser.coins || lg.diamonds !== currentUser.diamonds || (lg.playerLevel||1) !== (currentUser.level||1)) {
+                                lg.coins = currentUser.coins;
+                                lg.diamonds = currentUser.diamonds;
+                                lg.playerLevel = currentUser.level || 1;
+                                localStorage.setItem(KB_SAVE_KEY, JSON.stringify(lg));
+                            }
+                        } catch(e) {}
+
+                        if(currentUser.history && currentUser.history.length > 0) {
+                            const myLast = [...currentUser.history].reverse().find(h => h.dev === myDeviceId);
+                            const globalLast = currentUser.history[currentUser.history.length-1];
+                            document.getElementById('last-backup-info').innerText = "最終保存: " + (myLast ? myLast.d : globalLast.d);
+                        } else {
+                            document.getElementById('last-backup-info').innerText = "履歴なし";
+                        }
+
+                        const splash = document.getElementById('splash-screen');
+                        if(splash && splash.style.display !== 'none') {
+                            splash.classList.add('fade-out');
+                            setTimeout(() => splash.style.display = 'none', 500);
+                        }
                         app.go('scr-main'); app.tab('home'); 
                     }
                 }));
-                app.subNews(); app.subChat(); app.subTrade(); app.subDMList();
+                app.subNews(); 
+                app.subChat(); 
+                app.subTrade(); 
+                app.subDMList(uid); 
+                app.subRequests(uid);
             },
             renderHead: () => {
                 document.getElementById('header-user-name').innerText=currentUser.name; document.getElementById('set-name').value=currentUser.name; document.getElementById('set-uid').innerText=currentUser.username;
                 document.getElementById('v-coin').innerText=(currentUser.coins||0).toLocaleString(); document.getElementById('v-gem').innerText=(currentUser.diamonds||0).toLocaleString(); document.getElementById('v-level').innerText=currentUser.level||1;
             },
+            updateProfile: async () => {
+                const name = document.getElementById('set-name').value.trim();
+                if(!name) return;
+                await updateDoc(doc(db, "users", currentUser.username), { name: name });
+                app.toast("名前を更新しました");
+            },
             logout: () => { localStorage.removeItem(SESS_KEY); localStorage.removeItem(ADM_KEY); location.reload(); },
 
-            // BACKUP
             updateUser: async (changes, msg) => {
                 try {
                     await runTransaction(db, async (tr) => {
@@ -510,18 +678,39 @@
             restoreCloudList: () => {
                 if(!currentUser.history || currentUser.history.length === 0) return app.toast("履歴なし");
                 let h = `<div style='max-height:300px; overflow-y:auto;'>`;
-                const list = [...currentUser.history].reverse();
-                list.forEach((item) => {
+                const myHists = currentUser.history.filter(h => h.dev === myDeviceId).reverse().slice(0, 5);
+                if(myHists.length === 0) h += `<div class="text-xs text-sub mb-2">この端末のバックアップはありません</div>`;
+                myHists.forEach((item) => {
                     const data = JSON.parse(item.v);
-                    h += `<div class="hist-item"><div><b>${item.d}</b><br><span class="hist-meta">${item.dev===myDeviceId?'この端末':'別端末'} | 🪙${data.coins} 💎${data.diamonds}</span></div><button class="btn btn-sm btn-primary" onclick='app.execRestore(${JSON.stringify(data)})'>復元</button></div>`;
+                    h += `<div class="hist-item"><div><b>${item.d}</b><br><span class="hist-meta">🪙${data.coins} 💎${data.diamonds}</span></div><button class="btn btn-sm btn-primary" onclick='app.execRestore(${JSON.stringify(data)})'>復元</button></div>`;
                 });
                 h += `</div>`;
-                app.mdl("クラウド履歴復元", h);
+                app.mdl("クラウド履歴復元 (この端末の直近5件)", h);
             },
             execRestore: async (data) => {
                 if(!confirm("復元しますか？")) return;
                 await app.updateUser({ coins: data.coins, diamonds: data.diamonds, level: data.level }, "復元しました");
                 app.closeModal();
+            },
+            importFromGame: async () => {
+                const json = localStorage.getItem(KB_SAVE_KEY);
+                if(!json) return app.toast("ゲームデータが見つかりません");
+                if(!confirm("ブラウザのゲームデータを取り込みますか？\n現在の広場のデータは上書きされます。")) return;
+                try {
+                    const d = JSON.parse(json);
+                    await app.updateUser({ coins: d.coins, diamonds: d.diamonds, level: d.playerLevel || 1 }, "取り込み完了");
+                } catch(e) { app.toast("データ破損エラー"); }
+            },
+            exportToGame: async () => {
+                if(!confirm("広場のデータをゲームに反映しますか？\nゲーム側の進行状況は上書きされます。")) return;
+                try {
+                    let d = JSON.parse(localStorage.getItem(KB_SAVE_KEY) || "{}");
+                    d.coins = currentUser.coins;
+                    d.diamonds = currentUser.diamonds;
+                    d.playerLevel = currentUser.level;
+                    localStorage.setItem(KB_SAVE_KEY, JSON.stringify(d));
+                    app.toast("反映しました");
+                } catch(e) { app.toast("書き込みエラー"); }
             },
             saveToLocal: () => {
                 let hist = JSON.parse(localStorage.getItem(LOC_KEY) || "[]");
@@ -540,26 +729,119 @@
                 app.mdl("ブラウザ履歴復元", h);
             },
 
-            // CHAT
+            // CHAT & REPLY
             subChat: () => {
-                listeners.push(onSnapshot(query(collection(db,"chat"), orderBy("createdAt","desc"), limit(30)), s=>{
+                listeners.push(onSnapshot(query(collection(db,"chat"), limit(50)), s=>{
                     const b = document.getElementById('chat-box'); b.innerHTML="";
-                    const msgs=[]; s.forEach(d=>msgs.push({id:d.id, ...d.data()}));
-                    msgs.reverse().forEach(m => b.innerHTML += app.buildMsgHTML(m));
+                    let msgs=[]; s.forEach(d=>msgs.push({id:d.id, ...d.data()}));
+                    msgs.sort((a,b)=>(a.createdAt?.seconds||0) - (b.createdAt?.seconds||0));
+                    msgs.forEach(m => b.innerHTML += app.buildMsgHTML(m));
                     app.scrollChat();
                 }));
             },
-            buildMsgHTML: (m) => {
+            buildMsgHTML: (m, roomId = null) => {
                 const isMe = m.username === currentUser.username;
                 const name = m.sender || m.name || "Unknown";
-                return `<div class="msg-row ${isMe?'mine':'other'}">${!isMe?`<span class="msg-name" onclick="app.showProfile('${m.username}','${name}')">${name}</span>`:''}<div class="msg-bubble">${(isMe||currentUser.isAdmin)?`<div class="msg-del" onclick="app.delChat('${m.id}')">✕</div>`:''}${m.text?`<div>${m.text}</div>`:''}${m.img?`<img src="${m.img}" class="chat-img" onload="app.scrollChat()" onclick="document.getElementById('img-full').src=this.src;document.getElementById('img-viewer').style.display='flex'">`:''}</div></div>`;
+                const type = roomId ? 'dm' : 'all';
+                // 返信UIの構築
+                let replyHtml = '';
+                if(m.replyTo) {
+                    const r = m.replyTo;
+                    const rText = r.text ? (r.text.length > 20 ? r.text.substring(0,20)+'...' : r.text) : (r.img ? '画像' : '');
+                    replyHtml = `<div class="reply-box-in-msg">
+                        ${r.img ? `<img src="${r.img}">` : ''}
+                        <div class="reply-content">
+                            <div style="font-size:0.65rem; color:var(--primary)">${r.name}</div>
+                            <div>${rText}</div>
+                        </div>
+                    </div>`;
+                }
+
+                // 吹き出しクリックでアクションメニューを開く
+                const tapAction = `app.openMsgAction('${type}', '${m.id}', '${m.username}', \`${name}\`, \`${m.text?m.text.replace(/`/g, '\\`'):''}\`, '${m.img||''}', '${roomId||''}')`;
+                
+                return `<div class="msg-row ${isMe?'mine':'other'}">
+                    ${!isMe?`<span class="msg-name" onclick="app.showProfile('${m.username}','${name}')">${name}</span>`:''}
+                    <div class="msg-bubble" onclick="${tapAction}">
+                        ${replyHtml}
+                        ${m.text?`<div>${m.text}</div>`:''}
+                        ${m.img?`<img src="${m.img}" class="chat-img" onload="${roomId ? `document.getElementById('dm-talk-box').scrollTop=99999` : `app.scrollChat()`}" onclick="event.stopPropagation(); document.getElementById('img-full').src=this.src;document.getElementById('img-viewer').style.display='flex'">`:''}
+                    </div>
+                </div>`;
             },
+            
+            // メッセージアクション (ボトムシート)
+            openMsgAction: (type, msgId, msgUid, msgName, msgText, msgImg, roomId) => {
+                actionMsg = { type, msgId, msgUid, msgName, msgText, msgImg, roomId };
+                const isMine = msgUid === currentUser.username || currentUser.isAdmin;
+                
+                let preview = `${msgName}: `;
+                if(msgText) preview += msgText.substring(0, 30) + (msgText.length > 30 ? '...' : '');
+                else if(msgImg) preview += '[画像]';
+                
+                document.getElementById('msg-action-target').innerText = preview;
+                document.getElementById('msg-action-sheet').classList.add('show');
+                
+                const delBtn = document.getElementById('btn-msg-del');
+                if(isMine) delBtn.classList.remove('hidden');
+                else delBtn.classList.add('hidden');
+            },
+            closeMsgAction: () => {
+                document.getElementById('msg-action-sheet').classList.remove('show');
+                actionMsg = null;
+            },
+            prepareReply: () => {
+                if(!actionMsg) return;
+                const { type, msgId, msgName, msgText, msgImg } = actionMsg;
+                
+                replyTarget[type] = { id: msgId, name: msgName, text: msgText, img: msgImg };
+                
+                const preBox = document.getElementById(type === 'all' ? 'chat-reply-preview' : 'dm-reply-preview');
+                const preName = document.getElementById(type === 'all' ? 'chat-rep-name' : 'dm-rep-name');
+                const preText = document.getElementById(type === 'all' ? 'chat-rep-text' : 'dm-rep-text');
+                const preImg = document.getElementById(type === 'all' ? 'chat-rep-img' : 'dm-rep-img');
+                const inputId = type === 'all' ? 'chat-in' : 'dm-in';
+                
+                preName.innerText = `返信先: ${msgName}`;
+                preText.innerText = msgText || '画像';
+                if(msgImg) { preImg.src = msgImg; preImg.classList.remove('hidden'); }
+                else { preImg.classList.add('hidden'); }
+                
+                preBox.style.display = 'flex';
+                app.closeMsgAction();
+                document.getElementById(inputId).focus();
+            },
+            cancelReply: (type) => {
+                replyTarget[type] = null;
+                document.getElementById(type === 'all' ? 'chat-reply-preview' : 'dm-reply-preview').style.display = 'none';
+            },
+            execDelMsg: async () => {
+                if(!actionMsg) return;
+                if(!confirm("メッセージを削除しますか？")) return;
+                
+                try {
+                    if(actionMsg.type === 'all') {
+                        await deleteDoc(doc(db,"chat", actionMsg.msgId));
+                    } else if(actionMsg.type === 'dm') {
+                        await deleteDoc(doc(db, "rooms", actionMsg.roomId, "messages", actionMsg.msgId));
+                    }
+                    app.toast("削除しました");
+                } catch(e) { app.toast("削除エラー"); }
+                
+                app.closeMsgAction();
+            },
+
             sendChat: async () => {
                 const i=document.getElementById('chat-in'), t=i.value.trim(); if(!t && !chatImg) return;
-                await addDoc(collection(db,"chat"), { text:t, img:chatImg, username:currentUser.username, sender:currentUser.name, createdAt:serverTimestamp() });
-                i.value=""; app.clearChatImg();
+                
+                const payload = { text:t, img:chatImg, username:currentUser.username, sender:currentUser.name, createdAt:serverTimestamp() };
+                if(replyTarget.all) {
+                    payload.replyTo = replyTarget.all;
+                }
+                
+                await addDoc(collection(db,"chat"), payload);
+                i.value=""; app.clearChatImg(); app.cancelReply('all');
             },
-            delChat: async (id) => { if(confirm("削除？")) await deleteDoc(doc(db,"chat",id)); },
             scrollChat: () => { const b=document.getElementById('tab-chat'); if(!b.classList.contains('hidden')) setTimeout(()=>document.getElementById('chat-box').scrollTop=99999, 100); },
             clearChatImg: () => { chatImg = null; document.getElementById('chat-file').value = ""; document.getElementById('chat-preview').style.display = 'none'; },
             switchChatMode: (mode) => {
@@ -572,30 +854,103 @@
                 }
             },
 
-            // DM
-            subDMList: () => {
-                const q = query(collection(db, "rooms"), where("members", "array-contains", currentUser.username), orderBy("updatedAt", "desc"));
-                listeners.push(onSnapshot(q, s => {
-                    const list = document.getElementById('dm-list-box'); list.innerHTML = "";
-                    if(s.empty) { list.innerHTML = "<div class='text-center text-sub mt-4'>個チャはまだありません</div>"; return; }
-                    s.forEach(d => {
-                        const r = d.data(), otherId = r.members.find(id => id !== currentUser.username), otherName = r.names ? r.names[otherId] : otherId;
-                        list.innerHTML += `<div class="dm-item" onclick="app.openDMRoom('${d.id}', '${otherName}')"><div class="dm-icon">${otherName.charAt(0)}</div><div class="dm-info"><div class="dm-name">${otherName}</div><div class="dm-last">${r.lastMsg || "画像"}</div></div></div>`;
-                    });
-                }));
+            // FRIEND & REQUESTS
+            promptFriendRequest: () => {
+                const targetId = prompt("友達申請する相手のIDを入力してください");
+                if(!targetId) return;
+                if(targetId === currentUser.username) return app.toast("自分には送れません");
+                app.sendRequest(targetId);
             },
-            searchAndStartDM: async () => {
-                const targetId = prompt("相手のIDを入力してください");
-                if(!targetId || targetId === currentUser.username) return;
+            sendRequest: async (targetId) => {
                 try {
                     const snap = await getDoc(doc(db, "users", targetId));
                     if(!snap.exists()) return app.toast("ユーザーが見つかりません");
-                    app.startDM(targetId, snap.data().name);
+                    const q = query(collection(db, "requests"), where("from", "==", currentUser.username), where("to", "==", targetId));
+                    const exist = await getDocs(q);
+                    if(!exist.empty) return app.toast("既に申請済みです");
+                    if(currentUser.friends && currentUser.friends.includes(targetId)) return app.toast("既に友達です");
+                    await addDoc(collection(db, "requests"), { from: currentUser.username, fromName: currentUser.name, to: targetId, toName: snap.data().name, status: 'pending', createdAt: serverTimestamp() });
+                    app.toast("申請を送りました");
                 } catch(e) { app.toast("エラー"); }
+            },
+            subRequests: (uid) => {
+                const qIn = query(collection(db, "requests"), where("to", "==", uid));
+                listeners.push(onSnapshot(qIn, s => {
+                    const list = document.getElementById('requests-list'); list.innerHTML = "";
+                    if(s.empty) { list.innerHTML = "<div class='text-xs text-sub'>現在届いている申請はありません</div>"; } 
+                    else {
+                        s.forEach(d => {
+                            const r = d.data();
+                            list.innerHTML += `<div class="req-item" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid var(--border);"><div><div class="font-bold text-sm">${r.fromName}</div><div class="text-xs text-sub">ID: ${r.from}</div></div><div class="flex gap-2"><button class="btn btn-sm btn-primary" onclick="app.acceptRequest('${d.id}', '${r.from}', '${r.fromName}')">承認</button><button class="btn btn-sm btn-danger" onclick="app.rejectRequest('${d.id}')">拒否</button></div></div>`;
+                        });
+                    }
+                }));
+                const qOut = query(collection(db, "requests"), where("from", "==", uid));
+                listeners.push(onSnapshot(qOut, s => {
+                    const list = document.getElementById('outgoing-list'); list.innerHTML = "";
+                    if(s.empty) { list.innerHTML = "<div class='text-xs text-sub'>現在送っている申請はありません</div>"; } 
+                    else {
+                        s.forEach(d => {
+                            const r = d.data();
+                            list.innerHTML += `<div class="req-item"><div class="f-info"><div class="f-name">${r.toName || "ユーザー"}</div><div class="f-meta">ID: ${r.to} へ送信中</div></div><button class="btn btn-sm btn-danger" onclick="app.cancelRequest('${d.id}')">取消</button></div>`;
+                        });
+                    }
+                }));
+            },
+            acceptRequest: async (reqId, fromUid, fromName) => {
+                if(!confirm(`${fromName} さんからの申請を承認しますか？`)) return;
+                try {
+                    await runTransaction(db, async tr => {
+                        const myRef = doc(db, "users", currentUser.username);
+                        tr.update(myRef, { friends: arrayUnion(fromUid) });
+                        const otherRef = doc(db, "users", fromUid);
+                        tr.update(otherRef, { friends: arrayUnion(currentUser.username) });
+                        tr.delete(doc(db, "requests", reqId));
+                    });
+                    app.toast("友達になりました！");
+                } catch(e) { app.toast("エラー"); }
+            },
+            rejectRequest: async (reqId) => {
+                if(!confirm("申請を拒否（削除）しますか？")) return;
+                await deleteDoc(doc(db, "requests", reqId));
+                app.toast("申請を削除しました");
+            },
+            cancelRequest: async (reqId) => {
+                if(!confirm("申請を取り消しますか？")) return;
+                await deleteDoc(doc(db, "requests", reqId));
+                app.toast("申請を取り消しました");
+            },
+
+            subDMList: (uid) => {
+                listeners.push(onSnapshot(doc(db, "users", uid), async s => {
+                    if (!s.exists()) return;
+                    const d = s.data();
+                    const friends = d.friends || [];
+                    const list = document.getElementById('dm-list-box');
+                    
+                    if(friends.length === 0) { 
+                        list.innerHTML = "<div class='text-center text-sub mt-4'>まだ友達がいません</div>"; 
+                        return; 
+                    }
+
+                    let html = "";
+                    for(const fid of friends) {
+                        try {
+                            const fSnap = await getDoc(doc(db, "users", fid));
+                            if(fSnap.exists()) {
+                                const fData = fSnap.data();
+                                html += `<div class="dm-item" onclick="app.startDM('${fid}', '${fData.name}')"><div class="dm-icon">${fData.name.charAt(0)}</div><div class="dm-info"><div class="dm-name">${fData.name}</div><div class="dm-last">ID: ${fid}</div></div></div>`;
+                            }
+                        } catch(e) { console.error("友達取得エラー:", e); }
+                    }
+                    list.innerHTML = html;
+                }));
             },
             showProfile: (uid, name) => {
                 if(uid === currentUser.username) return;
-                app.mdl("プロフィール", `<div style="text-align:center"><div style="font-size:3rem; margin-bottom:10px;">👤</div><h3>${name}</h3><p class="text-sub mb-4">ID: ${uid}</p><button class="btn btn-primary" onclick="app.startDM('${uid}', '${name}')">個チャする</button></div>`);
+                const isFriend = currentUser.friends && currentUser.friends.includes(uid);
+                let btnHtml = isFriend ? `<button class="btn btn-success" onclick="app.startDM('${uid}', '${name}')">チャットする</button>` : `<button class="btn btn-primary" onclick="app.sendRequest('${uid}')">友達申請する</button>`;
+                app.mdl("プロフィール", `<div style="text-align:center"><div style="font-size:3rem; margin-bottom:10px;">👤</div><h3>${name}</h3><p class="text-sub mb-4">ID: ${uid}</p>${btnHtml}</div>`);
             },
             startDM: async (targetUid, targetName) => {
                 app.closeModal(); const members = [currentUser.username, targetUid].sort(), roomId = members.join("_"), ref = doc(db, "rooms", roomId);
@@ -606,20 +961,33 @@
             openDMRoom: (roomId, name) => {
                 currentRoomId = roomId; document.getElementById('dm-talk-name').innerText = name; document.getElementById('scr-dm-talk').classList.add('active');
                 if(dmUnsub) dmUnsub();
-                const q = query(collection(db, "rooms", roomId, "messages"), orderBy("createdAt", "desc"), limit(30));
+                
+                const q = query(collection(db, "rooms", roomId, "messages"), limit(50));
                 dmUnsub = onSnapshot(q, s => {
                     const b = document.getElementById('dm-talk-box'); b.innerHTML = "";
-                    const msgs = []; s.forEach(d => msgs.push({id:d.id, ...d.data()}));
-                    msgs.reverse().forEach(m => b.innerHTML += app.buildMsgHTML(m));
+                    let msgs = []; s.forEach(d => msgs.push({id:d.id, ...d.data()}));
+                    msgs.sort((a,b)=>(a.createdAt?.seconds||0) - (b.createdAt?.seconds||0));
+                    msgs.forEach(m => b.innerHTML += app.buildMsgHTML(m, roomId));
                     setTimeout(()=>b.scrollTop = 99999, 100);
                 });
             },
-            closeDM: () => { document.getElementById('scr-dm-talk').classList.remove('active'); if(dmUnsub) dmUnsub(); currentRoomId = null; },
+            closeDM: () => { 
+                document.getElementById('scr-dm-talk').classList.remove('active'); 
+                if(dmUnsub) dmUnsub(); 
+                currentRoomId = null; 
+                app.cancelReply('dm');
+            },
             sendDM: async () => {
                 const i = document.getElementById('dm-in'), t = i.value.trim(); if((!t && !dmImg) || !currentRoomId) return;
-                await addDoc(collection(db, "rooms", currentRoomId, "messages"), { text: t, img: dmImg, username: currentUser.username, sender: currentUser.name, createdAt: serverTimestamp() });
+                
+                const payload = { text: t, img: dmImg, username: currentUser.username, sender: currentUser.name, createdAt: serverTimestamp() };
+                if(replyTarget.dm) {
+                    payload.replyTo = replyTarget.dm;
+                }
+
+                await addDoc(collection(db, "rooms", currentRoomId, "messages"), payload);
                 await updateDoc(doc(db, "rooms", currentRoomId), { lastMsg: t || "画像", updatedAt: serverTimestamp() });
-                i.value = ""; app.clearDMImg();
+                i.value = ""; app.clearDMImg(); app.cancelReply('dm');
             },
             handleFileSelect: (i, type) => {
                 if(i.files[0]){
@@ -638,11 +1006,11 @@
             },
             clearDMImg: () => { dmImg=null; document.getElementById('dm-file').value=""; document.getElementById('dm-preview').style.display='none'; },
 
-            // NEWS (User Side)
+            // NEWS
             subNews: () => {
-                listeners.push(onSnapshot(query(collection(db,"announcements"), limit(30)), s=>{
+                listeners.push(onSnapshot(query(collection(db,"announcements"), limit(50)), s=>{
                     const l = document.getElementById('news-list'); l.innerHTML="";
-                    let items = []; s.forEach(d => items.push({id:d.id, ...d.data()}));
+                    let items = []; s.forEach(d => { appCache.news[d.id]=d.data(); items.push({id:d.id, ...d.data()}) });
                     const now = new Date();
                     items = items.filter(n => (n.publishAt ? toDate(n.publishAt) : toDate(n.createdAt)) <= now);
                     items.sort((a,b) => {
@@ -658,109 +1026,9 @@
                 }));
             },
             openNews: (id) => {
-                const ti = document.querySelector(`#nc-${id}`).parentElement.querySelector('.font-bold').innerText;
-                const bo = document.getElementById(`nc-${id}`).innerHTML;
-                const im = document.getElementById(`ni-${id}`).innerHTML;
-                app.mdl(ti, `${im?`<img src="${im}" style="width:100%;border-radius:8px;margin-bottom:10px">`:''}<div style="white-space:pre-wrap;line-height:1.6">${bo}</div>`);
+                const n = appCache.news[id];
+                if(n) app.mdl(n.title, `${n.img?`<img src="${n.img}" style="width:100%;border-radius:8px;margin-bottom:10px">`:''}<div style="white-space:pre-wrap;line-height:1.6">${n.body}</div>`);
             },
-
-            // ADMIN
-            checkAdmSess: () => { const e=localStorage.getItem(ADM_KEY); if(e&&parseInt(e)>Date.now())return true; localStorage.removeItem(ADM_KEY); return false; },
-            authAdmin: async () => {
-                if(app.checkAdmSess()){ app.tab('admin'); return; }
-                const c=document.getElementById('adm-code').value; let vc="cotobato-admin";
-                try{const d=await getDoc(doc(db,"system","config"));if(d.exists())vc=d.data().code}catch{}
-                if(c===vc){localStorage.setItem(ADM_KEY, Date.now()+1800000); document.getElementById('tab-admin').classList.remove('hidden'); document.getElementById('nav-adm-pc').classList.remove('hidden'); app.tab('admin'); app.toast("認証成功"); app.subAdmList(); document.getElementById('adm-code').value="";}else app.toast("違います");
-            },
-            changeAdmPass: async () => {
-                const nc=document.getElementById('adm-new-code').value.trim(); if(nc.length<4) return app.toast("短すぎます");
-                await setDoc(doc(db,"system","config"),{code:nc}); app.toast("変更しました");
-            },
-            subAdmList: () => {
-                onSnapshot(query(collection(db,"announcements"), limit(50)), s=>{
-                    const l=document.getElementById('adm-list-news'); l.innerHTML="";
-                    let items=[]; s.forEach(d=>items.push({id:d.id, ...d.data()}));
-                    items.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
-                    items.forEach(n=>{
-                        const pub=n.publishAt?toDate(n.publishAt):toDate(n.createdAt);
-                        l.innerHTML+=`<div class="adm-list-item"><div style="flex:1"><div class="font-bold text-sm">${n.pin?'<span class="adm-tag pin">固定</span>':''}${pub>new Date()?'<span class="adm-tag future">予約</span>':''}${n.img?'<span class="adm-tag img">画像</span>':''}${n.title}</div><div class="adm-detail">公開: ${pub.toLocaleString()}</div></div><div class="flex gap-2"><button class="btn btn-sm btn-primary" onclick='app.editNews(${JSON.stringify(n)})'>編集</button><button class="btn btn-sm btn-danger" onclick="app.delDoc('announcements','${n.id}')">削除</button></div></div>`;
-                    });
-                });
-                onSnapshot(query(collection(db,"gifts"), orderBy("createdAt","desc"), limit(20)), s=>{
-                    const l=document.getElementById('adm-list-gifts'); l.innerHTML="";
-                    s.forEach(d=>{
-                        const g=d.data(), st=g.publishAt?toDate(g.publishAt).toLocaleString():"即時", ed=g.expireAt?toDate(g.expireAt).toLocaleString():"無期限";
-                        l.innerHTML+=`<div class="adm-list-item"><div style="flex:1"><div class="font-bold text-sm">${g.val} ${g.type}</div><div class="adm-detail">${g.msg}</div><div class="adm-detail">期間: ${st} ～ ${ed}</div></div><div class="flex gap-2"><button class="btn btn-sm btn-primary" onclick='app.editGift(${JSON.stringify({id:d.id, ...g})})'>編集</button><button class="btn btn-sm btn-danger" onclick="app.delDoc('gifts','${d.id}')">削除</button></div></div>`;
-                    });
-                });
-            },
-            editNews: (n) => {
-                document.getElementById('adm-news-id').value=n.id; document.getElementById('adm-news-title').value=n.title;
-                document.getElementById('adm-news-body').value=n.body; document.getElementById('adm-news-pin').checked=n.pin;
-                if(n.publishAt){ const d=toDate(n.publishAt); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); document.getElementById('adm-news-date').value=d.toISOString().slice(0,16); } else document.getElementById('adm-news-date').value="";
-                newsImgOriginal=n.img; newsImg=null; if(n.img)document.getElementById('adm-news-file-status').innerText="画像あり(維持)";
-                document.getElementById('btn-news-post').innerText="更新(新規投稿)"; document.getElementById('btn-news-cancel').classList.remove('hidden'); document.querySelector('.scroll-view').scrollTop=0;
-            },
-            resetNewsForm: () => {
-                document.getElementById('adm-news-id').value=""; document.getElementById('adm-news-title').value="";
-                document.getElementById('adm-news-body').value=""; document.getElementById('adm-news-pin').checked=false;
-                document.getElementById('adm-news-date').value=""; newsImg=null; newsImgOriginal=null;
-                document.getElementById('adm-news-file-status').innerText="未選択";
-                document.getElementById('btn-news-post').innerText="配信登録"; document.getElementById('btn-news-cancel').classList.add('hidden');
-            },
-            postNews: async () => {
-                const id=document.getElementById('adm-news-id').value, ti=document.getElementById('adm-news-title').value, bo=document.getElementById('adm-news-body').value, pi=document.getElementById('adm-news-pin').checked, da=document.getElementById('adm-news-date').value;
-                if(!ti) return;
-                const d={title:ti, body:bo, pin:pi, createdAt:serverTimestamp()};
-                if(newsImg) d.img=newsImg; else if(id && newsImgOriginal) d.img=newsImgOriginal;
-                if(da) d.publishAt=Timestamp.fromDate(new Date(da)); else d.publishAt=serverTimestamp();
-                if(id) await deleteDoc(doc(db,"announcements",id));
-                await addDoc(collection(db,"announcements"), d); app.toast(id?"更新しました":"配信しました"); app.resetNewsForm();
-            },
-            editGift: (g) => {
-                document.getElementById('adm-gift-id').value=g.id; document.getElementById('adm-gift-type').value=g.type;
-                document.getElementById('adm-gift-val').value=g.val; document.getElementById('adm-gift-msg').value=g.msg;
-                const fmt=(ts)=>{if(!ts)return""; const d=toDate(ts); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,16);};
-                document.getElementById('adm-gift-start').value=fmt(g.publishAt); document.getElementById('adm-gift-end').value=fmt(g.expireAt);
-                document.getElementById('btn-gift-post').innerText="更新する"; document.getElementById('btn-gift-cancel').classList.remove('hidden');
-                document.querySelector('.scroll-view').scrollTop=0;
-            },
-            resetGiftForm: () => {
-                document.getElementById('adm-gift-id').value=""; document.getElementById('adm-gift-val').value=""; document.getElementById('adm-gift-msg').value="";
-                document.getElementById('adm-gift-start').value=""; document.getElementById('adm-gift-end').value="";
-                document.getElementById('btn-gift-post').innerText="全員に配布"; document.getElementById('btn-gift-cancel').classList.add('hidden');
-            },
-            distributeGift: async () => {
-                const id=document.getElementById('adm-gift-id').value, ty=document.getElementById('adm-gift-type').value, va=parseInt(document.getElementById('adm-gift-val').value), ms=document.getElementById('adm-gift-msg').value, st=document.getElementById('adm-gift-start').value, ed=document.getElementById('adm-gift-end').value;
-                if(!va) return;
-                const d={type:ty, val:va, msg:ms};
-                if(st) d.publishAt=Timestamp.fromDate(new Date(st)); else if(!id) d.publishAt=serverTimestamp();
-                if(ed) d.expireAt=Timestamp.fromDate(new Date(ed)); else d.expireAt=null;
-                if(id) { await updateDoc(doc(db,"gifts",id), d); app.toast("更新しました"); }
-                else { if(!confirm("全員に配布？")) return; d.to="all"; d.claimedBy=[]; d.createdAt=serverTimestamp(); await addDoc(collection(db,"gifts"), d); app.toast("配布しました"); }
-                app.resetGiftForm();
-            },
-            delDoc: async (c,i) => { if(confirm("削除しますか？")) await deleteDoc(doc(db,c,i)); },
-
-            // OTHER
-            handleFileSelect: (i, type) => {
-                if(i.files[0]){
-                    const reader = new FileReader();
-                    reader.onload = e => {
-                        const img = new Image(); img.onload = () => {
-                            const c = document.createElement('canvas'), MAX=800; let w=img.width, h=img.height;
-                            if(w>MAX){h*=MAX/w;w=MAX} c.width=w; c.height=h; c.getContext('2d').drawImage(img,0,0,w,h);
-                            const d = c.toDataURL('image/jpeg',0.7);
-                            if(type==='chat') { chatImg=d; document.getElementById('chat-preview').style.display='flex'; document.getElementById('chat-preview-img').src=d; }
-                            else if(type==='dm') { dmImg=d; document.getElementById('dm-preview').style.display='flex'; document.getElementById('dm-preview-img').src=d; }
-                            else { newsImg=d; document.getElementById('adm-news-file-status').innerText="選択済"; }
-                        }; img.src = e.target.result;
-                    }; reader.readAsDataURL(i.files[0]);
-                }
-            },
-            updateProfile: async () => { const n=document.getElementById('set-name').value; if(n){await updateDoc(doc(db,"users",currentUser.username),{name:n}); app.toast("保存しました");} },
-            
-            // Check Gifts - Fixed to be error-safe
             checkGifts: async () => {
                 try {
                     app.toast("確認中...");
@@ -775,7 +1043,7 @@
                                 c++; 
                                 h+=`<div class="card flex justify-between items-center" style="padding:10px"><div><b>${g.val} ${g.type}</b><br><small>${g.msg}</small><br><small style="color:var(--text-sub)">期限: ${ed?ed.toLocaleDateString():'無期限'}</small></div><button class="btn btn-sm btn-primary" style="width:auto" onclick="app.claimGift('${d.id}')">受取</button></div>`; 
                             }
-                        } catch(e) { console.error("Gift parse error", e); }
+                        } catch(e) {}
                     });
                     app.mdl("プレゼントBOX", c>0?h:"<p class='text-center text-sub'>受け取れるプレゼントはありません</p>");
                 } catch(e) { app.toast("エラー: " + e.message); }
@@ -796,14 +1064,18 @@
                     app.toast("受取完了"); app.closeModal();
                 } catch(e){ app.toast("エラー: "+e); }
             },
+
             // TRADE
             subTrade: () => {
-                listeners.push(onSnapshot(query(collection(db,"trades"), where("status","==","open"), orderBy("createdAt","desc"), limit(50)), s=>{
+                listeners.push(onSnapshot(query(collection(db,"trades"), where("status","==","open"), limit(100)), s=>{
                     const l=document.getElementById('trade-list'); l.innerHTML=""; const now=new Date();
-                    s.forEach(d=>{
-                        const t=d.data(), me=t.makerUid===currentUser.username;
+                    let items = [];
+                    s.forEach(d => items.push({id:d.id, ...d.data()}));
+                    items.sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
+                    items.forEach(t=>{
+                        const me=t.makerUid===currentUser.username;
                         const exp=t.expireAt?toDate(t.expireAt):null; if(exp&&exp<now)return;
-                        l.innerHTML+=`<div class="card flex justify-between items-center" style="margin-bottom:8px"><div><div class="text-xs text-sub mb-1">${t.makerName} ${t.passcode?'<span style="color:var(--warning)">🔒コード</span>':''}</div><div class="font-bold">出: ${t.giveVal} ${t.giveType}</div><div class="font-bold" style="color:var(--primary)">求: ${t.wantVal} ${t.wantType}</div><div class="text-xs text-sub">期限: ${exp?exp.toLocaleDateString():'不明'}</div></div><button class="btn btn-sm ${me?'btn-danger':'btn-primary'}" style="width:auto" onclick="${me?`app.cancelTrade('${d.id}',${t.giveVal},'${t.giveType}')`:`app.doTrade('${d.id}',${t.wantVal},'${t.wantType}',${t.giveVal},'${t.giveType}','${t.makerUid}','${t.passcode||''}')`}">${me?'取消':'交換'}</button></div>`;
+                        l.innerHTML+=`<div class="card flex justify-between items-center" style="margin-bottom:8px"><div><div class="text-xs text-sub mb-1">${t.makerName} ${t.passcode?'<span style="color:var(--warning)">🔒コード</span>':''}</div><div class="font-bold">出: ${t.giveVal} ${t.giveType}</div><div class="font-bold" style="color:var(--primary)">求: ${t.wantVal} ${t.wantType}</div><div class="text-xs text-sub">期限: ${exp?exp.toLocaleDateString():'不明'}</div></div><button class="btn btn-sm ${me?'btn-danger':'btn-primary'}" style="width:auto" onclick="${me?`app.cancelTrade('${t.id}',${t.giveVal},'${t.giveType}')`:`app.doTrade('${t.id}',${t.wantVal},'${t.wantType}',${t.giveVal},'${t.giveType}','${t.makerUid}','${t.passcode||''}')`}">${me?'取消':'交換'}</button></div>`;
                     });
                 }));
             },
@@ -832,6 +1104,120 @@
                 } catch{ app.toast("失敗"); }
             },
 
+            // ADMIN LOGIC
+            checkAdmSess: () => { 
+                const e=localStorage.getItem(ADM_KEY); 
+                if(e&&parseInt(e)>Date.now()){
+                    document.getElementById('nav-adm-pc').classList.remove('hidden');
+                    return true; 
+                }
+                localStorage.removeItem(ADM_KEY); 
+                document.getElementById('nav-adm-pc').classList.add('hidden');
+                return false; 
+            },
+            authAdmin: async () => {
+                if(app.checkAdmSess()){ app.tab('admin'); return; }
+                const c=document.getElementById('adm-code').value; let vc="cotobato-admin";
+                try{const d=await getDoc(doc(db,"system","config"));if(d.exists())vc=d.data().code}catch{}
+                
+                if(c===vc){
+                    localStorage.setItem(ADM_KEY, Date.now()+1800000); 
+                    document.getElementById('tab-admin').classList.remove('hidden'); 
+                    document.getElementById('nav-adm-pc').classList.remove('hidden'); 
+                    app.tab('admin'); 
+                    app.toast("認証成功"); 
+                    document.getElementById('adm-code').value="";
+                } else {
+                    app.toast("違います");
+                }
+            },
+            changeAdmPass: async () => {
+                const nc=document.getElementById('adm-new-code').value.trim(); if(nc.length<4) return app.toast("短すぎます");
+                await setDoc(doc(db,"system","config"),{code:nc}); app.toast("変更しました");
+            },
+            
+            // ADMIN LISTS
+            subAdmList: () => {
+                if(app.admListSubbed) return;
+                app.admListSubbed = true;
+
+                onSnapshot(query(collection(db,"announcements"), limit(50)), s=>{
+                    const l=document.getElementById('adm-list-news'); l.innerHTML="";
+                    let items=[]; s.forEach(d=>{ appCache.news[d.id] = d.data(); items.push({id:d.id, ...d.data()}) });
+                    items.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+                    
+                    if(items.length === 0) { l.innerHTML = "<div class='text-xs text-sub'>配信中のお知らせはありません</div>"; }
+
+                    items.forEach(n=>{
+                        const pub=n.publishAt?toDate(n.publishAt):toDate(n.createdAt);
+                        l.innerHTML+=`<div class="adm-list-item"><div style="flex:1"><div class="font-bold text-sm">${n.pin?'<span class="adm-tag pin">固定</span>':''}${pub>new Date()?'<span class="adm-tag future">予約</span>':''}${n.img?'<span class="adm-tag img">画像</span>':''}${n.title}</div><div class="adm-detail">公開: ${pub.toLocaleString()}</div></div><div class="flex gap-2"><button class="btn btn-sm btn-primary" onclick="app.editNews('${n.id}')">編集</button><button class="btn btn-sm btn-danger" onclick="app.delDoc('announcements','${n.id}')">🗑️</button></div></div>`;
+                    });
+                }, e => { console.error("Admin News Load Error:", e); document.getElementById('adm-list-news').innerHTML = "<div class='text-xs text-danger'>読み込みエラー</div>"; });
+
+                onSnapshot(query(collection(db,"gifts"), limit(30)), s=>{
+                    const l=document.getElementById('adm-list-gifts'); l.innerHTML="";
+                    let items=[]; s.forEach(d=>{ appCache.gifts[d.id] = d.data(); items.push({id:d.id, ...d.data()}) });
+                    items.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+
+                    if(items.length === 0) { l.innerHTML = "<div class='text-xs text-sub'>配布済みのギフトはありません</div>"; }
+
+                    items.forEach(g=>{
+                        const st=g.publishAt?toDate(g.publishAt).toLocaleString():"即時", ed=g.expireAt?toDate(g.expireAt).toLocaleString():"無期限";
+                        l.innerHTML+=`<div class="adm-list-item"><div style="flex:1"><div class="font-bold text-sm">${g.val} ${g.type}</div><div class="adm-detail">${g.msg}</div><div class="adm-detail">期間: ${st} ～ ${ed}</div></div><div class="flex gap-2"><button class="btn btn-sm btn-primary" onclick="app.editGift('${g.id}')">編集</button><button class="btn btn-sm btn-danger" onclick="app.delDoc('gifts','${g.id}')">🗑️</button></div></div>`;
+                    });
+                }, e => { console.error("Admin Gifts Load Error:", e); document.getElementById('adm-list-gifts').innerHTML = "<div class='text-xs text-danger'>読み込みエラー</div>"; });
+            },
+
+            editNews: (id) => {
+                const n = appCache.news[id]; if(!n) return;
+                document.getElementById('adm-news-id').value=id; document.getElementById('adm-news-title').value=n.title;
+                document.getElementById('adm-news-body').value=n.body; document.getElementById('adm-news-pin').checked=n.pin;
+                if(n.publishAt){ const d=toDate(n.publishAt); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); document.getElementById('adm-news-date').value=d.toISOString().slice(0,16); } else document.getElementById('adm-news-date').value="";
+                newsImgOriginal=n.img; newsImg=null; if(n.img)document.getElementById('adm-news-file-status').innerText="画像あり(維持)";
+                document.getElementById('btn-news-post').innerText="更新(新規投稿)"; document.getElementById('btn-news-cancel').classList.remove('hidden'); document.querySelector('.scroll-view').scrollTop=0;
+            },
+            resetNewsForm: () => {
+                document.getElementById('adm-news-id').value=""; document.getElementById('adm-news-title').value="";
+                document.getElementById('adm-news-body').value=""; document.getElementById('adm-news-pin').checked=false;
+                document.getElementById('adm-news-date').value=""; newsImg=null; newsImgOriginal=null;
+                document.getElementById('adm-news-file-status').innerText="未選択";
+                document.getElementById('btn-news-post').innerText="配信登録"; document.getElementById('btn-news-cancel').classList.add('hidden');
+            },
+            postNews: async () => {
+                const id=document.getElementById('adm-news-id').value, ti=document.getElementById('adm-news-title').value, bo=document.getElementById('adm-news-body').value, pi=document.getElementById('adm-news-pin').checked, da=document.getElementById('adm-news-date').value;
+                if(!ti) return;
+                const d={title:ti, body:bo, pin:pi, createdAt:serverTimestamp()};
+                if(newsImg) d.img=newsImg; else if(id && newsImgOriginal) d.img=newsImgOriginal;
+                if(da) d.publishAt=Timestamp.fromDate(new Date(da)); else d.publishAt=serverTimestamp();
+                if(id) await deleteDoc(doc(db,"announcements",id));
+                await addDoc(collection(db,"announcements"), d); app.toast(id?"更新しました":"配信しました"); app.resetNewsForm();
+            },
+            editGift: (id) => {
+                const g = appCache.gifts[id]; if(!g) return;
+                document.getElementById('adm-gift-id').value=id; document.getElementById('adm-gift-type').value=g.type;
+                document.getElementById('adm-gift-val').value=g.val; document.getElementById('adm-gift-msg').value=g.msg;
+                const fmt=(ts)=>{if(!ts)return""; const d=toDate(ts); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,16);};
+                document.getElementById('adm-gift-start').value=fmt(g.publishAt); document.getElementById('adm-gift-end').value=fmt(g.expireAt);
+                document.getElementById('btn-gift-post').innerText="更新する"; document.getElementById('btn-gift-cancel').classList.remove('hidden');
+                document.querySelector('.scroll-view').scrollTop=0;
+            },
+            resetGiftForm: () => {
+                document.getElementById('adm-gift-id').value=""; document.getElementById('adm-gift-val').value=""; document.getElementById('adm-gift-msg').value="";
+                document.getElementById('adm-gift-start').value=""; document.getElementById('adm-gift-end').value="";
+                document.getElementById('btn-gift-post').innerText="全員に配布"; document.getElementById('btn-gift-cancel').classList.add('hidden');
+            },
+            distributeGift: async () => {
+                const id=document.getElementById('adm-gift-id').value, ty=document.getElementById('adm-gift-type').value, va=parseInt(document.getElementById('adm-gift-val').value), ms=document.getElementById('adm-gift-msg').value, st=document.getElementById('adm-gift-start').value, ed=document.getElementById('adm-gift-end').value;
+                if(!va) return;
+                const d={type:ty, val:va, msg:ms};
+                if(st) d.publishAt=Timestamp.fromDate(new Date(st)); else if(!id) d.publishAt=serverTimestamp();
+                if(ed) d.expireAt=Timestamp.fromDate(new Date(ed)); else d.expireAt=null;
+                if(id) { await updateDoc(doc(db,"gifts",id), d); app.toast("更新しました"); }
+                else { if(!confirm("全員に配布？")) return; d.to="all"; d.claimedBy=[]; d.createdAt=serverTimestamp(); await addDoc(collection(db,"gifts"), d); app.toast("配布しました"); }
+                app.resetGiftForm();
+            },
+            delDoc: async (c,i) => { if(confirm("削除しますか？")) await deleteDoc(doc(db,c,i)); },
+
             mdl: (t,c) => { document.getElementById('mdl-title').innerText=t; document.getElementById('mdl-content').innerHTML=c; document.getElementById('modal-base').style.display='flex'; },
             closeModal: () => document.getElementById('modal-base').style.display='none',
             toast: (m) => { const e=document.getElementById('toast'); e.innerText=m; e.classList.add('show'); setTimeout(()=>e.classList.remove('show'),3000); }
@@ -844,5 +1230,3 @@
     </script>
 </body>
 </html>
-
-
