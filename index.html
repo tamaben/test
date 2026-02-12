@@ -62,6 +62,8 @@
         .auth-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 24px; padding: 40px 30px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
         .brand-title { font-size: 2rem; font-weight: 900; background: linear-gradient(135deg, #58a6ff, #bc8cff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 2rem; letter-spacing: 1px; }
 
+        .input { width: 100%; padding: 12px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: #fff; font-size: 1rem; transition: border-color 0.2s; }
+        .input:focus { border-color: var(--primary); }
         .input.error { border-color: var(--danger); animation: shake 0.3s; }
         @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
         .candidate-chip { display: inline-block; background: rgba(88, 166, 255, 0.1); border: 1px solid var(--primary); color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; margin-right: 5px; margin-bottom: 5px; transition: 0.2s; }
@@ -88,9 +90,6 @@
 
         .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; position: relative; }
         
-        .input { width: 100%; padding: 12px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: #fff; font-size: 1rem; transition: border-color 0.2s; }
-        .input:focus { border-color: var(--primary); }
-        
         .btn { width: 100%; padding: 12px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.95rem; color: white; transition: 0.2s; }
         .btn:active { opacity: 0.7; transform: scale(0.98); }
         .btn-primary { background: var(--success); }
@@ -111,7 +110,6 @@
         #chat-preview { display: none; padding: 10px 15px 0; align-items: center; gap: 10px; }
         .preview-thumb { height: 60px; border-radius: 8px; border: 1px solid var(--primary); object-fit: cover; }
         
-        /* 返信表示用 */
         #chat-reply-preview, #dm-reply-preview { display: none; padding: 8px 15px 0; align-items: center; gap: 10px; background: var(--bg-card); border-bottom: 1px solid var(--border); border-top: 1px solid var(--border); }
         .reply-thumb { height: 40px; border-radius: 4px; object-fit: cover; }
         .reply-text-preview { font-size: 0.8rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
@@ -134,6 +132,7 @@
         .msg-row.mine .msg-bubble { background: #1f6feb; color: white; border-bottom-right-radius: 4px; }
         .msg-row.other .msg-bubble { background: var(--bg-card); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
         .chat-img { max-width: 100%; border-radius: 8px; margin-top: 6px; display: block; cursor: zoom-in; }
+        .stamp-img { width: 100px; height: 100px; object-fit: contain; display: block; }
 
         .dm-item { display: flex; align-items: center; gap: 12px; padding: 15px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
         .dm-item:hover { background: var(--bg-input); }
@@ -142,9 +141,7 @@
         .dm-name { font-weight: bold; font-size: 0.95rem; }
         .dm-last { font-size: 0.8rem; color: var(--text-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* Request Items */
         .req-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid var(--border); }
-
         .news-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; cursor: pointer; display: flex; gap: 12px; align-items: center; margin-bottom: 8px; position: relative; overflow: hidden; }
         .news-thumb { width: 60px; height: 60px; background: #000; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
         .pin-mark { background: var(--warning); color: #000; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-right: 6px; }
@@ -155,7 +152,6 @@
         .adm-tag.pin { background: var(--primary); color: #fff; }
         .adm-tag.img { background: var(--success); color: #fff; }
         .adm-detail { font-size: 0.75rem; color: var(--text-sub); margin-top: 4px; line-height: 1.4; }
-
         .hist-item { padding: 10px; border-bottom: 1px solid var(--border); font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; }
         .hist-meta { font-size: 0.75rem; color: var(--text-sub); }
 
@@ -164,7 +160,6 @@
         .modal-head { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
         .modal-body { padding: 20px; overflow-y: auto; }
         
-        /* ボトムシート風メニュー (返信用) */
         .bottom-sheet { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; display: none; flex-direction: column; justify-content: flex-end; }
         .bottom-sheet-content { background: var(--bg-card); border-top-left-radius: 16px; border-top-right-radius: 16px; padding: 20px; padding-bottom: calc(20px + env(safe-area-inset-bottom)); transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.1, 0.8, 0.3, 1); }
         .bottom-sheet.show { display: flex; }
@@ -179,6 +174,17 @@
         .img-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 10px; }
         .img-full { max-width: 100%; max-height: 100vh; object-fit: contain; }
 
+        /* Stamp Modal Styles */
+        .stamp-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 10px 0; }
+        .stamp-item { aspect-ratio: 1; background: var(--bg-input); border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid transparent; position: relative; }
+        .stamp-item:hover { border-color: var(--primary); }
+        .stamp-item img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
+        .stamp-privacy-badge { position: absolute; top: 2px; right: 2px; font-size: 0.6rem; background: var(--bg-card); padding: 1px 4px; border-radius: 4px; opacity: 0.8; }
+        .stamp-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
+        .stamp-tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; color: var(--text-sub); border-bottom: 2px solid transparent; }
+        .stamp-tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: bold; }
+        .stamp-manage-mode .stamp-item { border-color: var(--warning); }
+        
         @media (min-width: 768px) {
             .sidebar { display: flex; } .bottom-nav { display: none; } .header-mobile { display: none; } .scroll-view { padding-bottom: 20px; }
             .bottom-sheet { align-items: center; justify-content: center; }
@@ -198,7 +204,31 @@
     <div id="toast" class="toast">メッセージ</div>
     <div id="img-viewer" class="img-overlay" onclick="this.style.display='none'"><img id="img-full" class="img-full"></div>
 
-    <!-- メッセージ操作メニュー (ボトムシート) -->
+    <!-- スタンプ選択モーダル -->
+    <div id="stamp-modal" class="modal-overlay" onclick="if(event.target===this) app.closeStampModal()">
+        <div class="modal-box" style="height: 60vh;">
+            <div class="modal-head">
+                <span>スタンプ</span>
+                <div class="flex gap-2">
+                    <button id="btn-stamp-manage" class="btn btn-ghost btn-sm" onclick="app.toggleStampManage()">管理</button>
+                    <button class="btn btn-ghost" style="width:30px;padding:0" onclick="app.closeStampModal()">✕</button>
+                </div>
+            </div>
+            <div class="modal-body" style="padding:0; display:flex; flex-direction:column; height:100%;">
+                <div class="stamp-tabs">
+                    <div class="stamp-tab active" onclick="app.switchStampTab('public')" id="tab-stamp-public">みんなの</div>
+                    <div class="stamp-tab" onclick="app.switchStampTab('private')" id="tab-stamp-private">自分用</div>
+                </div>
+                <div id="stamp-list" class="stamp-grid" style="overflow-y:auto; flex:1; padding:10px;"></div>
+                <div class="p-3 border-t border-[var(--border)]">
+                    <button class="btn btn-primary btn-sm" onclick="document.getElementById('stamp-file').click()">＋ 新規作成</button>
+                    <input type="file" id="stamp-file" accept="image/*" style="display:none" onchange="app.createStamp(this)">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- メッセージ操作メニュー -->
     <div id="msg-action-sheet" class="bottom-sheet" onclick="if(event.target===this) app.closeMsgAction()">
         <div class="bottom-sheet-content">
             <div id="msg-action-target" class="text-xs text-sub mb-3" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding: 0 16px;"></div>
@@ -284,7 +314,6 @@
                     <div id="area-all-chat" style="display:flex; flex-direction:column; flex:1; overflow:hidden;">
                         <div id="chat-box" class="chat-list"></div>
                         <div class="chat-input-wrapper">
-                            <!-- 返信プレビュー -->
                             <div id="chat-reply-preview">
                                 <div style="flex:1; overflow:hidden;">
                                     <div class="reply-name-preview" id="chat-rep-name"></div>
@@ -300,7 +329,10 @@
                                 <button class="btn btn-ghost btn-sm" style="width:auto; margin-left:auto;" onclick="app.clearChatImg()">取消</button>
                             </div>
                             <form class="chat-input-area" onsubmit="event.preventDefault(); app.sendChat();">
-                                <label class="btn btn-ghost" style="width:44px; padding:0; cursor:pointer; border-radius:8px;">
+                                <label class="btn btn-ghost" style="width:40px; padding:0; cursor:pointer;" onclick="app.openStampModal()">
+                                    <span style="font-size:1.2rem">😊</span>
+                                </label>
+                                <label class="btn btn-ghost" style="width:40px; padding:0; cursor:pointer;">
                                     <svg class="icon" viewBox="0 0 24 24"><path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5a2.5 2.5 0 0 1 5 0v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5a2.5 2.5 0 0 0 5 0V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/></svg>
                                     <input type="file" id="chat-file" accept="image/*" style="display:none" onchange="app.handleFileSelect(this, 'chat')">
                                 </label>
@@ -345,7 +377,6 @@
                     </div>
                     <div id="dm-talk-box" class="chat-list"></div>
                     <div class="chat-input-wrapper">
-                        <!-- DM返信プレビュー -->
                         <div id="dm-reply-preview">
                             <div style="flex:1; overflow:hidden;">
                                 <div class="reply-name-preview" id="dm-rep-name"></div>
@@ -361,7 +392,10 @@
                             <button class="btn btn-ghost btn-sm" style="width:auto; margin-left:auto;" onclick="app.clearDMImg()">取消</button>
                         </div>
                         <form class="chat-input-area" onsubmit="event.preventDefault(); app.sendDM();">
-                            <label class="btn btn-ghost" style="width:44px; padding:0; cursor:pointer; border-radius:8px;">
+                            <label class="btn btn-ghost" style="width:40px; padding:0; cursor:pointer;" onclick="app.openStampModal()">
+                                <span style="font-size:1.2rem">😊</span>
+                            </label>
+                            <label class="btn btn-ghost" style="width:40px; padding:0; cursor:pointer;">
                                 <svg class="icon" viewBox="0 0 24 24"><path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5a2.5 2.5 0 0 1 5 0v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5a2.5 2.5 0 0 0 5 0V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/></svg>
                                 <input type="file" id="dm-file" accept="image/*" style="display:none" onchange="app.handleFileSelect(this, 'dm')">
                             </label>
@@ -401,16 +435,24 @@
                         <button class="btn btn-primary" onclick="app.updateProfile()">保存</button>
                     </div>
                     <div class="card">
-                        <h3>コトバト連携</h3>
-                        <p class="text-xs text-sub mb-4">ブラウザにあるゲーム「コトバト」のセーブデータと連携します。</p>
+                        <h3>コトバト連携 (通貨のみ)</h3>
+                        <p class="text-xs text-sub mb-4">ゲーム内のコイン・ダイヤのみを同期します。</p>
                         <div class="flex gap-2 mb-2">
-                            <button class="btn btn-primary" onclick="app.importFromGame()">📥 ゲームデータを取り込む</button>
-                            <button class="btn btn-success" onclick="app.exportToGame()">📤 ゲームへデータを反映</button>
+                            <button class="btn btn-primary" onclick="app.importFromGame()">📥 取り込む</button>
+                            <button class="btn btn-success" onclick="app.exportToGame()">📤 反映する</button>
+                        </div>
+                    </div>
+                    <div class="card" style="border-color:var(--primary)">
+                        <h3 style="color:var(--primary)">全データバックアップ</h3>
+                        <p class="text-xs text-sub mb-4">ゲームの全進行状況をクラウドに保存・復元します。</p>
+                        <div class="flex gap-2 mb-2">
+                            <button class="btn btn-primary" onclick="app.backupFullGameData()">☁ 全データ保存</button>
+                            <button class="btn btn-danger" onclick="app.restoreFullGameData()">↺ 全データ復元</button>
                         </div>
                     </div>
                     <div class="card">
-                        <h3>データ管理(クラウド)</h3>
-                        <div class="flex gap-2 mb-2"><button class="btn btn-ghost" onclick="app.manualBackup()">☁ 手動バックアップ</button><button class="btn btn-danger" onclick="app.restoreCloudList()">↺ バックアップ復元</button></div>
+                        <h3>データ管理(クラウド履歴)</h3>
+                        <div class="flex gap-2 mb-2"><button class="btn btn-ghost" onclick="app.manualBackup()">☁ 手動保存(通貨)</button><button class="btn btn-ghost" onclick="app.restoreCloudList()">↺ 履歴確認</button></div>
                         <div class="text-xs text-sub text-center" id="last-backup-info">履歴なし</div>
                     </div>
                     <div class="card" style="border-color:var(--success)">
@@ -480,9 +522,9 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, onSnapshot, serverTimestamp, query, limit, where, deleteDoc, Timestamp, getDocs, increment, runTransaction, arrayUnion } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, onSnapshot, serverTimestamp, query, limit, where, deleteDoc, Timestamp, getDocs, increment, runTransaction, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDguL7I5v4GxKf5FahdoFEtU5lNMYgxcNo",
@@ -513,12 +555,14 @@
         
         const appCache = { news: {}, gifts: {} };
         const toDate = (ts) => { if (!ts) return new Date(); if (ts.toDate) return ts.toDate(); if (ts instanceof Date) return ts; return new Date(); };
+        const safeArgs = (s) => s ? s.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n') : '';
 
         let hasSyncedStart = false;
-
-        // 返信・メッセージアクション用ステート
         let actionMsg = null;
-        let replyTarget = { all: null, dm: null }; // { id, name, text, img }
+        let replyTarget = { all: null, dm: null };
+        
+        let stampManageMode = false;
+        let currentStampTab = 'public';
 
         const app = {
             admListSubbed: false,
@@ -552,21 +596,25 @@
                         app.subAdmList();
                     }
                 }
-
                 document.querySelectorAll('.nav-link, .b-nav-item').forEach(e=>e.classList.remove('active'));
                 document.querySelectorAll(`[data-tab="${id}"]`).forEach(e=>e.classList.add('active'));
             },
             
-            // AUTH
             login: async () => {
                 const uid = document.getElementById('inp-uid').value.trim(), pass = document.getElementById('inp-pass').value.trim();
                 if(!uid || !pass) return app.toast("入力してください");
                 document.getElementById('loading-msg').classList.remove('hidden');
                 try {
                     const s = await getDoc(doc(db,"users",uid));
-                    if(s.exists() && s.data().password === pass) { localStorage.setItem(SESS_KEY, uid); app.loadUser(uid); }
-                    else { app.toast("間違い"); document.getElementById('loading-msg').classList.add('hidden'); }
-                } catch { app.toast("エラー"); document.getElementById('loading-msg').classList.add('hidden'); }
+                    if(s.exists() && s.data().password === pass) { 
+                        localStorage.setItem(SESS_KEY, uid); app.loadUser(uid); 
+                    } else { 
+                        app.toast("IDまたはパスワードが違います"); 
+                        document.getElementById('loading-msg').classList.add('hidden'); 
+                    }
+                } catch(e) { 
+                    console.error(e); app.toast("接続エラー"); document.getElementById('loading-msg').classList.add('hidden'); 
+                }
             },
             register: async () => {
                 const uidInp = document.getElementById('reg-uid');
@@ -574,23 +622,25 @@
                 const name = document.getElementById('reg-name').value.trim()||uid;
                 const pass = document.getElementById('reg-pass').value.trim();
                 
-                if(!uid || !pass) return app.toast("必須");
+                if(!uid || !pass) return app.toast("IDとパスワードは必須です");
                 uidInp.classList.remove('error');
                 document.getElementById('reg-candidates').innerHTML = "";
 
-                const s = await getDoc(doc(db,"users",uid));
-                if(s.exists()) {
-                    app.toast("既に使用されています");
-                    uidInp.classList.add('error');
-                    const base = uid.replace(/\d+$/, ''); 
-                    const cands = [base + Math.floor(Math.random()*1000), base + "_" + new Date().getFullYear(), "user_" + base, base + "_jp"];
-                    let html = "<div class='text-xs text-sub mb-1'>おすすめ:</div>";
-                    cands.forEach(c => { html += `<span class="candidate-chip" onclick="document.getElementById('reg-uid').value='${c}'; document.getElementById('reg-uid').classList.remove('error'); this.parentElement.innerHTML='';">${c}</span>`; });
-                    document.getElementById('reg-candidates').innerHTML = html;
-                    return;
-                }
-                await setDoc(doc(db,"users",uid), { uid, username:uid, name, password:pass, coins:100, diamonds:0, level:1, isAdmin:false, createdAt:serverTimestamp(), history:[], friends:[] });
-                localStorage.setItem(SESS_KEY, uid); app.loadUser(uid);
+                try {
+                    const s = await getDoc(doc(db,"users",uid));
+                    if(s.exists()) {
+                        app.toast("既に使用されています");
+                        uidInp.classList.add('error');
+                        const base = uid.replace(/\d+$/, ''); 
+                        const cands = [base + Math.floor(Math.random()*1000), base + "_" + new Date().getFullYear(), "user_" + base, base + "_jp"];
+                        let html = "<div class='text-xs text-sub mb-1'>おすすめ:</div>";
+                        cands.forEach(c => { html += `<span class="candidate-chip" onclick="document.getElementById('reg-uid').value='${c}'; document.getElementById('reg-uid').classList.remove('error'); this.parentElement.innerHTML='';">${c}</span>`; });
+                        document.getElementById('reg-candidates').innerHTML = html;
+                        return;
+                    }
+                    await setDoc(doc(db,"users",uid), { uid, username:uid, name, password:pass, coins:100, diamonds:0, level:1, isAdmin:false, createdAt:serverTimestamp(), history:[], friends:[] });
+                    localStorage.setItem(SESS_KEY, uid); app.loadUser(uid);
+                } catch(e) { app.toast("登録エラー"); console.error(e); }
             },
             loadUser: async (uid) => {
                 listeners.push(onSnapshot(doc(db,"users",uid), async s=>{
@@ -636,6 +686,9 @@
                             setTimeout(() => splash.style.display = 'none', 500);
                         }
                         app.go('scr-main'); app.tab('home'); 
+                    } else {
+                        localStorage.removeItem(SESS_KEY);
+                        location.reload();
                     }
                 }));
                 app.subNews(); 
@@ -674,7 +727,41 @@
                     if(msg) app.toast(msg);
                 } catch(e) { console.error(e); app.toast("更新エラー"); }
             },
-            manualBackup: () => app.updateUser({}, "バックアップを作成しました"),
+            manualBackup: () => app.updateUser({}, "通貨データを保存しました"),
+            
+            // --- FULL DATA BACKUP FEATURE ---
+            backupFullGameData: async () => {
+                const raw = localStorage.getItem(KB_SAVE_KEY);
+                if(!raw) return app.toast("保存するゲームデータがありません");
+                if(!confirm("ゲームの【全データ】をクラウドに上書き保存しますか？")) return;
+                
+                try {
+                    await updateDoc(doc(db, "users", currentUser.username), {
+                        gameDataBackup: raw,
+                        backupDate: serverTimestamp()
+                    });
+                    app.toast("全データをクラウドに保存しました");
+                } catch(e) {
+                    console.error(e);
+                    app.toast("保存に失敗しました");
+                }
+            },
+            restoreFullGameData: async () => {
+                if(!currentUser.gameDataBackup) return app.toast("クラウドにバックアップがありません");
+                if(!confirm("クラウドから【全データ】を復元しますか？\n現在のブラウザ上のデータは上書きされます。")) return;
+                
+                try {
+                    localStorage.setItem(KB_SAVE_KEY, currentUser.gameDataBackup);
+                    // Parse to update sync fields immediately
+                    const d = JSON.parse(currentUser.gameDataBackup);
+                    await app.updateUser({ coins: d.coins, diamonds: d.diamonds, level: d.playerLevel || 1 }, "全データを復元しました");
+                    setTimeout(() => location.reload(), 1000);
+                } catch(e) {
+                    console.error(e);
+                    app.toast("復元に失敗しました");
+                }
+            },
+
             restoreCloudList: () => {
                 if(!currentUser.history || currentUser.history.length === 0) return app.toast("履歴なし");
                 let h = `<div style='max-height:300px; overflow-y:auto;'>`;
@@ -685,7 +772,7 @@
                     h += `<div class="hist-item"><div><b>${item.d}</b><br><span class="hist-meta">🪙${data.coins} 💎${data.diamonds}</span></div><button class="btn btn-sm btn-primary" onclick='app.execRestore(${JSON.stringify(data)})'>復元</button></div>`;
                 });
                 h += `</div>`;
-                app.mdl("クラウド履歴復元 (この端末の直近5件)", h);
+                app.mdl("クラウド履歴(通貨のみ)復元", h);
             },
             execRestore: async (data) => {
                 if(!confirm("復元しますか？")) return;
@@ -695,14 +782,14 @@
             importFromGame: async () => {
                 const json = localStorage.getItem(KB_SAVE_KEY);
                 if(!json) return app.toast("ゲームデータが見つかりません");
-                if(!confirm("ブラウザのゲームデータを取り込みますか？\n現在の広場のデータは上書きされます。")) return;
+                if(!confirm("ブラウザのコイン・ダイヤ情報を取り込みますか？")) return;
                 try {
                     const d = JSON.parse(json);
                     await app.updateUser({ coins: d.coins, diamonds: d.diamonds, level: d.playerLevel || 1 }, "取り込み完了");
                 } catch(e) { app.toast("データ破損エラー"); }
             },
             exportToGame: async () => {
-                if(!confirm("広場のデータをゲームに反映しますか？\nゲーム側の進行状況は上書きされます。")) return;
+                if(!confirm("広場のコイン・ダイヤ情報をゲームに反映しますか？")) return;
                 try {
                     let d = JSON.parse(localStorage.getItem(KB_SAVE_KEY) || "{}");
                     d.coins = currentUser.coins;
@@ -729,7 +816,140 @@
                 app.mdl("ブラウザ履歴復元", h);
             },
 
-            // CHAT & REPLY
+            // --- STAMP FEATURE ---
+            openStampModal: () => {
+                document.getElementById('stamp-modal').style.display = 'flex';
+                app.switchStampTab('public');
+            },
+            closeStampModal: () => {
+                document.getElementById('stamp-modal').style.display = 'none';
+                stampManageMode = false;
+                document.getElementById('stamp-list').classList.remove('stamp-manage-mode');
+                document.getElementById('btn-stamp-manage').innerText = "管理";
+            },
+            toggleStampManage: () => {
+                stampManageMode = !stampManageMode;
+                const list = document.getElementById('stamp-list');
+                const btn = document.getElementById('btn-stamp-manage');
+                if (stampManageMode) {
+                    list.classList.add('stamp-manage-mode');
+                    btn.innerText = "完了";
+                    btn.classList.add('btn-primary');
+                    btn.classList.remove('btn-ghost');
+                } else {
+                    list.classList.remove('stamp-manage-mode');
+                    btn.innerText = "管理";
+                    btn.classList.remove('btn-primary');
+                    btn.classList.add('btn-ghost');
+                }
+            },
+            switchStampTab: (tab) => {
+                currentStampTab = tab;
+                document.querySelectorAll('.stamp-tab').forEach(el => el.classList.remove('active'));
+                document.getElementById(`tab-stamp-${tab}`).classList.add('active');
+                app.loadStamps();
+            },
+            createStamp: (input) => {
+                if (input.files && input.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const img = new Image();
+                        img.onload = async function() {
+                            const canvas = document.createElement('canvas');
+                            const MAX_SIZE = 150; 
+                            let width = img.width;
+                            let height = img.height;
+                            if (width > height) {
+                                if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
+                            } else {
+                                if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
+                            }
+                            canvas.width = width;
+                            canvas.height = height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+                            const dataUrl = canvas.toDataURL('image/webp', 0.8);
+                            
+                            const isPublic = confirm("このスタンプを「みんなの（公開）」にしますか？\nキャンセルで「自分用」になります。");
+                            
+                            try {
+                                await addDoc(collection(db, "stamps"), {
+                                    url: dataUrl,
+                                    ownerUid: currentUser.username,
+                                    isPublic: isPublic,
+                                    createdAt: serverTimestamp()
+                                });
+                                app.toast("スタンプを作成しました");
+                                app.loadStamps();
+                            } catch(err) {
+                                app.toast("作成エラー");
+                            }
+                        };
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(input.files[0]);
+                }
+                input.value = "";
+            },
+            loadStamps: async () => {
+                const list = document.getElementById('stamp-list');
+                list.innerHTML = "<div class='text-xs text-sub text-center w-full'>読み込み中...</div>";
+                
+                let q;
+                if (currentStampTab === 'public') {
+                    q = query(collection(db, "stamps"), where("isPublic", "==", true), limit(50));
+                } else {
+                    q = query(collection(db, "stamps"), where("ownerUid", "==", currentUser.username), limit(50));
+                }
+                
+                const snap = await getDocs(q);
+                list.innerHTML = "";
+                
+                if (snap.empty) {
+                    list.innerHTML = "<div class='text-xs text-sub text-center w-full col-span-4'>スタンプがありません</div>";
+                    return;
+                }
+
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    const item = document.createElement('div');
+                    item.className = 'stamp-item';
+                    
+                    let badge = "";
+                    if (d.ownerUid === currentUser.username) {
+                         badge = `<div class="stamp-privacy-badge">${d.isPublic ? '公' : '私'}</div>`;
+                    }
+                    
+                    item.innerHTML = `<img src="${d.url}">${badge}`;
+                    item.onclick = () => app.handleStampClick(doc.id, d);
+                    list.appendChild(item);
+                });
+            },
+            handleStampClick: async (id, data) => {
+                if (stampManageMode) {
+                    if (data.ownerUid !== currentUser.username && !currentUser.isAdmin) return app.toast("権限がありません");
+                    
+                    if (confirm("操作を選択してください:\n[OK] 公開設定の切り替え\n[キャンセル] 削除")) {
+                        await updateDoc(doc(db, "stamps", id), { isPublic: !data.isPublic });
+                        app.toast("公開設定を変更しました");
+                    } else {
+                        if (confirm("本当に削除しますか？")) {
+                            await deleteDoc(doc(db, "stamps", id));
+                            app.toast("削除しました");
+                        }
+                    }
+                    app.loadStamps();
+                } else {
+                    // Send Stamp
+                    if (currentRoomId) { // In DM
+                         app.sendDM(data.url);
+                    } else { // In Global Chat
+                         app.sendChat(data.url);
+                    }
+                    app.closeStampModal();
+                }
+            },
+
             subChat: () => {
                 listeners.push(onSnapshot(query(collection(db,"chat"), limit(50)), s=>{
                     const b = document.getElementById('chat-box'); b.innerHTML="";
@@ -743,7 +963,6 @@
                 const isMe = m.username === currentUser.username;
                 const name = m.sender || m.name || "Unknown";
                 const type = roomId ? 'dm' : 'all';
-                // 返信UIの構築
                 let replyHtml = '';
                 if(m.replyTo) {
                     const r = m.replyTo;
@@ -757,27 +976,33 @@
                     </div>`;
                 }
 
-                // 吹き出しクリックでアクションメニューを開く
-                const tapAction = `app.openMsgAction('${type}', '${m.id}', '${m.username}', \`${name}\`, \`${m.text?m.text.replace(/`/g, '\\`'):''}\`, '${m.img||''}', '${roomId||''}')`;
+                const tapAction = `app.openMsgAction('${type}', '${m.id}', '${m.username}', '${safeArgs(name)}', '${safeArgs(m.text)}', '${m.img||''}', '${roomId||''}')`;
                 
+                // スタンプかどうか判定（imgがあり、textがない場合をスタンプ扱いにするなど）
+                let contentHtml = '';
+                if (m.text) contentHtml += `<div>${m.text}</div>`;
+                if (m.img) {
+                    // 通常画像かスタンプかの区別は厳密ではないが、ここでは全て画像として表示
+                    // スタンプ用クラスを当てることも可能だが、chat-imgで統一
+                    contentHtml += `<img src="${m.img}" class="${m.text ? 'chat-img' : 'stamp-img chat-img'}" onload="${roomId ? `document.getElementById('dm-talk-box').scrollTop=99999` : `app.scrollChat()`}" onclick="event.stopPropagation(); document.getElementById('img-full').src=this.src;document.getElementById('img-viewer').style.display='flex'">`;
+                }
+
                 return `<div class="msg-row ${isMe?'mine':'other'}">
-                    ${!isMe?`<span class="msg-name" onclick="app.showProfile('${m.username}','${name}')">${name}</span>`:''}
-                    <div class="msg-bubble" onclick="${tapAction}">
+                    ${!isMe?`<span class="msg-name" onclick="app.showProfile('${m.username}','${safeArgs(name)}')">${name}</span>`:''}
+                    <div class="msg-bubble" style="${!m.text && m.img ? 'background:transparent; border:none; padding:0;' : ''}" onclick="${tapAction}">
                         ${replyHtml}
-                        ${m.text?`<div>${m.text}</div>`:''}
-                        ${m.img?`<img src="${m.img}" class="chat-img" onload="${roomId ? `document.getElementById('dm-talk-box').scrollTop=99999` : `app.scrollChat()`}" onclick="event.stopPropagation(); document.getElementById('img-full').src=this.src;document.getElementById('img-viewer').style.display='flex'">`:''}
+                        ${contentHtml}
                     </div>
                 </div>`;
             },
             
-            // メッセージアクション (ボトムシート)
             openMsgAction: (type, msgId, msgUid, msgName, msgText, msgImg, roomId) => {
                 actionMsg = { type, msgId, msgUid, msgName, msgText, msgImg, roomId };
                 const isMine = msgUid === currentUser.username || currentUser.isAdmin;
                 
                 let preview = `${msgName}: `;
                 if(msgText) preview += msgText.substring(0, 30) + (msgText.length > 30 ? '...' : '');
-                else if(msgImg) preview += '[画像]';
+                else if(msgImg) preview += '[画像/スタンプ]';
                 
                 document.getElementById('msg-action-target').innerText = preview;
                 document.getElementById('msg-action-sheet').classList.add('show');
@@ -793,9 +1018,7 @@
             prepareReply: () => {
                 if(!actionMsg) return;
                 const { type, msgId, msgName, msgText, msgImg } = actionMsg;
-                
                 replyTarget[type] = { id: msgId, name: msgName, text: msgText, img: msgImg };
-                
                 const preBox = document.getElementById(type === 'all' ? 'chat-reply-preview' : 'dm-reply-preview');
                 const preName = document.getElementById(type === 'all' ? 'chat-rep-name' : 'dm-rep-name');
                 const preText = document.getElementById(type === 'all' ? 'chat-rep-text' : 'dm-rep-text');
@@ -818,7 +1041,6 @@
             execDelMsg: async () => {
                 if(!actionMsg) return;
                 if(!confirm("メッセージを削除しますか？")) return;
-                
                 try {
                     if(actionMsg.type === 'all') {
                         await deleteDoc(doc(db,"chat", actionMsg.msgId));
@@ -827,18 +1049,17 @@
                     }
                     app.toast("削除しました");
                 } catch(e) { app.toast("削除エラー"); }
-                
                 app.closeMsgAction();
             },
 
-            sendChat: async () => {
-                const i=document.getElementById('chat-in'), t=i.value.trim(); if(!t && !chatImg) return;
+            sendChat: async (stampUrl = null) => {
+                const i=document.getElementById('chat-in'), t=i.value.trim(); 
+                const imgPayload = stampUrl || chatImg;
                 
-                const payload = { text:t, img:chatImg, username:currentUser.username, sender:currentUser.name, createdAt:serverTimestamp() };
-                if(replyTarget.all) {
-                    payload.replyTo = replyTarget.all;
-                }
+                if(!t && !imgPayload) return;
                 
+                const payload = { text:t, img:imgPayload, username:currentUser.username, sender:currentUser.name, createdAt:serverTimestamp() };
+                if(replyTarget.all) { payload.replyTo = replyTarget.all; }
                 await addDoc(collection(db,"chat"), payload);
                 i.value=""; app.clearChatImg(); app.cancelReply('all');
             },
@@ -854,7 +1075,6 @@
                 }
             },
 
-            // FRIEND & REQUESTS
             promptFriendRequest: () => {
                 const targetId = prompt("友達申請する相手のIDを入力してください");
                 if(!targetId) return;
@@ -881,7 +1101,7 @@
                     else {
                         s.forEach(d => {
                             const r = d.data();
-                            list.innerHTML += `<div class="req-item" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid var(--border);"><div><div class="font-bold text-sm">${r.fromName}</div><div class="text-xs text-sub">ID: ${r.from}</div></div><div class="flex gap-2"><button class="btn btn-sm btn-primary" onclick="app.acceptRequest('${d.id}', '${r.from}', '${r.fromName}')">承認</button><button class="btn btn-sm btn-danger" onclick="app.rejectRequest('${d.id}')">拒否</button></div></div>`;
+                            list.innerHTML += `<div class="req-item" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid var(--border);"><div><div class="font-bold text-sm">${r.fromName}</div><div class="text-xs text-sub">ID: ${r.from}</div></div><div class="flex gap-2"><button class="btn btn-sm btn-primary" onclick="app.acceptRequest('${d.id}', '${r.from}', '${safeArgs(r.fromName)}')">承認</button><button class="btn btn-sm btn-danger" onclick="app.rejectRequest('${d.id}')">拒否</button></div></div>`;
                         });
                     }
                 }));
@@ -927,19 +1147,14 @@
                     const d = s.data();
                     const friends = d.friends || [];
                     const list = document.getElementById('dm-list-box');
-                    
-                    if(friends.length === 0) { 
-                        list.innerHTML = "<div class='text-center text-sub mt-4'>まだ友達がいません</div>"; 
-                        return; 
-                    }
-
+                    if(friends.length === 0) { list.innerHTML = "<div class='text-center text-sub mt-4'>まだ友達がいません</div>"; return; }
                     let html = "";
                     for(const fid of friends) {
                         try {
                             const fSnap = await getDoc(doc(db, "users", fid));
                             if(fSnap.exists()) {
                                 const fData = fSnap.data();
-                                html += `<div class="dm-item" onclick="app.startDM('${fid}', '${fData.name}')"><div class="dm-icon">${fData.name.charAt(0)}</div><div class="dm-info"><div class="dm-name">${fData.name}</div><div class="dm-last">ID: ${fid}</div></div></div>`;
+                                html += `<div class="dm-item" onclick="app.startDM('${fid}', '${safeArgs(fData.name)}')"><div class="dm-icon">${fData.name.charAt(0)}</div><div class="dm-info"><div class="dm-name">${fData.name}</div><div class="dm-last">ID: ${fid}</div></div></div>`;
                             }
                         } catch(e) { console.error("友達取得エラー:", e); }
                     }
@@ -949,7 +1164,7 @@
             showProfile: (uid, name) => {
                 if(uid === currentUser.username) return;
                 const isFriend = currentUser.friends && currentUser.friends.includes(uid);
-                let btnHtml = isFriend ? `<button class="btn btn-success" onclick="app.startDM('${uid}', '${name}')">チャットする</button>` : `<button class="btn btn-primary" onclick="app.sendRequest('${uid}')">友達申請する</button>`;
+                let btnHtml = isFriend ? `<button class="btn btn-success" onclick="app.startDM('${uid}', '${safeArgs(name)}')">チャットする</button>` : `<button class="btn btn-primary" onclick="app.sendRequest('${uid}')">友達申請する</button>`;
                 app.mdl("プロフィール", `<div style="text-align:center"><div style="font-size:3rem; margin-bottom:10px;">👤</div><h3>${name}</h3><p class="text-sub mb-4">ID: ${uid}</p>${btnHtml}</div>`);
             },
             startDM: async (targetUid, targetName) => {
@@ -961,7 +1176,6 @@
             openDMRoom: (roomId, name) => {
                 currentRoomId = roomId; document.getElementById('dm-talk-name').innerText = name; document.getElementById('scr-dm-talk').classList.add('active');
                 if(dmUnsub) dmUnsub();
-                
                 const q = query(collection(db, "rooms", roomId, "messages"), limit(50));
                 dmUnsub = onSnapshot(q, s => {
                     const b = document.getElementById('dm-talk-box'); b.innerHTML = "";
@@ -977,16 +1191,16 @@
                 currentRoomId = null; 
                 app.cancelReply('dm');
             },
-            sendDM: async () => {
-                const i = document.getElementById('dm-in'), t = i.value.trim(); if((!t && !dmImg) || !currentRoomId) return;
+            sendDM: async (stampUrl = null) => {
+                const i = document.getElementById('dm-in'), t = i.value.trim(); 
+                const imgPayload = stampUrl || dmImg;
                 
-                const payload = { text: t, img: dmImg, username: currentUser.username, sender: currentUser.name, createdAt: serverTimestamp() };
-                if(replyTarget.dm) {
-                    payload.replyTo = replyTarget.dm;
-                }
-
+                if((!t && !imgPayload) || !currentRoomId) return;
+                
+                const payload = { text: t, img: imgPayload, username: currentUser.username, sender: currentUser.name, createdAt: serverTimestamp() };
+                if(replyTarget.dm) { payload.replyTo = replyTarget.dm; }
                 await addDoc(collection(db, "rooms", currentRoomId, "messages"), payload);
-                await updateDoc(doc(db, "rooms", currentRoomId), { lastMsg: t || "画像", updatedAt: serverTimestamp() });
+                await updateDoc(doc(db, "rooms", currentRoomId), { lastMsg: t || (imgPayload ? "画像" : ""), updatedAt: serverTimestamp() });
                 i.value = ""; app.clearDMImg(); app.cancelReply('dm');
             },
             handleFileSelect: (i, type) => {
@@ -1006,7 +1220,6 @@
             },
             clearDMImg: () => { dmImg=null; document.getElementById('dm-file').value=""; document.getElementById('dm-preview').style.display='none'; },
 
-            // NEWS
             subNews: () => {
                 listeners.push(onSnapshot(query(collection(db,"announcements"), limit(50)), s=>{
                     const l = document.getElementById('news-list'); l.innerHTML="";
@@ -1021,7 +1234,7 @@
                     });
                     items.forEach(n => {
                         const pub = n.publishAt ? toDate(n.publishAt) : toDate(n.createdAt);
-                        l.innerHTML += `<div class="news-item" onclick="app.openNews('${n.id}')">${n.img?`<img src="${n.img}" class="news-thumb">`:''}<div style="flex:1"><div class="font-bold">${n.pin?'<span class="pin-mark">固定</span>':''}${n.title}</div><div class="text-xs text-sub">${pub.toLocaleDateString()}</div></div><div class="hidden" id="nc-${n.id}">${n.body}</div><div class="hidden" id="ni-${n.id}">${n.img||''}</div></div>`;
+                        l.innerHTML += `<div class="news-item" onclick="app.openNews('${n.id}')">${n.img?`<img src="${n.img}" class="news-thumb">`:''}<div style="flex:1"><div class="font-bold">${n.pin?'<span class="pin-mark">固定</span>':''}${n.title}</div><div class="text-xs text-sub">${pub.toLocaleDateString()}</div></div></div>`;
                     });
                 }));
             },
@@ -1065,7 +1278,6 @@
                 } catch(e){ app.toast("エラー: "+e); }
             },
 
-            // TRADE
             subTrade: () => {
                 listeners.push(onSnapshot(query(collection(db,"trades"), where("status","==","open"), limit(100)), s=>{
                     const l=document.getElementById('trade-list'); l.innerHTML=""; const now=new Date();
@@ -1104,7 +1316,6 @@
                 } catch{ app.toast("失敗"); }
             },
 
-            // ADMIN LOGIC
             checkAdmSess: () => { 
                 const e=localStorage.getItem(ADM_KEY); 
                 if(e&&parseInt(e)>Date.now()){
@@ -1133,21 +1344,18 @@
             },
             changeAdmPass: async () => {
                 const nc=document.getElementById('adm-new-code').value.trim(); if(nc.length<4) return app.toast("短すぎます");
-                await setDoc(doc(db,"system","config"),{code:nc}); app.toast("変更しました");
+                await setDoc(doc(db,"system","config"),{code:nc}, {merge:true}); 
+                app.toast("変更しました");
             },
             
-            // ADMIN LISTS
             subAdmList: () => {
                 if(app.admListSubbed) return;
                 app.admListSubbed = true;
-
                 onSnapshot(query(collection(db,"announcements"), limit(50)), s=>{
                     const l=document.getElementById('adm-list-news'); l.innerHTML="";
                     let items=[]; s.forEach(d=>{ appCache.news[d.id] = d.data(); items.push({id:d.id, ...d.data()}) });
                     items.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
-                    
                     if(items.length === 0) { l.innerHTML = "<div class='text-xs text-sub'>配信中のお知らせはありません</div>"; }
-
                     items.forEach(n=>{
                         const pub=n.publishAt?toDate(n.publishAt):toDate(n.createdAt);
                         l.innerHTML+=`<div class="adm-list-item"><div style="flex:1"><div class="font-bold text-sm">${n.pin?'<span class="adm-tag pin">固定</span>':''}${pub>new Date()?'<span class="adm-tag future">予約</span>':''}${n.img?'<span class="adm-tag img">画像</span>':''}${n.title}</div><div class="adm-detail">公開: ${pub.toLocaleString()}</div></div><div class="flex gap-2"><button class="btn btn-sm btn-primary" onclick="app.editNews('${n.id}')">編集</button><button class="btn btn-sm btn-danger" onclick="app.delDoc('announcements','${n.id}')">🗑️</button></div></div>`;
@@ -1158,9 +1366,7 @@
                     const l=document.getElementById('adm-list-gifts'); l.innerHTML="";
                     let items=[]; s.forEach(d=>{ appCache.gifts[d.id] = d.data(); items.push({id:d.id, ...d.data()}) });
                     items.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
-
                     if(items.length === 0) { l.innerHTML = "<div class='text-xs text-sub'>配布済みのギフトはありません</div>"; }
-
                     items.forEach(g=>{
                         const st=g.publishAt?toDate(g.publishAt).toLocaleString():"即時", ed=g.expireAt?toDate(g.expireAt).toLocaleString():"無期限";
                         l.innerHTML+=`<div class="adm-list-item"><div style="flex:1"><div class="font-bold text-sm">${g.val} ${g.type}</div><div class="adm-detail">${g.msg}</div><div class="adm-detail">期間: ${st} ～ ${ed}</div></div><div class="flex gap-2"><button class="btn btn-sm btn-primary" onclick="app.editGift('${g.id}')">編集</button><button class="btn btn-sm btn-danger" onclick="app.delDoc('gifts','${g.id}')">🗑️</button></div></div>`;
@@ -1174,7 +1380,7 @@
                 document.getElementById('adm-news-body').value=n.body; document.getElementById('adm-news-pin').checked=n.pin;
                 if(n.publishAt){ const d=toDate(n.publishAt); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); document.getElementById('adm-news-date').value=d.toISOString().slice(0,16); } else document.getElementById('adm-news-date').value="";
                 newsImgOriginal=n.img; newsImg=null; if(n.img)document.getElementById('adm-news-file-status').innerText="画像あり(維持)";
-                document.getElementById('btn-news-post').innerText="更新(新規投稿)"; document.getElementById('btn-news-cancel').classList.remove('hidden'); document.querySelector('.scroll-view').scrollTop=0;
+                document.getElementById('btn-news-post').innerText="更新(保存)"; document.getElementById('btn-news-cancel').classList.remove('hidden'); document.querySelector('.scroll-view').scrollTop=0;
             },
             resetNewsForm: () => {
                 document.getElementById('adm-news-id').value=""; document.getElementById('adm-news-title').value="";
@@ -1186,11 +1392,21 @@
             postNews: async () => {
                 const id=document.getElementById('adm-news-id').value, ti=document.getElementById('adm-news-title').value, bo=document.getElementById('adm-news-body').value, pi=document.getElementById('adm-news-pin').checked, da=document.getElementById('adm-news-date').value;
                 if(!ti) return;
-                const d={title:ti, body:bo, pin:pi, createdAt:serverTimestamp()};
+                
+                const d={title:ti, body:bo, pin:pi};
                 if(newsImg) d.img=newsImg; else if(id && newsImgOriginal) d.img=newsImgOriginal;
-                if(da) d.publishAt=Timestamp.fromDate(new Date(da)); else d.publishAt=serverTimestamp();
-                if(id) await deleteDoc(doc(db,"announcements",id));
-                await addDoc(collection(db,"announcements"), d); app.toast(id?"更新しました":"配信しました"); app.resetNewsForm();
+                if(da) d.publishAt=Timestamp.fromDate(new Date(da)); else if(!id) d.publishAt=serverTimestamp();
+                
+                if(id) { 
+                    d.updatedAt = serverTimestamp();
+                    await updateDoc(doc(db,"announcements",id), d);
+                    app.toast("更新しました");
+                } else {
+                    d.createdAt = serverTimestamp();
+                    await addDoc(collection(db,"announcements"), d); 
+                    app.toast("配信しました");
+                }
+                app.resetNewsForm();
             },
             editGift: (id) => {
                 const g = appCache.gifts[id]; if(!g) return;
