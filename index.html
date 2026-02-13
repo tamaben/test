@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SHAKE PARTY - 同期強化版</title>
+    <title>SHAKE PARTY - START</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=M+PLUS+Rounded+1c:wght@700&display=swap" rel="stylesheet">
     <style>
@@ -11,54 +11,74 @@
         body { font-family: 'M PLUS Rounded 1c', sans-serif; margin: 0; background: var(--bg); color: white; overflow: hidden; touch-action: none; }
         .hidden { display: none !important; }
         .full-screen { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .btn { background: linear-gradient(45deg, var(--secondary), #ff4444); border: none; color: white; padding: 15px 40px; font-size: 1.5rem; border-radius: 50px; cursor: pointer; font-family: 'Black Ops One'; box-shadow: 0 0 15px var(--secondary); margin-top: 20px; }
         
-        /* HOST */
-        #arena { display: flex; align-items: flex-end; justify-content: center; width: 90%; height: 45vh; gap: 10px; border-bottom: 3px solid #444; }
-        .player-col { width: 60px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; position: relative; }
-        .bar { width: 100%; transition: height 0.1s linear; }
-        .p-name { font-size: 0.7rem; margin-top: 10px; width: 100%; text-align: center; white-space: nowrap; overflow: hidden; }
-        .p-score { position: absolute; top: -30px; font-family: 'Black Ops One'; }
+        /* ボタンデザイン */
+        .btn { 
+            background: linear-gradient(45deg, var(--secondary), #ff4444); 
+            border: none; color: white; padding: 20px 60px; font-size: 2rem; 
+            border-radius: 60px; cursor: pointer; font-family: 'Black Ops One'; 
+            box-shadow: 0 0 20px var(--secondary); transition: 0.3s;
+        }
+        .btn:hover { transform: scale(1.05); filter: brightness(1.2); }
+        .btn:disabled { background: #444; box-shadow: none; cursor: not-allowed; opacity: 0.5; }
 
-        /* CLIENT */
-        #shake-circle { width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, #ff4444, #990000); border: 8px solid rgba(255,255,255,0.2); display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 0 30px #ff0000; }
-        input { background: #222; border: 2px solid var(--primary); color: white; padding: 10px; font-size: 1.5rem; border-radius: 10px; text-align: center; }
+        /* ホスト画面 */
+        #arena { display: flex; align-items: flex-end; justify-content: center; width: 90%; height: 40vh; gap: 15px; border-bottom: 3px solid #333; margin-bottom: 20px; }
+        .player-col { width: 80px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; position: relative; }
+        .bar { width: 100%; border-radius: 8px 8px 0 0; transition: height 0.1s linear; }
+        .p-name { font-size: 0.9rem; margin-top: 10px; color: #fff; }
+        .p-score { position: absolute; top: -35px; font-family: 'Black Ops One'; font-size: 1.5rem; }
+
+        /* プレイヤー画面 */
+        input { background: #1a1a1a; border: 2px solid var(--primary); color: white; padding: 15px; font-size: 1.5rem; border-radius: 15px; text-align: center; width: 80%; outline: none; }
+        #shake-circle { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, #ff4444, #880000); border: 10px solid rgba(255,255,255,0.2); display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 0 40px #ff0000; }
+        .active { transform: scale(0.92); }
     </style>
 </head>
 <body>
 
-    <!-- ホスト画面 -->
+    <!-- HOST VIEW -->
     <div id="host-view" class="full-screen hidden">
-        <h1 style="font-family:'Black Ops One'; color:var(--primary);">SHAKE PARTY</h1>
-        <div id="timer" style="font-size:5rem; font-family:'Black Ops One';">10</div>
+        <h1 style="font-family:'Black Ops One'; font-size:3rem; color:var(--primary); margin:0;">SHAKE PARTY</h1>
+        <div id="timer" style="font-size:7rem; font-family:'Black Ops One'; margin:10px 0;">10</div>
+        
         <div id="arena"></div>
-        <div id="lobby-ui" style="text-align:center; margin-top:20px;">
-            <div id="qrcode" style="background:white; padding:10px; display:inline-block; border-radius:10px;"></div>
-            <p id="room-id-display" style="color:#666;"></p>
-            <button class="btn" onclick="window.gameStart()">BATTLE START</button>
+
+        <div id="lobby-controls" style="text-align:center;">
+            <div id="qrcode" style="background:white; padding:10px; display:inline-block; border-radius:10px; margin-bottom:10px;"></div>
+            <p id="room-id-display" style="color:var(--primary); margin-bottom:20px;">Room ID: ----</p>
+            <!-- 参加者がいないと押せないボタン -->
+            <button id="start-btn" class="btn" onclick="window.gameStart()" disabled>WAITING PLAYERS...</button>
         </div>
     </div>
 
-    <!-- プレイヤー画面 -->
+    <!-- PLAYER VIEW -->
     <div id="client-view" class="full-screen hidden">
         <div id="step-name">
-            <h2>名前を入力</h2>
-            <input type="text" id="username" placeholder="ニックネーム" maxlength="6"><br>
-            <button class="btn" onclick="window.playerJoin()">参加する</button>
+            <h2 style="color:var(--primary)">ENTER NAME</h2>
+            <input type="text" id="username" placeholder="名前" maxlength="6"><br>
+            <button class="btn" onclick="window.playerJoin()" style="margin-top:20px; font-size:1.5rem;">JOIN!</button>
         </div>
-        <div id="step-shake" class="full-screen hidden">
-            <div id="msg" style="margin-bottom:20px;">待機中...</div>
-            <div id="shake-circle"><div id="score" style="font-size:4rem; font-family:'Black Ops One';">0</div></div>
+
+        <div id="step-game" class="full-screen hidden">
+            <div id="msg" style="font-size:1.5rem; margin-bottom:20px; color:#aaa;">待機中</div>
+            <div id="shake-circle">
+                <div id="score" style="font-size:5rem; font-family:'Black Ops One';">0</div>
+                <div style="font-weight:bold;">SHAKES</div>
+            </div>
         </div>
-        <div id="step-perm" class="full-screen hidden"><button class="btn" onclick="window.askSensor()">センサーを許可</button></div>
+
+        <div id="step-perm" class="full-screen hidden">
+            <button class="btn" onclick="window.askSensor()">START SENSOR</button>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue, update, onDisconnect, push } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+        import { getDatabase, ref, set, onValue, update, onDisconnect } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
         // ==========================================
-        // 自分のFirebase設定をここに貼り付けてください
+        // 1. FIREBASE CONFIG (ここを自分の設定に！)
         // ==========================================
         const firebaseConfig = {
             apiKey: "AIzaSyDbZzTMvUkG2LXIGY4ux0KBTmnAdqP236s",
@@ -77,99 +97,117 @@
         let role = urlParams.get('role');
         let roomId = urlParams.get('room');
 
-        // 起動時：Host or Player 分岐
         if (!role) {
             roomId = Math.random().toString(36).substring(2, 6).toUpperCase();
             window.location.replace(`?role=host&room=${roomId}`);
         } else if (role === 'host') {
             document.getElementById('host-view').classList.remove('hidden');
-            setupHost();
+            initHost();
         } else {
             document.getElementById('client-view').classList.remove('hidden');
-            setupPlayer();
+            initPlayer();
         }
 
         // ==========================================
-        // HOST 処理
+        // HOST logic
         // ==========================================
-        function setupHost() {
-            document.getElementById('room-id-display').innerText = `ROOM ID: ${roomId}`;
+        function initHost() {
+            document.getElementById('room-id-display').innerText = `Room ID: ${roomId}`;
             const qrUrl = `${window.location.origin}${window.location.pathname}?role=player&room=${roomId}`;
             new QRCode(document.getElementById("qrcode"), { text: qrUrl, width: 120, height: 120 });
 
-            // プレイヤー一覧の同期監視
-            onValue(ref(db, `shake/${roomId}/players`), (snap) => {
+            const playersRef = ref(db, `shake/${roomId}/players`);
+            const stateRef = ref(db, `shake/${roomId}/state`);
+
+            // プレイヤー参加監視
+            onValue(playersRef, (snap) => {
                 const arena = document.getElementById('arena');
+                const startBtn = document.getElementById('start-btn');
                 arena.innerHTML = '';
                 const players = snap.val() || {};
-                
-                Object.keys(players).forEach((id, index) => {
+                const pIds = Object.keys(players);
+
+                // 参加者が1人以上いればボタンを有効化
+                if (pIds.length > 0) {
+                    startBtn.disabled = false;
+                    startBtn.innerText = "BATTLE START!";
+                } else {
+                    startBtn.disabled = true;
+                    startBtn.innerText = "WAITING PLAYERS...";
+                }
+
+                pIds.forEach((id, idx) => {
                     const p = players[id];
-                    const h = Math.min((p.count || 0) * 2, 100);
-                    const color = `hsl(${index * 70}, 80%, 50%)`;
+                    const h = Math.min((p.count || 0) * 2.5, 100);
+                    const color = `hsl(${idx * 60}, 80%, 50%)`;
                     const col = document.createElement('div');
                     col.className = 'player-col';
                     col.innerHTML = `
-                        <div class="p-score">${p.count || 0}</div>
-                        <div class="bar" style="height:${h}%; background:${color}; box-shadow:0 0 10px ${color}"></div>
+                        <div class="p-score" style="color:${color}">${p.count || 0}</div>
+                        <div class="bar" style="height:${h}%; background:${color}; box-shadow:0 0 15px ${color}"></div>
                         <div class="p-name">${p.name}</div>
                     `;
                     arena.appendChild(col);
                 });
             });
 
+            // 開始処理
             window.gameStart = () => {
-                update(ref(db, `shake/${roomId}`), { "state/status": "ready" });
+                update(stateRef, { status: 'ready' });
+                document.getElementById('lobby-controls').classList.add('hidden');
+                
                 // スコアリセット
-                onValue(ref(db, `shake/${roomId}/players`), (snap) => {
+                onValue(playersRef, (snap) => {
                     const data = snap.val(); if(!data) return;
                     const updates = {};
-                    Object.keys(data).forEach(id => { updates[`players/${id}/count`] = 0; });
+                    Object.keys(data).forEach(id => updates[`players/${id}/count`] = 0);
                     update(ref(db, `shake/${roomId}`), updates);
                 }, { onlyOnce: true });
 
-                let count = 3;
-                const itv = setInterval(() => {
-                    document.getElementById('timer').innerText = count > 0 ? count : "GO!";
-                    if (count === 0) {
-                        clearInterval(itv);
-                        battleRunning();
+                let cd = 3;
+                const tm = document.getElementById('timer');
+                const cdItv = setInterval(() => {
+                    tm.innerText = cd > 0 ? cd : "GO!";
+                    if (cd === 0) {
+                        clearInterval(cdItv);
+                        runBattle();
                     }
-                    count--;
+                    cd--;
                 }, 1000);
             };
 
-            function battleRunning() {
-                update(ref(db, `shake/${roomId}`), { "state/status": "running" });
+            function runBattle() {
+                update(stateRef, { status: 'running' });
                 let time = 10;
+                const tm = document.getElementById('timer');
                 const itv = setInterval(() => {
                     time--;
-                    document.getElementById('timer').innerText = time;
+                    tm.innerText = time;
                     if (time <= 0) {
                         clearInterval(itv);
-                        update(ref(db, `shake/${roomId}`), { "state/status": "finished" });
-                        document.getElementById('timer').innerText = "FINISH!";
+                        update(stateRef, { status: 'finished' });
+                        tm.innerText = "FINISH!";
+                        setTimeout(() => document.getElementById('lobby-controls').classList.remove('hidden'), 5000);
                     }
                 }, 1000);
             }
         }
 
         // ==========================================
-        // PLAYER 処理
+        // PLAYER logic
         // ==========================================
-        function setupPlayer() {
-            let myId = localStorage.getItem('myShakeId') || Math.random().toString(36).substring(2, 7);
-            localStorage.setItem('myShakeId', myId);
-            let myCount = 0;
+        function initPlayer() {
+            let myId = Math.random().toString(36).substring(2, 7);
+            let count = 0;
             let canShake = false;
 
             window.playerJoin = () => {
-                const name = document.getElementById('username').value || "ゲスト";
+                const name = document.getElementById('username').value || "Guest";
                 if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
                     document.getElementById('step-name').classList.add('hidden');
                     document.getElementById('step-perm').classList.remove('hidden');
                 } else {
-                    connectRoom(name);
+                    connect(name);
                 }
             };
 
@@ -177,37 +215,47 @@
                 const res = await DeviceMotionEvent.requestPermission();
                 if (res === 'granted') {
                     document.getElementById('step-perm').classList.add('hidden');
-                    connectRoom(document.getElementById('username').value || "ゲスト");
+                    connect(document.getElementById('username').value || "Guest");
                 }
             };
 
-            function connectRoom(name) {
+            function connect(name) {
                 document.getElementById('step-name').classList.add('hidden');
-                document.getElementById('step-shake').classList.remove('hidden');
+                document.getElementById('step-game').classList.remove('hidden');
 
                 const myRef = ref(db, `shake/${roomId}/players/${myId}`);
                 set(myRef, { name: name, count: 0 });
                 onDisconnect(myRef).remove();
 
-                // ゲーム状態の監視
                 onValue(ref(db, `shake/${roomId}/state`), (snap) => {
-                    const state = snap.val() || {};
-                    const msg = document.getElementById('msg');
-                    if (state.status === 'ready') {
-                        myCount = 0; document.getElementById('score').innerText = "0";
-                        msg.innerText = "準備して..."; canShake = false;
-                    } else if (state.status === 'running') {
-                        msg.innerText = "振れええ！！"; canShake = true;
-                    } else if (state.status === 'finished') {
-                        msg.innerText = "終了！"; canShake = false;
+                    const s = snap.val() || {};
+                    const m = document.getElementById('msg');
+                    if (s.status === 'ready') {
+                        count = 0; document.getElementById('score').innerText = 0;
+                        m.innerText = "READY..."; canShake = false;
+                    } else if (s.status === 'running') {
+                        m.innerText = "SHAKE IT!!"; canShake = true;
+                    } else if (s.status === 'finished') {
+                        m.innerText = "FINISHED"; canShake = false;
                     }
                 });
 
-                // シェイク検知
                 let lastA = {x:0, y:0, z:0};
                 window.addEventListener('devicemotion', (e) => {
                     if (!canShake) return;
                     const a = e.accelerationIncludingGravity;
-                    const diff = Math.abs(a.x - lastA.x) + Math.abs(a.y - lastA.y) + Math.abs(a.z - lastA.z);
-                    if (diff > 25) { // 感度
-                        myCo
+                    const d = Math.abs(a.x - lastA.x) + Math.abs(a.y - lastA.y) + Math.abs(a.z - lastA.z);
+                    if (d > 25) {
+                        count++;
+                        document.getElementById('score').innerText = count;
+                        document.getElementById('shake-circle').classList.add('active');
+                        setTimeout(() => document.getElementById('shake-circle').classList.remove('active'), 50);
+                        if (count % 2 === 0) update(myRef, { count: count });
+                    }
+                    lastA = {x:a.x, y:a.y, z:a.z};
+                });
+            }
+        }
+    </script>
+</body>
+</html>
