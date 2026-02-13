@@ -3,99 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SHAKE PARTY - フリフリバトル</title>
+    <title>NEON SHAKE BATTLE</title>
+    <!-- QRコード生成ライブラリ -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- フォント -->
+    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=M+PLUS+Rounded+1c:wght@700&display=swap" rel="stylesheet">
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Roboto:wght@700&display=swap');
-
-        body { font-family: 'Roboto', sans-serif; margin: 0; background: #111; color: white; overflow: hidden; touch-action: none; }
-        .hidden { display: none !important; }
-        .full-screen { position: absolute; top:0; left:0; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        
-        /* --- HOST DESIGN --- */
-        #host-view { background: radial-gradient(circle at center, #222, #000); }
-        h1 { font-family: 'Black Ops One', cursive; font-size: 60px; color: #ffeb3b; text-shadow: 0 0 20px #ff9800; margin: 0; letter-spacing: 5px; }
-        
-        /* メーターエリア */
-        #meter-container { display: flex; align-items: flex-end; justify-content: center; width: 90%; height: 50vh; margin-top: 30px; gap: 10px; border-bottom: 5px solid #555; padding-bottom: 5px; }
-        .player-column { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 80px; height: 100%; transition: all 0.3s; position: relative; }
-        .bar { width: 100%; background: linear-gradient(to top, #ff0000, #ff8800); border-radius: 5px 5px 0 0; transition: height 0.1s linear; position: relative; box-shadow: 0 0 15px rgba(255, 87, 34, 0.5); }
-        .p-name { margin-top: 10px; font-weight: bold; font-size: 14px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
-        .p-score { font-size: 24px; font-weight: bold; position: absolute; top: -35px; color: #fff; text-shadow: 0 0 5px #000; }
-        .rank-crown { position: absolute; top: -70px; font-size: 30px; display: none; }
-
-        /* モード選択ボタン */
-        #mode-select { display: flex; gap: 20px; margin-top: 40px; }
-        .mode-btn { padding: 20px 40px; font-size: 20px; background: rgba(255,255,255,0.1); border: 2px solid #fff; color: white; cursor: pointer; border-radius: 10px; transition: 0.2s; font-weight: bold; }
-        .mode-btn:hover { background: #fff; color: #000; transform: scale(1.1); box-shadow: 0 0 20px white; }
-
-        #timer { font-size: 80px; font-family: 'Black Ops One'; position: absolute; top: 20px; right: 40px; color: #00e676; text-shadow: 0 0 20px #00e676; }
-        #game-msg { font-size: 40px; position: absolute; top: 40%; width: 100%; text-align: center; text-shadow: 0 0 20px black; pointer-events: none; }
-
-        /* --- CONTROLLER DESIGN --- */
-        #ctrl-view { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); text-align: center; }
-        #shake-btn { width: 250px; height: 250px; border-radius: 50%; border: 10px solid rgba(255,255,255,0.2); background: #ff5722; color: white; font-size: 40px; font-family: 'Black Ops One'; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin: 0 auto; user-select: none; }
-        .ripple { animation: ripple 1s infinite; }
-        @keyframes ripple {
-            0% { box-shadow: 0 0 0 0 rgba(255, 87, 34, 0.7); }
-            70% { box-shadow: 0 0 0 30px rgba(255, 87, 34, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 87, 34, 0); }
+        :root {
+            --primary: #00ffcc;
+            --secondary: #ff00ff;
+            --bg: #050505;
+            --panel: rgba(255, 255, 255, 0.05);
         }
-        #ctrl-score { font-size: 80px; font-weight: bold; margin-bottom: 20px; text-shadow: 2px 2px 10px rgba(0,0,0,0.5); }
-        #ctrl-msg { font-size: 20px; margin-top: 20px; color: #ccc; }
+
+        body {
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            margin: 0;
+            background: var(--bg);
+            color: white;
+            overflow: hidden;
+            touch-action: none;
+            user-select: none;
+        }
+
+        /* ユーティリティ */
+        .hidden { display: none !important; }
+        .full-screen {
+            position: absolute; top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+        .btn {
+            background: linear-gradient(45deg, var(--secondary), #ff4444);
+            border: none; color: white;
+            padding: 15px 40px; font-size: 1.5rem;
+            border-radius: 50px; cursor: pointer;
+            font-family: 'Black Ops One', cursive;
+            text-transform: uppercase;
+            box-shadow: 0 0 15px var(--secondary);
+            transition: transform 0.1s;
+        }
+        .btn:active { transform: scale(0.95); }
+
+        /* --- HOST (PC画面) デザイン --- */
+        #host-view {
+            background: radial-gradient(circle at center, #1a1a1a, #000);
+        }
+        .header {
+            position: absolute; top: 20px; left: 0; width: 100%;
+            text-align: center; pointer-events: none;
+        }
+        h1 {
+            font-family: 'Black Ops One', cursive;
+            font-size: 4rem; margin: 0;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(0, 255, 204, 0.5);
+        }
+        #timer {
+            font-size: 8rem; font-family: 'Black Ops One';
+            color: #fff; text-shadow: 0 0 30px #fff;
+            margin-top: 10px;
+        }
         
-        #permission-ui { z-index: 999; background: rgba(0,0,0,0.9); }
-        .big-btn { padding: 20px 50px; font-size: 24px; border-radius: 50px; background: #00e676; color: white; border: none; font-weight: bold; }
+        /* プレイヤーメーター */
+        #arena {
+            display: flex; align-items: flex-end; justify-content: center;
+            width: 90%; height: 50vh; gap: 20px;
+            border-bottom: 4px solid #333;
+            padding-bottom: 10px; margin-top: 50px;
+        }
+        .player-col {
+            width: 100px; height: 100%;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: flex-end;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .bar-container {
+            width: 100%; height: 100%;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px 10px 0 0;
+            position: relative; overflow: hidden;
+        }
+        .bar-fill {
+            width: 100%; height: 0%;
+            background: linear-gradient(to top, var(--primary), #00aa88);
+            position: absolute; bottom: 0;
+            transition: height 0.1s linear;
+            box-shadow: 0 0 20px var(--primary);
+        }
+        .p-score {
+            font-family: 'Black Ops One'; font-size: 2rem;
+            position: absolute; width: 100%; text-align: center;
+            top: -40px; z-index: 2;
+        }
+        .p-name {
+            margin-top: 15px; font-weight: bold; font-size: 1.2rem;
+            text-align: center; width: 120px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            text-shadow: 0 0 5px black;
+        }
+        .winner-crown {
+            position: absolute; top: -80px; font-size: 3rem;
+            animation: bounce 1s infinite; display: none;
+        }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+        /* ロビー画面 */
+        #lobby-info {
+            background: rgba(0,0,0,0.8);
+            padding: 30px; border-radius: 20px;
+            border: 2px solid #333;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        #room-qr { background: white; padding: 10px; border-radius: 10px; display: inline-block; }
+
+        /* --- CLIENT (スマホ) デザイン --- */
+        #client-view {
+            background: linear-gradient(135deg, #111 0%, #222 100%);
+        }
+        .input-group { margin-bottom: 20px; text-align: center; }
+        input[type="text"] {
+            background: transparent; border: none;
+            border-bottom: 2px solid var(--primary);
+            color: white; font-size: 2rem; text-align: center;
+            width: 80%; padding: 10px; outline: none;
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+        }
+        
+        /* シェイクボタン */
+        #shake-circle {
+            width: 280px; height: 280px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ff4444, #990000);
+            border: 10px solid rgba(255,255,255,0.2);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            box-shadow: 0 0 30px #ff0000;
+            transition: transform 0.1s;
+        }
+        .shake-active { transform: scale(0.95); filter: brightness(1.2); }
+        #my-score { font-size: 5rem; font-family: 'Black Ops One'; margin: 0; line-height: 1; }
+        .shake-text { font-size: 1.5rem; font-weight: bold; opacity: 0.8; }
+        
+        .status-msg {
+            font-size: 1.5rem; margin-bottom: 20px; color: #aaa;
+            text-align: center; padding: 0 20px;
+        }
     </style>
 </head>
 <body>
 
-    <!-- HOST (PC) -->
+    <!-- ================= HOST VIEW (PC) ================= -->
     <div id="host-view" class="full-screen hidden">
-        <h1>SHAKE PARTY</h1>
-        <div id="timer"></div>
-        <div id="game-msg"></div>
-
-        <!-- プレイヤーメーター表示エリア -->
-        <div id="meter-container">
-            <!-- プレイヤーが参加するとここに追加されます -->
-            <div style="color: #666; font-size: 20px;">QRコードを読み込んで参加待機中...</div>
+        <div class="header">
+            <h1>NEON SHAKE</h1>
+            <div id="timer">10</div>
         </div>
 
-        <!-- ロビー＆QR -->
-        <div id="lobby-ui" style="text-align: center; margin-top:20px;">
-            <div id="qrcode" style="background: white; padding: 10px; display: inline-block; border-radius: 10px;"></div>
-            <p id="room-id-display" style="margin: 10px; color: #aaa;"></p>
-            
-            <div id="mode-select">
-                <button class="mode-btn" onclick="startGame('speed')">⚡ SPEED RUSH<br><span style="font-size:12px">10秒連打バトル</span></button>
-                <button class="mode-btn" onclick="startGame('survival')">🔋 SURVIVAL<br><span style="font-size:12px">止まると死ぬ</span></button>
-                <button class="mode-btn" onclick="startGame('just')">🎯 JUST 50<br><span style="font-size:12px">50回で寸止め</span></button>
+        <div id="arena">
+            <!-- プレイヤーがここに追加されます -->
+            <div style="color: #666; font-size: 1.5rem; align-self: center;">
+                参加者を待っています...
             </div>
         </div>
-    </div>
 
-    <!-- CONTROLLER (Smartphone) -->
-    <div id="ctrl-view" class="full-screen hidden">
-        <div id="ctrl-game" class="hidden">
-            <div id="ctrl-score">0</div>
-            <div id="shake-btn" class="ripple">SHAKE!</div>
-            <div id="ctrl-msg">スマホをしっかり振れ！</div>
+        <div id="lobby-info">
+            <div id="room-qr"></div>
+            <p id="room-id-txt" style="font-size: 1.2rem; color:#aaa; margin: 10px 0;">Room ID: ---</p>
+            <button class="btn" onclick="hostStartGame()">BATTLE START</button>
+            <p style="font-size:0.9rem; color:#666; margin-top:10px;">スマホでQRを読み込んで参加</p>
         </div>
     </div>
 
-    <!-- センサー許可画面 -->
-    <div id="permission-ui" class="full-screen hidden">
-        <h2 style="color: white; margin-bottom: 30px;">準備はいいか？</h2>
-        <p style="color: #aaa; margin-bottom: 30px; padding: 0 20px; text-align: center;">スマホを振って遊ぶゲームです。<br>周りに注意してしっかり握ってください。</p>
-        <button id="perm-btn" class="big-btn">OK</button>
+    <!-- ================= CLIENT VIEW (Smartphone) ================= -->
+    <div id="client-view" class="full-screen hidden">
+        
+        <!-- 1. 名前入力画面 -->
+        <div id="step-name" class="full-screen">
+            <h2 style="color: var(--primary);">ENTER NAME</h2>
+            <div class="input-group">
+                <input type="text" id="username-input" placeholder="名前を入力" maxlength="6">
+            </div>
+            <button class="btn" onclick="submitName()">JOIN GAME</button>
+        </div>
+
+        <!-- 2. 待機・ゲーム画面 -->
+        <div id="step-game" class="full-screen hidden">
+            <div id="client-status" class="status-msg">ホストの開始待ち...</div>
+            
+            <!-- シェイクエリア -->
+            <div id="shake-circle">
+                <div id="my-score">0</div>
+                <div class="shake-text">SHAKE!</div>
+            </div>
+            
+            <p style="color:#666; margin-top: 30px; font-size: 0.8rem;">スマホをしっかり握って振れ！</p>
+        </div>
+
+        <!-- センサー許可要求 (iOS用) -->
+        <div id="step-perm" class="full-screen hidden" style="background:rgba(0,0,0,0.9); z-index:999;">
+            <p class="status-msg">ゲームを始めるには<br>センサーの許可が必要です</p>
+            <button class="btn" onclick="requestSensor()">OK</button>
+        </div>
     </div>
 
+    <!-- Firebase Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
         import { getDatabase, ref, set, onValue, update, remove, onDisconnect } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
-        // Firebase Config
+        // あなたのFirebase設定 (APIキー等はそのまま利用)
         const firebaseConfig = {
             apiKey: "AIzaSyDbZzTMvUkG2LXIGY4ux0KBTmnAdqP236s",
             authDomain: "game-4f2d9.firebaseapp.com",
@@ -110,346 +233,318 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Params
+        // URLパラメータ処理
         const params = new URLSearchParams(window.location.search);
-        let role = params.get('role') || 'host';
+        let role = params.get('role');
         let roomId = params.get('room');
-        const myId = Math.random().toString(36).substr(2, 5).toUpperCase();
 
-        // Colors
-        const COLORS = ['#F44336', '#E91E63', '#9C27B0', '#673AB7', '#3F51B5', '#2196F3', '#03A9F4', '#00BCD4', '#009688', '#4CAF50', '#8BC34A', '#FFC107', '#FF9800', '#FF5722'];
-        function getColor(str) {
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-            return COLORS[Math.abs(hash) % COLORS.length];
-        }
+        // 色定義 (プレイヤーごとの色)
+        const COLORS = ['#FF0055', '#00FFCC', '#CCFF00', '#0099FF', '#FFAA00', '#AA00FF'];
+        const getPlayerColor = (index) => COLORS[index % COLORS.length];
 
-        // ============================================
-        // HOST LOGIC
-        // ============================================
-        if (role === 'host') {
+        // ==========================================
+        // HOST LOGIC (PC)
+        // ==========================================
+        if (!role || role === 'host') {
+            // RoomIDがなければ生成してリロード
             if (!roomId) {
                 roomId = Math.random().toString(36).substring(2, 6).toUpperCase();
                 window.location.replace(`?role=host&room=${roomId}`);
             }
 
             document.getElementById('host-view').classList.remove('hidden');
-            document.getElementById('room-id-display').innerText = `Room: ${roomId}`;
+            document.getElementById('room-id-txt').innerText = `Room ID: ${roomId}`;
             
-            // QR Code
-            new QRCode(document.getElementById("qrcode"), {
-                text: `${window.location.origin}${window.location.pathname}?role=ctrl&room=${roomId}`,
-                width: 128, height: 128
-            });
-
-            // Game State
-            let players = {};
-            let gameMode = 'lobby'; // lobby, running, result
-            let timeLeft = 0;
-            let gameLoopId;
+            // QRコード生成
+            const joinUrl = `${window.location.origin}${window.location.pathname}?role=player&room=${roomId}`;
+            new QRCode(document.getElementById("room-qr"), { text: joinUrl, width: 128, height: 128 });
 
             const roomRef = ref(db, `shake/${roomId}`);
-            
+            let gameState = 'lobby'; 
+
             // プレイヤー監視
-            onValue(roomRef, (snap) => {
-                const data = snap.val() || {};
-                const pData = data.players || {};
-                
-                // 新規・更新・削除の反映
-                renderMeters(pData);
-                players = pData; // Update local state
+            onValue(roomRef, (snapshot) => {
+                const data = snapshot.val() || {};
+                const players = data.players || {};
+                renderHostArena(players);
             });
 
-            // メーター描画
-            function renderMeters(pData) {
-                const container = document.getElementById('meter-container');
-                const existingIds = Array.from(container.children).map(el => el.id).filter(id => id.startsWith('p-'));
-                const newIds = Object.keys(pData);
+            // メーター描画関数
+            function renderHostArena(players) {
+                const arena = document.getElementById('arena');
+                // 待機メッセージの制御
+                if (Object.keys(players).length > 0) {
+                    if(arena.innerText.includes('待機中')) arena.innerHTML = '';
+                } else {
+                    arena.innerHTML = '<div style="color: #666; font-size: 1.5rem; align-self: center;">参加者を待っています...</div>';
+                    return;
+                }
 
-                // 待機メッセージ消去
-                if(newIds.length > 0 && container.innerText.includes('待機中')) container.innerHTML = '';
-                if(newIds.length === 0) container.innerHTML = '<div style="color:#666; font-size:20px;">QRコードを読み込んで参加待機中...</div>';
+                // 既存の要素を確認・削除
+                const existingIds = Array.from(arena.children).map(el => el.id.replace('p-', ''));
+                const currentIds = Object.keys(players);
 
-                // 削除されたプレイヤーを消す
+                // いなくなった人を削除
                 existingIds.forEach(id => {
-                    if (!newIds.includes(id.replace('p-', ''))) document.getElementById(id).remove();
+                    if (!currentIds.includes(id)) document.getElementById(`p-${id}`).remove();
                 });
 
-                // 描画・更新
-                newIds.forEach(id => {
-                    const p = pData[id];
+                // プレイヤー描画更新
+                let index = 0;
+                currentIds.forEach(id => {
+                    const p = players[id];
                     let el = document.getElementById(`p-${id}`);
-                    const color = getColor(id);
-
+                    const color = getPlayerColor(index);
+                    
                     if (!el) {
                         el = document.createElement('div');
                         el.id = `p-${id}`;
-                        el.className = 'player-column';
+                        el.className = 'player-col';
                         el.innerHTML = `
-                            <div class="rank-crown">👑</div>
-                            <div class="p-score">0</div>
-                            <div class="bar"></div>
-                            <div class="p-name" style="color:${color}">P-${id}</div>
+                            <div class="winner-crown">👑</div>
+                            <div class="p-score" style="color:${color}">0</div>
+                            <div class="bar-container">
+                                <div class="bar-fill" style="background:${color}; box-shadow: 0 0 15px ${color}"></div>
+                            </div>
+                            <div class="p-name" style="color:${color}">${p.name}</div>
                         `;
-                        container.appendChild(el);
+                        arena.appendChild(el);
                     }
 
-                    // 値の更新
-                    const scoreEl = el.querySelector('.p-score');
-                    const barEl = el.querySelector('.bar');
-                    const crownEl = el.querySelector('.rank-crown');
+                    // 値の反映
+                    const score = p.count || 0;
+                    // 最大値を100回程度と仮定して高さを計算(ゲームバランス調整)
+                    const height = Math.min(score * 1.5, 100); 
+
+                    el.querySelector('.p-score').innerText = score;
+                    el.querySelector('.bar-fill').style.height = `${height}%`;
                     
-                    // モードごとの表示ロジック
-                    let displayScore = p.count || 0;
-                    let barHeight = 0;
+                    // 勝者表示
+                    if (p.isWinner) el.querySelector('.winner-crown').style.display = 'block';
+                    else el.querySelector('.winner-crown').style.display = 'none';
 
-                    if (gameMode === 'speed') {
-                        // 100回を100%とする基準
-                        barHeight = Math.min((p.count / 100) * 100, 100);
-                    } else if (gameMode === 'survival') {
-                        // HPを表示 (最大100)
-                        displayScore = Math.floor(p.hp || 0);
-                        barHeight = p.hp;
-                        if(p.hp <= 0) barEl.style.filter = 'grayscale(100%)';
-                        else barEl.style.filter = 'none';
-                    } else if (gameMode === 'just') {
-                        // 寸止め: ゲーム中は隠す(?が表示される)
-                        if (gameMode === 'result') {
-                            displayScore = p.count;
-                            barHeight = Math.min((p.count / 60) * 100, 100);
-                        } else {
-                            displayScore = '?';
-                            barHeight = (p.count > 0) ? 20 : 0; // 振ってることだけわかる
-                        }
-                    } else {
-                        // ロビー
-                        barHeight = Math.min(p.count, 100);
-                    }
-
-                    scoreEl.innerText = displayScore;
-                    barEl.style.height = `${barHeight}%`;
-                    barEl.style.backgroundColor = color;
-                    barEl.style.boxShadow = `0 0 20px ${color}`;
-
-                    // 勝者判定（結果発表時）
-                    crownEl.style.display = (p.isWinner) ? 'block' : 'none';
+                    index++;
                 });
             }
 
-            // ゲーム開始ロジック
-            window.startGame = (mode) => {
-                if (Object.keys(players).length === 0) return alert("プレイヤーがいません");
-                
-                gameMode = mode;
-                document.getElementById('lobby-ui').classList.add('hidden');
-                document.getElementById('game-msg').innerText = "READY...";
-                
-                // Reset Players
-                const updates = {};
-                Object.keys(players).forEach(id => {
-                    updates[`players/${id}/count`] = 0;
-                    updates[`players/${id}/hp`] = 100; // Survival用
-                    updates[`players/${id}/isWinner`] = false;
-                });
-                updates['state/status'] = 'ready';
-                updates['state/mode'] = mode;
-                update(roomRef, updates);
+            // ゲーム開始ボタン
+            window.hostStartGame = () => {
+                const arena = document.getElementById('arena');
+                if (arena.children.length === 0 || arena.innerText.includes('待機中')) {
+                    return alert("プレイヤーがいません");
+                }
 
-                // Countdown
-                let count = 3;
-                const cdInt = setInterval(() => {
-                    document.getElementById('game-msg').innerText = count > 0 ? count : "GO!!!";
-                    if (count === 0) {
-                        clearInterval(cdInt);
-                        runGameLoop(mode);
+                // ロビーUIを隠す
+                document.getElementById('lobby-info').classList.add('hidden');
+                
+                // 状態リセット
+                update(roomRef, { 
+                    'state/status': 'ready',
+                    'state/startTime': Date.now() 
+                });
+                
+                // スコアリセット
+                getDatabase(app); // Re-ref just in case
+                onValue(ref(db, `shake/${roomId}/players`), (snap) => {
+                    const players = snap.val();
+                    if(players) {
+                        const updates = {};
+                        Object.keys(players).forEach(pid => {
+                            updates[`players/${pid}/count`] = 0;
+                            updates[`players/${pid}/isWinner`] = false;
+                        });
+                        update(roomRef, updates);
                     }
-                    count--;
+                }, { onlyOnce: true });
+
+                // カウントダウン 3秒
+                let cd = 3;
+                const timerEl = document.getElementById('timer');
+                timerEl.innerText = "READY";
+                
+                const cdInterval = setInterval(() => {
+                    timerEl.innerText = cd;
+                    if (cd === 0) {
+                        clearInterval(cdInterval);
+                        timerEl.innerText = "GO!!";
+                        runGameLoop();
+                    }
+                    cd--;
                 }, 1000);
             };
 
-            function runGameLoop(mode) {
-                document.getElementById('game-msg').innerText = "";
+            // ゲームループ (10秒間)
+            function runGameLoop() {
                 update(roomRef, { 'state/status': 'running' });
                 
-                if (mode === 'speed') {
-                    timeLeft = 10;
-                } else if (mode === 'survival') {
-                    timeLeft = 999;
-                } else if (mode === 'just') {
-                    timeLeft = 20; // 制限時間
-                }
+                let timeLeft = 10;
+                const timerEl = document.getElementById('timer');
+                
+                const gameInterval = setInterval(() => {
+                    timeLeft--;
+                    timerEl.innerText = timeLeft;
 
-                gameLoopId = setInterval(() => {
-                    timeLeft -= 0.1;
-                    if(mode !== 'survival') document.getElementById('timer').innerText = Math.ceil(timeLeft);
-                    else document.getElementById('timer').innerText = "SURVIVE!";
-
-                    // --- SURVIVAL LOGIC ---
-                    if (mode === 'survival') {
-                        // 全員のHPを減らす
-                        Object.keys(players).forEach(id => {
-                            let p = players[id];
-                            if (p.hp > 0) {
-                                // 振っていないと早く減るロジックはクライアント側でカウントアップさせるが、
-                                // ここではシンプルに「現在のカウント」が増えていないとHPを減らす処理が必要だが、
-                                // 簡易化のため「クライアントから送られてくるHP」を表示する設計にするか、
-                                // あるいは「クライアントはカウントだけ送り、サーバー(Host)がHPを計算する」のが正しい。
-                                // 今回はシンプル化: クライアントが振るとHP回復、ホストが毎フレームHP減少させる
-                                let drain = 1.0; 
-                                let newHp = (p.hp || 100) - drain;
-                                if(newHp < 0) newHp = 0;
-                                update(ref(db, `shake/${roomId}/players/${id}`), { hp: newHp });
-                            }
-                        });
-                        
-                        // 残り1人になったら終了
-                        const survivors = Object.keys(players).filter(id => players[id].hp > 0);
-                        if (survivors.length <= 1 && Object.keys(players).length > 1) {
-                            finishGame(mode);
-                        }
-                    }
-
-                    // --- TIME UP ---
                     if (timeLeft <= 0) {
-                        finishGame(mode);
+                        clearInterval(gameInterval);
+                        finishGame();
                     }
-                }, 100);
+                }, 1000);
             }
 
-            function finishGame(mode) {
-                clearInterval(gameLoopId);
-                document.getElementById('game-msg').innerText = "FINISH!!";
-                document.getElementById('timer').innerText = "";
+            // 結果発表
+            function finishGame() {
                 update(roomRef, { 'state/status': 'finished' });
-                gameMode = 'result'; // メーター表示用
+                document.getElementById('timer').innerText = "FINISH";
 
                 // 勝者判定
-                let winnerId = null;
-                let bestScore = -1;
-                let minDiff = 999;
+                onValue(ref(db, `shake/${roomId}/players`), (snap) => {
+                    const players = snap.val();
+                    if (!players) return;
 
-                Object.keys(players).forEach(id => {
-                    const p = players[id];
-                    if (mode === 'speed') {
-                        if (p.count > bestScore) { bestScore = p.count; winnerId = id; }
-                    } else if (mode === 'survival') {
-                        if (p.hp > 0) winnerId = id; // 生き残り
-                    } else if (mode === 'just') {
-                        // 50に近い人
-                        const diff = Math.abs(50 - p.count);
-                        if (diff < minDiff) { minDiff = diff; winnerId = id; }
+                    let maxScore = -1;
+                    let winnerId = null;
+
+                    Object.keys(players).forEach(id => {
+                        if (players[id].count > maxScore) {
+                            maxScore = players[id].count;
+                            winnerId = id;
+                        }
+                    });
+
+                    if (winnerId) {
+                        update(ref(db, `shake/${roomId}/players/${winnerId}`), { isWinner: true });
                     }
-                });
 
-                if (winnerId) {
-                    update(ref(db, `shake/${roomId}/players/${winnerId}`), { isWinner: true });
-                    document.getElementById('game-msg').innerText = `WINNER: P-${winnerId}`;
-                }
+                    // 5秒後にロビーボタン再表示
+                    setTimeout(() => {
+                        document.getElementById('lobby-info').classList.remove('hidden');
+                    }, 5000);
 
-                // 5秒後にロビーへ
-                setTimeout(() => {
-                    document.getElementById('lobby-ui').classList.remove('hidden');
-                    document.getElementById('game-msg').innerText = "";
-                    gameMode = 'lobby';
-                }, 8000);
+                }, { onlyOnce: true });
             }
         }
 
-        // ============================================
-        // CONTROLLER LOGIC
-        // ============================================
-        else {
-            document.getElementById('permission-ui').classList.remove('hidden');
-            const pRef = ref(db, `shake/${roomId}/players/${myId}`);
-            const stateRef = ref(db, `shake/${roomId}/state`);
-            
-            // Disconnectで削除
-            onDisconnect(pRef).remove();
-
-            // 初期化
-            set(pRef, { count: 0, hp: 100 });
-
+        // ==========================================
+        // PLAYER LOGIC (Mobile)
+        // ==========================================
+        else if (role === 'player') {
+            document.getElementById('client-view').classList.remove('hidden');
+            const myId = Math.random().toString(36).substr(2, 8);
+            let myName = "";
             let myCount = 0;
-            let myHp = 100;
-            let currentStatus = 'lobby'; // lobby, ready, running
-            let currentMode = '';
+            let canShake = false;
 
-            // 状態監視
-            onValue(stateRef, (snap) => {
-                const s = snap.val();
-                if(!s) return;
-                currentStatus = s.status;
-                currentMode = s.mode;
+            const playerRef = ref(db, `shake/${roomId}/players/${myId}`);
+            const stateRef = ref(db, `shake/${roomId}/state`);
 
-                const msgEl = document.getElementById('ctrl-msg');
-                const scoreEl = document.getElementById('ctrl-score');
-                const btn = document.getElementById('shake-btn');
-
-                if (s.status === 'ready') {
-                    scoreEl.innerText = "READY";
-                    myCount = 0; 
-                    myHp = 100;
-                } else if (s.status === 'running') {
-                    msgEl.innerText = (currentMode === 'just') ? "50回振って止めろ！" : "SHAKE IT FAST!";
-                    if(currentMode === 'just') scoreEl.innerText = "?";
-                    else scoreEl.innerText = myCount;
-                    btn.classList.add('ripple');
-                    if(navigator.vibrate) navigator.vibrate(200);
-                } else if (s.status === 'finished') {
-                    msgEl.innerText = "結果発表...";
-                    scoreEl.innerText = myCount;
-                    btn.classList.remove('ripple');
-                    if(navigator.vibrate) navigator.vibrate([100,50,100]);
-                }
-            });
-
-            // 許可ボタン
-            document.getElementById('perm-btn').addEventListener('click', async () => {
-                if (typeof DeviceMotionEvent.requestPermission === 'function') {
-                    const res = await DeviceMotionEvent.requestPermission();
-                    if (res !== 'granted') return alert("センサー許可が必要です");
-                }
-                document.getElementById('permission-ui').classList.add('hidden');
-                document.getElementById('ctrl-view').classList.remove('hidden');
-                document.getElementById('ctrl-game').classList.remove('hidden');
+            // 名前送信
+            window.submitName = () => {
+                const input = document.getElementById('username-input');
+                if (!input.value) return alert("名前を入力してください");
                 
+                myName = input.value;
+                document.getElementById('step-name').classList.add('hidden');
+                
+                // iOS用センサー許可フローへ
+                if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                    document.getElementById('step-perm').classList.remove('hidden');
+                } else {
+                    // Android等はそのまま
+                    joinRoom();
+                }
+            };
+
+            // センサー許可 (iOS)
+            window.requestSensor = async () => {
+                try {
+                    const res = await DeviceMotionEvent.requestPermission();
+                    if (res === 'granted') {
+                        document.getElementById('step-perm').classList.add('hidden');
+                        joinRoom();
+                    } else {
+                        alert("センサー権限が必要です");
+                    }
+                } catch (e) {
+                    console.error(e);
+                    // PCデバッグ等のためのフォールバック
+                    document.getElementById('step-perm').classList.add('hidden');
+                    joinRoom();
+                }
+            };
+
+            function joinRoom() {
+                document.getElementById('step-game').classList.remove('hidden');
+                
+                // 接続時にFirebaseへ登録
+                set(playerRef, { name: myName, count: 0 });
+                onDisconnect(playerRef).remove();
+
+                // 状態監視
+                onValue(stateRef, (snap) => {
+                    const state = snap.val();
+                    if (!state) return;
+                    
+                    const statusEl = document.getElementById('client-status');
+                    const scoreEl = document.getElementById('my-score');
+                    const circle = document.getElementById('shake-circle');
+
+                    if (state.status === 'ready') {
+                        statusEl.innerText = "まもなく開始！";
+                        statusEl.style.color = "#ffeb3b";
+                        myCount = 0;
+                        scoreEl.innerText = "0";
+                        canShake = false;
+                    } 
+                    else if (state.status === 'running') {
+                        statusEl.innerText = "振れぇぇぇ！！！";
+                        statusEl.style.color = "#ff4444";
+                        canShake = true;
+                        // バイブレーション開始合図
+                        if(navigator.vibrate) navigator.vibrate(200);
+                    } 
+                    else if (state.status === 'finished') {
+                        statusEl.innerText = "終了！画面を見ろ";
+                        statusEl.style.color = "#fff";
+                        canShake = false;
+                        if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                    } 
+                    else {
+                        statusEl.innerText = "ホストの開始待ち...";
+                        statusEl.style.color = "#aaa";
+                        canShake = false;
+                    }
+                });
+
                 startSensor();
-            });
+            }
 
             function startSensor() {
                 let lastX=0, lastY=0, lastZ=0;
-                let lastSend = 0;
-                const THRESHOLD = 20; // 感度
+                let lastUpdate = 0;
+                const THRESHOLD = 15; // 感度調整
 
                 window.addEventListener('devicemotion', (e) => {
-                    if (currentStatus !== 'running' && currentStatus !== 'lobby') return;
+                    if (!canShake) return;
 
                     const acc = e.accelerationIncludingGravity || e.acceleration;
                     if (!acc) return;
 
                     const delta = Math.abs(acc.x - lastX) + Math.abs(acc.y - lastY) + Math.abs(acc.z - lastZ);
-                    
+
                     if (delta > THRESHOLD) {
-                        // 振った判定
                         myCount++;
+                        document.getElementById('my-score').innerText = myCount;
                         
-                        // サバイバルモードならHP回復
-                        if (currentMode === 'survival') {
-                            myHp = Math.min(myHp + 2, 100); 
-                        }
+                        // アニメーション
+                        const circle = document.getElementById('shake-circle');
+                        circle.classList.add('shake-active');
+                        setTimeout(() => circle.classList.remove('shake-active'), 50);
 
-                        // UI更新 (JUSTモードは隠す)
-                        if (currentMode !== 'just') {
-                            document.getElementById('ctrl-score').innerText = myCount;
-                        }
-
-                        // 送信制限 (50msごと)
+                        // 通信頻度制限 (100msに1回送信)
                         const now = Date.now();
-                        if (now - lastSend > 50) {
-                            const payload = { count: myCount };
-                            if (currentMode === 'survival') payload.hp = myHp;
-                            update(pRef, payload);
-                            lastSend = now;
+                        if (now - lastUpdate > 100) {
+                            update(playerRef, { count: myCount });
+                            lastUpdate = now;
                         }
                     }
 
