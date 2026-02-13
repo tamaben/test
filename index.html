@@ -2,22 +2,19 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <!-- 1. 拡大縮小の完全禁止 -->
+    <!-- 拡大縮小禁止 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
-    <title>SHAKE PARTY FINAL</title>
+    <title>SHAKE PARTY - FIXED</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Bangers&family=M+PLUS+Rounded+1c:wght@800&display=swap');
 
-        /* 2. タッチ操作によるズーム・スクロールの無効化 */
+        /* 基本スタイル */
         html, body {
             margin: 0; padding: 0; width: 100%; height: 100%;
             overflow: hidden; background: #111;
             font-family: 'M PLUS Rounded 1c', sans-serif; color: white;
-            /* ブラウザ標準のタッチアクション（ズーム、パン）を無効化 */
-            touch-action: none; 
-            /* テキスト選択無効化 */
-            user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+            touch-action: none; user-select: none; -webkit-user-select: none;
         }
 
         .hidden { display: none !important; }
@@ -25,88 +22,72 @@
         
         /* --- HOST DESIGN --- */
         #host-view { background: radial-gradient(circle at center, #2c3e50, #000); }
-        h1 { font-family: 'Bangers'; font-size: 40px; color: #f1c40f; text-shadow: 3px 3px 0 #e67e22; margin: 10px 0; pointer-events: none; }
+        h1 { font-family: 'Bangers'; font-size: 36px; color: #f1c40f; text-shadow: 3px 3px 0 #e67e22; margin: 5px 0; z-index: 10; pointer-events: none; }
         
-        /* Menu Grid */
-        #menu-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 10px; max-width: 95%; }
-        .menu-card { width: 90px; padding: 10px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 10px; cursor: pointer; text-align: center; transition: 0.2s; }
+        /* メニュー */
+        #menu-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 10px; max-width: 95%; }
+        .menu-card { width: 90px; padding: 8px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 10px; cursor: pointer; text-align: center; }
         .menu-card:hover { transform: scale(1.05); background: rgba(255,255,255,0.25); border-color: #f1c40f; }
         .card-icon { font-size: 24px; display: block; margin-bottom: 2px; }
         .card-title { font-size: 11px; font-weight: bold; color: #f1c40f; }
 
-        /* Game Area */
+        /* ゲームエリア */
         #game-area { width: 95%; height: 60%; position: relative; background: rgba(0,0,0,0.6); border-radius: 15px; border: 2px solid #555; display: none; overflow: hidden; }
         #timer-display { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); font-size: 50px; font-family: 'Bangers'; color: #e74c3c; z-index: 5; text-shadow: 2px 2px 0 #000; }
         #back-btn { position: absolute; top: 10px; right: 10px; z-index: 100; padding: 5px 15px; background: #e74c3c; color: white; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; }
 
-        /* Player List */
+        /* プレイヤーリスト */
         #player-list { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-top: 10px; width: 95%; }
-        .player-tag { background: #34495e; padding: 3px 10px; border-radius: 15px; font-size: 12px; border: 1px solid #aaa; animation: popIn 0.3s; }
-        @keyframes popIn { from{transform:scale(0);} to{transform:scale(1);} }
+        .player-tag { background: #34495e; padding: 3px 10px; border-radius: 15px; font-size: 11px; border: 1px solid #aaa; animation: popIn 0.3s; }
 
-        /* --- GAME FIELDS --- */
-        /* 1. Time Attack */
-        #timeattack-field { width: 100%; height: 100%; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 20px; gap: 10px; }
-        .ta-bar-container { width: 40px; height: 80%; background: #333; position: relative; border-radius: 5px; overflow: hidden; }
-        .ta-bar { width: 100%; position: absolute; bottom: 0; transition: height 0.1s; }
-        .ta-name { position: absolute; bottom: -20px; width: 100%; font-size: 10px; text-align: center; white-space: nowrap; }
-
-        /* 2. Race */
-        #race-track { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-evenly; }
+        /* 各ゲーム画面（簡略化） */
+        #timeattack-field, #race-track, #tug-field, #boss-field, #soda-field, #balance-field, #sniper-field, #ninja-field, #compass-field, #rope-field {
+            width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+        }
+        /* 個別調整 */
+        #race-track { flex-direction: column; justify-content: space-evenly; }
         .racer { position: relative; left: 2%; width: 90%; height: 30px; display: flex; align-items: center; font-size: 20px; transition: left 0.1s linear; }
         .goal-line { position: absolute; right: 5%; top: 0; height: 100%; width: 5px; background: repeating-linear-gradient(white, white 5px, black 5px, black 10px); }
-
-        /* 3. Tug */
-        #tug-field { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-        .team-zone { position: absolute; width: 50%; height: 100%; top: 0; opacity: 0.3; display: flex; align-items: center; justify-content: center; font-size: 80px; font-family: 'Bangers'; }
+        
+        #tug-field { position: relative; }
         #tug-rope { width: 80%; height: 8px; background: white; position: relative; border-radius: 4px; }
         #tug-marker { width: 30px; height: 30px; background: #f1c40f; border-radius: 50%; position: absolute; top: -11px; left: 50%; transform: translateX(-50%); transition: left 0.1s; border: 3px solid #fff; }
 
-        /* 4. Boss */
-        #boss-field { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
-        #boss-char { font-size: 80px; animation: float 2s infinite; }
-        #boss-hp-bar { width: 60%; height: 20px; background: #333; border: 2px solid white; margin-top: 10px; border-radius: 10px; overflow: hidden; }
+        #boss-field { flex-direction: column; }
+        #boss-char { font-size: 80px; }
+        #boss-hp-bar { width: 60%; height: 20px; background: #333; border: 2px solid white; margin-top: 10px; }
         #boss-hp-fill { width: 100%; height: 100%; background: #e74c3c; transition: width 0.2s; }
 
-        /* 5. Soda */
-        #soda-field { display: flex; align-items: flex-end; justify-content: space-around; height: 100%; padding-bottom: 20px; }
+        #soda-field, #rope-field { align-items: flex-end; justify-content: space-around; padding-bottom: 20px; }
         .bottle-col { width: 40px; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; position: relative; align-items: center; }
-        .bottle-body { width: 30px; height: 60px; background: white; position: relative; border-radius: 4px 4px 0 0; }
         .bottle-liq { width: 100%; background: #e67e22; position: absolute; bottom: 0; transition: height 0.1s; }
-
-        /* 6. Balance */
-        #balance-field { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; perspective: 800px; }
+        
+        #balance-field { perspective: 800px; }
         #tray { width: 400px; height: 8px; background: #3498db; position: relative; transform-style: preserve-3d; transition: transform 0.1s; }
         #tray-ball { width: 25px; height: 25px; background: #f1c40f; border-radius: 50%; position: absolute; top: -25px; left: 50%; transform: translateX(-50%); transition: left 0.05s linear; }
         .enemy-rock { position: absolute; font-size: 25px; top: -50px; }
-        #balance-hp { position: absolute; top: 10px; left: 20px; font-size: 24px; color: #e74c3c; font-weight: bold; font-family: 'Bangers'; }
+        
+        #sniper-field { position: relative; cursor: none; }
+        .target { position: absolute; font-size: 40px; }
+        .crosshair { position: absolute; width: 25px; height: 25px; border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%); transition: all 0.1s; }
 
-        /* 7. Sniper */
-        #sniper-field { width: 100%; height: 100%; position: relative; cursor: none; }
-        .target { position: absolute; font-size: 40px; transition: transform 0.2s; }
-        .crosshair { position: absolute; width: 25px; height: 25px; border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%); transition: all 0.1s; z-index: 10; pointer-events: none; }
-
-        /* 8. Ninja */
-        #ninja-field { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-evenly; }
+        #ninja-field { flex-direction: column; justify-content: space-evenly; }
         .ninja-lane { height: 30px; border-bottom: 1px solid #444; position: relative; width: 100%; }
         .ninja-char { position: absolute; font-size: 24px; transition: left 0.2s; left: 0; }
-        .noise-indicator { position: absolute; right: 10px; color: red; font-weight: bold; display: none; font-size: 10px; }
 
-        /* 9. Compass */
-        #compass-field { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #compass-field { flex-direction: column; }
         #compass-ring { width: 200px; height: 200px; border: 8px solid #555; border-radius: 50%; position: relative; }
         #target-needle { width: 4px; height: 100px; background: #e74c3c; position: absolute; left: 50%; top: 50%; transform-origin: top center; transform: rotate(180deg); }
         .player-needle { width: 3px; height: 100px; position: absolute; left: 50%; top: 50%; transform-origin: top center; opacity: 0.8; transition: transform 0.2s; }
-        #compass-msg { margin-top: 20px; font-size: 24px; color: #f1c40f; font-family: 'Bangers'; }
-
-        /* 10. Big Rope */
-        #rope-field { width: 100%; height: 100%; display: flex; align-items: flex-end; justify-content: space-around; position: relative; padding-bottom: 40px; }
+        
         #rope-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
         .jumper { width: 30px; height: 50px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; transition: bottom 0.1s; bottom: 0; }
-        .jumper-body { font-size: 30px; }
-        .jumper-name { font-size: 10px; position: absolute; bottom: -15px; width: 60px; text-align: center; white-space: nowrap; }
         .eliminated { opacity: 0.3; transform: rotate(90deg); filter: grayscale(100%); }
-        #rope-count { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); font-size: 60px; font-family: 'Bangers'; color: #f1c40f; z-index: 5; text-shadow: 3px 3px 0 #000; }
+
+        /* 結果画面 */
+        #result-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #res-title { font-family: 'Bangers'; font-size: 60px; color: #f1c40f; margin: 0; text-align: center; }
+        #back-lobby-btn { padding: 10px 30px; background: #3498db; border: none; border-radius: 30px; color: white; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 20px; }
 
         /* --- CONTROLLER --- */
         #ctrl-view { background: linear-gradient(135deg, #141e30, #243b55); text-align: center; }
@@ -123,27 +104,22 @@
         #tap-btn:active { transform: translateY(5px); box-shadow: 0 5px #d35400; }
         
         #jump-btn-visual { width: 100%; height: 100%; background: #9b59b6; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: bold; }
-
-        #debug-sensors { position: absolute; bottom: 5px; left: 0; width: 100%; font-size: 10px; color: #777; pointer-events: none; }
-
-        /* RESULT OVERLAY */
-        #result-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: fadeIn 0.5s; }
-        #res-title { font-family: 'Bangers'; font-size: 60px; color: #f1c40f; text-shadow: 0 0 20px #e67e22; margin: 0; text-align: center; }
-        #res-sub { font-size: 20px; margin-bottom: 20px; color: #ccc; }
-        #back-lobby-btn { padding: 10px 30px; background: #3498db; border: none; border-radius: 30px; color: white; font-size: 18px; font-weight: bold; cursor: pointer; }
-        @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
-        @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
+        
+        /* センサーデバッグ用 */
+        #sensor-debug { position: absolute; bottom: 10px; left: 0; width: 100%; color: #aaa; font-size: 12px; pointer-events: none; }
+        @keyframes popIn { from{transform:scale(0);} to{transform:scale(1);} }
     </style>
 </head>
 <body>
 
     <!-- HOST VIEW -->
     <div id="host-view" class="full-screen hidden">
-        <h1>SHAKE PARTY FINAL</h1>
+        <h1>SHAKE PARTY 10</h1>
         
         <div id="lobby-menu">
             <div id="qrcode" style="background: white; padding: 5px; border-radius: 5px; display: inline-block;"></div>
             <div id="menu-grid">
+                <!-- 10個のメニュー -->
                 <div class="menu-card" onclick="setMode('timeattack')"><span class="card-icon">⏱️</span><div class="card-title">TIME ATK</div></div>
                 <div class="menu-card" onclick="setMode('race')"><span class="card-icon">🚀</span><div class="card-title">RACE</div></div>
                 <div class="menu-card" onclick="setMode('tug')"><span class="card-icon">⚔️</span><div class="card-title">TUG</div></div>
@@ -159,24 +135,17 @@
 
         <div id="game-area">
             <div id="timer-display"></div>
-            
+            <!-- 各ゲーム画面 -->
             <div id="timeattack-field" class="hidden"></div>
             <div id="race-track" class="hidden"><div class="goal-line"></div></div>
-            <div id="tug-field" class="hidden">
-                <div class="team-zone" style="left:0; background:red; color:#faa;">RED</div>
-                <div class="team-zone" style="right:0; background:blue; color:#aaf;">BLUE</div>
-                <div id="tug-rope"><div id="tug-marker"></div></div>
-            </div>
+            <div id="tug-field" class="hidden"><div id="tug-rope"><div id="tug-marker"></div></div></div>
             <div id="boss-field" class="hidden"><div id="boss-char">👿</div><div id="boss-hp-bar"><div id="boss-hp-fill"></div></div></div>
             <div id="soda-field" class="hidden"></div>
             <div id="balance-field" class="hidden"><div id="balance-hp">HP: 100</div><div id="tray"><div id="tray-ball"></div></div></div>
             <div id="sniper-field" class="hidden"><div id="targets-container"></div><div id="crosshairs-container"></div></div>
             <div id="ninja-field" class="hidden"></div>
             <div id="compass-field" class="hidden"><div id="compass-msg">Find NORTH!</div><div id="compass-ring"><div id="target-needle"></div></div></div>
-            <div id="rope-field" class="hidden">
-                <div id="rope-count">0</div>
-                <canvas id="rope-canvas"></canvas>
-            </div>
+            <div id="rope-field" class="hidden"><div id="rope-count">0</div><canvas id="rope-canvas"></canvas></div>
         </div>
         
         <div id="player-list"></div>
@@ -193,485 +162,8 @@
         <div id="name-input-ui">
             <h2>JOIN GAME</h2>
             <input type="text" id="p-name" placeholder="Name" maxlength="6">
-            <button class="btn-go" id="join-btn">参加する (許可が必要です)</button>
+            <button class="btn-go" id="join-btn">参加する (タップ必須)</button>
             <p style="font-size:12px; color:#aaa; margin-top:20px;">※タップ後に「許可」を押してください</p>
         </div>
         <div id="ctrl-game-ui">
-            <div id="ui-shake" class="hidden"><div id="shake-btn">SHAKE!</div></div>
-            <div id="ui-tap" class="hidden"><div id="tap-btn">FIRE!</div></div>
-            <div id="ui-jump" class="hidden" style="width:100%;height:100%;"><div id="jump-btn-visual">JUMP!</div></div>
-            <div id="ui-msg" style="margin-top:20px; font-size:20px; color:#ccc;">Wait...</div>
-            <div id="debug-sensors">Sensors: Waiting...</div>
-        </div>
-    </div>
-
-    <!-- ズーム防止スクリプト -->
-    <script>
-        document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', function (e) {
-            const now = (new Date()).getTime();
-            if (now - lastTouchEnd <= 300) e.preventDefault();
-            lastTouchEnd = now;
-        }, false);
-    </script>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue, update, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDbZzTMvUkG2LXIGY4ux0KBTmnAdqP236s",
-            authDomain: "game-4f2d9.firebaseapp.com",
-            databaseURL: "https://game-4f2d9-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "game-4f2d9",
-            storageBucket: "game-4f2d9.firebasestorage.app",
-            messagingSenderId: "574316347824",
-            appId: "1:574316347824:web:cf686040628e25ad615675",
-            measurementId: "G-T0ZKQCC9L3"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        
-        const params = new URLSearchParams(window.location.search);
-        let role = params.get('role') || 'host';
-        let roomId = params.get('room');
-        const myId = Math.random().toString(36).substr(2, 6);
-
-        // ==========================================
-        // HOST LOGIC
-        // ==========================================
-        if (role === 'host') {
-            if (!roomId) {
-                roomId = Math.random().toString(36).substring(2, 6).toUpperCase();
-                window.location.href = `?role=host&room=${roomId}`;
-            }
-            document.getElementById('host-view').classList.remove('hidden');
-            new QRCode(document.getElementById("qrcode"), { text: `${window.location.origin}${window.location.pathname}?role=ctrl&room=${roomId}`, width: 100, height: 100 });
-
-            let players = {};
-            let mode = 'lobby';
-            let isPlaying = false;
-            let gameTimer = 0;
-            
-            // Game State Vars
-            let ropePhase = 0;
-            let ropeSpeed = 0.05;
-            let jumpCount = 0;
-            let ropeActive = false;
-            let gameState = { bossHp: 1000, tugPos: 50, ballPos: 50, balanceHp: 100, targetAngle: 0 };
-
-            const roomRef = ref(db, `rooms/${roomId}`);
-            update(roomRef, { mode: 'lobby' });
-
-            onValue(ref(db, `rooms/${roomId}/players`), (snap) => {
-                players = snap.val() || {};
-                renderLobby();
-            });
-
-            function renderLobby() {
-                const list = document.getElementById('player-list');
-                list.innerHTML = Object.values(players).map(p => 
-                    `<div class="player-tag" style="border-color:${p.color}">${p.name}</div>`
-                ).join('');
-            }
-
-            // MAIN LOOP (30 FPS)
-            setInterval(() => {
-                if (!isPlaying || mode === 'lobby') return;
-
-                if (gameTimer > 0) {
-                    gameTimer -= 1/30;
-                    document.getElementById('timer-display').innerText = Math.ceil(gameTimer);
-                    if (gameTimer <= 0) checkTimeUp();
-                }
-
-                // --- GAME LOGIC UPDATES ---
-                if (mode === 'timeattack') {
-                    Object.keys(players).forEach(id => {
-                        const el = document.getElementById(`ta-bar-${id}`);
-                        if(el) el.style.height = Math.min((players[id].score||0)*1.5, 100) + '%';
-                    });
-                }
-                else if (mode === 'race') {
-                    Object.keys(players).forEach(id => {
-                        const p = players[id];
-                        const el = document.getElementById(`racer-${id}`);
-                        if(el) el.style.left = Math.min((p.score||0)*0.9, 90) + '%';
-                        if ((p.score||0) >= 100) finishGame(p.name, "WINS!");
-                    });
-                }
-                else if (mode === 'tug') {
-                    let red=0, blue=0;
-                    Object.values(players).forEach(p => p.team==='red'?red+=p.score||0 : blue+=p.score||0);
-                    let pos = 50 + (blue - red) * 0.5;
-                    document.getElementById('tug-marker').style.left = Math.max(0, Math.min(100, pos)) + '%';
-                    if(pos <= 0) finishGame("RED TEAM", "WINS!");
-                    if(pos >= 100) finishGame("BLUE TEAM", "WINS!");
-                }
-                else if (mode === 'boss') {
-                    let total=0; Object.values(players).forEach(p => total += p.score||0);
-                    let hp = Math.max(0, 1000 - total);
-                    document.getElementById('boss-hp-fill').style.width = (hp/10) + '%';
-                    if (hp <= 0) finishGame("HEROES", "VICTORY!");
-                }
-                else if (mode === 'soda') {
-                    Object.keys(players).forEach(id => {
-                        const p = players[id];
-                        const el = document.getElementById(`liq-${id}`);
-                        if(el) el.style.height = Math.min(p.score||0, 100) + '%';
-                        if((p.score||0) >= 100) finishGame(p.name, "EXPLODED!");
-                    });
-                }
-                else if (mode === 'balance') {
-                    let totalTilt = 0, count = 0;
-                    Object.values(players).forEach(p => { if (p.tilt !== undefined) { totalTilt += p.tilt; count++; } });
-                    const avgTilt = count > 0 ? totalTilt / count : 0;
-                    const tray = document.getElementById('tray');
-                    tray.style.transform = `rotateZ(${avgTilt}deg)`;
-                    gameState.ballPos += avgTilt * 0.1;
-                    gameState.ballPos = Math.max(0, Math.min(100, gameState.ballPos));
-                    document.getElementById('tray-ball').style.left = gameState.ballPos + '%';
-
-                    if (Math.random() < 0.05) spawnRock();
-                    document.querySelectorAll('.enemy-rock').forEach(rock => {
-                        let top = parseFloat(rock.style.top || 0) + 2;
-                        rock.style.top = top + '%';
-                        if (top > 90 && top < 100 && Math.abs(parseFloat(rock.style.left) - gameState.ballPos) < 10) {
-                            gameState.balanceHp -= 10;
-                            document.getElementById('balance-hp').innerText = `HP: ${gameState.balanceHp}`;
-                            rock.remove();
-                            if(gameState.balanceHp <= 0) finishGame("GAME OVER", "TRY AGAIN");
-                        }
-                        if (top > 100) rock.remove();
-                    });
-                }
-                else if (mode === 'sniper') {
-                    const container = document.getElementById('crosshairs-container');
-                    Object.keys(players).forEach(id => {
-                        const p = players[id];
-                        if (!p.aim) return;
-                        let ch = document.getElementById(`ch-${id}`);
-                        if (!ch) {
-                            ch = document.createElement('div');
-                            ch.id = `ch-${id}`; ch.className = 'crosshair'; ch.style.borderColor = p.color; ch.dataset.name = p.name;
-                            container.appendChild(ch);
-                        }
-                        let x = 50 + (p.aim.g || 0) * 1.5;
-                        let y = 50 + (p.aim.b || 0) * 1.5;
-                        ch.style.left = x + '%'; ch.style.top = y + '%';
-                        if (p.shot) {
-                            checkHit(x, y, id);
-                            update(ref(db, `rooms/${roomId}/players/${id}`), { shot: false });
-                        }
-                    });
-                }
-                else if (mode === 'ninja') {
-                     Object.keys(players).forEach(id => {
-                        const p = players[id];
-                        const char = document.getElementById(`ninja-${id}`);
-                        const ind = document.getElementById(`noise-${id}`);
-                        if(char && ind) {
-                            char.style.left = Math.min((p.score||0)*0.5, 90) + '%';
-                            if ((p.vol||0) > 30) { ind.style.display='block'; ind.innerText='NOISY!'; }
-                            else ind.style.display='none';
-                            if ((p.score||0) >= 180) finishGame(p.name, "NINJA MASTER!");
-                        }
-                    });
-                }
-                else if (mode === 'compass') {
-                     Object.keys(players).forEach(id => {
-                        const p = players[id];
-                        if (p.alpha !== undefined) {
-                            let arrow = document.getElementById(`arr-${id}`);
-                            if (!arrow) {
-                                arrow = document.createElement('div'); arrow.id = `arr-${id}`; arrow.className = 'player-needle'; arrow.style.backgroundColor = p.color;
-                                document.getElementById('compass-ring').appendChild(arrow);
-                            }
-                            let diff = (p.alpha - gameState.targetAngle);
-                            arrow.style.transform = `rotate(${diff}deg)`;
-                        }
-                    });
-                }
-                else if (mode === 'rope') {
-                    if(ropeActive) {
-                        ropePhase += ropeSpeed;
-                        if(ropePhase > Math.PI * 2) {
-                            ropePhase -= Math.PI * 2;
-                            jumpCount++;
-                            document.getElementById('rope-count').innerText = jumpCount;
-                            if(jumpCount % 5 === 0) ropeSpeed += 0.01;
-                        }
-                        const canvas = document.getElementById('rope-canvas');
-                        const ctx = canvas.getContext('2d');
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        ctx.beginPath();
-                        const midY = canvas.height * 0.8;
-                        const height = Math.sin(ropePhase) * (canvas.height * 0.4); 
-                        ctx.moveTo(0, midY);
-                        ctx.quadraticCurveTo(canvas.width/2, midY - height, canvas.width, midY);
-                        ctx.lineWidth = 5; ctx.strokeStyle = '#f1c40f'; ctx.stroke();
-
-                        if (Math.abs(Math.sin(ropePhase)) < 0.2) {
-                             Object.keys(players).forEach(id => {
-                                const p = players[id];
-                                if(p.eliminated) return;
-                                const lastJump = p.lastJump || 0;
-                                if ((Date.now() - lastJump) > 600) {
-                                    update(ref(db, `rooms/${roomId}/players/${id}`), { eliminated: true });
-                                    const el = document.getElementById(`jumper-${id}`);
-                                    if(el) el.classList.add('eliminated');
-                                }
-                            });
-                            const survivors = Object.values(players).filter(p => !p.eliminated);
-                            if(survivors.length === 0) finishGame("NO ONE", "SURVIVED");
-                            else if(survivors.length === 1 && Object.keys(players).length > 1) finishGame(survivors[0].name, "WINS!");
-                        }
-                    }
-                    Object.keys(players).forEach(id => {
-                        const p = players[id];
-                        const el = document.getElementById(`jumper-${id}`);
-                        if(el && !p.eliminated) {
-                             if (Date.now() - (p.lastJump || 0) < 300) el.style.bottom = '30px';
-                             else el.style.bottom = '0px';
-                        }
-                    });
-                }
-
-            }, 33);
-
-            function checkTimeUp() {
-                isPlaying = false;
-                if (mode === 'timeattack') {
-                    let max = -1, winner = "";
-                    Object.values(players).forEach(p => { if((p.score||0)>max){max=p.score; winner=p.name;} });
-                    finishGame(winner, `Score: ${max}`);
-                }
-                else if (mode === 'balance') finishGame("CLEAR!", "SURVIVED");
-                else if (mode === 'sniper') {
-                    let max = -1, winner = "";
-                    Object.values(players).forEach(p => { if((p.hits||0)>max){max=p.hits; winner=p.name;} });
-                    finishGame(winner, `Hits: ${max}`);
-                }
-                else if (mode === 'compass') {
-                    let bestDiff = 999, winner = "";
-                    Object.values(players).forEach(p => {
-                        if(p.alpha!==undefined) {
-                            let diff = Math.abs(p.alpha - gameState.targetAngle);
-                            if(diff>180) diff = 360-diff;
-                            if(diff < bestDiff){ bestDiff=diff; winner=p.name; }
-                        }
-                    });
-                    finishGame(winner, `Error: ${Math.floor(bestDiff)}°`);
-                }
-                else finishGame("TIME UP", "DRAW");
-            }
-
-            function finishGame(title, sub) {
-                isPlaying = false; ropeActive = false;
-                document.getElementById('result-overlay').classList.remove('hidden');
-                document.getElementById('res-title').innerText = title;
-                document.getElementById('res-sub').innerText = sub;
-                update(roomRef, { mode: 'result' });
-            }
-
-            function spawnRock() {
-                const rock = document.createElement('div');
-                rock.className = 'enemy-rock'; rock.innerText = '🪨';
-                rock.style.left = Math.random() * 90 + '%'; rock.style.top = '-10%';
-                document.getElementById('balance-field').appendChild(rock);
-            }
-            function spawnTarget() {
-                const t = document.createElement('div');
-                t.className = 'target'; t.innerText = '🛸';
-                t.style.left = Math.random() * 90 + '%'; t.style.top = Math.random() * 80 + '%';
-                t.dataset.id = Date.now();
-                document.getElementById('targets-container').appendChild(t);
-                setTimeout(()=>{if(t.parentNode)t.remove()}, 2000);
-            }
-            function checkHit(x, y, pid) {
-                const field = document.getElementById('sniper-field');
-                const fx = x/100*field.clientWidth; const fy = y/100*field.clientHeight;
-                document.querySelectorAll('.target').forEach(t => {
-                    const rect = t.getBoundingClientRect();
-                    const fRect = field.getBoundingClientRect();
-                    const tx = rect.left - fRect.left + rect.width/2;
-                    const ty = rect.top - fRect.top + rect.height/2;
-                    if(Math.sqrt((fx-tx)**2+(fy-ty)**2) < 40) {
-                        t.remove();
-                        let hits = (players[pid].hits || 0) + 1;
-                        update(ref(db, `rooms/${roomId}/players/${pid}`), { hits: hits });
-                        spawnTarget();
-                    }
-                });
-            }
-
-            window.setMode = (m) => {
-                mode = m;
-                document.getElementById('lobby-menu').style.display = 'none';
-                document.getElementById('player-list').style.display = 'none';
-                document.getElementById('game-area').style.display = 'block';
-                document.getElementById('result-overlay').classList.add('hidden');
-                document.getElementById('timer-display').innerText = "";
-                
-                document.querySelectorAll('#game-area > div').forEach(el => {
-                    if(!['back-btn','timer-display'].includes(el.id)) el.classList.add('hidden');
-                });
-
-                const updates = { mode: m };
-                let idx=0;
-                Object.keys(players).forEach(id => {
-                    updates[`players/${id}/score`] = 0; updates[`players/${id}/hits`] = 0;
-                    updates[`players/${id}/eliminated`] = false; updates[`players/${id}/team`] = (idx++%2===0)?'red':'blue';
-                });
-                update(roomRef, updates);
-
-                isPlaying = true;
-                if (m === 'timeattack') { gameTimer = 10; document.getElementById('timeattack-field').classList.remove('hidden'); document.getElementById('timeattack-field').innerHTML = Object.keys(players).map(id=>`<div class="ta-bar-container"><div id="ta-bar-${id}" class="ta-bar" style="background:${players[id].color}; height:0%"></div><div class="ta-name">${players[id].name}</div></div>`).join(''); }
-                else if (m === 'race') { gameTimer = 30; document.getElementById('race-track').classList.remove('hidden'); document.getElementById('race-track').innerHTML = Object.keys(players).map(id=>`<div id="racer-${id}" class="racer"><span style="font-size:30px">🚀</span>${players[id].name}</div>`).join('') + '<div class="goal-line"></div>'; }
-                else if (m === 'tug') { gameTimer = 30; document.getElementById('tug-field').classList.remove('hidden'); }
-                else if (m === 'boss') { gameTimer = 30; document.getElementById('boss-field').classList.remove('hidden'); }
-                else if (m === 'soda') { gameTimer = 60; document.getElementById('soda-field').classList.remove('hidden'); document.getElementById('soda-field').innerHTML = Object.keys(players).map(id=>`<div class="bottle-col"><div class="bottle-body"><div id="liq-${id}" class="bottle-liq" style="background:${players[id].color}"></div></div></div>`).join(''); }
-                else if (m === 'balance') { gameTimer = 30; document.getElementById('balance-field').classList.remove('hidden'); gameState.balanceHp = 100; gameState.ballPos = 50; document.getElementById('balance-hp').innerText = "HP: 100"; }
-                else if (m === 'sniper') { gameTimer = 30; document.getElementById('sniper-field').classList.remove('hidden'); document.getElementById('targets-container').innerHTML=''; spawnTarget(); }
-                else if (m === 'ninja') { gameTimer = 30; document.getElementById('ninja-field').classList.remove('hidden'); document.getElementById('ninja-field').innerHTML = Object.keys(players).map(id=>`<div class="ninja-lane"><div class="ninja-char" id="ninja-${id}" style="color:${players[id].color}">🥷</div><div class="noise-indicator" id="noise-${id}">LOUD!</div></div>`).join(''); }
-                else if (m === 'compass') { gameTimer = 15; document.getElementById('compass-field').classList.remove('hidden'); gameState.targetAngle = Math.floor(Math.random() * 360); document.getElementById('compass-msg').innerText = `FACE ${gameState.targetAngle}° !`; }
-                else if (m === 'rope') { gameTimer = 999; document.getElementById('rope-field').classList.remove('hidden'); document.getElementById('rope-field').innerHTML = `<div id="rope-count">0</div><canvas id="rope-canvas" width="800" height="400"></canvas>` + Object.keys(players).map(id=>`<div class="jumper" id="jumper-${id}"><div class="jumper-body" style="color:${players[id].color}">🧍</div><div class="jumper-name">${players[id].name}</div></div>`).join(''); const cvs = document.getElementById('rope-canvas'); cvs.width = cvs.parentElement.clientWidth; cvs.height = cvs.parentElement.clientHeight; ropePhase = 0; ropeSpeed = 0.05; jumpCount = 0; ropeActive = true; }
-            };
-
-            window.resetToLobby = () => {
-                mode = 'lobby'; isPlaying = false;
-                update(roomRef, { mode: 'lobby' });
-                document.getElementById('lobby-menu').style.display = 'block';
-                document.getElementById('player-list').style.display = 'flex';
-                document.getElementById('game-area').style.display = 'none';
-                document.getElementById('result-overlay').classList.add('hidden');
-            };
-        }
-
-        // ==========================================
-        // CONTROLLER LOGIC
-        // ==========================================
-        else {
-            document.getElementById('ctrl-view').classList.remove('hidden');
-            const pRef = ref(db, `rooms/${roomId}/players/${myId}`);
-            let currentMode = 'lobby';
-            let myScore = 0;
-
-            document.getElementById('join-btn').onclick = async () => {
-                const name = document.getElementById('p-name').value || "Guest";
-                const color = `hsl(${Math.random()*360}, 80%, 60%)`;
-                set(pRef, { name, color, score: 0 });
-                document.getElementById('name-input-ui').style.display = 'none';
-                document.getElementById('ctrl-game-ui').style.display = 'flex';
-                
-                // IMPORTANT: PERMISSION REQUEST
-                if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                    try {
-                        const response = await DeviceMotionEvent.requestPermission();
-                        if (response !== 'granted') alert('Permission Denied!');
-                    } catch (e) { alert(e); }
-                }
-                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                    try { await DeviceOrientationEvent.requestPermission(); } catch (e) {}
-                }
-                
-                requestMic();
-                startLoop();
-            };
-            onDisconnect(pRef).remove();
-
-            async function requestMic() {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    const analyser = audioCtx.createAnalyser();
-                    const source = audioCtx.createMediaStreamSource(stream);
-                    source.connect(analyser);
-                    const dataArray = new Uint8Array(analyser.frequencyBinCount);
-                    setInterval(()=>{
-                        if(currentMode==='ninja'){
-                            analyser.getByteFrequencyData(dataArray);
-                            let sum=0; for(let i=0;i<dataArray.length;i++)sum+=dataArray[i];
-                            update(pRef, { vol: sum/dataArray.length });
-                        }
-                    }, 200);
-                } catch(e){}
-            }
-
-            function startLoop() {
-                onValue(ref(db, `rooms/${roomId}`), (snap) => {
-                    const d = snap.val();
-                    if(!d) return;
-                    if(d.mode !== currentMode) {
-                        currentMode = d.mode; myScore = 0; updateUI(d.mode);
-                    }
-                });
-
-                let lastAcc = {x:0,y:0,z:0};
-                let lastSend = 0;
-                const debugEl = document.getElementById('debug-sensors');
-
-                window.addEventListener('devicemotion', (e) => {
-                    const acc = e.accelerationIncludingGravity || e.acceleration;
-                    if(!acc) return;
-                    
-                    debugEl.innerText = `Acc: ${acc.x.toFixed(1)}, ${acc.y.toFixed(1)}, ${acc.z.toFixed(1)}`;
-
-                    if(['timeattack','race','tug','boss','soda','ninja'].includes(currentMode)) {
-                        const delta = Math.abs(acc.x - lastAcc.x) + Math.abs(acc.y - lastAcc.y) + Math.abs(acc.z - lastAcc.z);
-                        if(delta > 15) {
-                            myScore++;
-                            document.getElementById('shake-btn').classList.remove('shaking');
-                            void document.getElementById('shake-btn').offsetWidth;
-                            document.getElementById('shake-btn').classList.add('shaking');
-                            if(Date.now() - lastSend > 100) { update(pRef, { score: myScore }); lastSend = Date.now(); }
-                        }
-                    }
-                    else if (currentMode === 'rope') {
-                        const delta = Math.abs(acc.x - lastAcc.x) + Math.abs(acc.y - lastAcc.y) + Math.abs(acc.z - lastAcc.z);
-                         if(delta > 15) { 
-                             if(Date.now() - lastSend > 300) { 
-                                 update(pRef, { lastJump: Date.now() });
-                                 const bg = document.getElementById('jump-btn-visual');
-                                 bg.style.background = 'white'; setTimeout(()=>bg.style.background='#9b59b6', 100);
-                                 lastSend = Date.now();
-                             }
-                         }
-                    }
-                    lastAcc = acc;
-                });
-
-                window.addEventListener('deviceorientation', (e) => {
-                    const now = Date.now();
-                    if(now - lastSend < 50) return;
-                    if (currentMode === 'balance') update(pRef, { tilt: e.gamma });
-                    else if (currentMode === 'sniper') update(pRef, { aim: { b: e.beta, g: e.gamma } });
-                    else if (currentMode === 'compass') {
-                        let h = e.webkitCompassHeading || (360 - e.alpha);
-                        update(pRef, { alpha: h });
-                    }
-                    lastSend = now;
-                });
-
-                document.getElementById('tap-btn').addEventListener('touchstart', (e)=>{ e.preventDefault(); if(currentMode==='sniper') update(pRef, { shot: true }); });
-                document.getElementById('jump-btn-visual').addEventListener('touchstart', (e)=>{ e.preventDefault(); update(pRef, { lastJump: Date.now() }); });
-            }
-
-            function updateUI(m) {
-                ['ui-shake','ui-tap','ui-jump'].forEach(id=>document.getElementById(id).classList.add('hidden'));
-                const msg = document.getElementById('ui-msg'); msg.style.display = 'block';
-
-                if(m === 'lobby') msg.innerText = "Wait for Host...";
-                else if(m === 'result') msg.innerText = "Check Screen!";
-                else if(['timeattack','race','boss','soda','tug','ninja'].includes(m)) { document.getElementById('ui-shake').classList.remove('hidden'); msg.style.display='none'; }
-                else if(m === 'rope') { document.getElementById('ui-jump').classList.remove('hidden'); msg.style.display='none'; }
-                else if(m === 'sniper') { document.getElementById('ui-tap').classList.remove('hidden'); msg.style.display='none'; }
-                else if(m === 'balance') msg.innerText = "Tilt Phone!";
-                else if(m === 'compass') msg.innerText = "Rotate Body!";
-            }
-        }
-    </script>
-</body>
-</html>
+            <div id="ui-shake" class="hidden"><div id="shake-btn">SHAKE!</di
