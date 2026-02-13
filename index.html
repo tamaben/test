@@ -2,18 +2,22 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SHAKE PARTY 10 - Big Rope Edition</title>
+    <!-- 1. 拡大縮小の完全禁止 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>SHAKE PARTY FINAL</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Bangers&family=M+PLUS+Rounded+1c:wght@800&display=swap');
 
-        /* RESET & BASE */
+        /* 2. タッチ操作によるズーム・スクロールの無効化 */
         html, body {
             margin: 0; padding: 0; width: 100%; height: 100%;
             overflow: hidden; background: #111;
             font-family: 'M PLUS Rounded 1c', sans-serif; color: white;
-            touch-action: none; user-select: none; -webkit-user-select: none;
+            /* ブラウザ標準のタッチアクション（ズーム、パン）を無効化 */
+            touch-action: none; 
+            /* テキスト選択無効化 */
+            user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
         }
 
         .hidden { display: none !important; }
@@ -21,23 +25,23 @@
         
         /* --- HOST DESIGN --- */
         #host-view { background: radial-gradient(circle at center, #2c3e50, #000); }
-        h1 { font-family: 'Bangers'; font-size: 36px; color: #f1c40f; text-shadow: 3px 3px 0 #e67e22; margin: 5px 0; z-index: 10; pointer-events: none; }
+        h1 { font-family: 'Bangers'; font-size: 40px; color: #f1c40f; text-shadow: 3px 3px 0 #e67e22; margin: 10px 0; pointer-events: none; }
         
         /* Menu Grid */
-        #menu-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 10px; max-width: 95%; }
-        .menu-card { width: 100px; padding: 8px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 10px; cursor: pointer; text-align: center; transition: 0.2s; }
+        #menu-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 10px; max-width: 95%; }
+        .menu-card { width: 90px; padding: 10px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 10px; cursor: pointer; text-align: center; transition: 0.2s; }
         .menu-card:hover { transform: scale(1.05); background: rgba(255,255,255,0.25); border-color: #f1c40f; }
         .card-icon { font-size: 24px; display: block; margin-bottom: 2px; }
-        .card-title { font-size: 11px; font-weight: bold; color: #f1c40f; line-height: 1.1; }
+        .card-title { font-size: 11px; font-weight: bold; color: #f1c40f; }
 
         /* Game Area */
-        #game-area { width: 95%; height: 65%; position: relative; background: rgba(0,0,0,0.6); border-radius: 15px; border: 2px solid #555; display: none; overflow: hidden; }
-        #timer-display { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); font-size: 40px; font-family: 'Bangers'; color: #e74c3c; z-index: 5; text-shadow: 2px 2px 0 #000; }
+        #game-area { width: 95%; height: 60%; position: relative; background: rgba(0,0,0,0.6); border-radius: 15px; border: 2px solid #555; display: none; overflow: hidden; }
+        #timer-display { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); font-size: 50px; font-family: 'Bangers'; color: #e74c3c; z-index: 5; text-shadow: 2px 2px 0 #000; }
         #back-btn { position: absolute; top: 10px; right: 10px; z-index: 100; padding: 5px 15px; background: #e74c3c; color: white; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; }
 
         /* Player List */
         #player-list { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-top: 10px; width: 95%; }
-        .player-tag { background: #34495e; padding: 3px 10px; border-radius: 15px; font-size: 11px; border: 1px solid #aaa; animation: popIn 0.3s; }
+        .player-tag { background: #34495e; padding: 3px 10px; border-radius: 15px; font-size: 12px; border: 1px solid #aaa; animation: popIn 0.3s; }
         @keyframes popIn { from{transform:scale(0);} to{transform:scale(1);} }
 
         /* --- GAME FIELDS --- */
@@ -69,7 +73,6 @@
         .bottle-col { width: 40px; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; position: relative; align-items: center; }
         .bottle-body { width: 30px; height: 60px; background: white; position: relative; border-radius: 4px 4px 0 0; }
         .bottle-liq { width: 100%; background: #e67e22; position: absolute; bottom: 0; transition: height 0.1s; }
-        .cork { font-size: 20px; position: absolute; bottom: 60px; transition: bottom 0.2s; }
 
         /* 6. Balance */
         #balance-field { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; perspective: 800px; }
@@ -82,7 +85,6 @@
         #sniper-field { width: 100%; height: 100%; position: relative; cursor: none; }
         .target { position: absolute; font-size: 40px; transition: transform 0.2s; }
         .crosshair { position: absolute; width: 25px; height: 25px; border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%); transition: all 0.1s; z-index: 10; pointer-events: none; }
-        .crosshair::after { content: attr(data-name); position: absolute; top: -15px; left: 50%; transform: translateX(-50%); font-size: 10px; white-space: nowrap; color: white; text-shadow: 0 0 3px black; }
 
         /* 8. Ninja */
         #ninja-field { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-evenly; }
@@ -97,7 +99,7 @@
         .player-needle { width: 3px; height: 100px; position: absolute; left: 50%; top: 50%; transform-origin: top center; opacity: 0.8; transition: transform 0.2s; }
         #compass-msg { margin-top: 20px; font-size: 24px; color: #f1c40f; font-family: 'Bangers'; }
 
-        /* 10. Big Rope (New) */
+        /* 10. Big Rope */
         #rope-field { width: 100%; height: 100%; display: flex; align-items: flex-end; justify-content: space-around; position: relative; padding-bottom: 40px; }
         #rope-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
         .jumper { width: 30px; height: 50px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; transition: bottom 0.1s; bottom: 0; }
@@ -122,6 +124,8 @@
         
         #jump-btn-visual { width: 100%; height: 100%; background: #9b59b6; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: bold; }
 
+        #debug-sensors { position: absolute; bottom: 5px; left: 0; width: 100%; font-size: 10px; color: #777; pointer-events: none; }
+
         /* RESULT OVERLAY */
         #result-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: fadeIn 0.5s; }
         #res-title { font-family: 'Bangers'; font-size: 60px; color: #f1c40f; text-shadow: 0 0 20px #e67e22; margin: 0; text-align: center; }
@@ -135,7 +139,7 @@
 
     <!-- HOST VIEW -->
     <div id="host-view" class="full-screen hidden">
-        <h1>SHAKE PARTY 10</h1>
+        <h1>SHAKE PARTY FINAL</h1>
         
         <div id="lobby-menu">
             <div id="qrcode" style="background: white; padding: 5px; border-radius: 5px; display: inline-block;"></div>
@@ -169,7 +173,6 @@
             <div id="sniper-field" class="hidden"><div id="targets-container"></div><div id="crosshairs-container"></div></div>
             <div id="ninja-field" class="hidden"></div>
             <div id="compass-field" class="hidden"><div id="compass-msg">Find NORTH!</div><div id="compass-ring"><div id="target-needle"></div></div></div>
-            <!-- NEW -->
             <div id="rope-field" class="hidden">
                 <div id="rope-count">0</div>
                 <canvas id="rope-canvas"></canvas>
@@ -190,15 +193,28 @@
         <div id="name-input-ui">
             <h2>JOIN GAME</h2>
             <input type="text" id="p-name" placeholder="Name" maxlength="6">
-            <button class="btn-go" id="join-btn">START</button>
+            <button class="btn-go" id="join-btn">参加する (許可が必要です)</button>
+            <p style="font-size:12px; color:#aaa; margin-top:20px;">※タップ後に「許可」を押してください</p>
         </div>
         <div id="ctrl-game-ui">
             <div id="ui-shake" class="hidden"><div id="shake-btn">SHAKE!</div></div>
             <div id="ui-tap" class="hidden"><div id="tap-btn">FIRE!</div></div>
             <div id="ui-jump" class="hidden" style="width:100%;height:100%;"><div id="jump-btn-visual">JUMP!</div></div>
             <div id="ui-msg" style="margin-top:20px; font-size:20px; color:#ccc;">Wait...</div>
+            <div id="debug-sensors">Sensors: Waiting...</div>
         </div>
     </div>
+
+    <!-- ズーム防止スクリプト -->
+    <script>
+        document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (e) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) e.preventDefault();
+            lastTouchEnd = now;
+        }, false);
+    </script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
@@ -239,20 +255,12 @@
             let isPlaying = false;
             let gameTimer = 0;
             
-            // Rope Logic
+            // Game State Vars
             let ropePhase = 0;
             let ropeSpeed = 0.05;
             let jumpCount = 0;
             let ropeActive = false;
-
-            // Game State
-            let gameState = {
-                bossHp: 1000,
-                tugPos: 50,
-                ballPos: 50,
-                balanceHp: 100,
-                targetAngle: 0
-            };
+            let gameState = { bossHp: 1000, tugPos: 50, ballPos: 50, balanceHp: 100, targetAngle: 0 };
 
             const roomRef = ref(db, `rooms/${roomId}`);
             update(roomRef, { mode: 'lobby' });
@@ -269,25 +277,23 @@
                 ).join('');
             }
 
-            // --- MAIN GAME LOOP (30 FPS) ---
+            // MAIN LOOP (30 FPS)
             setInterval(() => {
                 if (!isPlaying || mode === 'lobby') return;
 
-                // Timer
                 if (gameTimer > 0) {
                     gameTimer -= 1/30;
                     document.getElementById('timer-display').innerText = Math.ceil(gameTimer);
                     if (gameTimer <= 0) checkTimeUp();
                 }
 
-                // 1. TIME ATTACK
+                // --- GAME LOGIC UPDATES ---
                 if (mode === 'timeattack') {
                     Object.keys(players).forEach(id => {
                         const el = document.getElementById(`ta-bar-${id}`);
                         if(el) el.style.height = Math.min((players[id].score||0)*1.5, 100) + '%';
                     });
                 }
-                // 2. RACE
                 else if (mode === 'race') {
                     Object.keys(players).forEach(id => {
                         const p = players[id];
@@ -296,7 +302,6 @@
                         if ((p.score||0) >= 100) finishGame(p.name, "WINS!");
                     });
                 }
-                // 3. TUG
                 else if (mode === 'tug') {
                     let red=0, blue=0;
                     Object.values(players).forEach(p => p.team==='red'?red+=p.score||0 : blue+=p.score||0);
@@ -305,14 +310,12 @@
                     if(pos <= 0) finishGame("RED TEAM", "WINS!");
                     if(pos >= 100) finishGame("BLUE TEAM", "WINS!");
                 }
-                // 4. BOSS
                 else if (mode === 'boss') {
                     let total=0; Object.values(players).forEach(p => total += p.score||0);
                     let hp = Math.max(0, 1000 - total);
                     document.getElementById('boss-hp-fill').style.width = (hp/10) + '%';
                     if (hp <= 0) finishGame("HEROES", "VICTORY!");
                 }
-                // 5. SODA
                 else if (mode === 'soda') {
                     Object.keys(players).forEach(id => {
                         const p = players[id];
@@ -321,19 +324,16 @@
                         if((p.score||0) >= 100) finishGame(p.name, "EXPLODED!");
                     });
                 }
-                // 6. BALANCE
                 else if (mode === 'balance') {
                     let totalTilt = 0, count = 0;
                     Object.values(players).forEach(p => { if (p.tilt !== undefined) { totalTilt += p.tilt; count++; } });
                     const avgTilt = count > 0 ? totalTilt / count : 0;
                     const tray = document.getElementById('tray');
-                    
                     tray.style.transform = `rotateZ(${avgTilt}deg)`;
                     gameState.ballPos += avgTilt * 0.1;
                     gameState.ballPos = Math.max(0, Math.min(100, gameState.ballPos));
                     document.getElementById('tray-ball').style.left = gameState.ballPos + '%';
 
-                    // Rocks
                     if (Math.random() < 0.05) spawnRock();
                     document.querySelectorAll('.enemy-rock').forEach(rock => {
                         let top = parseFloat(rock.style.top || 0) + 2;
@@ -347,7 +347,6 @@
                         if (top > 100) rock.remove();
                     });
                 }
-                // 7. SNIPER
                 else if (mode === 'sniper') {
                     const container = document.getElementById('crosshairs-container');
                     Object.keys(players).forEach(id => {
@@ -356,21 +355,18 @@
                         let ch = document.getElementById(`ch-${id}`);
                         if (!ch) {
                             ch = document.createElement('div');
-                            ch.id = `ch-${id}`; ch.className = 'crosshair'; ch.style.borderColor = p.color;
-                            ch.dataset.name = p.name;
+                            ch.id = `ch-${id}`; ch.className = 'crosshair'; ch.style.borderColor = p.color; ch.dataset.name = p.name;
                             container.appendChild(ch);
                         }
                         let x = 50 + (p.aim.g || 0) * 1.5;
                         let y = 50 + (p.aim.b || 0) * 1.5;
                         ch.style.left = x + '%'; ch.style.top = y + '%';
-                        
                         if (p.shot) {
                             checkHit(x, y, id);
                             update(ref(db, `rooms/${roomId}/players/${id}`), { shot: false });
                         }
                     });
                 }
-                // 8. NINJA
                 else if (mode === 'ninja') {
                      Object.keys(players).forEach(id => {
                         const p = players[id];
@@ -380,14 +376,11 @@
                             char.style.left = Math.min((p.score||0)*0.5, 90) + '%';
                             if ((p.vol||0) > 30) { ind.style.display='block'; ind.innerText='NOISY!'; }
                             else ind.style.display='none';
-                            
                             if ((p.score||0) >= 180) finishGame(p.name, "NINJA MASTER!");
                         }
                     });
                 }
-                // 9. COMPASS
                 else if (mode === 'compass') {
-                    // Visual update only, logic handled in checkTimeUp
                      Object.keys(players).forEach(id => {
                         const p = players[id];
                         if (p.alpha !== undefined) {
@@ -401,7 +394,6 @@
                         }
                     });
                 }
-                // 10. BIG ROPE (New)
                 else if (mode === 'rope') {
                     if(ropeActive) {
                         ropePhase += ropeSpeed;
@@ -409,68 +401,39 @@
                             ropePhase -= Math.PI * 2;
                             jumpCount++;
                             document.getElementById('rope-count').innerText = jumpCount;
-                            if(jumpCount % 5 === 0) ropeSpeed += 0.01; // Speed up
+                            if(jumpCount % 5 === 0) ropeSpeed += 0.01;
                         }
-
-                        // Draw Rope
                         const canvas = document.getElementById('rope-canvas');
                         const ctx = canvas.getContext('2d');
                         ctx.clearRect(0, 0, canvas.width, canvas.height);
                         ctx.beginPath();
-                        
-                        // Rope physics simulation (visual)
-                        const midY = canvas.height * 0.8; // Ground level
+                        const midY = canvas.height * 0.8;
                         const height = Math.sin(ropePhase) * (canvas.height * 0.4); 
                         ctx.moveTo(0, midY);
                         ctx.quadraticCurveTo(canvas.width/2, midY - height, canvas.width, midY);
-                        ctx.lineWidth = 5;
-                        ctx.strokeStyle = '#f1c40f';
-                        ctx.stroke();
+                        ctx.lineWidth = 5; ctx.strokeStyle = '#f1c40f'; ctx.stroke();
 
-                        // Collision Check (When rope is near bottom: sin(phase) ~ 0 and going positive?)
-                        // Simplified: Check if rope is "low" (phase around 0 or 2PI)
-                        // Actually, rope is lowest when sin is 0. Let's say phase 0 is flat/ground.
-                        
-                        // Check logic: If rope is close to ground (phase 0 +/- 0.5)
-                        // Player must be "in air" (lastJump recent)
-                        
-                        // Let's align visual: Height 0 is Danger.
-                        // Phase 0 -> Height 0. Phase PI -> Height 0. 
-                        // It swings up and down. Down is danger.
-                        // Let's say Phase 0 is hitting the ground.
-                        
-                        if (Math.abs(Math.sin(ropePhase)) < 0.2) { // Danger window
+                        if (Math.abs(Math.sin(ropePhase)) < 0.2) {
                              Object.keys(players).forEach(id => {
                                 const p = players[id];
                                 if(p.eliminated) return;
-                                
                                 const lastJump = p.lastJump || 0;
-                                const now = Date.now();
-                                // Jump valid if within last 500ms
-                                const isJumping = (now - lastJump) < 600;
-                                
-                                if (!isJumping) {
-                                    // ELIMINATED
+                                if ((Date.now() - lastJump) > 600) {
                                     update(ref(db, `rooms/${roomId}/players/${id}`), { eliminated: true });
                                     const el = document.getElementById(`jumper-${id}`);
                                     if(el) el.classList.add('eliminated');
                                 }
                             });
-                            
-                            // Check winner
                             const survivors = Object.values(players).filter(p => !p.eliminated);
                             if(survivors.length === 0) finishGame("NO ONE", "SURVIVED");
                             else if(survivors.length === 1 && Object.keys(players).length > 1) finishGame(survivors[0].name, "WINS!");
                         }
                     }
-                    
-                    // Visual Jump
                     Object.keys(players).forEach(id => {
                         const p = players[id];
                         const el = document.getElementById(`jumper-${id}`);
                         if(el && !p.eliminated) {
-                             const lastJump = p.lastJump || 0;
-                             if (Date.now() - lastJump < 300) el.style.bottom = '30px';
+                             if (Date.now() - (p.lastJump || 0) < 300) el.style.bottom = '30px';
                              else el.style.bottom = '0px';
                         }
                     });
@@ -506,15 +469,13 @@
             }
 
             function finishGame(title, sub) {
-                isPlaying = false;
-                ropeActive = false;
+                isPlaying = false; ropeActive = false;
                 document.getElementById('result-overlay').classList.remove('hidden');
                 document.getElementById('res-title').innerText = title;
                 document.getElementById('res-sub').innerText = sub;
-                update(roomRef, { mode: 'result' }); // Tell controllers
+                update(roomRef, { mode: 'result' });
             }
 
-            // --- HELPER FUNCTIONS ---
             function spawnRock() {
                 const rock = document.createElement('div');
                 rock.className = 'enemy-rock'; rock.innerText = '🪨';
@@ -539,7 +500,6 @@
                     const ty = rect.top - fRect.top + rect.height/2;
                     if(Math.sqrt((fx-tx)**2+(fy-ty)**2) < 40) {
                         t.remove();
-                        // Update score
                         let hits = (players[pid].hits || 0) + 1;
                         update(ref(db, `rooms/${roomId}/players/${pid}`), { hits: hits });
                         spawnTarget();
@@ -547,7 +507,6 @@
                 });
             }
 
-            // --- MODE SWITCH ---
             window.setMode = (m) => {
                 mode = m;
                 document.getElementById('lobby-menu').style.display = 'none';
@@ -556,88 +515,29 @@
                 document.getElementById('result-overlay').classList.add('hidden');
                 document.getElementById('timer-display').innerText = "";
                 
-                // Reset UI
                 document.querySelectorAll('#game-area > div').forEach(el => {
                     if(!['back-btn','timer-display'].includes(el.id)) el.classList.add('hidden');
                 });
 
-                // Reset Player Stats
                 const updates = { mode: m };
                 let idx=0;
                 Object.keys(players).forEach(id => {
-                    updates[`players/${id}/score`] = 0;
-                    updates[`players/${id}/hits`] = 0;
-                    updates[`players/${id}/eliminated`] = false;
-                    updates[`players/${id}/team`] = (idx++%2===0)?'red':'blue';
+                    updates[`players/${id}/score`] = 0; updates[`players/${id}/hits`] = 0;
+                    updates[`players/${id}/eliminated`] = false; updates[`players/${id}/team`] = (idx++%2===0)?'red':'blue';
                 });
                 update(roomRef, updates);
 
-                // Setup specific games
                 isPlaying = true;
-                
-                if (m === 'timeattack') {
-                    gameTimer = 10;
-                    const f = document.getElementById('timeattack-field');
-                    f.classList.remove('hidden');
-                    f.innerHTML = Object.keys(players).map(id=>`
-                        <div class="ta-bar-container">
-                            <div id="ta-bar-${id}" class="ta-bar" style="background:${players[id].color}; height:0%"></div>
-                            <div class="ta-name">${players[id].name}</div>
-                        </div>`).join('');
-                }
-                else if (m === 'race') {
-                    gameTimer = 30;
-                    const f = document.getElementById('race-track');
-                    f.classList.remove('hidden');
-                    f.innerHTML = Object.keys(players).map(id=>`<div id="racer-${id}" class="racer"><span style="font-size:30px">🚀</span>${players[id].name}</div>`).join('') + '<div class="goal-line"></div>';
-                }
+                if (m === 'timeattack') { gameTimer = 10; document.getElementById('timeattack-field').classList.remove('hidden'); document.getElementById('timeattack-field').innerHTML = Object.keys(players).map(id=>`<div class="ta-bar-container"><div id="ta-bar-${id}" class="ta-bar" style="background:${players[id].color}; height:0%"></div><div class="ta-name">${players[id].name}</div></div>`).join(''); }
+                else if (m === 'race') { gameTimer = 30; document.getElementById('race-track').classList.remove('hidden'); document.getElementById('race-track').innerHTML = Object.keys(players).map(id=>`<div id="racer-${id}" class="racer"><span style="font-size:30px">🚀</span>${players[id].name}</div>`).join('') + '<div class="goal-line"></div>'; }
                 else if (m === 'tug') { gameTimer = 30; document.getElementById('tug-field').classList.remove('hidden'); }
                 else if (m === 'boss') { gameTimer = 30; document.getElementById('boss-field').classList.remove('hidden'); }
-                else if (m === 'soda') { gameTimer = 60; document.getElementById('soda-field').classList.remove('hidden'); 
-                    document.getElementById('soda-field').innerHTML = Object.keys(players).map(id=>`<div class="bottle-col"><div class="bottle-body"><div id="liq-${id}" class="bottle-liq" style="background:${players[id].color}"></div></div></div>`).join('');
-                }
-                else if (m === 'balance') {
-                    gameTimer = 30;
-                    document.getElementById('balance-field').classList.remove('hidden');
-                    gameState.balanceHp = 100; gameState.ballPos = 50;
-                    document.getElementById('balance-hp').innerText = "HP: 100";
-                }
-                else if (m === 'sniper') {
-                    gameTimer = 30;
-                    document.getElementById('sniper-field').classList.remove('hidden');
-                    document.getElementById('targets-container').innerHTML='';
-                    document.getElementById('crosshairs-container').innerHTML='';
-                    spawnTarget();
-                }
-                else if (m === 'ninja') {
-                    gameTimer = 30;
-                    const f = document.getElementById('ninja-field');
-                    f.classList.remove('hidden');
-                    f.innerHTML = Object.keys(players).map(id=>`<div class="ninja-lane"><div class="ninja-char" id="ninja-${id}" style="color:${players[id].color}">🥷</div><div class="noise-indicator" id="noise-${id}">LOUD!</div></div>`).join('');
-                }
-                else if (m === 'compass') {
-                    gameTimer = 15;
-                    document.getElementById('compass-field').classList.remove('hidden');
-                    gameState.targetAngle = Math.floor(Math.random() * 360);
-                    document.getElementById('target-needle').style.transform = `rotate(${180}deg)`; // Fixed visual up, players match it
-                    // In logic: Target is 0 deg (Up). Players send Heading.
-                    // Wait, compass logic: Target Angle is random compass direction (e.g. East).
-                    // Player must face East.
-                    // Visual: Ring is static. Target needle points to target relative to North?
-                    // Simplified: Target says "FACE 90 deg". Player rotates phone. 
-                    document.getElementById('compass-msg').innerText = `FACE ${gameState.targetAngle}° !`;
-                }
-                else if (m === 'rope') {
-                    gameTimer = 999;
-                    const f = document.getElementById('rope-field');
-                    f.classList.remove('hidden');
-                    f.innerHTML = `<div id="rope-count">0</div><canvas id="rope-canvas" width="800" height="400"></canvas>` + 
-                        Object.keys(players).map(id=>`<div class="jumper" id="jumper-${id}"><div class="jumper-body" style="color:${players[id].color}">🧍</div><div class="jumper-name">${players[id].name}</div></div>`).join('');
-                    
-                    const cvs = document.getElementById('rope-canvas');
-                    cvs.width = f.clientWidth; cvs.height = f.clientHeight;
-                    ropePhase = 0; ropeSpeed = 0.05; jumpCount = 0; ropeActive = true;
-                }
+                else if (m === 'soda') { gameTimer = 60; document.getElementById('soda-field').classList.remove('hidden'); document.getElementById('soda-field').innerHTML = Object.keys(players).map(id=>`<div class="bottle-col"><div class="bottle-body"><div id="liq-${id}" class="bottle-liq" style="background:${players[id].color}"></div></div></div>`).join(''); }
+                else if (m === 'balance') { gameTimer = 30; document.getElementById('balance-field').classList.remove('hidden'); gameState.balanceHp = 100; gameState.ballPos = 50; document.getElementById('balance-hp').innerText = "HP: 100"; }
+                else if (m === 'sniper') { gameTimer = 30; document.getElementById('sniper-field').classList.remove('hidden'); document.getElementById('targets-container').innerHTML=''; spawnTarget(); }
+                else if (m === 'ninja') { gameTimer = 30; document.getElementById('ninja-field').classList.remove('hidden'); document.getElementById('ninja-field').innerHTML = Object.keys(players).map(id=>`<div class="ninja-lane"><div class="ninja-char" id="ninja-${id}" style="color:${players[id].color}">🥷</div><div class="noise-indicator" id="noise-${id}">LOUD!</div></div>`).join(''); }
+                else if (m === 'compass') { gameTimer = 15; document.getElementById('compass-field').classList.remove('hidden'); gameState.targetAngle = Math.floor(Math.random() * 360); document.getElementById('compass-msg').innerText = `FACE ${gameState.targetAngle}° !`; }
+                else if (m === 'rope') { gameTimer = 999; document.getElementById('rope-field').classList.remove('hidden'); document.getElementById('rope-field').innerHTML = `<div id="rope-count">0</div><canvas id="rope-canvas" width="800" height="400"></canvas>` + Object.keys(players).map(id=>`<div class="jumper" id="jumper-${id}"><div class="jumper-body" style="color:${players[id].color}">🧍</div><div class="jumper-name">${players[id].name}</div></div>`).join(''); const cvs = document.getElementById('rope-canvas'); cvs.width = cvs.parentElement.clientWidth; cvs.height = cvs.parentElement.clientHeight; ropePhase = 0; ropeSpeed = 0.05; jumpCount = 0; ropeActive = true; }
             };
 
             window.resetToLobby = () => {
@@ -659,21 +559,30 @@
             let currentMode = 'lobby';
             let myScore = 0;
 
-            document.getElementById('join-btn').onclick = () => {
+            document.getElementById('join-btn').onclick = async () => {
                 const name = document.getElementById('p-name').value || "Guest";
                 const color = `hsl(${Math.random()*360}, 80%, 60%)`;
                 set(pRef, { name, color, score: 0 });
                 document.getElementById('name-input-ui').style.display = 'none';
                 document.getElementById('ctrl-game-ui').style.display = 'flex';
-                requestSensors();
+                
+                // IMPORTANT: PERMISSION REQUEST
+                if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                    try {
+                        const response = await DeviceMotionEvent.requestPermission();
+                        if (response !== 'granted') alert('Permission Denied!');
+                    } catch (e) { alert(e); }
+                }
+                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    try { await DeviceOrientationEvent.requestPermission(); } catch (e) {}
+                }
+                
+                requestMic();
+                startLoop();
             };
             onDisconnect(pRef).remove();
 
-            async function requestSensors() {
-                if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') await DeviceMotionEvent.requestPermission();
-                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') await DeviceOrientationEvent.requestPermission();
-                
-                // Mic for Ninja
+            async function requestMic() {
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -681,7 +590,6 @@
                     const source = audioCtx.createMediaStreamSource(stream);
                     source.connect(analyser);
                     const dataArray = new Uint8Array(analyser.frequencyBinCount);
-                    
                     setInterval(()=>{
                         if(currentMode==='ninja'){
                             analyser.getByteFrequencyData(dataArray);
@@ -690,8 +598,6 @@
                         }
                     }, 200);
                 } catch(e){}
-
-                startLoop();
             }
 
             function startLoop() {
@@ -699,20 +605,20 @@
                     const d = snap.val();
                     if(!d) return;
                     if(d.mode !== currentMode) {
-                        currentMode = d.mode;
-                        myScore = 0;
-                        updateUI(d.mode);
+                        currentMode = d.mode; myScore = 0; updateUI(d.mode);
                     }
                 });
 
                 let lastAcc = {x:0,y:0,z:0};
                 let lastSend = 0;
+                const debugEl = document.getElementById('debug-sensors');
 
                 window.addEventListener('devicemotion', (e) => {
                     const acc = e.accelerationIncludingGravity || e.acceleration;
                     if(!acc) return;
+                    
+                    debugEl.innerText = `Acc: ${acc.x.toFixed(1)}, ${acc.y.toFixed(1)}, ${acc.z.toFixed(1)}`;
 
-                    // SHAKE LOGIC
                     if(['timeattack','race','tug','boss','soda','ninja'].includes(currentMode)) {
                         const delta = Math.abs(acc.x - lastAcc.x) + Math.abs(acc.y - lastAcc.y) + Math.abs(acc.z - lastAcc.z);
                         if(delta > 15) {
@@ -723,18 +629,13 @@
                             if(Date.now() - lastSend > 100) { update(pRef, { score: myScore }); lastSend = Date.now(); }
                         }
                     }
-                    // JUMP LOGIC (Vertical accel)
                     else if (currentMode === 'rope') {
-                        // Simple peak detection on Y or Z depending on hold
-                        // Let's use total magnitude spike
                         const delta = Math.abs(acc.x - lastAcc.x) + Math.abs(acc.y - lastAcc.y) + Math.abs(acc.z - lastAcc.z);
-                         if(delta > 20) { // Higher threshold for jump
-                             if(Date.now() - lastSend > 300) { // Cooldown
+                         if(delta > 15) { 
+                             if(Date.now() - lastSend > 300) { 
                                  update(pRef, { lastJump: Date.now() });
-                                 // Visual feedback
                                  const bg = document.getElementById('jump-btn-visual');
-                                 bg.style.background = 'white';
-                                 setTimeout(()=>bg.style.background='#9b59b6', 100);
+                                 bg.style.background = 'white'; setTimeout(()=>bg.style.background='#9b59b6', 100);
                                  lastSend = Date.now();
                              }
                          }
@@ -754,37 +655,19 @@
                     lastSend = now;
                 });
 
-                document.getElementById('tap-btn').addEventListener('touchstart', (e)=>{
-                    e.preventDefault();
-                    if(currentMode==='sniper') update(pRef, { shot: true });
-                });
-                
-                // Jump button manual tap fallback
-                document.getElementById('jump-btn-visual').addEventListener('touchstart', (e)=>{
-                     e.preventDefault();
-                     update(pRef, { lastJump: Date.now() });
-                });
+                document.getElementById('tap-btn').addEventListener('touchstart', (e)=>{ e.preventDefault(); if(currentMode==='sniper') update(pRef, { shot: true }); });
+                document.getElementById('jump-btn-visual').addEventListener('touchstart', (e)=>{ e.preventDefault(); update(pRef, { lastJump: Date.now() }); });
             }
 
             function updateUI(m) {
                 ['ui-shake','ui-tap','ui-jump'].forEach(id=>document.getElementById(id).classList.add('hidden'));
-                const msg = document.getElementById('ui-msg');
-                msg.style.display = 'block';
+                const msg = document.getElementById('ui-msg'); msg.style.display = 'block';
 
                 if(m === 'lobby') msg.innerText = "Wait for Host...";
                 else if(m === 'result') msg.innerText = "Check Screen!";
-                else if(['timeattack','race','boss','soda','tug','ninja'].includes(m)) {
-                    document.getElementById('ui-shake').classList.remove('hidden');
-                    msg.style.display='none';
-                }
-                else if(m === 'rope') {
-                    document.getElementById('ui-jump').classList.remove('hidden');
-                    msg.style.display='none';
-                }
-                else if(m === 'sniper') {
-                    document.getElementById('ui-tap').classList.remove('hidden');
-                    msg.style.display='none';
-                }
+                else if(['timeattack','race','boss','soda','tug','ninja'].includes(m)) { document.getElementById('ui-shake').classList.remove('hidden'); msg.style.display='none'; }
+                else if(m === 'rope') { document.getElementById('ui-jump').classList.remove('hidden'); msg.style.display='none'; }
+                else if(m === 'sniper') { document.getElementById('ui-tap').classList.remove('hidden'); msg.style.display='none'; }
                 else if(m === 'balance') msg.innerText = "Tilt Phone!";
                 else if(m === 'compass') msg.innerText = "Rotate Body!";
             }
