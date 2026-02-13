@@ -3,73 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SHAKE PARTY - START</title>
+    <title>SHAKE PARTY - NEON BATTLE</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=M+PLUS+Rounded+1c:wght@700&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #00ffcc; --secondary: #ff00ff; --bg: #0a0a0a; }
-        body { font-family: 'M PLUS Rounded 1c', sans-serif; margin: 0; background: var(--bg); color: white; overflow: hidden; touch-action: none; }
-        .hidden { display: none !important; }
-        .full-screen { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        
-        /* ボタンデザイン */
-        .btn { 
-            background: linear-gradient(45deg, var(--secondary), #ff4444); 
-            border: none; color: white; padding: 20px 60px; font-size: 2rem; 
-            border-radius: 60px; cursor: pointer; font-family: 'Black Ops One'; 
-            box-shadow: 0 0 20px var(--secondary); transition: 0.3s;
+        @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Roboto:wght@700&display=swap');
+
+        :root {
+            --primary: #00ffcc;
+            --secondary: #ff00ff;
+            --bg: #0a0a0a;
         }
-        .btn:hover { transform: scale(1.05); filter: brightness(1.2); }
-        .btn:disabled { background: #444; box-shadow: none; cursor: not-allowed; opacity: 0.5; }
 
-        /* ホスト画面 */
-        #arena { display: flex; align-items: flex-end; justify-content: center; width: 90%; height: 40vh; gap: 15px; border-bottom: 3px solid #333; margin-bottom: 20px; }
-        .player-col { width: 80px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; position: relative; }
-        .bar { width: 100%; border-radius: 8px 8px 0 0; transition: height 0.1s linear; }
-        .p-name { font-size: 0.9rem; margin-top: 10px; color: #fff; }
-        .p-score { position: absolute; top: -35px; font-family: 'Black Ops One'; font-size: 1.5rem; }
+        body { font-family: 'Roboto', sans-serif; margin: 0; background: var(--bg); color: white; overflow: hidden; touch-action: none; }
+        .hidden { display: none !important; }
+        .full-screen { position: absolute; top:0; left:0; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        
+        /* --- HOST DESIGN --- */
+        #host-view { background: radial-gradient(circle at center, #1a1a1a, #000); }
+        h1 { font-family: 'Black Ops One', cursive; font-size: 50px; color: var(--primary); text-shadow: 0 0 20px var(--primary); margin: 10px 0; }
+        
+        #meter-container { display: flex; align-items: flex-end; justify-content: center; width: 90%; height: 50vh; margin-top: 20px; gap: 15px; border-bottom: 3px solid #333; padding-bottom: 5px; }
+        .player-column { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 90px; height: 100%; transition: all 0.3s; position: relative; }
+        .bar { width: 100%; border-radius: 8px 8px 0 0; transition: height 0.1s linear; position: relative; box-shadow: 0 0 15px rgba(0, 255, 204, 0.3); }
+        .p-name { margin-top: 15px; font-weight: bold; font-size: 14px; text-align: center; color: #fff; width: 100%; overflow: hidden; text-overflow: ellipsis; }
+        .p-score { font-family: 'Black Ops One'; font-size: 24px; position: absolute; top: -35px; color: var(--primary); }
+        .winner-crown { position: absolute; top: -80px; font-size: 40px; display: none; animation: bounce 0.5s infinite alternate; }
+        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
 
-        /* プレイヤー画面 */
-        input { background: #1a1a1a; border: 2px solid var(--primary); color: white; padding: 15px; font-size: 1.5rem; border-radius: 15px; text-align: center; width: 80%; outline: none; }
-        #shake-circle { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, #ff4444, #880000); border: 10px solid rgba(255,255,255,0.2); display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 0 40px #ff0000; }
-        .active { transform: scale(0.92); }
+        #timer { font-size: 100px; font-family: 'Black Ops One'; position: absolute; top: 20px; right: 40px; color: #fff; text-shadow: 0 0 20px var(--secondary); }
+        #game-msg { font-size: 60px; font-family: 'Black Ops One'; position: absolute; top: 40%; width: 100%; text-align: center; pointer-events: none; z-index: 10; color: var(--secondary); }
+
+        .btn { padding: 15px 40px; font-size: 24px; background: var(--secondary); border: none; color: white; cursor: pointer; border-radius: 50px; font-weight: bold; font-family: 'Black Ops One'; box-shadow: 0 0 20px var(--secondary); transition: 0.2s; }
+        .btn:hover { transform: scale(1.1); filter: brightness(1.2); }
+        .btn:disabled { background: #444; box-shadow: none; opacity: 0.5; }
+
+        /* --- CONTROLLER DESIGN --- */
+        #ctrl-view { background: #111; }
+        #shake-circle { width: 250px; height: 250px; border-radius: 50%; background: radial-gradient(circle, #ff00ff, #880088); border: 10px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 0 50px var(--secondary); margin-bottom: 30px; }
+        #ctrl-score { font-size: 80px; font-family: 'Black Ops One'; }
+        .shake-active { transform: scale(0.9); }
+        
+        input[type="text"] { background: #222; border: 2px solid var(--primary); color: white; padding: 15px; font-size: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px; width: 80%; outline: none; }
     </style>
 </head>
 <body>
 
-    <!-- HOST VIEW -->
+    <!-- ホスト表示 (PC) -->
     <div id="host-view" class="full-screen hidden">
-        <h1 style="font-family:'Black Ops One'; font-size:3rem; color:var(--primary); margin:0;">SHAKE PARTY</h1>
-        <div id="timer" style="font-size:7rem; font-family:'Black Ops One'; margin:10px 0;">10</div>
-        
-        <div id="arena"></div>
+        <h1>NEON SHAKE BATTLE</h1>
+        <div id="timer">10</div>
+        <div id="game-msg"></div>
 
-        <div id="lobby-controls" style="text-align:center;">
-            <div id="qrcode" style="background:white; padding:10px; display:inline-block; border-radius:10px; margin-bottom:10px;"></div>
-            <p id="room-id-display" style="color:var(--primary); margin-bottom:20px;">Room ID: ----</p>
-            <!-- 参加者がいないと押せないボタン -->
-            <button id="start-btn" class="btn" onclick="window.gameStart()" disabled>WAITING PLAYERS...</button>
+        <div id="meter-container">
+            <div id="waiting-msg" style="color: #444; font-size: 24px;">参加者を待機中...</div>
+        </div>
+
+        <div id="lobby-ui" style="text-align: center; margin-top:30px;">
+            <div id="qrcode" style="background: white; padding: 10px; display: inline-block; border-radius: 10px;"></div>
+            <p id="room-id-display" style="margin: 10px; color: var(--primary); font-family: 'Black Ops One';"></p>
+            <button id="start-btn" class="btn" onclick="window.hostStartGame()" disabled>BATTLE START</button>
         </div>
     </div>
 
-    <!-- PLAYER VIEW -->
-    <div id="client-view" class="full-screen hidden">
-        <div id="step-name">
-            <h2 style="color:var(--primary)">ENTER NAME</h2>
-            <input type="text" id="username" placeholder="名前" maxlength="6"><br>
-            <button class="btn" onclick="window.playerJoin()" style="margin-top:20px; font-size:1.5rem;">JOIN!</button>
+    <!-- コントローラー表示 (スマホ) -->
+    <div id="ctrl-view" class="full-screen hidden">
+        <!-- 名前入力画面 -->
+        <div id="name-step" class="full-screen">
+            <h2 style="color: var(--primary)">ENTER NAME</h2>
+            <input type="text" id="user-name" placeholder="ニックネーム" maxlength="8">
+            <button class="btn" onclick="window.submitName()">JOIN GAME</button>
         </div>
 
-        <div id="step-game" class="full-screen hidden">
-            <div id="msg" style="font-size:1.5rem; margin-bottom:20px; color:#aaa;">待機中</div>
+        <!-- センサー許可画面 -->
+        <div id="perm-step" class="full-screen hidden">
+            <h2 style="color: var(--secondary)">センサーの許可</h2>
+            <p style="text-align:center; padding:20px;">スマホを振る動作を検知するために<br>センサーの許可が必要です。</p>
+            <button class="btn" onclick="window.requestPermission()">OK</button>
+        </div>
+
+        <!-- プレイ画面 -->
+        <div id="game-step" class="full-screen hidden">
+            <div id="ctrl-msg" style="margin-bottom:20px; font-size: 20px; color: #aaa;">待機中...</div>
             <div id="shake-circle">
-                <div id="score" style="font-size:5rem; font-family:'Black Ops One';">0</div>
+                <div id="ctrl-score">0</div>
                 <div style="font-weight:bold;">SHAKES</div>
             </div>
-        </div>
-
-        <div id="step-perm" class="full-screen hidden">
-            <button class="btn" onclick="window.askSensor()">START SENSOR</button>
         </div>
     </div>
 
@@ -77,9 +95,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
         import { getDatabase, ref, set, onValue, update, onDisconnect } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
-        // ==========================================
-        // 1. FIREBASE CONFIG (ここを自分の設定に！)
-        // ==========================================
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyDbZzTMvUkG2LXIGY4ux0KBTmnAdqP236s",
             authDomain: "game-4f2d9.firebaseapp.com",
@@ -93,166 +109,251 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        const urlParams = new URLSearchParams(window.location.search);
-        let role = urlParams.get('role');
-        let roomId = urlParams.get('room');
+        const params = new URLSearchParams(window.location.search);
+        let role = params.get('role') || 'host';
+        let roomId = params.get('room');
+        const myId = Math.random().toString(36).substr(2, 5).toUpperCase();
 
-        if (!role) {
-            roomId = Math.random().toString(36).substring(2, 6).toUpperCase();
-            window.location.replace(`?role=host&room=${roomId}`);
-        } else if (role === 'host') {
+        const COLORS = ['#00ffcc', '#ff00ff', '#ffff00', '#0077ff', '#ff3300', '#00ff00'];
+
+        // ============================================
+        // HOST LOGIC
+        // ============================================
+        if (role === 'host') {
+            if (!roomId) {
+                roomId = Math.random().toString(36).substring(2, 6).toUpperCase();
+                window.location.replace(`?role=host&room=${roomId}`);
+            }
+
             document.getElementById('host-view').classList.remove('hidden');
-            initHost();
-        } else {
-            document.getElementById('client-view').classList.remove('hidden');
-            initPlayer();
-        }
-
-        // ==========================================
-        // HOST logic
-        // ==========================================
-        function initHost() {
-            document.getElementById('room-id-display').innerText = `Room ID: ${roomId}`;
-            const qrUrl = `${window.location.origin}${window.location.pathname}?role=player&room=${roomId}`;
-            new QRCode(document.getElementById("qrcode"), { text: qrUrl, width: 120, height: 120 });
-
-            const playersRef = ref(db, `shake/${roomId}/players`);
-            const stateRef = ref(db, `shake/${roomId}/state`);
-
-            // プレイヤー参加監視
-            onValue(playersRef, (snap) => {
-                const arena = document.getElementById('arena');
-                const startBtn = document.getElementById('start-btn');
-                arena.innerHTML = '';
-                const players = snap.val() || {};
-                const pIds = Object.keys(players);
-
-                // 参加者が1人以上いればボタンを有効化
-                if (pIds.length > 0) {
-                    startBtn.disabled = false;
-                    startBtn.innerText = "BATTLE START!";
-                } else {
-                    startBtn.disabled = true;
-                    startBtn.innerText = "WAITING PLAYERS...";
-                }
-
-                pIds.forEach((id, idx) => {
-                    const p = players[id];
-                    const h = Math.min((p.count || 0) * 2.5, 100);
-                    const color = `hsl(${idx * 60}, 80%, 50%)`;
-                    const col = document.createElement('div');
-                    col.className = 'player-col';
-                    col.innerHTML = `
-                        <div class="p-score" style="color:${color}">${p.count || 0}</div>
-                        <div class="bar" style="height:${h}%; background:${color}; box-shadow:0 0 15px ${color}"></div>
-                        <div class="p-name">${p.name}</div>
-                    `;
-                    arena.appendChild(col);
-                });
+            document.getElementById('room-id-display').innerText = `ROOM ID: ${roomId}`;
+            
+            new QRCode(document.getElementById("qrcode"), {
+                text: `${window.location.origin}${window.location.pathname}?role=ctrl&room=${roomId}`,
+                width: 128, height: 128
             });
 
-            // 開始処理
-            window.gameStart = () => {
-                update(stateRef, { status: 'ready' });
-                document.getElementById('lobby-controls').classList.add('hidden');
+            const roomRef = ref(db, `shake/${roomId}`);
+            
+            // 参加者のリアルタイム監視
+            onValue(ref(db, `shake/${roomId}/players`), (snap) => {
+                const players = snap.val() || {};
+                renderArena(players);
+                
+                // 1人以上いればボタンを有効化
+                document.getElementById('start-btn').disabled = (Object.keys(players).length === 0);
+            });
+
+            function renderArena(players) {
+                const container = document.getElementById('meter-container');
+                const pIds = Object.keys(players);
+
+                if (pIds.length > 0) {
+                    const msg = document.getElementById('waiting-msg');
+                    if (msg) msg.remove();
+                } else {
+                    if (!document.getElementById('waiting-msg')) {
+                        container.innerHTML = '<div id="waiting-msg" style="color: #444; font-size: 24px;">参加者を待機中...</div>';
+                    }
+                    return;
+                }
+
+                pIds.forEach((id, index) => {
+                    const p = players[id];
+                    let el = document.getElementById(`p-${id}`);
+                    const color = COLORS[index % COLORS.length];
+
+                    if (!el) {
+                        el = document.createElement('div');
+                        el.id = `p-${id}`;
+                        el.className = 'player-column';
+                        el.innerHTML = `
+                            <div class="winner-crown">👑</div>
+                            <div class="p-score">0</div>
+                            <div class="bar"></div>
+                            <div class="p-name">${p.name}</div>
+                        `;
+                        container.appendChild(el);
+                    }
+
+                    const scoreEl = el.querySelector('.p-score');
+                    const barEl = el.querySelector('.bar');
+                    const crownEl = el.querySelector('.winner-crown');
+                    
+                    const score = p.count || 0;
+                    scoreEl.innerText = score;
+                    barEl.style.height = `${Math.min(score * 2, 100)}%`;
+                    barEl.style.backgroundColor = color;
+                    barEl.style.boxShadow = `0 0 20px ${color}`;
+                    el.querySelector('.p-name').style.color = color;
+                    crownEl.style.display = p.isWinner ? 'block' : 'none';
+                });
+
+                // 退出したプレイヤーを削除
+                Array.from(container.children).forEach(child => {
+                    if (child.id.startsWith('p-') && !players[child.id.replace('p-', '')]) {
+                        child.remove();
+                    }
+                });
+            }
+
+            window.hostStartGame = () => {
+                const stateRef = ref(db, `shake/${roomId}/state`);
+                update(roomRef, { 'state/status': 'ready' });
+                document.getElementById('lobby-ui').classList.add('hidden');
                 
                 // スコアリセット
-                onValue(playersRef, (snap) => {
-                    const data = snap.val(); if(!data) return;
+                onValue(ref(db, `shake/${roomId}/players`), (snap) => {
+                    const players = snap.val();
                     const updates = {};
-                    Object.keys(data).forEach(id => updates[`players/${id}/count`] = 0);
-                    update(ref(db, `shake/${roomId}`), updates);
+                    Object.keys(players).forEach(id => {
+                        updates[`players/${id}/count`] = 0;
+                        updates[`players/${id}/isWinner`] = false;
+                    });
+                    update(roomRef, updates);
                 }, { onlyOnce: true });
 
-                let cd = 3;
-                const tm = document.getElementById('timer');
-                const cdItv = setInterval(() => {
-                    tm.innerText = cd > 0 ? cd : "GO!";
-                    if (cd === 0) {
-                        clearInterval(cdItv);
-                        runBattle();
+                let count = 3;
+                const msgEl = document.getElementById('game-msg');
+                const cd = setInterval(() => {
+                    msgEl.innerText = count > 0 ? count : "GO!";
+                    if (count === 0) {
+                        clearInterval(cd);
+                        setTimeout(() => msgEl.innerText = "", 1000);
+                        startTimer();
                     }
-                    cd--;
+                    count--;
                 }, 1000);
             };
 
-            function runBattle() {
-                update(stateRef, { status: 'running' });
-                let time = 10;
-                const tm = document.getElementById('timer');
-                const itv = setInterval(() => {
-                    time--;
-                    tm.innerText = time;
-                    if (time <= 0) {
-                        clearInterval(itv);
-                        update(stateRef, { status: 'finished' });
-                        tm.innerText = "FINISH!";
-                        setTimeout(() => document.getElementById('lobby-controls').classList.remove('hidden'), 5000);
+            function startTimer() {
+                update(ref(db, `shake/${roomId}/state`), { status: 'running' });
+                let timeLeft = 10;
+                const timerEl = document.getElementById('timer');
+                
+                const timer = setInterval(() => {
+                    timeLeft--;
+                    timerEl.innerText = timeLeft;
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        finishGame();
                     }
                 }, 1000);
             }
+
+            function finishGame() {
+                update(ref(db, `shake/${roomId}/state`), { status: 'finished' });
+                document.getElementById('game-msg').innerText = "FINISH!";
+                
+                // 勝者判定
+                onValue(ref(db, `shake/${roomId}/players`), (snap) => {
+                    const players = snap.val();
+                    let winnerId = null;
+                    let top = -1;
+                    Object.keys(players).forEach(id => {
+                        if (players[id].count > top) {
+                            top = players[id].count;
+                            winnerId = id;
+                        }
+                    });
+                    if (winnerId) {
+                        update(ref(db, `shake/${roomId}/players/${winnerId}`), { isWinner: true });
+                    }
+                    
+                    setTimeout(() => {
+                        document.getElementById('lobby-ui').classList.remove('hidden');
+                        document.getElementById('game-msg').innerText = "";
+                        document.getElementById('timer').innerText = "10";
+                    }, 5000);
+                }, { onlyOnce: true });
+            }
         }
 
-        // ==========================================
-        // PLAYER logic
-        // ==========================================
-        function initPlayer() {
-            let myId = Math.random().toString(36).substring(2, 7);
-            let count = 0;
-            let canShake = false;
+        // ============================================
+        // CONTROLLER LOGIC
+        // ============================================
+        else {
+            document.getElementById('ctrl-view').classList.remove('hidden');
+            let myName = "";
+            let myCount = 0;
+            let currentStatus = 'lobby';
 
-            window.playerJoin = () => {
-                const name = document.getElementById('username').value || "Guest";
+            window.submitName = () => {
+                const input = document.getElementById('user-name');
+                if (!input.value) return alert("名前を入力してください");
+                myName = input.value;
+                document.getElementById('name-step').classList.add('hidden');
+                
+                // iOSセンサー許可の確認
                 if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                    document.getElementById('step-name').classList.add('hidden');
-                    document.getElementById('step-perm').classList.remove('hidden');
+                    document.getElementById('perm-step').classList.remove('hidden');
                 } else {
-                    connect(name);
+                    joinGame();
                 }
             };
 
-            window.askSensor = async () => {
+            window.requestPermission = async () => {
                 const res = await DeviceMotionEvent.requestPermission();
                 if (res === 'granted') {
-                    document.getElementById('step-perm').classList.add('hidden');
-                    connect(document.getElementById('username').value || "Guest");
+                    document.getElementById('perm-step').classList.add('hidden');
+                    joinGame();
                 }
             };
 
-            function connect(name) {
-                document.getElementById('step-name').classList.add('hidden');
-                document.getElementById('step-game').classList.remove('hidden');
+            function joinGame() {
+                document.getElementById('game-step').classList.remove('hidden');
+                const pRef = ref(db, `shake/${roomId}/players/${myId}`);
+                set(pRef, { name: myName, count: 0 });
+                onDisconnect(pRef).remove();
 
-                const myRef = ref(db, `shake/${roomId}/players/${myId}`);
-                set(myRef, { name: name, count: 0 });
-                onDisconnect(myRef).remove();
-
+                // ゲーム状態の同期
                 onValue(ref(db, `shake/${roomId}/state`), (snap) => {
                     const s = snap.val() || {};
-                    const m = document.getElementById('msg');
-                    if (s.status === 'ready') {
-                        count = 0; document.getElementById('score').innerText = 0;
-                        m.innerText = "READY..."; canShake = false;
-                    } else if (s.status === 'running') {
-                        m.innerText = "SHAKE IT!!"; canShake = true;
-                    } else if (s.status === 'finished') {
-                        m.innerText = "FINISHED"; canShake = false;
+                    currentStatus = s.status;
+                    const msgEl = document.getElementById('ctrl-msg');
+
+                    if (currentStatus === 'ready') {
+                        myCount = 0;
+                        document.getElementById('ctrl-score').innerText = "0";
+                        msgEl.innerText = "READY...";
+                    } else if (currentStatus === 'running') {
+                        msgEl.innerText = "SHAKE IT!!";
+                    } else if (currentStatus === 'finished') {
+                        msgEl.innerText = "FINISH!";
+                    } else {
+                        msgEl.innerText = "ホストの開始待ち...";
                     }
                 });
 
-                let lastA = {x:0, y:0, z:0};
+                startSensor();
+            }
+
+            function startSensor() {
+                let lastX=0, lastY=0, lastZ=0;
+                let lastSend = 0;
+
                 window.addEventListener('devicemotion', (e) => {
-                    if (!canShake) return;
-                    const a = e.accelerationIncludingGravity;
-                    const d = Math.abs(a.x - lastA.x) + Math.abs(a.y - lastA.y) + Math.abs(a.z - lastA.z);
-                    if (d > 25) {
-                        count++;
-                        document.getElementById('score').innerText = count;
-                        document.getElementById('shake-circle').classList.add('active');
-                        setTimeout(() => document.getElementById('shake-circle').classList.remove('active'), 50);
-                        if (count % 2 === 0) update(myRef, { count: count });
+                    if (currentStatus !== 'running') return;
+
+                    const acc = e.accelerationIncludingGravity || e.acceleration;
+                    if (!acc) return;
+
+                    const delta = Math.abs(acc.x - lastX) + Math.abs(acc.y - lastY) + Math.abs(acc.z - lastZ);
+                    
+                    if (delta > 20) {
+                        myCount++;
+                        document.getElementById('ctrl-score').innerText = myCount;
+                        const circle = document.getElementById('shake-circle');
+                        circle.classList.add('shake-active');
+                        setTimeout(() => circle.classList.remove('shake-active'), 50);
+
+                        const now = Date.now();
+                        if (now - lastSend > 100) {
+                            update(ref(db, `shake/${roomId}/players/${myId}`), { count: myCount });
+                            lastSend = now;
+                        }
                     }
-                    lastA = {x:a.x, y:a.y, z:a.z};
+                    lastX = acc.x; lastY = acc.y; lastZ = acc.z;
                 });
             }
         }
