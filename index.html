@@ -14,88 +14,463 @@
         
         /* --- HOST DESIGN --- */
         #host-view { background: radial-gradient(circle at center, #2c3e50, #000); }
-        h1 { font-family: 'Bangers', cursive; font-size: 60px; color: #f1c40f; text-shadow: 4px 4px 0 #e67e22; letter-spacing: 3px; margin-bottom: 10px; }
+        h1 { font-family: 'Bangers', cursive; font-size: 50px; color: #f1c40f; text-shadow: 4px 4px 0 #e67e22; margin: 10px 0; }
         
         /* Game Select Menu */
-        #menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px; }
-        .menu-card { width: 220px; padding: 20px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 15px; cursor: pointer; text-align: center; transition: 0.2s; }
+        #menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; }
+        .menu-card { width: 180px; padding: 15px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 15px; cursor: pointer; text-align: center; transition: 0.2s; }
         .menu-card:hover { transform: scale(1.05); background: rgba(255,255,255,0.25); border-color: #f1c40f; }
-        .card-icon { font-size: 50px; display: block; margin-bottom: 10px; }
-        .card-title { font-size: 20px; font-weight: bold; color: #f1c40f; }
-        .card-desc { font-size: 14px; color: #ccc; margin-top: 5px; }
+        .card-icon { font-size: 40px; display: block; margin-bottom: 5px; }
+        .card-title { font-size: 18px; font-weight: bold; color: #f1c40f; }
+        .card-desc { font-size: 12px; color: #ccc; }
 
         /* Player List */
-        #player-lobby { margin-top: 30px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; max-width: 80%; }
-        .lobby-tag { background: #3498db; padding: 5px 15px; border-radius: 20px; font-size: 18px; animation: popIn 0.3s; box-shadow: 0 4px 0 #2980b9; }
+        #player-list { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 20px; max-width: 90%; }
+        .player-tag { background: #34495e; padding: 5px 15px; border-radius: 20px; font-size: 14px; border: 1px solid #7f8c8d; animation: popIn 0.3s; }
         @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
 
         /* Game Areas */
-        #game-area { width: 90%; height: 70%; position: relative; background: rgba(0,0,0,0.3); border-radius: 20px; margin-top: 20px; overflow: hidden; border: 2px solid #555; }
+        #game-area { width: 90%; height: 60%; position: relative; background: rgba(0,0,0,0.5); border-radius: 20px; margin-top: 20px; overflow: hidden; border: 2px solid #555; display: none; }
         
         /* 1. Race */
-        .race-track { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-around; padding: 10px 0; }
-        .racer { display: flex; align-items: center; position: absolute; transition: left 0.2s linear; height: 40px; }
-        .racer-avatar { font-size: 30px; margin-right: 10px; }
-        .racer-name { font-size: 14px; color: #fff; white-space: nowrap; position: absolute; top: -15px; }
+        #race-track { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-evenly; position: relative; }
+        .racer { position: absolute; left: 10px; transition: left 0.1s linear; display: flex; align-items: center; }
+        .racer-icon { font-size: 30px; margin-right: 5px; }
+        .racer-name { font-size: 12px; position: absolute; top: -15px; left: 0; white-space: nowrap; }
 
-        /* 2. Tug of War */
-        #tug-container { display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; position: relative; }
-        #tug-rope { width: 80%; height: 10px; background: #fff; position: relative; }
-        #tug-marker { width: 40px; height: 40px; background: #f1c40f; position: absolute; top: -15px; left: 50%; transform: translateX(-50%); border-radius: 50%; box-shadow: 0 0 20px #f1c40f; transition: left 0.1s; }
-        .team-zone { position: absolute; width: 50%; height: 100%; top: 0; display: flex; align-items: center; justify-content: center; font-size: 100px; opacity: 0.3; font-family: 'Bangers'; }
-        #team-red { left: 0; background: linear-gradient(90deg, #c0392b 0%, transparent 100%); color: #e74c3c; }
-        #team-blue { right: 0; background: linear-gradient(-90deg, #2980b9 0%, transparent 100%); color: #3498db; }
+        /* 2. Tug */
+        #tug-field { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; position: relative; }
+        .team-bg { position: absolute; width: 50%; height: 100%; top: 0; opacity: 0.2; font-size: 100px; display: flex; align-items: center; justify-content: center; font-family: 'Bangers'; }
+        #team-red-bg { left: 0; background: red; color: #ffadad; }
+        #team-blue-bg { right: 0; background: blue; color: #adadff; }
+        #tug-rope { width: 80%; height: 10px; background: white; position: relative; border-radius: 5px; }
+        #tug-marker { width: 40px; height: 40px; background: #f1c40f; border-radius: 50%; position: absolute; top: -15px; left: 50%; transform: translateX(-50%); transition: left 0.1s; box-shadow: 0 0 15px yellow; }
 
         /* 3. Boss */
-        #boss-container { text-align: center; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #boss-img { font-size: 150px; animation: float 2s infinite ease-in-out; filter: drop-shadow(0 0 20px red); }
-        #boss-hp-bar { width: 60%; height: 30px; background: #333; border-radius: 15px; overflow: hidden; margin-top: 20px; border: 3px solid #fff; }
+        #boss-field { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #boss-char { font-size: 120px; animation: float 2s infinite ease-in-out; filter: drop-shadow(0 0 20px purple); }
+        #boss-hp-bar { width: 60%; height: 30px; background: #333; border-radius: 15px; overflow: hidden; border: 2px solid white; margin-top: 20px; }
         #boss-hp-fill { width: 100%; height: 100%; background: #e74c3c; transition: width 0.2s; }
-        .damage-effect { position: absolute; color: #ffeb3b; font-weight: bold; font-size: 24px; animation: floatUp 0.8s forwards; pointer-events: none; }
-        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
-        @keyframes floatUp { 0% { opacity:1; transform:translateY(0); } 100% { opacity:0; transform:translateY(-50px); } }
+        @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-20px);} }
 
         /* 4. Soda */
-        #soda-container { display: flex; align-items: flex-end; justify-content: space-around; height: 100%; padding-bottom: 20px; }
-        .soda-bottle { width: 60px; background: #fff; position: relative; border-radius: 5px 5px 0 0; transition: height 0.1s; display: flex; justify-content: center; }
-        .cork { position: absolute; top: -20px; width: 20px; height: 20px; background: #8d6e63; border-radius: 2px; transition: top 0.5s ease-out; }
+        #soda-field { width: 100%; height: 100%; display: flex; align-items: flex-end; justify-content: space-around; padding-bottom: 20px; box-sizing: border-box; }
+        .bottle-col { display: flex; flex-direction: column; align-items: center; position: relative; height: 100%; justify-content: flex-end; }
+        .cork { font-size: 20px; transition: bottom 0.2s; position: absolute; bottom: 60px; }
+        .bottle-body { width: 40px; height: 60px; background: #fff; border-radius: 5px 5px 0 0; position: relative; }
+        .bottle-liquid { position: absolute; bottom: 0; width: 100%; background: #e67e22; height: 0%; transition: height 0.1s; border-radius: 0 0 0 0; }
 
         /* --- CONTROLLER DESIGN --- */
-        #ctrl-view { background: linear-gradient(135deg, #2b5876 0%, #4e4376 100%); text-align: center; padding: 20px; box-sizing: border-box; }
+        #ctrl-view { background: linear-gradient(135deg, #2b5876 0%, #4e4376 100%); text-align: center; }
         
         /* Name Input */
-        #name-input-area { background: rgba(0,0,0,0.5); padding: 30px; border-radius: 20px; width: 100%; max-width: 300px; }
-        input[type="text"] { width: 80%; padding: 15px; font-size: 18px; border-radius: 10px; border: none; margin-bottom: 20px; text-align: center; }
-        .btn-primary { width: 100%; padding: 15px; background: #f1c40f; border: none; border-radius: 10px; font-size: 20px; font-weight: bold; color: #333; cursor: pointer; box-shadow: 0 4px 0 #d35400; }
-        .btn-primary:active { transform: translateY(4px); box-shadow: none; }
+        #name-input-ui { background: rgba(0,0,0,0.6); padding: 30px; border-radius: 20px; width: 80%; max-width: 300px; }
+        input { width: 90%; padding: 10px; font-size: 18px; margin-bottom: 20px; border-radius: 5px; border: none; text-align: center; }
+        .btn-go { width: 100%; padding: 15px; background: #2ecc71; border: none; color: white; font-weight: bold; font-size: 20px; border-radius: 10px; }
 
-        /* Shake UI */
-        #shake-circle { width: 220px; height: 220px; border-radius: 50%; background: #e74c3c; margin: 40px auto; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Bangers'; font-size: 40px; box-shadow: 0 10px 0 #c0392b; border: 8px solid rgba(255,255,255,0.2); }
-        .shake-active { animation: pulse 0.1s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        /* Game UI */
+        #game-ui { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; }
+        #shake-btn { width: 200px; height: 200px; border-radius: 50%; background: #e74c3c; display: flex; align-items: center; justify-content: center; font-size: 40px; font-family: 'Bangers'; border: 8px solid rgba(255,255,255,0.3); box-shadow: 0 10px 0 #c0392b; margin-bottom: 20px; user-select: none; }
+        .shaking { animation: shrink 0.1s; }
+        @keyframes shrink { 0%{transform:scale(1);} 50%{transform:scale(0.95);} 100%{transform:scale(1);} }
         
-        #ctrl-info { font-size: 20px; color: #ecf0f1; margin-bottom: 10px; }
-        #team-indicator { font-size: 24px; font-weight: bold; padding: 10px; border-radius: 8px; display: inline-block; margin-bottom: 15px; }
+        #team-badge { font-size: 20px; padding: 5px 15px; border-radius: 5px; margin-bottom: 20px; display: inline-block; font-weight: bold; }
+        #info-text { font-size: 18px; color: #bdc3c7; padding: 0 20px; }
+        
+        #back-btn { position: absolute; top: 10px; right: 10px; z-index: 100; padding: 5px 10px; background: #555; color: white; border: none; cursor: pointer; border-radius: 5px; }
     </style>
 </head>
 <body>
 
-    <!-- HOST VIEW (PC) -->
+    <!-- HOST UI -->
     <div id="host-view" class="full-screen hidden">
-        <h1 id="game-title">SHAKE PARTY 2.0</h1>
+        <h1>SHAKE PARTY 2.0</h1>
         
-        <!-- Lobby / Menu -->
-        <div id="lobby-ui">
+        <div id="lobby-menu">
             <div id="qrcode" style="background: white; padding: 10px; border-radius: 10px; display: inline-block;"></div>
-            <p>スマホで参加して名前を入力！</p>
+            <p style="margin: 5px 0;">スマホで参加して名前を入力！</p>
             
             <div id="menu-grid">
                 <div class="menu-card" onclick="setMode('race')">
                     <span class="card-icon">🚀</span>
-                    <div class="card-title">GALACTIC RACE</div>
-                    <div class="card-desc">個人戦：宇宙レース</div>
+                    <div class="card-title">SPACE RACE</div>
+                    <div class="card-desc">個人戦：最速を目指せ</div>
                 </div>
                 <div class="menu-card" onclick="setMode('tug')">
                     <span class="card-icon">⚔️</span>
                     <div class="card-title">TUG OF WAR</div>
-                    <div class="card-
+                    <div class="card-desc">チーム戦：綱引き</div>
+                </div>
+                <div class="menu-card" onclick="setMode('boss')">
+                    <span class="card-icon">👹</span>
+                    <div class="card-title">BOSS RAID</div>
+                    <div class="card-desc">協力戦：魔王討伐</div>
+                </div>
+                <div class="menu-card" onclick="setMode('soda')">
+                    <span class="card-icon">🍾</span>
+                    <div class="card-title">SODA POP</div>
+                    <div class="card-desc">バラエティ：炭酸噴射</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="game-area">
+            <button id="back-btn" onclick="resetToLobby()">MENU</button>
+            
+            <!-- 1. Race -->
+            <div id="race-track" class="hidden"></div>
+            
+            <!-- 2. Tug -->
+            <div id="tug-field" class="hidden">
+                <div id="team-red-bg" class="team-bg">RED</div>
+                <div id="team-blue-bg" class="team-bg">BLUE</div>
+                <div id="tug-rope"><div id="tug-marker"></div></div>
+            </div>
+
+            <!-- 3. Boss -->
+            <div id="boss-field" class="hidden">
+                <div id="boss-char">👿</div>
+                <div id="boss-hp-bar"><div id="boss-hp-fill"></div></div>
+                <h2 id="boss-msg" style="margin-top: 20px;">ATTACK!!</h2>
+            </div>
+
+            <!-- 4. Soda -->
+            <div id="soda-field" class="hidden"></div>
+        </div>
+
+        <div id="player-list"></div>
+    </div>
+
+    <!-- CONTROLLER UI -->
+    <div id="ctrl-view" class="full-screen hidden">
+        <!-- Name Input -->
+        <div id="name-input-ui">
+            <h2>ENTER NAME</h2>
+            <input type="text" id="p-name" placeholder="名前を入力 (例: TARO)" maxlength="6">
+            <button class="btn-go" id="join-btn">参加する！</button>
+        </div>
+
+        <!-- Game Interface -->
+        <div id="game-ui">
+            <div id="team-badge" class="hidden">TEAM RED</div>
+            <div id="shake-btn">SHAKE!</div>
+            <p id="info-text">準備完了！<br>ホストがゲームを選ぶのを待ってね</p>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue, update, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDbZzTMvUkG2LXIGY4ux0KBTmnAdqP236s",
+            authDomain: "game-4f2d9.firebaseapp.com",
+            databaseURL: "https://game-4f2d9-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "game-4f2d9",
+            storageBucket: "game-4f2d9.firebasestorage.app",
+            messagingSenderId: "574316347824",
+            appId: "1:574316347824:web:cf686040628e25ad615675",
+            measurementId: "G-T0ZKQCC9L3"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        
+        // URL Params
+        const params = new URLSearchParams(window.location.search);
+        let role = params.get('role') || 'host';
+        let roomId = params.get('room');
+        const myId = Math.random().toString(36).substr(2, 6);
+
+        // ============================================
+        // HOST LOGIC
+        // ============================================
+        if (role === 'host') {
+            if (!roomId) {
+                roomId = Math.random().toString(36).substring(2, 6).toUpperCase();
+                window.location.href = `?role=host&room=${roomId}`;
+            }
+
+            document.getElementById('host-view').classList.remove('hidden');
+            
+            // QR Generate
+            new QRCode(document.getElementById("qrcode"), {
+                text: `${window.location.origin}${window.location.pathname}?role=ctrl&room=${roomId}`,
+                width: 120, height: 120
+            });
+
+            // State
+            let players = {};
+            let mode = 'lobby';
+            let bossHp = 1000;
+            let tugPos = 50; // 0 (Red) - 100 (Blue)
+
+            const roomRef = ref(db, `rooms/${roomId}`);
+            
+            // Initial reset
+            update(roomRef, { mode: 'lobby', bossHp: 1000, tugPos: 50 });
+
+            // Player Listener
+            onValue(ref(db, `rooms/${roomId}/players`), (snap) => {
+                players = snap.val() || {};
+                renderPlayerList();
+                if(mode !== 'lobby') updateGameView();
+            });
+
+            // Render Lobby List
+            function renderPlayerList() {
+                const list = document.getElementById('player-list');
+                list.innerHTML = Object.values(players).map(p => 
+                    `<div class="player-tag" style="border-color:${p.color}">${p.name}</div>`
+                ).join('');
+            }
+
+            // Mode Switching
+            window.setMode = (m) => {
+                mode = m;
+                document.getElementById('lobby-menu').style.display = 'none';
+                document.getElementById('player-list').style.display = 'none';
+                document.getElementById('game-area').style.display = 'block';
+                
+                // Reset Scores
+                const updates = { mode: m };
+                Object.keys(players).forEach((id, idx) => {
+                    updates[`players/${id}/score`] = 0;
+                    // Assign Team for Tug
+                    updates[`players/${id}/team`] = (idx % 2 === 0) ? 'red' : 'blue';
+                });
+                
+                if(m === 'boss') updates.bossHp = 1000;
+                if(m === 'tug') updates.tugPos = 50;
+                
+                update(roomRef, updates);
+                
+                // Show Correct UI
+                document.querySelectorAll('#game-area > div').forEach(el => {
+                    if(el.id !== 'back-btn') el.classList.add('hidden');
+                });
+                
+                if(m === 'race') {
+                    document.getElementById('race-track').classList.remove('hidden');
+                    renderRaceTrack();
+                } else if(m === 'tug') {
+                    document.getElementById('tug-field').classList.remove('hidden');
+                } else if(m === 'boss') {
+                    document.getElementById('boss-field').classList.remove('hidden');
+                } else if(m === 'soda') {
+                    document.getElementById('soda-field').classList.remove('hidden');
+                    renderSodaField();
+                }
+            };
+
+            // Back to Lobby
+            window.resetToLobby = () => {
+                mode = 'lobby';
+                update(roomRef, { mode: 'lobby' });
+                document.getElementById('lobby-menu').style.display = 'block';
+                document.getElementById('player-list').style.display = 'flex';
+                document.getElementById('game-area').style.display = 'none';
+            };
+
+            // Game Loop / Updates
+            function updateGameView() {
+                // 1. Race
+                if(mode === 'race') {
+                    Object.keys(players).forEach(id => {
+                        const p = players[id];
+                        const el = document.getElementById(`racer-${id}`);
+                        if(el) {
+                            // Max score assumed around 200 for finish
+                            let left = Math.min((p.score || 0) * 0.8, 90);
+                            el.style.left = left + '%';
+                        }
+                    });
+                }
+                
+                // 2. Tug
+                else if(mode === 'tug') {
+                    let red = 0, blue = 0;
+                    Object.values(players).forEach(p => {
+                        if(p.team === 'red') red += (p.score || 0);
+                        else blue += (p.score || 0);
+                    });
+                    
+                    // Simple logic: difference moves the marker
+                    let diff = blue - red; 
+                    // sensitivity 
+                    let pos = 50 + (diff * 0.5);
+                    pos = Math.max(0, Math.min(100, pos));
+                    
+                    document.getElementById('tug-marker').style.left = pos + '%';
+                }
+
+                // 3. Boss
+                else if(mode === 'boss') {
+                    let totalDmg = 0;
+                    Object.values(players).forEach(p => totalDmg += (p.score || 0));
+                    let currentHp = 1000 - totalDmg;
+                    if(currentHp < 0) currentHp = 0;
+                    
+                    document.getElementById('boss-hp-fill').style.width = (currentHp / 10) + '%';
+                    if(currentHp === 0) document.getElementById('boss-msg').innerText = "VICTORY!!";
+                    else document.getElementById('boss-msg').innerText = `HP: ${currentHp}`;
+                }
+
+                // 4. Soda
+                else if(mode === 'soda') {
+                    Object.keys(players).forEach(id => {
+                        const p = players[id];
+                        const liq = document.getElementById(`soda-liq-${id}`);
+                        const cork = document.getElementById(`soda-cork-${id}`);
+                        if(liq && cork) {
+                            let h = Math.min(p.score || 0, 100);
+                            liq.style.height = h + '%';
+                            if(h >= 100) cork.style.bottom = '400px'; // Fly away
+                        }
+                    });
+                }
+            }
+
+            // Init Helpers
+            function renderRaceTrack() {
+                const c = document.getElementById('race-track');
+                c.innerHTML = Object.keys(players).map(id => `
+                    <div id="racer-${id}" class="racer" style="top:${Math.random()*80}%">
+                        <span class="racer-icon">🚀</span>
+                        <span class="racer-name">${players[id].name}</span>
+                    </div>
+                `).join('');
+            }
+            
+            function renderSodaField() {
+                const c = document.getElementById('soda-field');
+                c.innerHTML = Object.keys(players).map(id => `
+                    <div class="bottle-col">
+                        <div id="soda-cork-${id}" class="cork">📦</div>
+                        <div class="bottle-body">
+                            <div id="soda-liq-${id}" class="bottle-liquid" style="background:${players[id].color}"></div>
+                        </div>
+                        <span style="font-size:12px; margin-top:5px;">${players[id].name}</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // ============================================
+        // CONTROLLER LOGIC
+        // ============================================
+        else {
+            document.getElementById('ctrl-view').classList.remove('hidden');
+            const playerRef = ref(db, `rooms/${roomId}/players/${myId}`);
+            
+            // Join
+            document.getElementById('join-btn').addEventListener('click', () => {
+                const name = document.getElementById('p-name').value || "NO NAME";
+                const color = `hsl(${Math.random()*360}, 70%, 50%)`;
+                
+                set(playerRef, {
+                    name: name,
+                    color: color,
+                    score: 0
+                }).then(() => {
+                    document.getElementById('name-input-ui').style.display = 'none';
+                    document.getElementById('game-ui').style.display = 'flex';
+                    requestPermission();
+                });
+                
+                onDisconnect(playerRef).remove();
+            });
+
+            // Permission
+            async function requestPermission() {
+                if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                    await DeviceMotionEvent.requestPermission();
+                }
+                startGameLoop();
+            }
+
+            // Sensor Logic
+            let myScore = 0;
+            let currentMode = 'lobby';
+            let myTeam = '';
+
+            // Listen to Mode & Team
+            onValue(ref(db, `rooms/${roomId}`), (snap) => {
+                const data = snap.val();
+                if(!data) return;
+                
+                // Reset score on mode change
+                if(data.mode !== currentMode) {
+                    currentMode = data.mode;
+                    myScore = 0;
+                    updateInfoText(data.mode);
+                    
+                    if(data.mode === 'tug') {
+                        // Wait a bit for team assignment to propagate
+                        setTimeout(() => {
+                            onValue(playerRef, (pSnap) => {
+                                const p = pSnap.val();
+                                if(p && p.team) {
+                                    myTeam = p.team;
+                                    const badge = document.getElementById('team-badge');
+                                    badge.classList.remove('hidden');
+                                    badge.innerText = `TEAM ${myTeam.toUpperCase()}`;
+                                    badge.style.background = myTeam;
+                                    badge.style.color = 'white';
+                                }
+                            }, {onlyOnce: true});
+                        }, 500);
+                    } else {
+                        document.getElementById('team-badge').classList.add('hidden');
+                    }
+                }
+            });
+
+            function updateInfoText(m) {
+                const t = document.getElementById('info-text');
+                if(m === 'lobby') t.innerText = "ホストがゲームを選んでいます...";
+                else if(m === 'race') t.innerText = "振って加速しろ！";
+                else if(m === 'tug') t.innerText = "チームのために振れ！";
+                else if(m === 'boss') t.innerText = "全員で攻撃だ！";
+                else if(m === 'soda') t.innerText = "振って飛ばせ！";
+            }
+
+            // Shake Detection
+            function startGameLoop() {
+                let lastX=0, lastY=0, lastZ=0;
+                let lastUpdate = 0;
+                const THRESHOLD = 15;
+
+                window.addEventListener('devicemotion', (e) => {
+                    if(currentMode === 'lobby') return;
+
+                    const acc = e.accelerationIncludingGravity || e.acceleration;
+                    if(!acc) return;
+                    
+                    const delta = Math.abs(acc.x - lastX) + Math.abs(acc.y - lastY) + Math.abs(acc.z - lastZ);
+                    
+                    if(delta > THRESHOLD) {
+                        myScore++;
+                        
+                        // Visual Feedback
+                        const btn = document.getElementById('shake-btn');
+                        btn.classList.remove('shaking');
+                        void btn.offsetWidth; // trigger reflow
+                        btn.classList.add('shaking');
+                        
+                        // Throttle Updates (100ms)
+                        const now = Date.now();
+                        if(now - lastUpdate > 100) {
+                            update(playerRef, { score: myScore });
+                            lastUpdate = now;
+                        }
+                    }
+                    
+                    lastX = acc.x; lastY = acc.y; lastZ = acc.z;
+                });
+            }
+        }
+    </script>
+</body>
+</html>
