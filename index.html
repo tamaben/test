@@ -2,213 +2,195 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <!-- 1. Metaタグによるズーム禁止 (user-scalable=no) -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
-    <title>SHAKE PARTY 2.0 (No Zoom)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SHAKE PARTY 4.0 - All Sensors</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Bangers&family=M+PLUS+Rounded+1c:wght@800&display=swap');
 
-        /* 2. CSSによるタッチ操作の制限 */
+        /* 基本設定 */
         html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden; /* スクロール禁止 */
-            background: #1a1a1a;
-            font-family: 'M PLUS Rounded 1c', sans-serif;
-            color: white;
-            
-            /* 重要: ブラウザの標準タッチ動作（ズーム、パン）を無効化 */
-            touch-action: none; 
-            
-            /* テキスト選択禁止（連打時のハイライト防止） */
-            user-select: none;
-            -webkit-user-select: none;
-            -webkit-touch-callout: none;
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; background: #111;
+            font-family: 'M PLUS Rounded 1c', sans-serif; color: white;
+            touch-action: none; user-select: none; -webkit-user-select: none;
         }
 
         .hidden { display: none !important; }
         .full-screen { width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; position: absolute; top: 0; left: 0; }
         
-        /* --- HOST DESIGN --- */
+        /* --- HOST UI --- */
         #host-view { background: radial-gradient(circle at center, #2c3e50, #000); }
-        h1 { font-family: 'Bangers', cursive; font-size: 50px; color: #f1c40f; text-shadow: 4px 4px 0 #e67e22; margin: 10px 0; pointer-events: none; }
+        h1 { font-family: 'Bangers', cursive; font-size: 40px; color: #f1c40f; text-shadow: 3px 3px 0 #e67e22; margin: 5px 0; pointer-events: none; }
         
-        /* Menu */
-        #menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; }
-        .menu-card { width: 180px; padding: 15px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 15px; cursor: pointer; text-align: center; transition: 0.2s; }
+        /* Menu Grid */
+        #menu-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; max-width: 95%; }
+        .menu-card { width: 120px; padding: 10px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 10px; cursor: pointer; text-align: center; transition: 0.2s; }
         .menu-card:hover { transform: scale(1.05); background: rgba(255,255,255,0.25); border-color: #f1c40f; }
-        .card-icon { font-size: 40px; display: block; margin-bottom: 5px; }
-        .card-title { font-size: 18px; font-weight: bold; color: #f1c40f; }
-        .card-desc { font-size: 12px; color: #ccc; }
+        .card-icon { font-size: 30px; display: block; margin-bottom: 2px; }
+        .card-title { font-size: 14px; font-weight: bold; color: #f1c40f; line-height: 1.2; }
+        .card-desc { font-size: 10px; color: #ccc; display: none; } /* スペース節約のため非表示 */
+
+        /* Game Area */
+        #game-area { width: 95%; height: 60%; position: relative; background: rgba(0,0,0,0.5); border-radius: 15px; margin-top: 10px; overflow: hidden; border: 2px solid #555; display: none; }
+        #back-btn { position: absolute; top: 10px; right: 10px; z-index: 100; padding: 5px 15px; background: #e74c3c; color: white; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; }
 
         /* Player List */
-        #player-list { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 20px; max-width: 90%; }
-        .player-tag { background: #34495e; padding: 5px 15px; border-radius: 20px; font-size: 14px; border: 1px solid #7f8c8d; animation: popIn 0.3s; }
-        @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+        #player-list { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-top: 10px; max-width: 95%; }
+        .player-tag { background: #34495e; padding: 3px 10px; border-radius: 15px; font-size: 12px; border: 1px solid #7f8c8d; animation: popIn 0.3s; }
 
-        /* Game Areas */
-        #game-area { width: 90%; height: 60%; position: relative; background: rgba(0,0,0,0.5); border-radius: 20px; margin-top: 20px; overflow: hidden; border: 2px solid #555; display: none; }
-        #back-btn { position: absolute; top: 10px; right: 10px; z-index: 100; padding: 5px 10px; background: #555; color: white; border: none; cursor: pointer; border-radius: 5px; }
-
-        /* 1. Race */
-        #race-track { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-evenly; position: relative; }
-        .racer { position: absolute; left: 10px; transition: left 0.1s linear; display: flex; align-items: center; }
-        .racer-icon { font-size: 30px; margin-right: 5px; }
-        .racer-name { font-size: 12px; position: absolute; top: -15px; left: 0; white-space: nowrap; }
-
-        /* 2. Tug */
+        /* --- SPECIFIC GAMES --- */
+        /* 1-4. Classic Games */
+        #race-track { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-evenly; }
+        .racer { position: relative; left: 10px; transition: left 0.1s linear; display: flex; align-items: center; font-size: 20px; }
+        
         #tug-field { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; position: relative; }
-        .team-bg { position: absolute; width: 50%; height: 100%; top: 0; opacity: 0.2; font-size: 100px; display: flex; align-items: center; justify-content: center; font-family: 'Bangers'; }
+        .team-bg { position: absolute; width: 50%; height: 100%; top: 0; opacity: 0.2; font-size: 80px; display: flex; align-items: center; justify-content: center; font-family: 'Bangers'; }
         #team-red-bg { left: 0; background: red; color: #ffadad; }
         #team-blue-bg { right: 0; background: blue; color: #adadff; }
-        #tug-rope { width: 80%; height: 10px; background: white; position: relative; border-radius: 5px; }
-        #tug-marker { width: 40px; height: 40px; background: #f1c40f; border-radius: 50%; position: absolute; top: -15px; left: 50%; transform: translateX(-50%); transition: left 0.1s; box-shadow: 0 0 15px yellow; }
+        #tug-marker { width: 30px; height: 30px; background: #f1c40f; border-radius: 50%; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); transition: left 0.1s; }
 
-        /* 3. Boss */
-        #boss-field { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #boss-char { font-size: 120px; animation: float 2s infinite ease-in-out; filter: drop-shadow(0 0 20px purple); }
-        #boss-hp-bar { width: 60%; height: 30px; background: #333; border-radius: 15px; overflow: hidden; border: 2px solid white; margin-top: 20px; }
+        #boss-field { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
+        #boss-char { font-size: 80px; animation: float 2s infinite; }
+        #boss-hp-bar { width: 60%; height: 20px; background: #333; border: 2px solid white; margin-top: 10px; }
         #boss-hp-fill { width: 100%; height: 100%; background: #e74c3c; transition: width 0.2s; }
-        @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-20px);} }
 
-        /* 4. Soda */
-        #soda-field { width: 100%; height: 100%; display: flex; align-items: flex-end; justify-content: space-around; padding-bottom: 20px; box-sizing: border-box; }
-        .bottle-col { display: flex; flex-direction: column; align-items: center; position: relative; height: 100%; justify-content: flex-end; width: 60px; }
-        .cork { font-size: 20px; transition: bottom 0.2s; position: absolute; bottom: 60px; }
-        .bottle-body { width: 40px; height: 60px; background: #fff; border-radius: 5px 5px 0 0; position: relative; overflow: hidden; }
-        .bottle-liquid { position: absolute; bottom: 0; width: 100%; background: #e67e22; height: 0%; transition: height 0.1s; }
+        #soda-field { display: flex; align-items: flex-end; justify-content: space-around; height: 100%; padding-bottom: 20px; }
+        .bottle-col { display: flex; flex-direction: column; align-items: center; position: relative; height: 100%; justify-content: flex-end; width: 40px; }
+        .bottle-liq { background: #e67e22; width: 100%; position: absolute; bottom: 0; transition: height 0.1s; }
 
-        /* --- CONTROLLER DESIGN --- */
-        #ctrl-view { background: linear-gradient(135deg, #2b5876 0%, #4e4376 100%); text-align: center; }
+        /* 5. Balance Survival (Updated) */
+        #balance-field { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; perspective: 800px; overflow: hidden; }
+        #tray { width: 400px; height: 10px; background: #3498db; position: relative; transform-style: preserve-3d; transition: transform 0.1s; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        #tray-ball { width: 30px; height: 30px; background: #f1c40f; border-radius: 50%; position: absolute; top: -30px; left: 50%; transform: translateX(-50%); box-shadow: 0 5px 10px rgba(0,0,0,0.3); transition: left 0.05s linear; }
+        .enemy-rock { position: absolute; font-size: 30px; top: 0; transition: top 0.1s linear; }
+        #balance-hp { position: absolute; top: 10px; left: 10px; font-size: 20px; color: #e74c3c; font-weight: bold; }
+
+        /* 6. Sniper */
+        #sniper-field { width: 100%; height: 100%; position: relative; cursor: none; }
+        .crosshair { position: absolute; width: 20px; height: 20px; border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%); transition: top 0.1s, left 0.1s; }
+        .target { position: absolute; font-size: 40px; }
+
+        /* 7. Silent Ninja (Mic) */
+        #ninja-field { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-evenly; padding: 0 20px; }
+        .ninja-row { display: flex; align-items: center; height: 40px; position: relative; border-bottom: 1px solid #333; }
+        .ninja-char { font-size: 30px; position: absolute; transition: left 0.2s; }
+        .noise-alert { color: red; font-weight: bold; margin-left: 10px; display: none; }
+
+        /* 8. Compass (Orientation) */
+        #compass-field { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #compass-target { width: 200px; height: 200px; border: 5px solid #555; border-radius: 50%; position: relative; }
+        #compass-needle { width: 4px; height: 100px; background: red; position: absolute; left: 50%; top: 50%; transform-origin: top center; transition: transform 0.5s; }
+        #compass-msg { font-size: 30px; margin-top: 20px; color: #f1c40f; }
+        .player-arrow { position: absolute; width: 10px; height: 30px; background: #3498db; transform-origin: bottom center; top: 50%; left: 50%; margin-top: -30px; margin-left: -5px; transition: transform 0.2s; }
+
+        /* --- CONTROLLER UI --- */
+        #ctrl-view { background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); text-align: center; }
+        #name-input-ui { background: rgba(0,0,0,0.8); padding: 30px; border-radius: 20px; width: 80%; max-width: 300px; }
+        input { width: 90%; padding: 12px; font-size: 18px; margin-bottom: 20px; border-radius: 8px; border: none; text-align: center; }
+        .btn-go { width: 100%; padding: 15px; background: #2ecc71; border: none; color: white; font-weight: bold; font-size: 20px; border-radius: 8px; }
+
+        #ctrl-game-ui { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; }
         
-        #name-input-ui { background: rgba(0,0,0,0.6); padding: 30px; border-radius: 20px; width: 80%; max-width: 300px; }
-        input { width: 90%; padding: 10px; font-size: 18px; margin-bottom: 20px; border-radius: 5px; border: none; text-align: center; }
-        .btn-go { width: 100%; padding: 15px; background: #2ecc71; border: none; color: white; font-weight: bold; font-size: 20px; border-radius: 10px; }
-        .btn-go:active { background: #27ae60; transform: scale(0.98); }
-
-        #game-ui { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; }
-        #shake-btn { width: 220px; height: 220px; border-radius: 50%; background: #e74c3c; display: flex; align-items: center; justify-content: center; font-size: 40px; font-family: 'Bangers'; border: 8px solid rgba(255,255,255,0.3); box-shadow: 0 10px 0 #c0392b; margin-bottom: 20px; }
+        #shake-btn { width: 200px; height: 200px; border-radius: 50%; background: #e74c3c; display: flex; align-items: center; justify-content: center; font-size: 40px; font-family: 'Bangers'; border: 8px solid rgba(255,255,255,0.3); box-shadow: 0 10px 0 #c0392b; }
         .shaking { animation: shrink 0.1s; }
         @keyframes shrink { 0%{transform:scale(1);} 50%{transform:scale(0.95);} 100%{transform:scale(1);} }
+
+        #mic-indicator { width: 20px; height: 100px; background: #333; border: 2px solid #fff; position: relative; margin-top: 20px; display: none; }
+        #mic-level { width: 100%; height: 0%; background: #e74c3c; position: absolute; bottom: 0; transition: height 0.1s; }
         
-        #team-badge { font-size: 20px; padding: 5px 15px; border-radius: 5px; margin-bottom: 20px; display: inline-block; font-weight: bold; }
-        #info-text { font-size: 18px; color: #bdc3c7; padding: 0 20px; pointer-events: none; }
+        #compass-dial { width: 200px; height: 200px; border: 4px solid white; border-radius: 50%; position: relative; display: none; }
+        #compass-arrow { font-size: 50px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+
+        #ctrl-msg { font-size: 18px; color: #bdc3c7; margin-top: 20px; pointer-events: none; padding: 0 20px; }
+        @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
     </style>
 </head>
 <body>
 
-    <!-- HOST UI -->
+    <!-- HOST VIEW -->
     <div id="host-view" class="full-screen hidden">
-        <h1>SHAKE PARTY 2.0</h1>
+        <h1>SHAKE PARTY 4.0</h1>
         
         <div id="lobby-menu">
-            <div id="qrcode" style="background: white; padding: 10px; border-radius: 10px; display: inline-block;"></div>
-            <p style="margin: 5px 0;">スマホで参加して名前を入力！</p>
-            
+            <div id="qrcode" style="background: white; padding: 5px; border-radius: 5px; display: inline-block;"></div>
             <div id="menu-grid">
-                <div class="menu-card" onclick="setMode('race')">
-                    <span class="card-icon">🚀</span>
-                    <div class="card-title">SPACE RACE</div>
-                    <div class="card-desc">個人戦：最速を目指せ</div>
-                </div>
-                <div class="menu-card" onclick="setMode('tug')">
-                    <span class="card-icon">⚔️</span>
-                    <div class="card-title">TUG OF WAR</div>
-                    <div class="card-desc">チーム戦：綱引き</div>
-                </div>
-                <div class="menu-card" onclick="setMode('boss')">
-                    <span class="card-icon">👹</span>
-                    <div class="card-title">BOSS RAID</div>
-                    <div class="card-desc">協力戦：魔王討伐</div>
-                </div>
-                <div class="menu-card" onclick="setMode('soda')">
-                    <span class="card-icon">🍾</span>
-                    <div class="card-title">SODA POP</div>
-                    <div class="card-desc">バラエティ：炭酸噴射</div>
-                </div>
+                <!-- SHAKE -->
+                <div class="menu-card" onclick="setMode('race')"><span class="card-icon">🚀</span><div class="card-title">RACE</div></div>
+                <div class="menu-card" onclick="setMode('tug')"><span class="card-icon">⚔️</span><div class="card-title">TUG</div></div>
+                <div class="menu-card" onclick="setMode('boss')"><span class="card-icon">👹</span><div class="card-title">BOSS</div></div>
+                <div class="menu-card" onclick="setMode('soda')"><span class="card-icon">🍾</span><div class="card-title">SODA</div></div>
+                <!-- SENSORS -->
+                <div class="menu-card" onclick="setMode('balance')"><span class="card-icon">⚖️</span><div class="card-title">BALANCE</div></div>
+                <div class="menu-card" onclick="setMode('sniper')"><span class="card-icon">🛸</span><div class="card-title">LASER</div></div>
+                <!-- NEW -->
+                <div class="menu-card" onclick="setMode('ninja')"><span class="card-icon">🥷</span><div class="card-title">NINJA (Mic)</div></div>
+                <div class="menu-card" onclick="setMode('compass')"><span class="card-icon">🧭</span><div class="card-title">COMPASS</div></div>
             </div>
         </div>
 
         <div id="game-area">
             <button id="back-btn" onclick="resetToLobby()">MENU</button>
             
-            <!-- 1. Race -->
             <div id="race-track" class="hidden"></div>
-            
-            <!-- 2. Tug -->
             <div id="tug-field" class="hidden">
-                <div id="team-red-bg" class="team-bg">RED</div>
-                <div id="team-blue-bg" class="team-bg">BLUE</div>
+                <div id="team-red-bg" class="team-bg">RED</div><div id="team-blue-bg" class="team-bg">BLUE</div>
                 <div id="tug-rope"><div id="tug-marker"></div></div>
             </div>
-
-            <!-- 3. Boss -->
             <div id="boss-field" class="hidden">
-                <div id="boss-char">👿</div>
-                <div id="boss-hp-bar"><div id="boss-hp-fill"></div></div>
-                <h2 id="boss-msg" style="margin-top: 20px;">ATTACK!!</h2>
+                <div id="boss-char">👿</div><div id="boss-hp-bar"><div id="boss-hp-fill"></div></div><h2 id="boss-msg">ATTACK!</h2>
             </div>
-
-            <!-- 4. Soda -->
             <div id="soda-field" class="hidden"></div>
+            
+            <!-- NEW/UPDATED FIELDS -->
+            <div id="balance-field" class="hidden">
+                <div id="balance-hp">HP: 100</div>
+                <div id="tray"><div id="tray-ball"></div></div>
+            </div>
+            <div id="sniper-field" class="hidden">
+                <div id="targets-container"></div><div id="crosshairs-container"></div>
+            </div>
+            <div id="ninja-field" class="hidden"></div>
+            <div id="compass-field" class="hidden">
+                <div id="compass-target"><div id="compass-needle"></div></div>
+                <div id="compass-msg">FIND NORTH!</div>
+            </div>
         </div>
 
         <div id="player-list"></div>
     </div>
 
-    <!-- CONTROLLER UI -->
+    <!-- CONTROLLER VIEW -->
     <div id="ctrl-view" class="full-screen hidden">
-        <!-- Name Input -->
         <div id="name-input-ui">
             <h2>ENTER NAME</h2>
-            <input type="text" id="p-name" placeholder="名前を入力 (例: TARO)" maxlength="6">
-            <button class="btn-go" id="join-btn">参加する！</button>
+            <input type="text" id="p-name" placeholder="Name" maxlength="6">
+            <button class="btn-go" id="join-btn">JOIN GAME</button>
+            <p style="font-size:10px; color:#aaa; margin-top:10px;">※Allow Mic/Sensor permissions</p>
         </div>
 
-        <!-- Game Interface -->
-        <div id="game-ui">
-            <div id="team-badge" class="hidden">TEAM RED</div>
-            <div id="shake-btn">SHAKE!</div>
-            <p id="info-text">準備完了！<br>ホストがゲームを選ぶのを待ってね</p>
+        <div id="ctrl-game-ui">
+            <div id="ui-shake" class="hidden"><div id="shake-btn">SHAKE!</div></div>
+            <div id="ui-tap" class="hidden" style="width:200px; height:100px; background:#e67e22; border-radius:10px; line-height:100px; font-weight:bold; font-size:30px;">FIRE!</div>
+            
+            <div id="mic-indicator"><div id="mic-level"></div></div>
+            <div id="compass-dial"><div id="compass-arrow">⬆️</div></div>
+            
+            <p id="ctrl-msg">Waiting...</p>
         </div>
     </div>
 
-    <!-- 3. JavaScriptによるズーム禁止スクリプト -->
     <script>
-        // iOS 10以降などのSafariでダブルタップ拡大を防ぐ
-        document.addEventListener('gesturestart', function (e) {
-            e.preventDefault();
-        });
-
-        // ダブルタップ操作自体を無効化（直近のタップから300ms以内なら無効）
+        // Zoom Prevention
+        document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
         let lastTouchEnd = 0;
-        document.addEventListener('touchend', function (event) {
+        document.addEventListener('touchend', function (e) {
             const now = (new Date()).getTime();
-            if (now - lastTouchEnd <= 300) {
-                event.preventDefault();
-            }
+            if (now - lastTouchEnd <= 300) e.preventDefault();
             lastTouchEnd = now;
         }, false);
-
-        // PC：Ctrlキー＋ホイールでの拡大禁止
-        document.addEventListener('wheel', function(e) {
-            if (e.ctrlKey) {
-                e.preventDefault();
-            }
-        }, { passive: false });
-
-        // PC：キーボードショートカットでの拡大禁止 (Ctrl + +, -, 0)
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && (e.key === '+' || e.key === '-' || e.key === '0')) {
-                e.preventDefault();
-            }
-        });
     </script>
 
-    <!-- Firebase Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
         import { getDatabase, ref, set, onValue, update, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
@@ -227,51 +209,213 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         
-        // URL Params
         const params = new URLSearchParams(window.location.search);
         let role = params.get('role') || 'host';
         let roomId = params.get('room');
         const myId = Math.random().toString(36).substr(2, 6);
 
-        // ============================================
+        // ==========================================
         // HOST LOGIC
-        // ============================================
+        // ==========================================
         if (role === 'host') {
             if (!roomId) {
                 roomId = Math.random().toString(36).substring(2, 6).toUpperCase();
                 window.location.href = `?role=host&room=${roomId}`;
             }
-
             document.getElementById('host-view').classList.remove('hidden');
-            
-            // QR Generate
-            new QRCode(document.getElementById("qrcode"), {
-                text: `${window.location.origin}${window.location.pathname}?role=ctrl&room=${roomId}`,
-                width: 120, height: 120
-            });
+            new QRCode(document.getElementById("qrcode"), { text: `${window.location.origin}${window.location.pathname}?role=ctrl&room=${roomId}`, width: 100, height: 100 });
 
-            // State
             let players = {};
             let mode = 'lobby';
+            let gameState = {
+                bossHp: 1000,
+                tugPos: 50,
+                ballPos: 50,
+                balanceHp: 100,
+                rocks: [],
+                targetAngle: 0
+            };
 
             const roomRef = ref(db, `rooms/${roomId}`);
-            
-            // Initial reset
-            update(roomRef, { mode: 'lobby', bossHp: 1000, tugPos: 50 });
+            update(roomRef, { mode: 'lobby' });
 
-            // Player Listener
             onValue(ref(db, `rooms/${roomId}/players`), (snap) => {
                 players = snap.val() || {};
-                renderPlayerList();
-                if(mode !== 'lobby') updateGameView();
+                renderLobby();
             });
 
-            // Render Lobby List
-            function renderPlayerList() {
+            function renderLobby() {
                 const list = document.getElementById('player-list');
                 list.innerHTML = Object.values(players).map(p => 
                     `<div class="player-tag" style="border-color:${p.color}">${p.name}</div>`
                 ).join('');
+            }
+
+            // MAIN GAME LOOP (30 FPS)
+            setInterval(() => {
+                if (mode === 'lobby') return;
+
+                // 1-4 Classic Games (Simplified view updates)
+                if (mode === 'race') {
+                    Object.keys(players).forEach(id => {
+                        const el = document.getElementById(`racer-${id}`);
+                        if(el) el.style.left = Math.min((players[id].score||0)*0.8, 90) + '%';
+                    });
+                }
+                else if (mode === 'tug') {
+                    let red=0, blue=0;
+                    Object.values(players).forEach(p => p.team==='red' ? red+=p.score||0 : blue+=p.score||0);
+                    let pos = 50 + (blue - red) * 0.5;
+                    document.getElementById('tug-marker').style.left = Math.max(0, Math.min(100, pos)) + '%';
+                }
+                else if (mode === 'boss') {
+                    let total=0; Object.values(players).forEach(p => total += p.score||0);
+                    let hp = Math.max(0, 1000 - total);
+                    document.getElementById('boss-hp-fill').style.width = (hp/10) + '%';
+                }
+                else if (mode === 'soda') {
+                    Object.keys(players).forEach(id => {
+                        const el = document.getElementById(`liq-${id}`);
+                        if(el) el.style.height = Math.min(players[id].score||0, 100) + '%';
+                    });
+                }
+                
+                // 5. BALANCE SURVIVAL (Updated with Enemies)
+                else if (mode === 'balance') {
+                    let totalTilt = 0, count = 0;
+                    Object.values(players).forEach(p => { if (p.tilt !== undefined) { totalTilt += p.tilt; count++; } });
+                    
+                    const avgTilt = count > 0 ? totalTilt / count : 0;
+                    const tray = document.getElementById('tray');
+                    const ball = document.getElementById('tray-ball');
+                    
+                    // Rotate Tray & Move Ball
+                    tray.style.transform = `rotateZ(${avgTilt}deg)`;
+                    gameState.ballPos += avgTilt * 0.1;
+                    gameState.ballPos = Math.max(0, Math.min(100, gameState.ballPos));
+                    ball.style.left = gameState.ballPos + '%';
+
+                    // Falling Rocks Logic
+                    if (Math.random() < 0.05) spawnRock();
+                    const rocks = document.querySelectorAll('.enemy-rock');
+                    rocks.forEach(rock => {
+                        let top = parseFloat(rock.style.top || 0);
+                        top += 2; // fall speed
+                        rock.style.top = top + '%';
+
+                        // Collision Check (Simple box overlap with ball's X percentage)
+                        if (top > 90 && top < 100) {
+                            const rockX = parseFloat(rock.style.left);
+                            if (Math.abs(rockX - gameState.ballPos) < 10) {
+                                gameState.balanceHp -= 10;
+                                document.getElementById('balance-hp').innerText = `HP: ${gameState.balanceHp}`;
+                                rock.remove();
+                                if(gameState.balanceHp <= 0) document.getElementById('balance-hp').innerText = "GAME OVER";
+                            }
+                        }
+                        if (top > 100) rock.remove();
+                    });
+                }
+
+                // 6. SNIPER (Target logic)
+                else if (mode === 'sniper') {
+                    // Render Crosshairs
+                    const container = document.getElementById('crosshairs-container');
+                    Object.keys(players).forEach(id => {
+                        const p = players[id];
+                        if (!p.aim) return;
+                        let ch = document.getElementById(`ch-${id}`);
+                        if (!ch) {
+                            ch = document.createElement('div');
+                            ch.id = `ch-${id}`; ch.className = 'crosshair';
+                            ch.style.borderColor = p.color;
+                            container.appendChild(ch);
+                        }
+                        let x = 50 + (p.aim.g || 0) * 1.5;
+                        let y = 50 + (p.aim.b || 0) * 1.5;
+                        ch.style.left = x + '%'; ch.style.top = y + '%';
+                        
+                        if (p.shot) {
+                            checkHit(x, y);
+                            update(ref(db, `rooms/${roomId}/players/${id}`), { shot: false });
+                        }
+                    });
+                }
+
+                // 7. NINJA (Mic + Shake)
+                else if (mode === 'ninja') {
+                    Object.keys(players).forEach(id => {
+                        const p = players[id];
+                        const char = document.getElementById(`ninja-${id}`);
+                        const alert = document.getElementById(`alert-${id}`);
+                        if(char && alert) {
+                            // Move based on score (shake)
+                            char.style.left = Math.min((p.score||0)*0.5, 90) + '%';
+                            
+                            // Check Volume
+                            if ((p.vol || 0) > 30) { // Threshold
+                                alert.style.display = 'inline';
+                                // Penalty logic could go here
+                            } else {
+                                alert.style.display = 'none';
+                            }
+                        }
+                    });
+                }
+
+                // 8. COMPASS
+                else if (mode === 'compass') {
+                    // Update Player Arrows relative to Target
+                    const field = document.getElementById('compass-target');
+                    Object.keys(players).forEach(id => {
+                        const p = players[id];
+                        if (p.alpha !== undefined) {
+                            let arrow = document.getElementById(`arr-${id}`);
+                            if (!arrow) {
+                                arrow = document.createElement('div');
+                                arrow.id = `arr-${id}`; arrow.className = 'player-arrow';
+                                arrow.style.backgroundColor = p.color;
+                                field.appendChild(arrow);
+                            }
+                            // Calculate relative rotation
+                            // Target is fixed visually UP (0deg for CSS), but logically implies `gameState.targetAngle`.
+                            // Player's `alpha` is their absolute compass heading.
+                            // We want to show how far off they are.
+                            let diff = (p.alpha - gameState.targetAngle);
+                            arrow.style.transform = `rotate(${diff}deg) translateY(-80px)`;
+                        }
+                    });
+                }
+
+            }, 33);
+
+            function spawnRock() {
+                const rock = document.createElement('div');
+                rock.className = 'enemy-rock';
+                rock.innerText = '🪨';
+                rock.style.left = Math.random() * 90 + '%';
+                rock.style.top = '0%';
+                document.getElementById('balance-field').appendChild(rock);
+            }
+
+            function checkHit(x, y) {
+                const field = document.getElementById('sniper-field');
+                const targets = document.querySelectorAll('.target');
+                targets.forEach(t => {
+                    const tx = parseFloat(t.style.left);
+                    const ty = parseFloat(t.style.top);
+                    if (Math.abs(x - tx) < 10 && Math.abs(y - ty) < 10) {
+                        t.remove();
+                        spawnTarget();
+                    }
+                });
+            }
+
+            function spawnTarget() {
+                const t = document.createElement('div');
+                t.className = 'target'; t.innerText = '🛸';
+                t.style.left = Math.random() * 90 + '%'; t.style.top = Math.random() * 80 + '%';
+                document.getElementById('targets-container').appendChild(t);
             }
 
             // Mode Switching
@@ -281,39 +425,51 @@
                 document.getElementById('player-list').style.display = 'none';
                 document.getElementById('game-area').style.display = 'block';
                 
-                // Reset Scores & Teams
+                // Reset UI & Data
+                document.querySelectorAll('#game-area > div').forEach(el => { if(el.id!=='back-btn') el.classList.add('hidden'); });
+                
                 const updates = { mode: m };
-                let idx = 0;
+                let idx=0;
                 Object.keys(players).forEach(id => {
                     updates[`players/${id}/score`] = 0;
-                    updates[`players/${id}/team`] = (idx % 2 === 0) ? 'red' : 'blue';
-                    idx++;
+                    updates[`players/${id}/team`] = (idx++%2===0)?'red':'blue';
                 });
-                
-                if(m === 'boss') updates.bossHp = 1000;
-                if(m === 'tug') updates.tugPos = 50;
-                
                 update(roomRef, updates);
-                
-                // Show Correct UI
-                document.querySelectorAll('#game-area > div').forEach(el => {
-                    if(el.id !== 'back-btn') el.classList.add('hidden');
-                });
-                
-                if(m === 'race') {
+
+                // Setup specific fields
+                if(m==='race'){
                     document.getElementById('race-track').classList.remove('hidden');
-                    renderRaceTrack();
-                } else if(m === 'tug') {
-                    document.getElementById('tug-field').classList.remove('hidden');
-                } else if(m === 'boss') {
-                    document.getElementById('boss-field').classList.remove('hidden');
-                } else if(m === 'soda') {
+                    document.getElementById('race-track').innerHTML = Object.keys(players).map(id=>`<div id="racer-${id}" class="racer"><span style="font-size:30px">🚀</span>${players[id].name}</div>`).join('');
+                }
+                else if(m==='tug') document.getElementById('tug-field').classList.remove('hidden');
+                else if(m==='boss') document.getElementById('boss-field').classList.remove('hidden');
+                else if(m==='soda'){
                     document.getElementById('soda-field').classList.remove('hidden');
-                    renderSodaField();
+                    document.getElementById('soda-field').innerHTML = Object.keys(players).map(id=>`<div class="bottle-col"><div class="bottle-body"><div id="liq-${id}" class="bottle-liq" style="background:${players[id].color}"></div></div></div>`).join('');
+                }
+                else if(m==='balance'){
+                    document.getElementById('balance-field').classList.remove('hidden');
+                    gameState.balanceHp = 100;
+                    gameState.ballPos = 50;
+                    document.getElementById('balance-hp').innerText = "HP: 100";
+                }
+                else if(m==='sniper'){
+                    document.getElementById('sniper-field').classList.remove('hidden');
+                    document.getElementById('targets-container').innerHTML='';
+                    spawnTarget();
+                }
+                else if(m==='ninja'){
+                    document.getElementById('ninja-field').classList.remove('hidden');
+                    document.getElementById('ninja-field').innerHTML = Object.keys(players).map(id=>`<div class="ninja-row"><div class="ninja-char" id="ninja-${id}">🥷 ${players[id].name}<span class="noise-alert" id="alert-${id}">NOISE!</span></div></div>`).join('');
+                }
+                else if(m==='compass'){
+                    document.getElementById('compass-field').classList.remove('hidden');
+                    gameState.targetAngle = Math.floor(Math.random() * 360);
+                    document.getElementById('compass-msg').innerText = `Face ${gameState.targetAngle}° !`;
+                    document.getElementById('compass-target').innerHTML = `<div id="compass-needle" style="transform:rotate(0deg)"></div>`; // Reset needle visual relative
                 }
             };
 
-            // Back to Lobby
             window.resetToLobby = () => {
                 mode = 'lobby';
                 update(roomRef, { mode: 'lobby' });
@@ -321,200 +477,156 @@
                 document.getElementById('player-list').style.display = 'flex';
                 document.getElementById('game-area').style.display = 'none';
             };
-
-            // Game Loop / Updates
-            function updateGameView() {
-                // 1. Race
-                if(mode === 'race') {
-                    Object.keys(players).forEach(id => {
-                        const p = players[id];
-                        const el = document.getElementById(`racer-${id}`);
-                        if(el) {
-                            let left = Math.min((p.score || 0) * 0.8, 90);
-                            el.style.left = left + '%';
-                        }
-                    });
-                }
-                
-                // 2. Tug
-                else if(mode === 'tug') {
-                    let red = 0, blue = 0;
-                    Object.values(players).forEach(p => {
-                        if(p.team === 'red') red += (p.score || 0);
-                        else blue += (p.score || 0);
-                    });
-                    
-                    let diff = blue - red; 
-                    let pos = 50 + (diff * 0.5);
-                    pos = Math.max(0, Math.min(100, pos));
-                    
-                    document.getElementById('tug-marker').style.left = pos + '%';
-                }
-
-                // 3. Boss
-                else if(mode === 'boss') {
-                    let totalDmg = 0;
-                    Object.values(players).forEach(p => totalDmg += (p.score || 0));
-                    let currentHp = 1000 - totalDmg;
-                    if(currentHp < 0) currentHp = 0;
-                    
-                    document.getElementById('boss-hp-fill').style.width = (currentHp / 10) + '%';
-                    if(currentHp === 0) document.getElementById('boss-msg').innerText = "VICTORY!!";
-                    else document.getElementById('boss-msg').innerText = `HP: ${currentHp}`;
-                }
-
-                // 4. Soda
-                else if(mode === 'soda') {
-                    Object.keys(players).forEach(id => {
-                        const p = players[id];
-                        const liq = document.getElementById(`soda-liq-${id}`);
-                        const cork = document.getElementById(`soda-cork-${id}`);
-                        if(liq && cork) {
-                            let h = Math.min(p.score || 0, 100);
-                            liq.style.height = h + '%';
-                            if(h >= 100) cork.style.bottom = '400px'; 
-                        }
-                    });
-                }
-            }
-
-            // Init Helpers
-            function renderRaceTrack() {
-                const c = document.getElementById('race-track');
-                c.innerHTML = Object.keys(players).map(id => `
-                    <div id="racer-${id}" class="racer" style="top:${Math.random()*80}%">
-                        <span class="racer-icon">🚀</span>
-                        <span class="racer-name">${players[id].name}</span>
-                    </div>
-                `).join('');
-            }
-            
-            function renderSodaField() {
-                const c = document.getElementById('soda-field');
-                c.innerHTML = Object.keys(players).map(id => `
-                    <div class="bottle-col">
-                        <div id="soda-cork-${id}" class="cork">📦</div>
-                        <div class="bottle-body">
-                            <div id="soda-liq-${id}" class="bottle-liquid" style="background:${players[id].color}"></div>
-                        </div>
-                        <span style="font-size:12px; margin-top:5px; white-space:nowrap;">${players[id].name}</span>
-                    </div>
-                `).join('');
-            }
         }
 
-        // ============================================
+        // ==========================================
         // CONTROLLER LOGIC
-        // ============================================
+        // ==========================================
         else {
             document.getElementById('ctrl-view').classList.remove('hidden');
-            const playerRef = ref(db, `rooms/${roomId}/players/${myId}`);
-            
-            // Join
-            document.getElementById('join-btn').addEventListener('click', () => {
-                const name = document.getElementById('p-name').value || "NO NAME";
-                const color = `hsl(${Math.random()*360}, 70%, 50%)`;
-                
-                set(playerRef, {
-                    name: name,
-                    color: color,
-                    score: 0
-                }).then(() => {
-                    document.getElementById('name-input-ui').style.display = 'none';
-                    document.getElementById('game-ui').style.display = 'flex';
-                    requestPermission();
-                });
-                
-                onDisconnect(playerRef).remove();
-            });
-
-            // Permission
-            async function requestPermission() {
-                if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                    await DeviceMotionEvent.requestPermission();
-                }
-                startGameLoop();
-            }
-
-            // Sensor Logic
-            let myScore = 0;
+            const pRef = ref(db, `rooms/${roomId}/players/${myId}`);
             let currentMode = 'lobby';
-            let myTeam = '';
+            let myScore = 0;
+            let audioCtx, analyser, dataArray;
 
-            // Listen to Mode & Team
-            onValue(ref(db, `rooms/${roomId}`), (snap) => {
-                const data = snap.val();
-                if(!data) return;
+            document.getElementById('join-btn').onclick = () => {
+                const name = document.getElementById('p-name').value || "Guest";
+                const color = `hsl(${Math.random()*360}, 80%, 60%)`;
+                set(pRef, { name, color, score: 0 });
+                document.getElementById('name-input-ui').style.display = 'none';
+                document.getElementById('ctrl-game-ui').style.display = 'flex';
                 
-                // Reset score on mode change
-                if(data.mode !== currentMode) {
-                    currentMode = data.mode;
-                    myScore = 0;
-                    updateInfoText(data.mode);
-                    
-                    if(data.mode === 'tug') {
-                        // Wait a bit for team assignment to propagate
-                        setTimeout(() => {
-                            onValue(playerRef, (pSnap) => {
-                                const p = pSnap.val();
-                                if(p && p.team) {
-                                    myTeam = p.team;
-                                    const badge = document.getElementById('team-badge');
-                                    badge.classList.remove('hidden');
-                                    badge.innerText = `TEAM ${myTeam.toUpperCase()}`;
-                                    badge.style.background = myTeam;
-                                    badge.style.color = 'white';
-                                }
-                            }, {onlyOnce: true});
-                        }, 500);
-                    } else {
-                        document.getElementById('team-badge').classList.add('hidden');
-                    }
-                }
-            });
+                // Initialize Permissions
+                requestSensors().then(initMic);
+            };
+            onDisconnect(pRef).remove();
 
-            function updateInfoText(m) {
-                const t = document.getElementById('info-text');
-                if(m === 'lobby') t.innerText = "ホストがゲームを選んでいます...";
-                else if(m === 'race') t.innerText = "振って加速しろ！";
-                else if(m === 'tug') t.innerText = "チームのために振れ！";
-                else if(m === 'boss') t.innerText = "全員で攻撃だ！";
-                else if(m === 'soda') t.innerText = "振って飛ばせ！";
+            async function requestSensors() {
+                if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') await DeviceMotionEvent.requestPermission();
+                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') await DeviceOrientationEvent.requestPermission();
+                startLoops();
             }
 
-            // Shake Detection
-            function startGameLoop() {
-                let lastX=0, lastY=0, lastZ=0;
-                let lastUpdate = 0;
-                const THRESHOLD = 15;
+            async function initMic() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const source = audioCtx.createMediaStreamSource(stream);
+                    analyser = audioCtx.createAnalyser();
+                    analyser.fftSize = 32;
+                    source.connect(analyser);
+                    dataArray = new Uint8Array(analyser.frequencyBinCount);
+                } catch(e) { console.log("Mic not allowed"); }
+            }
 
+            function startLoops() {
+                // Monitor Mode
+                onValue(ref(db, `rooms/${roomId}`), (snap) => {
+                    const d = snap.val();
+                    if(!d) return;
+                    if(d.mode !== currentMode) {
+                        currentMode = d.mode;
+                        myScore = 0;
+                        updateUI(d.mode);
+                    }
+                });
+
+                // Sensor Loop
+                let lastAcc = {x:0,y:0,z:0};
+                let lastSend = 0;
+
+                // 1. Motion (Shake)
                 window.addEventListener('devicemotion', (e) => {
-                    if(currentMode === 'lobby') return;
-
                     const acc = e.accelerationIncludingGravity || e.acceleration;
                     if(!acc) return;
                     
-                    const delta = Math.abs(acc.x - lastX) + Math.abs(acc.y - lastY) + Math.abs(acc.z - lastZ);
-                    
-                    if(delta > THRESHOLD) {
-                        myScore++;
-                        
-                        // Visual Feedback
-                        const btn = document.getElementById('shake-btn');
-                        btn.classList.remove('shaking');
-                        void btn.offsetWidth; // trigger reflow
-                        btn.classList.add('shaking');
-                        
-                        // Throttle Updates (100ms)
-                        const now = Date.now();
-                        if(now - lastUpdate > 100) {
-                            update(playerRef, { score: myScore });
-                            lastUpdate = now;
+                    if(['race','tug','boss','soda','ninja'].includes(currentMode)) {
+                        const delta = Math.abs(acc.x - lastAcc.x) + Math.abs(acc.y - lastAcc.y) + Math.abs(acc.z - lastAcc.z);
+                        if(delta > 15) {
+                            myScore++;
+                            document.getElementById('shake-btn').classList.remove('shaking');
+                            void document.getElementById('shake-btn').offsetWidth;
+                            document.getElementById('shake-btn').classList.add('shaking');
+                            
+                            // For Ninja, we send volume separately in the loop below
+                            if(currentMode !== 'ninja' && Date.now() - lastSend > 100) {
+                                update(pRef, { score: myScore });
+                                lastSend = Date.now();
+                            }
                         }
                     }
-                    
-                    lastX = acc.x; lastY = acc.y; lastZ = acc.z;
+                    lastAcc = acc;
                 });
+
+                // 2. Orientation (Tilt / Compass)
+                window.addEventListener('deviceorientation', (e) => {
+                    const now = Date.now();
+                    if(now - lastSend < 50) return;
+
+                    if (currentMode === 'balance') {
+                        update(pRef, { tilt: e.gamma });
+                        lastSend = now;
+                    } else if (currentMode === 'sniper') {
+                        update(pRef, { aim: { b: e.beta, g: e.gamma } });
+                        lastSend = now;
+                    } else if (currentMode === 'compass') {
+                        // Alpha: 0-360 (Compass heading)
+                        // WebkitCompassHeading for iOS
+                        let heading = e.webkitCompassHeading || (360 - e.alpha);
+                        update(pRef, { alpha: heading });
+                        document.getElementById('compass-arrow').style.transform = `translate(-50%, -50%) rotate(${-heading}deg)`;
+                        lastSend = now;
+                    }
+                });
+
+                // 3. Mic Loop (Ninja)
+                setInterval(() => {
+                    if (currentMode === 'ninja' && analyser) {
+                        analyser.getByteFrequencyData(dataArray);
+                        let sum = 0;
+                        for(let i=0; i<dataArray.length; i++) sum += dataArray[i];
+                        let vol = sum / dataArray.length;
+                        
+                        document.getElementById('mic-level').style.height = (vol/2) + '%';
+                        update(pRef, { score: myScore, vol: vol });
+                    }
+                }, 100);
+
+                // Tap Handler
+                document.getElementById('ui-tap').addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    if(currentMode === 'sniper') update(pRef, { shot: true });
+                });
+            }
+
+            function updateUI(m) {
+                // Hide All
+                ['ui-shake','ui-tap','mic-indicator','compass-dial'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+                document.getElementById('ui-tap').style.display = 'none'; // force hide
+
+                const msg = document.getElementById('ctrl-msg');
+                if(m === 'lobby') msg.innerText = "Wait for Host...";
+                else if(['race','boss','soda','tug'].includes(m)) {
+                    document.getElementById('ui-shake').classList.remove('hidden');
+                    msg.innerText = "SHAKE IT!";
+                }
+                else if(m === 'balance') msg.innerText = "Tilt Left/Right!";
+                else if(m === 'sniper') {
+                    document.getElementById('ui-tap').style.display = 'block';
+                    document.getElementById('ui-tap').classList.remove('hidden');
+                    msg.innerText = "Tilt to Aim!";
+                }
+                else if(m === 'ninja') {
+                    document.getElementById('ui-shake').classList.remove('hidden');
+                    document.getElementById('mic-indicator').style.display = 'block';
+                    document.getElementById('mic-indicator').classList.remove('hidden');
+                    msg.innerText = "Shake QUIETLY!";
+                }
+                else if(m === 'compass') {
+                    document.getElementById('compass-dial').style.display = 'block';
+                    document.getElementById('compass-dial').classList.remove('hidden');
+                    msg.innerText = "Turn Body!";
+                }
             }
         }
     </script>
