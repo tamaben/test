@@ -2,21 +2,41 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SHAKE PARTY 2.0</title>
+    <!-- 1. Metaタグによるズーム禁止 (user-scalable=no) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>SHAKE PARTY 2.0 (No Zoom)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Bangers&family=M+PLUS+Rounded+1c:wght@800&display=swap');
 
-        body { margin: 0; overflow: hidden; background: #1a1a1a; font-family: 'M PLUS Rounded 1c', sans-serif; color: white; touch-action: none; }
+        /* 2. CSSによるタッチ操作の制限 */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* スクロール禁止 */
+            background: #1a1a1a;
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            color: white;
+            
+            /* 重要: ブラウザの標準タッチ動作（ズーム、パン）を無効化 */
+            touch-action: none; 
+            
+            /* テキスト選択禁止（連打時のハイライト防止） */
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
         .hidden { display: none !important; }
         .full-screen { width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; position: absolute; top: 0; left: 0; }
         
         /* --- HOST DESIGN --- */
         #host-view { background: radial-gradient(circle at center, #2c3e50, #000); }
-        h1 { font-family: 'Bangers', cursive; font-size: 50px; color: #f1c40f; text-shadow: 4px 4px 0 #e67e22; margin: 10px 0; }
+        h1 { font-family: 'Bangers', cursive; font-size: 50px; color: #f1c40f; text-shadow: 4px 4px 0 #e67e22; margin: 10px 0; pointer-events: none; }
         
-        /* Game Select Menu */
+        /* Menu */
         #menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; }
         .menu-card { width: 180px; padding: 15px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 15px; cursor: pointer; text-align: center; transition: 0.2s; }
         .menu-card:hover { transform: scale(1.05); background: rgba(255,255,255,0.25); border-color: #f1c40f; }
@@ -31,7 +51,8 @@
 
         /* Game Areas */
         #game-area { width: 90%; height: 60%; position: relative; background: rgba(0,0,0,0.5); border-radius: 20px; margin-top: 20px; overflow: hidden; border: 2px solid #555; display: none; }
-        
+        #back-btn { position: absolute; top: 10px; right: 10px; z-index: 100; padding: 5px 10px; background: #555; color: white; border: none; cursor: pointer; border-radius: 5px; }
+
         /* 1. Race */
         #race-track { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-evenly; position: relative; }
         .racer { position: absolute; left: 10px; transition: left 0.1s linear; display: flex; align-items: center; }
@@ -55,29 +76,26 @@
 
         /* 4. Soda */
         #soda-field { width: 100%; height: 100%; display: flex; align-items: flex-end; justify-content: space-around; padding-bottom: 20px; box-sizing: border-box; }
-        .bottle-col { display: flex; flex-direction: column; align-items: center; position: relative; height: 100%; justify-content: flex-end; }
+        .bottle-col { display: flex; flex-direction: column; align-items: center; position: relative; height: 100%; justify-content: flex-end; width: 60px; }
         .cork { font-size: 20px; transition: bottom 0.2s; position: absolute; bottom: 60px; }
-        .bottle-body { width: 40px; height: 60px; background: #fff; border-radius: 5px 5px 0 0; position: relative; }
-        .bottle-liquid { position: absolute; bottom: 0; width: 100%; background: #e67e22; height: 0%; transition: height 0.1s; border-radius: 0 0 0 0; }
+        .bottle-body { width: 40px; height: 60px; background: #fff; border-radius: 5px 5px 0 0; position: relative; overflow: hidden; }
+        .bottle-liquid { position: absolute; bottom: 0; width: 100%; background: #e67e22; height: 0%; transition: height 0.1s; }
 
         /* --- CONTROLLER DESIGN --- */
         #ctrl-view { background: linear-gradient(135deg, #2b5876 0%, #4e4376 100%); text-align: center; }
         
-        /* Name Input */
         #name-input-ui { background: rgba(0,0,0,0.6); padding: 30px; border-radius: 20px; width: 80%; max-width: 300px; }
         input { width: 90%; padding: 10px; font-size: 18px; margin-bottom: 20px; border-radius: 5px; border: none; text-align: center; }
         .btn-go { width: 100%; padding: 15px; background: #2ecc71; border: none; color: white; font-weight: bold; font-size: 20px; border-radius: 10px; }
+        .btn-go:active { background: #27ae60; transform: scale(0.98); }
 
-        /* Game UI */
         #game-ui { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; }
-        #shake-btn { width: 200px; height: 200px; border-radius: 50%; background: #e74c3c; display: flex; align-items: center; justify-content: center; font-size: 40px; font-family: 'Bangers'; border: 8px solid rgba(255,255,255,0.3); box-shadow: 0 10px 0 #c0392b; margin-bottom: 20px; user-select: none; }
+        #shake-btn { width: 220px; height: 220px; border-radius: 50%; background: #e74c3c; display: flex; align-items: center; justify-content: center; font-size: 40px; font-family: 'Bangers'; border: 8px solid rgba(255,255,255,0.3); box-shadow: 0 10px 0 #c0392b; margin-bottom: 20px; }
         .shaking { animation: shrink 0.1s; }
         @keyframes shrink { 0%{transform:scale(1);} 50%{transform:scale(0.95);} 100%{transform:scale(1);} }
         
         #team-badge { font-size: 20px; padding: 5px 15px; border-radius: 5px; margin-bottom: 20px; display: inline-block; font-weight: bold; }
-        #info-text { font-size: 18px; color: #bdc3c7; padding: 0 20px; }
-        
-        #back-btn { position: absolute; top: 10px; right: 10px; z-index: 100; padding: 5px 10px; background: #555; color: white; border: none; cursor: pointer; border-radius: 5px; }
+        #info-text { font-size: 18px; color: #bdc3c7; padding: 0 20px; pointer-events: none; }
     </style>
 </head>
 <body>
@@ -158,7 +176,39 @@
         </div>
     </div>
 
-    <!-- Firebase SDK -->
+    <!-- 3. JavaScriptによるズーム禁止スクリプト -->
+    <script>
+        // iOS 10以降などのSafariでダブルタップ拡大を防ぐ
+        document.addEventListener('gesturestart', function (e) {
+            e.preventDefault();
+        });
+
+        // ダブルタップ操作自体を無効化（直近のタップから300ms以内なら無効）
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+
+        // PC：Ctrlキー＋ホイールでの拡大禁止
+        document.addEventListener('wheel', function(e) {
+            if (e.ctrlKey) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // PC：キーボードショートカットでの拡大禁止 (Ctrl + +, -, 0)
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && (e.key === '+' || e.key === '-' || e.key === '0')) {
+                e.preventDefault();
+            }
+        });
+    </script>
+
+    <!-- Firebase Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
         import { getDatabase, ref, set, onValue, update, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
@@ -203,8 +253,6 @@
             // State
             let players = {};
             let mode = 'lobby';
-            let bossHp = 1000;
-            let tugPos = 50; // 0 (Red) - 100 (Blue)
 
             const roomRef = ref(db, `rooms/${roomId}`);
             
@@ -233,12 +281,13 @@
                 document.getElementById('player-list').style.display = 'none';
                 document.getElementById('game-area').style.display = 'block';
                 
-                // Reset Scores
+                // Reset Scores & Teams
                 const updates = { mode: m };
-                Object.keys(players).forEach((id, idx) => {
+                let idx = 0;
+                Object.keys(players).forEach(id => {
                     updates[`players/${id}/score`] = 0;
-                    // Assign Team for Tug
                     updates[`players/${id}/team`] = (idx % 2 === 0) ? 'red' : 'blue';
+                    idx++;
                 });
                 
                 if(m === 'boss') updates.bossHp = 1000;
@@ -281,7 +330,6 @@
                         const p = players[id];
                         const el = document.getElementById(`racer-${id}`);
                         if(el) {
-                            // Max score assumed around 200 for finish
                             let left = Math.min((p.score || 0) * 0.8, 90);
                             el.style.left = left + '%';
                         }
@@ -296,9 +344,7 @@
                         else blue += (p.score || 0);
                     });
                     
-                    // Simple logic: difference moves the marker
                     let diff = blue - red; 
-                    // sensitivity 
                     let pos = 50 + (diff * 0.5);
                     pos = Math.max(0, Math.min(100, pos));
                     
@@ -326,7 +372,7 @@
                         if(liq && cork) {
                             let h = Math.min(p.score || 0, 100);
                             liq.style.height = h + '%';
-                            if(h >= 100) cork.style.bottom = '400px'; // Fly away
+                            if(h >= 100) cork.style.bottom = '400px'; 
                         }
                     });
                 }
@@ -351,7 +397,7 @@
                         <div class="bottle-body">
                             <div id="soda-liq-${id}" class="bottle-liquid" style="background:${players[id].color}"></div>
                         </div>
-                        <span style="font-size:12px; margin-top:5px;">${players[id].name}</span>
+                        <span style="font-size:12px; margin-top:5px; white-space:nowrap;">${players[id].name}</span>
                     </div>
                 `).join('');
             }
