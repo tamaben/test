@@ -2,168 +2,461 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <!-- 拡大縮小禁止 -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
-    <title>SHAKE PARTY - FIXED</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SHAKE PARTY - フリフリバトル</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Bangers&family=M+PLUS+Rounded+1c:wght@800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Roboto:wght@700&display=swap');
 
-        /* 基本スタイル */
-        html, body {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            overflow: hidden; background: #111;
-            font-family: 'M PLUS Rounded 1c', sans-serif; color: white;
-            touch-action: none; user-select: none; -webkit-user-select: none;
-        }
-
+        body { font-family: 'Roboto', sans-serif; margin: 0; background: #111; color: white; overflow: hidden; touch-action: none; }
         .hidden { display: none !important; }
-        .full-screen { width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; position: absolute; top: 0; left: 0; }
+        .full-screen { position: absolute; top:0; left:0; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
         /* --- HOST DESIGN --- */
-        #host-view { background: radial-gradient(circle at center, #2c3e50, #000); }
-        h1 { font-family: 'Bangers'; font-size: 36px; color: #f1c40f; text-shadow: 3px 3px 0 #e67e22; margin: 5px 0; z-index: 10; pointer-events: none; }
+        #host-view { background: radial-gradient(circle at center, #222, #000); }
+        h1 { font-family: 'Black Ops One', cursive; font-size: 60px; color: #ffeb3b; text-shadow: 0 0 20px #ff9800; margin: 0; letter-spacing: 5px; }
         
-        /* メニュー */
-        #menu-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 10px; max-width: 95%; }
-        .menu-card { width: 90px; padding: 8px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 10px; cursor: pointer; text-align: center; }
-        .menu-card:hover { transform: scale(1.05); background: rgba(255,255,255,0.25); border-color: #f1c40f; }
-        .card-icon { font-size: 24px; display: block; margin-bottom: 2px; }
-        .card-title { font-size: 11px; font-weight: bold; color: #f1c40f; }
+        /* メーターエリア */
+        #meter-container { display: flex; align-items: flex-end; justify-content: center; width: 90%; height: 50vh; margin-top: 30px; gap: 10px; border-bottom: 5px solid #555; padding-bottom: 5px; }
+        .player-column { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 80px; height: 100%; transition: all 0.3s; position: relative; }
+        .bar { width: 100%; background: linear-gradient(to top, #ff0000, #ff8800); border-radius: 5px 5px 0 0; transition: height 0.1s linear; position: relative; box-shadow: 0 0 15px rgba(255, 87, 34, 0.5); }
+        .p-name { margin-top: 10px; font-weight: bold; font-size: 14px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+        .p-score { font-size: 24px; font-weight: bold; position: absolute; top: -35px; color: #fff; text-shadow: 0 0 5px #000; }
+        .rank-crown { position: absolute; top: -70px; font-size: 30px; display: none; }
 
-        /* ゲームエリア */
-        #game-area { width: 95%; height: 60%; position: relative; background: rgba(0,0,0,0.6); border-radius: 15px; border: 2px solid #555; display: none; overflow: hidden; }
-        #timer-display { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); font-size: 50px; font-family: 'Bangers'; color: #e74c3c; z-index: 5; text-shadow: 2px 2px 0 #000; }
-        #back-btn { position: absolute; top: 10px; right: 10px; z-index: 100; padding: 5px 15px; background: #e74c3c; color: white; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        /* モード選択ボタン */
+        #mode-select { display: flex; gap: 20px; margin-top: 40px; }
+        .mode-btn { padding: 20px 40px; font-size: 20px; background: rgba(255,255,255,0.1); border: 2px solid #fff; color: white; cursor: pointer; border-radius: 10px; transition: 0.2s; font-weight: bold; }
+        .mode-btn:hover { background: #fff; color: #000; transform: scale(1.1); box-shadow: 0 0 20px white; }
 
-        /* プレイヤーリスト */
-        #player-list { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-top: 10px; width: 95%; }
-        .player-tag { background: #34495e; padding: 3px 10px; border-radius: 15px; font-size: 11px; border: 1px solid #aaa; animation: popIn 0.3s; }
+        #timer { font-size: 80px; font-family: 'Black Ops One'; position: absolute; top: 20px; right: 40px; color: #00e676; text-shadow: 0 0 20px #00e676; }
+        #game-msg { font-size: 40px; position: absolute; top: 40%; width: 100%; text-align: center; text-shadow: 0 0 20px black; pointer-events: none; }
 
-        /* 各ゲーム画面（簡略化） */
-        #timeattack-field, #race-track, #tug-field, #boss-field, #soda-field, #balance-field, #sniper-field, #ninja-field, #compass-field, #rope-field {
-            width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+        /* --- CONTROLLER DESIGN --- */
+        #ctrl-view { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); text-align: center; }
+        #shake-btn { width: 250px; height: 250px; border-radius: 50%; border: 10px solid rgba(255,255,255,0.2); background: #ff5722; color: white; font-size: 40px; font-family: 'Black Ops One'; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin: 0 auto; user-select: none; }
+        .ripple { animation: ripple 1s infinite; }
+        @keyframes ripple {
+            0% { box-shadow: 0 0 0 0 rgba(255, 87, 34, 0.7); }
+            70% { box-shadow: 0 0 0 30px rgba(255, 87, 34, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 87, 34, 0); }
         }
-        /* 個別調整 */
-        #race-track { flex-direction: column; justify-content: space-evenly; }
-        .racer { position: relative; left: 2%; width: 90%; height: 30px; display: flex; align-items: center; font-size: 20px; transition: left 0.1s linear; }
-        .goal-line { position: absolute; right: 5%; top: 0; height: 100%; width: 5px; background: repeating-linear-gradient(white, white 5px, black 5px, black 10px); }
+        #ctrl-score { font-size: 80px; font-weight: bold; margin-bottom: 20px; text-shadow: 2px 2px 10px rgba(0,0,0,0.5); }
+        #ctrl-msg { font-size: 20px; margin-top: 20px; color: #ccc; }
         
-        #tug-field { position: relative; }
-        #tug-rope { width: 80%; height: 8px; background: white; position: relative; border-radius: 4px; }
-        #tug-marker { width: 30px; height: 30px; background: #f1c40f; border-radius: 50%; position: absolute; top: -11px; left: 50%; transform: translateX(-50%); transition: left 0.1s; border: 3px solid #fff; }
-
-        #boss-field { flex-direction: column; }
-        #boss-char { font-size: 80px; }
-        #boss-hp-bar { width: 60%; height: 20px; background: #333; border: 2px solid white; margin-top: 10px; }
-        #boss-hp-fill { width: 100%; height: 100%; background: #e74c3c; transition: width 0.2s; }
-
-        #soda-field, #rope-field { align-items: flex-end; justify-content: space-around; padding-bottom: 20px; }
-        .bottle-col { width: 40px; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; position: relative; align-items: center; }
-        .bottle-liq { width: 100%; background: #e67e22; position: absolute; bottom: 0; transition: height 0.1s; }
-        
-        #balance-field { perspective: 800px; }
-        #tray { width: 400px; height: 8px; background: #3498db; position: relative; transform-style: preserve-3d; transition: transform 0.1s; }
-        #tray-ball { width: 25px; height: 25px; background: #f1c40f; border-radius: 50%; position: absolute; top: -25px; left: 50%; transform: translateX(-50%); transition: left 0.05s linear; }
-        .enemy-rock { position: absolute; font-size: 25px; top: -50px; }
-        
-        #sniper-field { position: relative; cursor: none; }
-        .target { position: absolute; font-size: 40px; }
-        .crosshair { position: absolute; width: 25px; height: 25px; border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%); transition: all 0.1s; }
-
-        #ninja-field { flex-direction: column; justify-content: space-evenly; }
-        .ninja-lane { height: 30px; border-bottom: 1px solid #444; position: relative; width: 100%; }
-        .ninja-char { position: absolute; font-size: 24px; transition: left 0.2s; left: 0; }
-
-        #compass-field { flex-direction: column; }
-        #compass-ring { width: 200px; height: 200px; border: 8px solid #555; border-radius: 50%; position: relative; }
-        #target-needle { width: 4px; height: 100px; background: #e74c3c; position: absolute; left: 50%; top: 50%; transform-origin: top center; transform: rotate(180deg); }
-        .player-needle { width: 3px; height: 100px; position: absolute; left: 50%; top: 50%; transform-origin: top center; opacity: 0.8; transition: transform 0.2s; }
-        
-        #rope-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
-        .jumper { width: 30px; height: 50px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; transition: bottom 0.1s; bottom: 0; }
-        .eliminated { opacity: 0.3; transform: rotate(90deg); filter: grayscale(100%); }
-
-        /* 結果画面 */
-        #result-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #res-title { font-family: 'Bangers'; font-size: 60px; color: #f1c40f; margin: 0; text-align: center; }
-        #back-lobby-btn { padding: 10px 30px; background: #3498db; border: none; border-radius: 30px; color: white; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 20px; }
-
-        /* --- CONTROLLER --- */
-        #ctrl-view { background: linear-gradient(135deg, #141e30, #243b55); text-align: center; }
-        #name-input-ui { background: rgba(0,0,0,0.8); padding: 30px; border-radius: 20px; width: 80%; max-width: 300px; }
-        input { width: 90%; padding: 12px; font-size: 18px; margin-bottom: 20px; border-radius: 8px; border: none; text-align: center; }
-        .btn-go { width: 100%; padding: 15px; background: #2ecc71; border: none; color: white; font-weight: bold; font-size: 20px; border-radius: 8px; }
-        
-        #ctrl-game-ui { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; }
-        #shake-btn { width: 200px; height: 200px; border-radius: 50%; background: #e74c3c; display: flex; align-items: center; justify-content: center; font-size: 40px; font-family: 'Bangers'; border: 8px solid rgba(255,255,255,0.3); box-shadow: 0 10px 0 #c0392b; }
-        .shaking { animation: shrink 0.1s; }
-        @keyframes shrink { 0%{transform:scale(1);} 50%{transform:scale(0.95);} 100%{transform:scale(1);} }
-        
-        #tap-btn { width: 80%; height: 150px; background: #e67e22; border-radius: 20px; font-size: 40px; font-weight: bold; line-height: 150px; box-shadow: 0 10px #d35400; margin-top: 20px; }
-        #tap-btn:active { transform: translateY(5px); box-shadow: 0 5px #d35400; }
-        
-        #jump-btn-visual { width: 100%; height: 100%; background: #9b59b6; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: bold; }
-        
-        /* センサーデバッグ用 */
-        #sensor-debug { position: absolute; bottom: 10px; left: 0; width: 100%; color: #aaa; font-size: 12px; pointer-events: none; }
-        @keyframes popIn { from{transform:scale(0);} to{transform:scale(1);} }
+        #permission-ui { z-index: 999; background: rgba(0,0,0,0.9); }
+        .big-btn { padding: 20px 50px; font-size: 24px; border-radius: 50px; background: #00e676; color: white; border: none; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <!-- HOST VIEW -->
+    <!-- HOST (PC) -->
     <div id="host-view" class="full-screen hidden">
-        <h1>SHAKE PARTY 10</h1>
-        
-        <div id="lobby-menu">
-            <div id="qrcode" style="background: white; padding: 5px; border-radius: 5px; display: inline-block;"></div>
-            <div id="menu-grid">
-                <!-- 10個のメニュー -->
-                <div class="menu-card" onclick="setMode('timeattack')"><span class="card-icon">⏱️</span><div class="card-title">TIME ATK</div></div>
-                <div class="menu-card" onclick="setMode('race')"><span class="card-icon">🚀</span><div class="card-title">RACE</div></div>
-                <div class="menu-card" onclick="setMode('tug')"><span class="card-icon">⚔️</span><div class="card-title">TUG</div></div>
-                <div class="menu-card" onclick="setMode('boss')"><span class="card-icon">👹</span><div class="card-title">BOSS</div></div>
-                <div class="menu-card" onclick="setMode('soda')"><span class="card-icon">🍾</span><div class="card-title">SODA</div></div>
-                <div class="menu-card" onclick="setMode('balance')"><span class="card-icon">⚖️</span><div class="card-title">BALANCE</div></div>
-                <div class="menu-card" onclick="setMode('sniper')"><span class="card-icon">🛸</span><div class="card-title">SNIPER</div></div>
-                <div class="menu-card" onclick="setMode('ninja')"><span class="card-icon">🥷</span><div class="card-title">NINJA</div></div>
-                <div class="menu-card" onclick="setMode('compass')"><span class="card-icon">🧭</span><div class="card-title">COMPASS</div></div>
-                <div class="menu-card" onclick="setMode('rope')"><span class="card-icon">🪢</span><div class="card-title">BIG ROPE</div></div>
+        <h1>SHAKE PARTY</h1>
+        <div id="timer"></div>
+        <div id="game-msg"></div>
+
+        <!-- プレイヤーメーター表示エリア -->
+        <div id="meter-container">
+            <!-- プレイヤーが参加するとここに追加されます -->
+            <div style="color: #666; font-size: 20px;">QRコードを読み込んで参加待機中...</div>
+        </div>
+
+        <!-- ロビー＆QR -->
+        <div id="lobby-ui" style="text-align: center; margin-top:20px;">
+            <div id="qrcode" style="background: white; padding: 10px; display: inline-block; border-radius: 10px;"></div>
+            <p id="room-id-display" style="margin: 10px; color: #aaa;"></p>
+            
+            <div id="mode-select">
+                <button class="mode-btn" onclick="startGame('speed')">⚡ SPEED RUSH<br><span style="font-size:12px">10秒連打バトル</span></button>
+                <button class="mode-btn" onclick="startGame('survival')">🔋 SURVIVAL<br><span style="font-size:12px">止まると死ぬ</span></button>
+                <button class="mode-btn" onclick="startGame('just')">🎯 JUST 50<br><span style="font-size:12px">50回で寸止め</span></button>
             </div>
-        </div>
-
-        <div id="game-area">
-            <div id="timer-display"></div>
-            <!-- 各ゲーム画面 -->
-            <div id="timeattack-field" class="hidden"></div>
-            <div id="race-track" class="hidden"><div class="goal-line"></div></div>
-            <div id="tug-field" class="hidden"><div id="tug-rope"><div id="tug-marker"></div></div></div>
-            <div id="boss-field" class="hidden"><div id="boss-char">👿</div><div id="boss-hp-bar"><div id="boss-hp-fill"></div></div></div>
-            <div id="soda-field" class="hidden"></div>
-            <div id="balance-field" class="hidden"><div id="balance-hp">HP: 100</div><div id="tray"><div id="tray-ball"></div></div></div>
-            <div id="sniper-field" class="hidden"><div id="targets-container"></div><div id="crosshairs-container"></div></div>
-            <div id="ninja-field" class="hidden"></div>
-            <div id="compass-field" class="hidden"><div id="compass-msg">Find NORTH!</div><div id="compass-ring"><div id="target-needle"></div></div></div>
-            <div id="rope-field" class="hidden"><div id="rope-count">0</div><canvas id="rope-canvas"></canvas></div>
-        </div>
-        
-        <div id="player-list"></div>
-
-        <div id="result-overlay" class="hidden">
-            <div id="res-title">WINNER!</div>
-            <div id="res-sub">Player Name</div>
-            <button id="back-lobby-btn" onclick="resetToLobby()">Back to Lobby</button>
         </div>
     </div>
 
-    <!-- CONTROLLER VIEW -->
+    <!-- CONTROLLER (Smartphone) -->
     <div id="ctrl-view" class="full-screen hidden">
-        <div id="name-input-ui">
-            <h2>JOIN GAME</h2>
-            <input type="text" id="p-name" placeholder="Name" maxlength="6">
-            <button class="btn-go" id="join-btn">参加する (タップ必須)</button>
-            <p style="font-size:12px; color:#aaa; margin-top:20px;">※タップ後に「許可」を押してください</p>
+        <div id="ctrl-game" class="hidden">
+            <div id="ctrl-score">0</div>
+            <div id="shake-btn" class="ripple">SHAKE!</div>
+            <div id="ctrl-msg">スマホをしっかり振れ！</div>
         </div>
-        <div id="ctrl-game-ui">
-            <div id="ui-shake" class="hidden"><div id="shake-btn">SHAKE!</di
+    </div>
+
+    <!-- センサー許可画面 -->
+    <div id="permission-ui" class="full-screen hidden">
+        <h2 style="color: white; margin-bottom: 30px;">準備はいいか？</h2>
+        <p style="color: #aaa; margin-bottom: 30px; padding: 0 20px; text-align: center;">スマホを振って遊ぶゲームです。<br>周りに注意してしっかり握ってください。</p>
+        <button id="perm-btn" class="big-btn">OK</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue, update, remove, onDisconnect } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDbZzTMvUkG2LXIGY4ux0KBTmnAdqP236s",
+            authDomain: "game-4f2d9.firebaseapp.com",
+            databaseURL: "https://game-4f2d9-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "game-4f2d9",
+            storageBucket: "game-4f2d9.firebasestorage.app",
+            messagingSenderId: "574316347824",
+            appId: "1:574316347824:web:cf686040628e25ad615675",
+            measurementId: "G-T0ZKQCC9L3"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Params
+        const params = new URLSearchParams(window.location.search);
+        let role = params.get('role') || 'host';
+        let roomId = params.get('room');
+        const myId = Math.random().toString(36).substr(2, 5).toUpperCase();
+
+        // Colors
+        const COLORS = ['#F44336', '#E91E63', '#9C27B0', '#673AB7', '#3F51B5', '#2196F3', '#03A9F4', '#00BCD4', '#009688', '#4CAF50', '#8BC34A', '#FFC107', '#FF9800', '#FF5722'];
+        function getColor(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            return COLORS[Math.abs(hash) % COLORS.length];
+        }
+
+        // ============================================
+        // HOST LOGIC
+        // ============================================
+        if (role === 'host') {
+            if (!roomId) {
+                roomId = Math.random().toString(36).substring(2, 6).toUpperCase();
+                window.location.replace(`?role=host&room=${roomId}`);
+            }
+
+            document.getElementById('host-view').classList.remove('hidden');
+            document.getElementById('room-id-display').innerText = `Room: ${roomId}`;
+            
+            // QR Code
+            new QRCode(document.getElementById("qrcode"), {
+                text: `${window.location.origin}${window.location.pathname}?role=ctrl&room=${roomId}`,
+                width: 128, height: 128
+            });
+
+            // Game State
+            let players = {};
+            let gameMode = 'lobby'; // lobby, running, result
+            let timeLeft = 0;
+            let gameLoopId;
+
+            const roomRef = ref(db, `shake/${roomId}`);
+            
+            // プレイヤー監視
+            onValue(roomRef, (snap) => {
+                const data = snap.val() || {};
+                const pData = data.players || {};
+                
+                // 新規・更新・削除の反映
+                renderMeters(pData);
+                players = pData; // Update local state
+            });
+
+            // メーター描画
+            function renderMeters(pData) {
+                const container = document.getElementById('meter-container');
+                const existingIds = Array.from(container.children).map(el => el.id).filter(id => id.startsWith('p-'));
+                const newIds = Object.keys(pData);
+
+                // 待機メッセージ消去
+                if(newIds.length > 0 && container.innerText.includes('待機中')) container.innerHTML = '';
+                if(newIds.length === 0) container.innerHTML = '<div style="color:#666; font-size:20px;">QRコードを読み込んで参加待機中...</div>';
+
+                // 削除されたプレイヤーを消す
+                existingIds.forEach(id => {
+                    if (!newIds.includes(id.replace('p-', ''))) document.getElementById(id).remove();
+                });
+
+                // 描画・更新
+                newIds.forEach(id => {
+                    const p = pData[id];
+                    let el = document.getElementById(`p-${id}`);
+                    const color = getColor(id);
+
+                    if (!el) {
+                        el = document.createElement('div');
+                        el.id = `p-${id}`;
+                        el.className = 'player-column';
+                        el.innerHTML = `
+                            <div class="rank-crown">👑</div>
+                            <div class="p-score">0</div>
+                            <div class="bar"></div>
+                            <div class="p-name" style="color:${color}">P-${id}</div>
+                        `;
+                        container.appendChild(el);
+                    }
+
+                    // 値の更新
+                    const scoreEl = el.querySelector('.p-score');
+                    const barEl = el.querySelector('.bar');
+                    const crownEl = el.querySelector('.rank-crown');
+                    
+                    // モードごとの表示ロジック
+                    let displayScore = p.count || 0;
+                    let barHeight = 0;
+
+                    if (gameMode === 'speed') {
+                        // 100回を100%とする基準
+                        barHeight = Math.min((p.count / 100) * 100, 100);
+                    } else if (gameMode === 'survival') {
+                        // HPを表示 (最大100)
+                        displayScore = Math.floor(p.hp || 0);
+                        barHeight = p.hp;
+                        if(p.hp <= 0) barEl.style.filter = 'grayscale(100%)';
+                        else barEl.style.filter = 'none';
+                    } else if (gameMode === 'just') {
+                        // 寸止め: ゲーム中は隠す(?が表示される)
+                        if (gameMode === 'result') {
+                            displayScore = p.count;
+                            barHeight = Math.min((p.count / 60) * 100, 100);
+                        } else {
+                            displayScore = '?';
+                            barHeight = (p.count > 0) ? 20 : 0; // 振ってることだけわかる
+                        }
+                    } else {
+                        // ロビー
+                        barHeight = Math.min(p.count, 100);
+                    }
+
+                    scoreEl.innerText = displayScore;
+                    barEl.style.height = `${barHeight}%`;
+                    barEl.style.backgroundColor = color;
+                    barEl.style.boxShadow = `0 0 20px ${color}`;
+
+                    // 勝者判定（結果発表時）
+                    crownEl.style.display = (p.isWinner) ? 'block' : 'none';
+                });
+            }
+
+            // ゲーム開始ロジック
+            window.startGame = (mode) => {
+                if (Object.keys(players).length === 0) return alert("プレイヤーがいません");
+                
+                gameMode = mode;
+                document.getElementById('lobby-ui').classList.add('hidden');
+                document.getElementById('game-msg').innerText = "READY...";
+                
+                // Reset Players
+                const updates = {};
+                Object.keys(players).forEach(id => {
+                    updates[`players/${id}/count`] = 0;
+                    updates[`players/${id}/hp`] = 100; // Survival用
+                    updates[`players/${id}/isWinner`] = false;
+                });
+                updates['state/status'] = 'ready';
+                updates['state/mode'] = mode;
+                update(roomRef, updates);
+
+                // Countdown
+                let count = 3;
+                const cdInt = setInterval(() => {
+                    document.getElementById('game-msg').innerText = count > 0 ? count : "GO!!!";
+                    if (count === 0) {
+                        clearInterval(cdInt);
+                        runGameLoop(mode);
+                    }
+                    count--;
+                }, 1000);
+            };
+
+            function runGameLoop(mode) {
+                document.getElementById('game-msg').innerText = "";
+                update(roomRef, { 'state/status': 'running' });
+                
+                if (mode === 'speed') {
+                    timeLeft = 10;
+                } else if (mode === 'survival') {
+                    timeLeft = 999;
+                } else if (mode === 'just') {
+                    timeLeft = 20; // 制限時間
+                }
+
+                gameLoopId = setInterval(() => {
+                    timeLeft -= 0.1;
+                    if(mode !== 'survival') document.getElementById('timer').innerText = Math.ceil(timeLeft);
+                    else document.getElementById('timer').innerText = "SURVIVE!";
+
+                    // --- SURVIVAL LOGIC ---
+                    if (mode === 'survival') {
+                        // 全員のHPを減らす
+                        Object.keys(players).forEach(id => {
+                            let p = players[id];
+                            if (p.hp > 0) {
+                                // 振っていないと早く減るロジックはクライアント側でカウントアップさせるが、
+                                // ここではシンプルに「現在のカウント」が増えていないとHPを減らす処理が必要だが、
+                                // 簡易化のため「クライアントから送られてくるHP」を表示する設計にするか、
+                                // あるいは「クライアントはカウントだけ送り、サーバー(Host)がHPを計算する」のが正しい。
+                                // 今回はシンプル化: クライアントが振るとHP回復、ホストが毎フレームHP減少させる
+                                let drain = 1.0; 
+                                let newHp = (p.hp || 100) - drain;
+                                if(newHp < 0) newHp = 0;
+                                update(ref(db, `shake/${roomId}/players/${id}`), { hp: newHp });
+                            }
+                        });
+                        
+                        // 残り1人になったら終了
+                        const survivors = Object.keys(players).filter(id => players[id].hp > 0);
+                        if (survivors.length <= 1 && Object.keys(players).length > 1) {
+                            finishGame(mode);
+                        }
+                    }
+
+                    // --- TIME UP ---
+                    if (timeLeft <= 0) {
+                        finishGame(mode);
+                    }
+                }, 100);
+            }
+
+            function finishGame(mode) {
+                clearInterval(gameLoopId);
+                document.getElementById('game-msg').innerText = "FINISH!!";
+                document.getElementById('timer').innerText = "";
+                update(roomRef, { 'state/status': 'finished' });
+                gameMode = 'result'; // メーター表示用
+
+                // 勝者判定
+                let winnerId = null;
+                let bestScore = -1;
+                let minDiff = 999;
+
+                Object.keys(players).forEach(id => {
+                    const p = players[id];
+                    if (mode === 'speed') {
+                        if (p.count > bestScore) { bestScore = p.count; winnerId = id; }
+                    } else if (mode === 'survival') {
+                        if (p.hp > 0) winnerId = id; // 生き残り
+                    } else if (mode === 'just') {
+                        // 50に近い人
+                        const diff = Math.abs(50 - p.count);
+                        if (diff < minDiff) { minDiff = diff; winnerId = id; }
+                    }
+                });
+
+                if (winnerId) {
+                    update(ref(db, `shake/${roomId}/players/${winnerId}`), { isWinner: true });
+                    document.getElementById('game-msg').innerText = `WINNER: P-${winnerId}`;
+                }
+
+                // 5秒後にロビーへ
+                setTimeout(() => {
+                    document.getElementById('lobby-ui').classList.remove('hidden');
+                    document.getElementById('game-msg').innerText = "";
+                    gameMode = 'lobby';
+                }, 8000);
+            }
+        }
+
+        // ============================================
+        // CONTROLLER LOGIC
+        // ============================================
+        else {
+            document.getElementById('permission-ui').classList.remove('hidden');
+            const pRef = ref(db, `shake/${roomId}/players/${myId}`);
+            const stateRef = ref(db, `shake/${roomId}/state`);
+            
+            // Disconnectで削除
+            onDisconnect(pRef).remove();
+
+            // 初期化
+            set(pRef, { count: 0, hp: 100 });
+
+            let myCount = 0;
+            let myHp = 100;
+            let currentStatus = 'lobby'; // lobby, ready, running
+            let currentMode = '';
+
+            // 状態監視
+            onValue(stateRef, (snap) => {
+                const s = snap.val();
+                if(!s) return;
+                currentStatus = s.status;
+                currentMode = s.mode;
+
+                const msgEl = document.getElementById('ctrl-msg');
+                const scoreEl = document.getElementById('ctrl-score');
+                const btn = document.getElementById('shake-btn');
+
+                if (s.status === 'ready') {
+                    scoreEl.innerText = "READY";
+                    myCount = 0; 
+                    myHp = 100;
+                } else if (s.status === 'running') {
+                    msgEl.innerText = (currentMode === 'just') ? "50回振って止めろ！" : "SHAKE IT FAST!";
+                    if(currentMode === 'just') scoreEl.innerText = "?";
+                    else scoreEl.innerText = myCount;
+                    btn.classList.add('ripple');
+                    if(navigator.vibrate) navigator.vibrate(200);
+                } else if (s.status === 'finished') {
+                    msgEl.innerText = "結果発表...";
+                    scoreEl.innerText = myCount;
+                    btn.classList.remove('ripple');
+                    if(navigator.vibrate) navigator.vibrate([100,50,100]);
+                }
+            });
+
+            // 許可ボタン
+            document.getElementById('perm-btn').addEventListener('click', async () => {
+                if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                    const res = await DeviceMotionEvent.requestPermission();
+                    if (res !== 'granted') return alert("センサー許可が必要です");
+                }
+                document.getElementById('permission-ui').classList.add('hidden');
+                document.getElementById('ctrl-view').classList.remove('hidden');
+                document.getElementById('ctrl-game').classList.remove('hidden');
+                
+                startSensor();
+            });
+
+            function startSensor() {
+                let lastX=0, lastY=0, lastZ=0;
+                let lastSend = 0;
+                const THRESHOLD = 20; // 感度
+
+                window.addEventListener('devicemotion', (e) => {
+                    if (currentStatus !== 'running' && currentStatus !== 'lobby') return;
+
+                    const acc = e.accelerationIncludingGravity || e.acceleration;
+                    if (!acc) return;
+
+                    const delta = Math.abs(acc.x - lastX) + Math.abs(acc.y - lastY) + Math.abs(acc.z - lastZ);
+                    
+                    if (delta > THRESHOLD) {
+                        // 振った判定
+                        myCount++;
+                        
+                        // サバイバルモードならHP回復
+                        if (currentMode === 'survival') {
+                            myHp = Math.min(myHp + 2, 100); 
+                        }
+
+                        // UI更新 (JUSTモードは隠す)
+                        if (currentMode !== 'just') {
+                            document.getElementById('ctrl-score').innerText = myCount;
+                        }
+
+                        // 送信制限 (50msごと)
+                        const now = Date.now();
+                        if (now - lastSend > 50) {
+                            const payload = { count: myCount };
+                            if (currentMode === 'survival') payload.hp = myHp;
+                            update(pRef, payload);
+                            lastSend = now;
+                        }
+                    }
+
+                    lastX = acc.x; lastY = acc.y; lastZ = acc.z;
+                });
+            }
+        }
+    </script>
+</body>
+</html>
