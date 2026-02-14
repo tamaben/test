@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>団結！大縄跳び大会 V8</title>
+    <title>連帯・大縄アリーナ V9 - 職人魂</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=Zen+Maru+Gothic:wght@700;900&display=swap');
@@ -31,8 +31,8 @@
             padding: 0 50px; box-sizing: border-box; background: rgba(0,0,0,0.9); border-bottom: 2px solid var(--accent); z-index: 100;
         }
 
-        #team-display { text-align: center; margin-top: 60px; z-index: 10; }
-        .combo-count { font-family: 'Rajdhani'; font-size: 140px; line-height: 1; color: #fff; text-shadow: 0 0 40px var(--accent); }
+        .combo-area { text-align: center; margin-top: 50px; z-index: 10; }
+        .combo-num { font-family: 'Rajdhani'; font-size: 130px; line-height: 1; color: #fff; text-shadow: 0 0 40px var(--accent); }
 
         #arena {
             display: flex; align-items: flex-end; justify-content: center;
@@ -40,24 +40,28 @@
             position: relative; perspective: 1200px;
         }
 
-        /* シンクロ大縄 */
+        /* 左右のパワーメーター */
+        .power-meter { position: absolute; bottom: 100px; width: 120px; height: 10px; background: #222; border-radius: 5px; overflow: hidden; }
+        .power-fill { width: 0%; height: 100%; transition: width 0.1s; }
+        #left-meter { left: 50px; border: 1px solid var(--secondary); }
+        #right-meter { right: 50px; border: 1px solid var(--secondary); }
+
         #rope-visual {
             position: absolute; width: 100%; height: 150%;
             border: 12px solid var(--accent); border-radius: 50%;
             top: -75%; left: 0; transform-origin: center;
-            display: none; pointer-events: none; opacity: 0.7;
+            display: none; pointer-events: none; opacity: 0.8;
             box-shadow: 0 0 50px var(--accent);
-            transform: rotateX(0deg); /* JS制御 */
+            transform: rotateX(0deg);
         }
 
         .player-unit { display: flex; flex-direction: column; align-items: center; width: 80px; z-index: 5; }
         .p-char { width: 40px; height: 60px; background: #fff; border-radius: 6px; transition: transform 0.1s; border: 3px solid #555; }
         .role-badge { font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-bottom: 6px; font-weight: 900; }
-        .badge-turner { background: var(--secondary); color: white; }
+        .badge-left { background: var(--secondary); color: white; }
+        .badge-right { background: #ff9900; color: white; }
         .badge-jumper { background: var(--primary); color: #000; }
 
-        /* --- UIパネル --- */
-        .panel { background: rgba(0,0,0,0.9); padding: 30px; border-radius: 20px; text-align: center; border: 2px solid var(--primary); backdrop-filter: blur(10px); }
         .btn-ready { background: var(--secondary); border: none; color: white; padding: 18px 50px; font-size: 28px; cursor: pointer; border-radius: 50px; font-weight: 900; box-shadow: 0 0 30px var(--secondary); }
         .btn-ready:disabled { opacity: 0.3; }
 
@@ -67,12 +71,6 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             background: rgba(255,255,255,0.05); transition: 0.1s;
         }
-        .vibrate { animation: pulse 0.1s infinite alternate; }
-        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
-
-        #news-ticker { position: absolute; bottom: 0; width: 100%; background: var(--secondary); color: white; padding: 10px 0; overflow: hidden; font-weight: 900; }
-        .ticker-move { display: inline-block; white-space: nowrap; animation: ticker 20s linear infinite; }
-        @keyframes ticker { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
     </style>
 </head>
 <body>
@@ -81,47 +79,49 @@
     <!-- ホスト画面 -->
     <div id="host-view" class="full-screen hidden">
         <div id="top-ui">
-            <div style="font-size: 22px; color: var(--accent);">最高記録： <span id="max-combo-val">0</span> 回</div>
-            <div id="game-timer" style="font-family: 'Rajdhani'; font-size: 50px;">00:00</div>
-            <div style="color: var(--primary); font-weight: 900;">大縄協力戦：V8</div>
+            <div style="font-size: 20px; color: var(--accent);">最高： <span id="max-combo-val">0</span> 回</div>
+            <div id="game-timer" style="font-family: 'Rajdhani'; font-size: 45px;">00:00</div>
+            <div style="color: var(--primary); font-weight: 900;">大縄協力戦 V9</div>
         </div>
 
-        <div id="team-display">
-            <div style="letter-spacing: 10px; color: var(--accent); font-weight: 900;">TEAM COMBO</div>
-            <div id="combo-num" class="combo-count">0</div>
+        <div class="combo-area">
+            <div style="letter-spacing: 10px; color: var(--accent); font-weight: 900; font-size: 20px;">TEAM COMBO</div>
+            <div id="combo-num" class="combo-num">0</div>
         </div>
 
-        <div id="lobby-ui" class="panel">
-            <h1 style="font-size: 40px; margin: 0 0 10px 0;">みんなで大縄跳び！</h1>
-            <p>まわし手はスマホを回し、ジャンパーはポケットで跳ぼう！</p>
-            <div id="qrcode" style="background:white; padding:12px; display:inline-block; margin:20px; border-radius:12px;"></div>
+        <div id="lobby-ui" style="background: rgba(0,0,0,0.85); padding: 30px; border-radius: 20px; text-align: center; border: 2px solid var(--primary); z-index: 200;">
+            <h1 style="margin: 0 0 10px 0;">シンクロ大縄跳び</h1>
+            <p>【左まわし】【右まわし】が息を合わせて縄を回せ！</p>
+            <div id="qrcode" style="background:white; padding:10px; display:inline-block; margin:20px; border-radius:10px;"></div>
             <div><button id="start-btn" class="btn-ready" onclick="hostStart()" disabled>試合開始</button></div>
             <p id="p-count-msg" style="margin-top:20px; color:var(--primary); font-weight:bold;">選手の入場を待っています...</p>
         </div>
 
         <div id="arena" class="hidden">
             <div id="rope-visual"></div>
+            <div id="left-meter" class="power-meter"><div id="left-fill" class="power-fill" style="background: var(--secondary);"></div></div>
+            <div id="right-meter" class="power-meter"><div id="right-fill" class="power-fill" style="background: #ff9900;"></div></div>
+            <div style="position:absolute; bottom:115px; left:50px; font-size:12px; color:var(--secondary);">LEFT TURNER</div>
+            <div style="position:absolute; bottom:115px; right:50px; font-size:12px; color:#ff9900;">RIGHT TURNER</div>
         </div>
-
-        <div id="news-ticker"><div class="ticker-move">【協力戦】ジャンパー全員が成功してコンボ継続！まわし手は一定のリズムで縄を回そう！</div></div>
-        <div id="overlay-msg" style="position:absolute; font-size:15vw; font-weight:900; opacity:0; transition:0.2s; z-index:200; text-shadow: 0 0 50px #000;"></div>
+        <div id="overlay-msg" style="position:absolute; font-size:15vw; font-weight:900; opacity:0; transition:0.2s; z-index:300; text-shadow: 0 0 50px #000; text-align:center;"></div>
     </div>
 
     <!-- コントローラー画面 -->
     <div id="ctrl-view" class="full-screen hidden">
-        <div id="ctrl-login" class="panel" style="width:85%;">
-            <h2>チームに加わる</h2>
-            <input type="text" id="user-name" placeholder="ニックネーム" maxlength="8" style="padding:18px; width:80%; font-size:22px; text-align:center; border-radius:12px; border:none; margin:20px 0; background:#222; color:white;">
-            <button class="btn-ready" onclick="ctrlJoin()">入場する</button>
+        <div id="ctrl-login" style="background: rgba(0,0,0,0.85); padding: 30px; border-radius: 20px; text-align: center; border: 2px solid var(--primary); width:85%;">
+            <h2>選手入場</h2>
+            <input type="text" id="user-name" placeholder="名前" maxlength="8" style="padding:15px; width:80%; font-size:20px; text-align:center; border-radius:10px; border:none; margin:20px 0; background:#222; color:white;">
+            <button class="btn-ready" onclick="ctrlJoin()">入場</button>
         </div>
 
         <div id="ctrl-game" class="hidden" style="text-align:center;">
-            <div id="my-role-badge" class="role-badge" style="display:inline-block; font-size:18px;">役割：判定中</div>
+            <div id="my-role-badge" class="role-badge" style="display:inline-block; font-size:20px; margin-bottom:15px;">役割判定中</div>
             <div id="ctrl-pad">
                 <div id="role-icon" style="font-size:70px;">⏳</div>
                 <div id="role-hint" style="font-size:18px; font-weight:bold; margin-top:15px; color:var(--accent);">準備してください</div>
             </div>
-            <div id="player-status" style="font-size:30px; font-weight:900; margin-top:30px; color:var(--primary);">READY...</div>
+            <div id="player-status" style="font-size:24px; font-weight:900; margin-top:25px; color:var(--primary);">READY</div>
         </div>
     </div>
 
@@ -159,9 +159,9 @@
             document.getElementById('host-view').classList.remove('hidden');
             new QRCode(document.getElementById("qrcode"), { text: `${window.location.origin}${window.location.pathname}?role=ctrl&room=${roomId}`, width: 140, height: 140 });
 
-            const playersRef = ref(db, `v8/${roomId}/players`);
-            const stateRef = ref(db, `v8/${roomId}/state`);
-            const teamRef = ref(db, `v8/${roomId}/team`);
+            const playersRef = ref(db, `v9/${roomId}/players`);
+            const stateRef = ref(db, `v9/${roomId}/state`);
+            const teamRef = ref(db, `v9/${roomId}/team`);
 
             let ropeAngle = 0;
             let ropeSpeed = 0;
@@ -170,8 +170,8 @@
 
             onValue(playersRef, snap => {
                 const players = snap.val() || {};
-                document.getElementById('p-count-msg').innerText = `現在 ${Object.keys(players).length} 名が入場済み`;
-                document.getElementById('start-btn').disabled = Object.keys(players).length < 2;
+                document.getElementById('p-count-msg').innerText = `現在 ${Object.keys(players).length} 名が入場中`;
+                document.getElementById('start-btn').disabled = Object.keys(players).length < 3; // まわし2人+ジャンパー1人以上
                 renderArena(players);
             });
 
@@ -183,37 +183,44 @@
 
             function renderArena(players) {
                 const arena = document.getElementById('arena');
-                let turnerPowerSum = 0;
+                let leftPower = 0;
+                let rightPower = 0;
 
                 Object.keys(players).forEach(id => {
                     let el = document.getElementById(`p-${id}`);
                     if (!el) {
                         el = document.createElement('div'); el.id = `p-${id}`; el.className = 'player-unit';
-                        el.innerHTML = `<div class="role-badge">---</div><div class="p-char"></div><div style="font-size:11px; margin-top:6px;">${players[id].name}</div>`;
+                        el.innerHTML = `<div class="role-badge">---</div><div class="p-char"></div><div style="font-size:10px; margin-top:5px;">${players[id].name}</div>`;
                         arena.appendChild(el);
                     }
                     const p = players[id];
                     const char = el.querySelector('.p-char');
                     const badge = el.querySelector('.role-badge');
 
-                    if (p.role === 'turner') {
-                        badge.innerText = "まわし手"; badge.className = "role-badge badge-turner";
+                    if (p.role === 'turner_l') {
+                        badge.innerText = "左まわし"; badge.className = "role-badge badge-left";
                         char.style.background = "var(--secondary)";
-                        if (isRunning) turnerPowerSum += (p.power || 0);
+                        leftPower = p.power || 0;
+                    } else if (p.role === 'turner_r') {
+                        badge.innerText = "右まわし"; badge.className = "role-badge badge-right";
+                        char.style.background = "#ff9900";
+                        rightPower = p.power || 0;
                     } else if (p.role === 'jumper') {
                         badge.innerText = "ジャンパー"; badge.className = "role-badge badge-jumper";
                         char.style.background = "#fff";
-                        if (p.state === 'jump') {
-                            char.style.transform = 'translateY(-50px)';
-                            setTimeout(() => char.style.transform = 'translateY(0)', 150);
-                        }
+                        if (p.state === 'jump') { char.style.transform = 'translateY(-50px)'; setTimeout(() => char.style.transform = 'translateY(0)', 150); }
                     }
                 });
                 
                 if (isRunning) {
-                    // まわし手2人の合計パワーで縄の加速を計算
-                    ropeSpeed = (turnerPowerSum * 0.12) + (ropeSpeed * 0.96);
-                    if (ropeSpeed < 0.2) ropeSpeed = 0;
+                    document.getElementById('left-fill').style.width = (leftPower * 10) + '%';
+                    document.getElementById('right-fill').style.width = (rightPower * 10) + '%';
+                    
+                    // 左右のパワーの相乗効果で縄を回す（物理シミュレーション風）
+                    // 片方が0ならほとんど回らないように設定
+                    const combinedPower = (leftPower + rightPower) * (Math.min(leftPower, rightPower) > 0.5 ? 1 : 0.2);
+                    ropeSpeed = (combinedPower * 0.15) + (ropeSpeed * 0.94); // 0.94は空気抵抗/摩擦
+                    if (ropeSpeed < 0.1) ropeSpeed = 0;
                 }
             }
 
@@ -223,30 +230,22 @@
                 ropeAngle += ropeSpeed;
                 rope.style.transform = `rotateX(${ropeAngle}deg)`;
 
-                // 縄が地面（90度）を通過する瞬間を判定
                 const normAngle = ropeAngle % 360;
-                if (lastCheckAngle < 90 && normAngle >= 90) {
-                    processHit();
-                }
+                if (lastCheckAngle < 90 && normAngle >= 90) processHit();
                 lastCheckAngle = normAngle;
                 requestAnimationFrame(animate);
             }
 
             function processHit() {
-                playSfx(150, 'triangle', 0.1, 0.05); // 地面の音
-
+                playSfx(150, 'triangle', 0.1, 0.05);
                 onValue(playersRef, snap => {
                     const players = snap.val() || {};
                     const jumpers = Object.values(players).filter(p => p.role === 'jumper');
                     if (jumpers.length === 0) return;
-
                     const allSuccess = jumpers.every(p => p.state === 'jump');
                     if (allSuccess) {
                         playSfx(600, 'sine', 0.1, 0.2);
-                        runTransaction(teamRef, c => {
-                            if(c) { c.combo++; if(c.combo > c.maxCombo) c.maxCombo = c.combo; }
-                            return c;
-                        });
+                        runTransaction(teamRef, c => { if(c){ c.combo++; if(c.combo > c.maxCombo) c.maxCombo = c.combo; } return c; });
                     } else {
                         update(teamRef, { combo: 0 });
                         playSfx(100, 'sawtooth', 0.2, 0.1);
@@ -259,24 +258,25 @@
                 document.getElementById('arena').classList.remove('hidden');
                 document.getElementById('rope-visual').style.display = 'block';
                 
-                // 完全リセットと役割のランダム割り当て
                 onValue(playersRef, snap => {
                     const ids = Object.keys(snap.val() || {});
                     const updates = {};
-                    // シャッフルして最初の2人をまわし手に
                     const shuffled = ids.sort(() => Math.random() - 0.5);
                     shuffled.forEach((id, idx) => {
-                        updates[id + '/role'] = (idx < 2) ? 'turner' : 'jumper';
+                        let r = 'jumper';
+                        if (idx === 0) r = 'turner_l';
+                        if (idx === 1) r = 'turner_r';
+                        updates[id + '/role'] = r;
                         updates[id + '/power'] = 0;
                         updates[id + '/state'] = 'idle';
                     });
                     update(playersRef, updates);
                 }, {onlyOnce: true});
                 set(teamRef, { combo: 0, maxCombo: 0 });
+                ropeAngle = 0; ropeSpeed = 0; // 開始時に縄を静止
 
                 let count = 3;
-                const ov = document.getElementById('overlay-msg');
-                ov.style.opacity = 1;
+                const ov = document.getElementById('overlay-msg'); ov.style.opacity = 1;
                 const cd = setInterval(() => {
                     if (count > 0) { playSfx(800, 'sine', 0.1); ov.innerText = count; }
                     else {
@@ -297,12 +297,11 @@
                     time--;
                     document.getElementById('game-timer').innerText = `00:${time < 10 ? '0'+time : time}`;
                     if (time <= 0) {
-                        clearInterval(timer);
-                        isRunning = false;
+                        clearInterval(timer); isRunning = false;
                         update(stateRef, { status: 'finished' });
-                        document.getElementById('overlay-msg').innerText = "タイムアップ！";
+                        document.getElementById('overlay-msg').innerText = "終了！";
                         document.getElementById('overlay-msg').style.opacity = 1;
-                        setTimeout(() => location.reload(), 8000);
+                        setTimeout(() => location.reload(), 10000);
                     }
                 }, 1000);
             }
@@ -315,7 +314,7 @@
 
             window.ctrlJoin = () => {
                 const n = document.getElementById('user-name').value;
-                if(!n) return alert("名前を入力してください！");
+                if(!n) return alert("名前を入力！");
                 if(typeof DeviceMotionEvent.requestPermission === 'function') {
                     DeviceMotionEvent.requestPermission().then(r => { if(r==='granted') init(n); });
                 } else init(n);
@@ -324,11 +323,11 @@
             function init(name) {
                 document.getElementById('ctrl-login').classList.add('hidden');
                 document.getElementById('ctrl-game').classList.remove('hidden');
-                const pRef = ref(db, `v8/${roomId}/players/${myId}`);
+                const pRef = ref(db, `v9/${roomId}/players/${myId}`);
                 set(pRef, { name: name, role: 'waiting', power: 0, state: 'idle' });
                 onDisconnect(pRef).remove();
 
-                onValue(ref(db, `v8/${roomId}/state`), s => { status = (s.val() || {}).status; });
+                onValue(ref(db, `v9/${roomId}/state`), s => { status = (s.val() || {}).status; });
                 onValue(pRef, snap => {
                     const d = snap.val(); if(!d) return;
                     myRole = d.role;
@@ -336,11 +335,14 @@
                     const icon = document.getElementById('role-icon');
                     const hint = document.getElementById('role-hint');
 
-                    if (myRole === 'turner') {
-                        badge.innerText = "役割：まわし手"; badge.className = "role-badge badge-turner";
-                        icon.innerText = "🌀"; hint.innerText = "スマホを手で回して縄を回せ！";
+                    if (myRole === 'turner_l') {
+                        badge.innerText = "あなたは【左まわし手】"; badge.className = "role-badge badge-left";
+                        icon.innerText = "⬅️🌀"; hint.innerText = "スマホを回して縄に力を送れ！";
+                    } else if (myRole === 'turner_r') {
+                        badge.innerText = "あなたは【右まわし手】"; badge.className = "role-badge badge-right";
+                        icon.innerText = "🌀➡️"; hint.innerText = "スマホを回して縄に力を送れ！";
                     } else if (myRole === 'jumper') {
-                        badge.innerText = "役割：ジャンパー"; badge.className = "role-badge badge-jumper";
+                        badge.innerText = "あなたは【ジャンパー】"; badge.className = "role-badge badge-jumper";
                         icon.innerText = "👖"; hint.innerText = "スマホをポケットに入れて跳べ！";
                     }
                 });
@@ -351,24 +353,17 @@
                     const acc = e.accelerationIncludingGravity;
                     const now = Date.now();
 
-                    if (myRole === 'turner') {
-                        // 回す強さを計算
+                    if (myRole.startsWith('turner')) {
                         const power = Math.min(10, (Math.abs(acc.x - lastX) + Math.abs(acc.y - lastY)));
                         update(pRef, { power: power });
-                        document.getElementById('player-status').innerText = "回し中！";
+                        document.getElementById('player-status').innerText = "全力まわし中！";
                         lastX = acc.x; lastY = acc.y;
                     } else if (myRole === 'jumper') {
-                        // ポケットの中の上下動(Y軸)を判定
                         if (acc.y > 16 && now - lastJumpTime > 500) {
                             lastJumpTime = now;
                             update(pRef, { state: 'jump' });
-                            document.getElementById('player-status').innerText = "JUMP!";
-                            document.getElementById('ctrl-game').classList.add('vibrate');
-                            setTimeout(() => {
-                                update(pRef, { state: 'idle' });
-                                document.getElementById('player-status').innerText = "待機...";
-                                document.getElementById('ctrl-game').classList.remove('vibrate');
-                            }, 400);
+                            document.getElementById('player-status').innerText = "JUMP!!";
+                            setTimeout(() => { update(pRef, { state: 'idle' }); document.getElementById('player-status').innerText = "待機中"; }, 400);
                         }
                     }
                 });
