@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>フリフリ＆ジャンプ決定戦 - ARENA</title>
+    <title>フリフリ大会 V4 - まわし手編</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Rajdhani:wght@700&family=Zen+Maru+Gothic:wght@700;900&display=swap');
@@ -24,75 +24,70 @@
         .full-screen { position: absolute; top:0; left:0; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .hidden { display: none !important; }
 
-        /* --- 背景演出 --- */
-        .bg-vfx { position: fixed; top:0; left:0; width:100%; height:100%; z-index:-1; background: radial-gradient(circle at 50% 50%, #111 0%, #000 100%); opacity: 0.8; }
+        /* --- 背景・ホスト画面 --- */
+        .bg-vfx { position: fixed; top:0; left:0; width:100%; height:100%; z-index:-1; background: radial-gradient(circle at 50% 50%, #111 0%, #000 100%); }
         
-        /* --- ホスト画面 UI --- */
         #top-ui {
             position: absolute; top: 0; width: 100%; height: 80px;
             display: flex; justify-content: space-between; align-items: center;
             padding: 0 50px; box-sizing: border-box; background: rgba(0,0,0,0.9); border-bottom: 3px solid var(--primary);
-            z-index: 10;
         }
 
         #arena {
             display: flex; align-items: flex-end; justify-content: center;
-            height: 45vh; width: 90%; gap: 20px; border-bottom: 5px solid #222;
+            height: 45vh; width: 95%; gap: 15px; border-bottom: 5px solid #222;
             position: relative; margin-top: 50px;
         }
 
-        /* --- 大なわのアニメーション --- */
+        /* --- 大縄（まわし手用）のアニメーション --- */
         #long-rope {
             position: absolute; width: 100%; height: 140%;
-            border: 8px dashed var(--accent); border-radius: 50%;
+            border: 8px solid var(--accent); border-radius: 50%;
             top: -70%; left: 0; transform-origin: center;
-            display: none; pointer-events: none; opacity: 0.6;
-            box-shadow: 0 0 50px var(--accent);
+            display: none; pointer-events: none; opacity: 0.4;
         }
-        .rope-swing { display: block !important; animation: swing 1.2s infinite linear; }
-        @keyframes swing {
-            0% { transform: rotateX(0deg); opacity: 0.2; }
-            50% { transform: rotateX(90deg); opacity: 1; } /* ここが地面接地 */
-            100% { transform: rotateX(180deg); opacity: 0.2; }
+        .rope-spin { display: block !important; animation: spin-rope 1.0s infinite linear; }
+        @keyframes spin-rope {
+            from { transform: rotateX(0deg); border-color: var(--accent); }
+            50% { border-color: #fff; }
+            to { transform: rotateX(360deg); border-color: var(--accent); }
         }
 
-        .player-unit { display: flex; flex-direction: column; align-items: center; width: 100px; position: relative; }
-        .bar { width: 45px; background: linear-gradient(to top, var(--primary), #fff); transition: 0.1s; box-shadow: 0 0 15px var(--primary); border-radius: 5px 5px 0 0; }
-        .jump-box { width: 60px; height: 100px; border-bottom: 2px solid #444; position: relative; }
-        .character { width: 30px; height: 40px; background: #fff; position: absolute; bottom: 0; left: 15px; transition: transform 0.1s; border-radius: 5px; }
+        .player-unit { display: flex; flex-direction: column; align-items: center; width: 80px; }
+        .bar { width: 35px; background: linear-gradient(to top, var(--primary), #fff); transition: 0.1s; border-radius: 5px 5px 0 0; }
+        
+        /* 回し手用の円アニメーション */
+        .rotate-icon { 
+            width: 50px; height: 50px; border: 4px dashed var(--accent); border-radius: 50%;
+            animation: icon-spin 1s infinite linear; display: none;
+        }
+        @keyframes icon-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* --- モード選択パネル --- */
-        .panel { background: rgba(255,255,255,0.05); padding: 30px; border-radius: 15px; text-align: center; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        /* --- ホスト UI --- */
+        .panel { background: rgba(255,255,255,0.05); padding: 25px; border-radius: 15px; text-align: center; backdrop-filter: blur(10px); }
         .mode-btn { 
-            padding: 15px; border: 2px solid #444; cursor: pointer; color: #888; transition: 0.3s;
-            font-size: 16px; flex: 1; border-radius: 8px; font-weight: bold;
+            padding: 12px; border: 2px solid #444; cursor: pointer; color: #888; transition: 0.3s;
+            font-size: 15px; flex: 1; border-radius: 8px;
         }
-        .mode-btn.active { border-color: var(--primary); color: var(--primary); background: rgba(0,242,255,0.1); box-shadow: 0 0 15px var(--primary); }
-        .btn-main { background: var(--secondary); border: none; color: white; padding: 15px 50px; font-size: 26px; cursor: pointer; font-family: 'Zen Maru Gothic'; font-weight: 900; border-radius: 50px; box-shadow: 0 0 20px var(--secondary); transition: 0.2s; }
-        .btn-main:hover { transform: scale(1.05); }
-        .btn-main:disabled { opacity: 0.3; transform: scale(1); }
-
-        /* --- 実況テロップ --- */
-        #news-feed {
-            position: absolute; bottom: 0; width: 100%; background: var(--secondary);
-            color: white; padding: 12px 0; font-weight: 900; overflow: hidden; font-size: 20px;
-        }
-        .news-scroll { display: inline-block; white-space: nowrap; animation: scroll 15s linear infinite; }
-        @keyframes scroll { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
+        .mode-btn.active { border-color: var(--primary); color: var(--primary); background: rgba(0,242,255,0.1); }
+        .btn-main { background: var(--secondary); border: none; color: white; padding: 15px 40px; font-size: 24px; cursor: pointer; border-radius: 50px; font-weight: 900; }
+        .btn-main:disabled { opacity: 0.3; }
 
         /* --- コントローラー UI --- */
         #action-btn {
-            width: 260px; height: 260px; border-radius: 50%; border: 10px solid var(--primary);
+            width: 250px; height: 250px; border-radius: 50%; border: 10px solid var(--primary);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            box-shadow: 0 0 40px var(--primary); transition: 0.1s; background: rgba(0,0,0,0.5);
+            transition: 0.1s; background: rgba(0,0,0,0.5); position: relative;
         }
-        .active-jump { background: var(--primary); transform: scale(0.9); }
-        .p-score-display { font-family: 'Rajdhani'; font-size: 100px; font-weight: 700; line-height: 1; margin: 0; }
+        #action-btn.turning { border-style: dashed; animation: icon-spin 1s infinite linear; }
+        .score-val { font-family: 'Rajdhani'; font-size: 90px; font-weight: 700; line-height: 1; }
 
-        #overlay {
-            position: absolute; font-family: 'Zen Maru Gothic'; font-weight: 900; font-size: 12vw; 
-            opacity: 0; transition: 0.2s; pointer-events: none; z-index: 100; color: white; text-shadow: 0 0 50px var(--secondary);
+        #news-feed {
+            position: absolute; bottom: 0; width: 100%; background: var(--secondary);
+            color: white; padding: 10px 0; font-weight: 900; overflow: hidden;
         }
+        .news-scroll { display: inline-block; white-space: nowrap; animation: scroll 15s linear infinite; }
+        @keyframes scroll { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
     </style>
 </head>
 <body>
@@ -101,53 +96,49 @@
     <!-- ホスト画面 -->
     <div id="host-view" class="full-screen hidden">
         <div id="top-ui">
-            <div style="font-size: 20px; color: var(--accent);">歴代最高記録: <span id="wr-score">0</span> <small id="wr-name"></small></div>
-            <div id="main-timer" style="font-family: 'Rajdhani'; font-size: 60px; color: #fff;">00:00</div>
-            <div id="current-mode-label" style="font-size: 20px; color: var(--primary);">種目：フリフリ</div>
+            <div style="font-size: 18px; color: var(--accent);">最高記録: <span id="wr-score">0</span></div>
+            <div id="main-timer" style="font-family: 'Rajdhani'; font-size: 55px; color: #fff;">00:00</div>
+            <div id="mode-label" style="font-size: 18px; color: var(--primary);">種目：フリフリ</div>
         </div>
 
         <div id="lobby-ui" class="panel">
-            <h1 style="font-size: 45px; margin: 0 0 10px 0;">競技アリーナ V3</h1>
-            <p style="color: #aaa; margin-bottom: 25px;">種目を選択して参加者を待とう！</p>
-            
-            <div style="display:flex; gap:15px; margin-bottom:30px;">
-                <div id="m-shake" class="mode-btn active" onclick="setMode('SHAKE')">フリフリ<br><small>腕を振りまくれ！</small></div>
-                <div id="m-jump" class="mode-btn" onclick="setMode('JUMP')">なわとび<br><small>自分のペースで跳べ！</small></div>
-                <div id="m-long" class="mode-btn" onclick="setMode('LONG')">大なわとび<br><small>リズムに合わせて跳べ！</small></div>
+            <h1 style="margin: 0 0 10px 0;">フリフリ大会 V4</h1>
+            <div style="display:flex; gap:10px; margin-bottom:20px;">
+                <div id="m-shake" class="mode-btn active" onclick="setMode('SHAKE')">フリフリ<br><small>縦に振る！</small></div>
+                <div id="m-jump" class="mode-btn" onclick="setMode('JUMP')">なわとび<br><small>跳ぶ！</small></div>
+                <div id="m-long" class="mode-btn" onclick="setMode('LONG')">まわし手<br><small>円を描く！</small></div>
             </div>
-
-            <div id="qrcode" style="background:white; padding:15px; display:inline-block; margin-bottom:25px; border-radius: 10px;"></div>
-            
-            <div style="margin-bottom: 20px;">
-                制限時間: <input type="number" id="game-sec" value="20" style="width:70px; background:#000; border:2px solid var(--primary); color:white; font-size:24px; text-align:center; border-radius:5px;"> 秒 
-                <button id="start-btn" class="btn-main" onclick="hostStart()" disabled style="margin-left: 20px;">試合開始！</button>
+            <div id="qrcode" style="background:white; padding:10px; display:inline-block; margin-bottom:20px; border-radius: 10px;"></div>
+            <div>
+                時間: <input type="number" id="game-sec" value="15" style="width:60px; text-align:center; font-size:20px;"> 秒 
+                <button id="start-btn" class="btn-main" onclick="hostStart()" disabled>試合開始</button>
             </div>
-            <p id="player-count" style="color:var(--primary); font-weight: bold;">参加者を待っています...</p>
+            <p id="player-count" style="color:var(--primary); font-weight: bold; margin-top:10px;">参加者を待っています...</p>
         </div>
 
         <div id="arena" class="hidden">
             <div id="long-rope"></div>
         </div>
 
-        <div id="news-feed"><div class="news-scroll" id="news-text">QRコードを読み取って選手登録！世界一を目指せ！</div></div>
-        <div id="overlay" style="text-align:center;"></div>
+        <div id="news-feed"><div class="news-scroll" id="news-text">スマホを準備して待機！まわし手モードは円を描くように動かそう！</div></div>
+        <div id="overlay" style="position:absolute; font-size:10vw; font-weight:900; opacity:0; transition:0.2s; z-index:100; text-shadow: 0 0 20px #000;"></div>
     </div>
 
     <!-- コントローラー画面 -->
     <div id="ctrl-view" class="full-screen hidden">
-        <div id="ctrl-login" class="panel" style="width: 80%;">
-            <h2 style="font-size: 32px; margin:0;">選手入場</h2>
-            <input type="text" id="p-name" placeholder="ニックネーム" maxlength="8" style="padding:18px; width:80%; margin:25px 0; text-align:center; font-size:20px; border-radius:10px; border:none; background:#222; color:white;">
-            <button class="btn-main" onclick="ctrlJoin()">入場する</button>
+        <div id="ctrl-login" class="panel" style="width:80%;">
+            <h2>選手エントリー</h2>
+            <input type="text" id="p-name" placeholder="名前を入力" maxlength="8" style="padding:15px; width:80%; margin:20px 0; text-align:center; font-size:18px;">
+            <button class="btn-main" onclick="ctrlJoin()">入場</button>
         </div>
 
         <div id="ctrl-game" class="hidden" style="text-align:center;">
-            <h2 id="mode-hint" style="color:var(--accent); letter-spacing: 2px;">準備中...</h2>
+            <h3 id="mode-hint" style="color:var(--accent);">準備中...</h3>
             <div id="action-btn">
-                <div style="font-size: 20px; color: #aaa; font-weight:bold;">カウント</div>
-                <div id="my-count" class="p-score-display">0</div>
+                <div style="font-size: 18px; color: #aaa;">カウント</div>
+                <div id="my-count" class="score-val">0</div>
             </div>
-            <p id="ctrl-status" style="margin-top:25px; color:var(--primary); font-size: 24px; font-weight: 900;">ホストの開始を待っています</p>
+            <p id="ctrl-status" style="margin-top:20px; font-weight: 900;">開始を待っています</p>
         </div>
     </div>
 
@@ -155,7 +146,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
         import { getDatabase, ref, set, onValue, update, onDisconnect, runTransaction } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
-        // Firebase 設定
         const firebaseConfig = {
             apiKey: "AIzaSyDbZzTMvUkG2LXIGY4ux0KBTmnAdqP236s",
             authDomain: "game-4f2d9.firebaseapp.com",
@@ -168,23 +158,14 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // --- 効果音 ---
         const audio = new (window.AudioContext || window.webkitAudioContext)();
-        function playTone(f, t, d, v=0.1) {
+        function sfx(f, t, d) {
             const o = audio.createOscillator(); const g = audio.createGain();
-            o.type = t; o.frequency.value = f; g.gain.setValueAtTime(v, audio.currentTime);
+            o.type = t; o.frequency.value = f; g.gain.setValueAtTime(0.1, audio.currentTime);
             g.gain.exponentialRampToValueAtTime(0.01, audio.currentTime+d);
             o.connect(g); g.connect(audio.destination); o.start(); o.stop(audio.currentTime+d);
         }
-        const sfx = {
-            tick: () => playTone(800, 'sine', 0.1),
-            go: () => playTone(400, 'square', 0.4),
-            swish: () => playTone(150, 'triangle', 0.2, 0.05),
-            hit: () => playTone(600, 'sine', 0.05, 0.2),
-            finish: () => { playTone(1000, 'sine', 0.5); playTone(500, 'sine', 0.5); }
-        };
 
-        // --- 変数管理 ---
         const params = new URLSearchParams(window.location.search);
         const role = params.get('role') || 'host';
         const roomId = params.get('room');
@@ -194,35 +175,24 @@
         if (role === 'host') {
             if (!roomId) window.location.replace(`?role=host&room=${Math.random().toString(36).substr(2,4).toUpperCase()}`);
             document.getElementById('host-view').classList.remove('hidden');
-            
-            new QRCode(document.getElementById("qrcode"), { 
-                text: `${window.location.origin}${window.location.pathname}?role=ctrl&room=${roomId}`, 
-                width: 140, height: 140 
-            });
+            new QRCode(document.getElementById("qrcode"), { text: `${window.location.origin}${window.location.pathname}?role=ctrl&room=${roomId}`, width: 120, height: 120 });
 
-            const stateRef = ref(db, `v3/${roomId}/state`);
-            const playersRef = ref(db, `v3/${roomId}/players`);
+            const stateRef = ref(db, `v4/${roomId}/state`);
+            const playersRef = ref(db, `v4/${roomId}/players`);
 
             window.setMode = (m) => {
                 gameMode = m;
                 document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
                 document.getElementById(`m-${m.toLowerCase()}`).classList.add('active');
-                const labels = {'SHAKE': '種目：フリフリ', 'JUMP': '種目：なわとび', 'LONG': '種目：大なわとび'};
-                document.getElementById('current-mode-label').innerText = labels[m];
+                const labels = {'SHAKE': '種目：フリフリ', 'JUMP': '種目：なわとび', 'LONG': '種目：まわし手'};
+                document.getElementById('mode-label').innerText = labels[m];
                 update(stateRef, { mode: m });
             };
 
-            onValue(ref(db, `v3_global/best`), s => { 
-                const d = s.val() || {score:0, name:''};
-                document.getElementById('wr-score').innerText = d.score; 
-                document.getElementById('wr-name').innerText = d.name ? `(${d.name} 選手)` : "";
-            });
-            
             onValue(playersRef, snap => {
                 const players = snap.val() || {};
-                const pCount = Object.keys(players).length;
-                document.getElementById('player-count').innerText = `現在参加中： ${pCount} 名`;
-                document.getElementById('start-btn').disabled = pCount === 0;
+                document.getElementById('player-count').innerText = `参加中: ${Object.keys(players).length}名`;
+                document.getElementById('start-btn').disabled = Object.keys(players).length === 0;
                 renderArena(players);
             });
 
@@ -236,35 +206,26 @@
                         el = document.createElement('div');
                         el.id = `p-${id}`;
                         el.className = 'player-unit';
-                        el.innerHTML = `<div class="p-score" style="font-family:'Rajdhani'; font-size:28px; font-weight:bold;">0</div>
-                                       <div class="jump-box hidden"><div class="character"></div></div>
-                                       <div class="bar"></div>
-                                       <div class="p-name-label" style="font-size:14px; color:#aaa; margin-top:5px;">${players[id].name}</div>`;
+                        el.innerHTML = `<div class="p-score" style="font-size:20px; font-weight:bold;">0</div>
+                                       <div class="rotate-icon"></div>
+                                       <div class="bar" style="width:30px; height:0px;"></div>
+                                       <div style="font-size:12px; color:#aaa;">${players[id].name}</div>`;
                         arena.appendChild(el);
                     }
                     const p = players[id];
                     const scoreText = el.querySelector('.p-score');
                     const bar = el.querySelector('.bar');
-                    const jumpBox = el.querySelector('.jump-box');
-                    const char = el.querySelector('.character');
+                    const icon = el.querySelector('.rotate-icon');
 
-                    const oldVal = parseInt(scoreText.innerText) || 0;
-                    if (p.count > oldVal) {
-                        sfx.hit();
-                        if(gameMode !== 'SHAKE') {
-                            char.style.transform = 'translateY(-50px)';
-                            setTimeout(() => char.style.transform = 'translateY(0)', 150);
-                        }
-                    }
-
-                    // 競技中はスコアを「???」にする
+                    if (p.count > (parseInt(scoreText.innerText) || 0)) sfx(600, 'sine', 0.05);
                     scoreText.innerText = isRunning ? "???" : (p.count || 0);
                     
-                    if (gameMode === 'SHAKE') {
-                        bar.classList.remove('hidden'); jumpBox.classList.add('hidden');
-                        bar.style.height = Math.min(p.count * 2, 280) + 'px';
+                    if (gameMode === 'LONG') {
+                        bar.style.display = 'none'; icon.style.display = 'block';
+                        icon.style.animationDuration = (2 / Math.max(1, p.count % 10)) + 's';
                     } else {
-                        bar.classList.add('hidden'); jumpBox.classList.remove('hidden');
+                        bar.style.display = 'block'; icon.style.display = 'none';
+                        bar.style.height = Math.min(p.count * 3, 250) + 'px';
                     }
                 });
             }
@@ -274,20 +235,21 @@
                 document.getElementById('lobby-ui').classList.add('hidden');
                 document.getElementById('arena').classList.remove('hidden');
                 
-                // 開始時にスコアを確実に 0 リセット
+                // 【重要】前回のスコアを完全に0にリセット
                 onValue(playersRef, snap => {
-                    const updates = {};
-                    Object.keys(snap.val()||{}).forEach(k => updates[k+'/count'] = 0);
-                    update(playersRef, updates);
-                }, {onlyOnce:true});
+                    const players = snap.val() || {};
+                    const resets = {};
+                    Object.keys(players).forEach(k => resets[k+'/count'] = 0);
+                    update(playersRef, resets);
+                }, {onlyOnce: true});
 
                 let count = 3;
                 const ov = document.getElementById('overlay');
                 ov.style.opacity = 1;
                 const cd = setInterval(() => {
-                    if (count > 0) { sfx.tick(); ov.innerText = count; }
+                    if (count > 0) { sfx(800, 'sine', 0.1); ov.innerText = count; }
                     else {
-                        clearInterval(cd); sfx.go(); ov.innerText = "スタート！";
+                        clearInterval(cd); sfx(400, 'square', 0.4); ov.innerText = "スタート！";
                         setTimeout(() => ov.style.opacity = 0, 1000);
                         startMatch(sec);
                     }
@@ -297,58 +259,35 @@
 
             function startMatch(sec) {
                 document.getElementById('arena').setAttribute('data-run', 'true');
-                if (gameMode === 'LONG') document.getElementById('long-rope').classList.add('rope-swing');
+                if (gameMode === 'LONG') document.getElementById('long-rope').classList.add('rope-spin');
                 
                 let time = sec;
-                const startTime = Date.now();
-                update(stateRef, { status: 'running', startTime: startTime });
-
+                update(stateRef, { status: 'running' });
                 const timer = setInterval(() => {
                     time--;
                     document.getElementById('main-timer').innerText = `00:${time < 10 ? '0'+time : time}`;
-                    
-                    if (gameMode === 'LONG' && time > 0) {
-                        sfx.swish(); // リズムガイド音
-                    }
-
-                    if (time <= 0) {
-                        clearInterval(timer);
-                        finishMatch();
-                    }
+                    if (time <= 0) { clearInterval(timer); finishMatch(); }
                 }, 1000);
             }
 
             function finishMatch() {
-                sfx.finish();
                 update(stateRef, { status: 'finished' });
-                document.getElementById('long-rope').classList.remove('rope-swing');
+                document.getElementById('long-rope').classList.remove('rope-spin');
                 document.getElementById('arena').setAttribute('data-run', 'false');
                 const ov = document.getElementById('overlay');
                 ov.innerText = "終了！"; ov.style.opacity = 1;
-
-                onValue(playersRef, snap => {
-                    const players = snap.val() || {};
-                    let top = -1; let win = "";
-                    Object.keys(players).forEach(k => { if(players[k].count > top){ top = players[k].count; win = players[k].name; } });
-                    
-                    setTimeout(() => {
-                        ov.innerHTML = `優勝<br><span style="color:var(--primary); font-size:1.2em;">${win} 選手</span>`;
-                        document.getElementById('news-text').innerText = `${win} 選手が ${top} 回で優勝！おめでとうございます！`;
-                        if(top > 0) runTransaction(ref(db, `v3_global/best`), c => { if(!c || top > c.score) return {score:top, name:win}; return; });
-                    }, 2000);
-                    setTimeout(() => location.reload(), 10000);
-                }, {onlyOnce:true});
+                setTimeout(() => location.reload(), 8000);
             }
         } 
         
         // --- コントローラー ---
         else {
             document.getElementById('ctrl-view').classList.remove('hidden');
-            let status = 'lobby', count = 0, mode = 'SHAKE', startTime = 0;
+            let status = 'lobby', count = 0, mode = 'SHAKE';
 
             window.ctrlJoin = () => {
                 const n = document.getElementById('p-name').value;
-                if(!n) return alert("名前を入力してください");
+                if(!n) return alert("名前を入力！");
                 if(typeof DeviceMotionEvent.requestPermission === 'function') {
                     DeviceMotionEvent.requestPermission().then(r => { if(r==='granted') init(n); });
                 } else init(n);
@@ -357,63 +296,49 @@
             function init(name) {
                 document.getElementById('ctrl-login').classList.add('hidden');
                 document.getElementById('ctrl-game').classList.remove('hidden');
-                const pRef = ref(db, `v3/${roomId}/players/${myId}`);
+                const pRef = ref(db, `v4/${roomId}/players/${myId}`);
                 set(pRef, { name: name, count: 0 });
                 onDisconnect(pRef).remove();
 
-                onValue(ref(db, `v3/${roomId}/state`), s => {
+                onValue(ref(db, `v4/${roomId}/state`), s => {
                     const data = s.val() || {};
                     status = data.status;
                     mode = data.mode;
-                    startTime = data.startTime;
+                    const hints = {'SHAKE':'スマホを振れ！', 'JUMP':'ジャンプしろ！', 'LONG':'大きく円を描け！'};
+                    document.getElementById('mode-hint').innerText = hints[mode];
                     
-                    const hints = {'SHAKE':'全力で振れ！', 'JUMP':'リズムよく跳べ！', 'LONG':'縄に合わせて跳べ！'};
-                    document.getElementById('mode-hint').innerText = hints[mode] || "準備中...";
-                    
-                    if(status === 'running') {
-                        document.getElementById('ctrl-status').innerText = "競技中！！";
-                    } else if(status === 'finished') {
-                        document.getElementById('ctrl-status').innerText = "終了しました";
-                    } else {
+                    const btn = document.getElementById('action-btn');
+                    if (mode === 'LONG') btn.classList.add('turning');
+                    else btn.classList.remove('turning');
+
+                    if(status !== 'running') {
                         count = 0; document.getElementById('my-count').innerText = 0;
-                        document.getElementById('ctrl-status').innerText = "開始を待っています...";
                     }
                 });
 
-                let lastJump = 0;
+                let lastX=0, lastY=0, lastZ=0, lastTime=0;
                 window.addEventListener('devicemotion', e => {
                     if (status !== 'running') return;
                     const acc = e.accelerationIncludingGravity;
                     const now = Date.now();
 
                     if (mode === 'SHAKE') {
-                        const power = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
-                        if (power > 35) { if(now - lastJump > 100) trigger(); }
-                    } else if (mode === 'JUMP') {
-                        if (acc.y > 15) { if(now - lastJump > 300) trigger(); }
-                    } else if (mode === 'LONG') {
-                        // 大なわとび判定: 1.2秒周期のリズム合わせ
-                        if (acc.y > 15 && now - lastJump > 400) {
-                            const elapsed = (now - startTime) % 1200;
-                            // 縄が地面に来るのは 600ms 地点。許容誤差 ±150ms
-                            if (elapsed > 450 && elapsed < 750) {
-                                trigger();
-                                document.getElementById('ctrl-status').innerText = "ナイス！";
-                                document.getElementById('ctrl-status').style.color = "var(--accent)";
-                            } else {
-                                document.getElementById('ctrl-status').innerText = "ミス！";
-                                document.getElementById('ctrl-status').style.color = "var(--secondary)";
-                                lastJump = now;
-                            }
+                        if (Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z) > 35) {
+                            if(now - lastTime > 100) trigger();
                         }
+                    } else if (mode === 'JUMP') {
+                        if (acc.y > 15 && now - lastTime > 300) trigger();
+                    } else if (mode === 'LONG') {
+                        // 円を描く動作の簡易判定（加速度の変化の合計）
+                        const d = Math.abs(acc.x - lastX) + Math.abs(acc.y - lastY);
+                        if (d > 15 && now - lastTime > 150) trigger();
                     }
+                    lastX=acc.x; lastY=acc.y; lastZ=acc.z;
                 });
 
                 function trigger() {
-                    count++; lastJump = Date.now();
+                    count++; lastTime = Date.now();
                     document.getElementById('my-count').innerText = count;
-                    document.getElementById('action-btn').classList.add('active-jump');
-                    setTimeout(() => document.getElementById('action-btn').classList.remove('active-jump'), 100);
                     update(pRef, { count: count });
                 }
             }
