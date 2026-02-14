@@ -2,397 +2,179 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI人狼 ARENA V12 - 安定版</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI人狼 V13 - 安定動作版</title>
     <style>
+        :root {
+            --bg: #121216;
+            --panel: #1e1e24;
+            --accent: #ff3e3e;
+            --btn: #3d8bff;
+            --text: #ffffff;
+        }
+
         body {
-            font-family: "Helvetica Neue", Arial, sans-serif;
-            background-color: #0d0d0f; color: white; margin: 0;
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+            font-family: sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            user-select: none;
         }
-        .container { width: 95%; max-width: 650px; padding: 20px; box-sizing: border-box; }
-        .hidden { display: none !important; }
-        h1 { color: #ff3e3e; text-align: center; border-bottom: 2px solid #ff3e3e; padding-bottom: 10px; }
 
-        /* キャラクター表示 */
-        .player-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-bottom: 15px; }
-        .p-card { background: #1a1a20; border: 2px solid #333; border-radius: 12px; padding: 10px; text-align: center; font-size: 14px; }
-        .p-card.dead { opacity: 0.3; background: #000; filter: grayscale(1); }
-        .p-card.me { border-color: #00ffcc; }
-        .role-tag { font-size: 11px; background: #444; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 5px; }
+        #game-container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--panel);
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-sizing: border-box;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
 
-        /* ログ・字幕 */
-        #log-area { background: #000; height: 160px; overflow-y: auto; border: 1px solid #333; padding: 10px; font-size: 14px; margin-bottom: 10px; border-radius: 8px; line-height: 1.6; }
-        .name-lbl { font-weight: bold; margin-right: 5px; color: #ffcc00; }
-
-        /* 操作パネル */
-        .panel { background: #1e1e24; padding: 20px; border-radius: 20px; text-align: center; border: 1px solid #444; }
-        .privacy-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        h1 { color: var(--accent); text-align: center; font-size: 22px; margin-top: 0; }
+        .status-bar { text-align: center; font-weight: bold; color: #ffcc00; margin-bottom: 10px; }
+        .info-text { background: #000; padding: 10px; border-radius: 10px; font-size: 14px; line-height: 1.6; margin-bottom: 15px; min-height: 60px; }
         
+        .player-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+        .player-item { background: #2a2a32; padding: 8px; border-radius: 8px; font-size: 13px; border: 1px solid #444; text-align: center; }
+        .player-item.dead { opacity: 0.3; background: #000; text-decoration: line-through; }
+        .player-item.me { border-color: #00ffcc; }
+
         button {
-            background: #ff3e3e; color: white; border: none; padding: 15px 30px;
-            font-size: 18px; border-radius: 50px; cursor: pointer; font-weight: bold;
-            margin: 10px 0; width: 100%; max-width: 320px;
+            background: var(--btn);
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: auto;
+            width: 100%;
+            transition: 0.2s;
         }
-        button:disabled { background: #444; cursor: not-allowed; }
-        .btn-sub { background: #3d8bff; }
-        .btn-mic { background: #333; border: 1px solid #555; }
-        .btn-mic.active { background: #ff3e3e; animation: pulse 1s infinite; }
+        button:active { transform: scale(0.95); background: #2a6bcc; }
+        button.wolf-btn { background: var(--accent); }
 
-        input, select { width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 10px; border: none; box-sizing: border-box; font-size: 16px; background: #000; color: white; }
-        label { display: block; text-align: left; font-size: 13px; color: #aaa; margin-bottom: 5px; }
+        select, input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            background: #000;
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
 
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+        /* 端末受け渡し用：真っ暗画面 */
+        #pass-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 20px; box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>AI人狼 ARENA V12</h1>
-
-        <!-- 1. 設定 -->
-        <div id="setup-screen">
-            <div class="panel">
-                <label>プレイ総人数 (5〜10名)</label>
-                <input type="number" id="total-players" value="5" min="5" max="10">
-                <label>人間の参加人数</label>
-                <input type="number" id="human-count" value="1" min="1" max="10">
-                <button onclick="generateNameInputs()">次へ進む</button>
-            </div>
-        </div>
-
-        <!-- 2. 名前入力 -->
-        <div id="name-input-screen" class="hidden">
-            <div class="panel">
-                <h3>名前を入力してください</h3>
-                <div id="name-fields"></div>
-                <button onclick="startGame()">ゲーム開始</button>
-            </div>
-        </div>
-
-        <!-- 3. プライバシー保護 (パス＆プレイ) -->
-        <div id="privacy-screen" class="privacy-overlay hidden">
-            <h2 id="turn-player-name" style="color:#00ffcc;">---</h2>
-            <p>さんの番です。<br>他の方は画面を見ないでください。</p>
-            <button onclick="showSecret()">画面を表示して確認</button>
-        </div>
-
-        <!-- 4. メインゲーム -->
-        <div id="game-screen" class="hidden">
-            <h3 id="phase-label" style="color:#ffcc00; text-align:center; margin-bottom:10px;"></h3>
-            <div id="timer-display" style="font-size: 40px; text-align:center; font-weight:bold;" class="hidden">01:00</div>
-            
-            <div class="player-grid" id="player-grid"></div>
-            <div id="log-area"></div>
-            
-            <!-- 議論フェーズのみ表示 -->
-            <button id="mic-toggle" class="btn-mic hidden" onclick="toggleMic()">🎤 マイクで話す (ログに記録)</button>
-
-            <div id="control-panel" class="panel" style="margin-top:10px;">
-                <p id="guide-msg" style="color: #aaa; font-size: 14px; margin-bottom: 10px;"></p>
-                
-                <!-- 個別アクション用 -->
-                <div id="action-ui" class="hidden">
-                    <div id="role-display" style="font-size:20px; font-weight:bold; color:#ffcc00; margin-bottom:10px;"></div>
-                    <label id="action-hint"></label>
-                    <select id="target-select"></select>
-                    <button id="submit-btn" onclick="onActionClick()">決定</button>
-                </div>
-
-                <!-- 進行用ボタン -->
-                <button id="finish-turn-btn" class="hidden btn-sub" onclick="finishCurrentTurn()">完了（次の人へ）</button>
-                <button id="next-phase-btn" class="hidden" onclick="advanceToNextPhase()">朝に進む</button>
-            </div>
+    <div id="game-container">
+        <h1>AI人狼 ARENA V13</h1>
+        <div id="game-content">
+            <!-- ここにJavaScriptで画面が生成されます -->
         </div>
     </div>
 
+    <!-- 端末受け渡し用オーバーレイ -->
+    <div id="pass-screen" style="display: none;">
+        <h2 id="next-player-name" style="color: #00ffcc; font-size: 30px;"></h2>
+        <p style="font-size: 18px;">さんの番です。<br>他の方は画面を見ないでください。</p>
+        <button onclick="hidePassScreen()">画面を表示する</button>
+    </div>
+
     <script>
-        // --- データ定義 ---
-        const ROLE = { WOLF: '人狼', SEER: '占い師', VILLAGER: '村人' };
-        let players = [];
-        let day = 1;
-        let phase = 'NIGHT';
-        let killedThisMorning = null;
-        let timerId = null;
+        // --- ゲームの状態管理 ---
+        const ROLES = { WOLF: '人狼', SEER: '占い師', VILL: '村人' };
+        let state = {
+            view: 'SETUP', // SETUP, PASS, ACTION, RESULT, DISCUSS, VOTE, END
+            day: 1,
+            phase: 'NIGHT', // NIGHT, MORNING, DISCUSS, VOTE
+            players: [],
+            humanIdxs: [],
+            currentTurnIdx: 0,
+            log: "",
+            killedName: ""
+        };
 
-        // --- 音声合成 ---
-        function speak(text, speaker = "システム") {
-            if (window.speechSynthesis) {
-                window.speechSynthesis.cancel();
-                const uttr = new SpeechSynthesisUtterance(text);
-                uttr.lang = "ja-JP";
-                uttr.rate = 1.2;
-                window.speechSynthesis.speak(uttr);
+        const content = document.getElementById('game-content');
+
+        // --- 画面描画の核 ---
+        function render() {
+            content.innerHTML = "";
+
+            if (state.view === 'SETUP') {
+                content.innerHTML = `
+                    <p>何人で遊びますか？</p>
+                    <label style="font-size:12px; color:#aaa;">総人数 (5-10)</label>
+                    <input type="number" id="total-p" value="5" min="5" max="10">
+                    <label style="font-size:12px; color:#aaa;">人間の数</label>
+                    <input type="number" id="human-p" value="1" min="1" max="10">
+                    <button onclick="setupPlayers()">名前を入力する</button>
+                `;
+            } 
+            else if (state.view === 'SETUP_NAMES') {
+                let inputs = "";
+                for(let i=0; i<state.humanCount; i++) {
+                    inputs += `<input type="text" class="name-in" value="プレイヤー${i+1}">`;
+                }
+                content.innerHTML = `
+                    <p>名前を入力してください</p>
+                    ${inputs}
+                    <button onclick="startGame()">ゲーム開始</button>
+                `;
             }
-            addLog(text, speaker);
-        }
+            else if (state.view === 'ACTION') {
+                const p = state.players[state.humanIdxs[state.currentTurnIdx]];
+                let actionHtml = "";
 
-        function addLog(msg, name = "システム") {
-            const log = document.getElementById('log-area');
-            const d = document.createElement('div');
-            d.innerHTML = `<span class="name-lbl">${name}:</span><span>${msg}</span>`;
-            log.appendChild(d);
-            log.scrollTop = log.scrollHeight;
-        }
-
-        // --- 音声認識 (Mic) ---
-        let recognition;
-        let isMicOn = false;
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognition = new SpeechRec();
-            recognition.lang = 'ja-JP';
-            recognition.continuous = true;
-            recognition.onresult = (e) => {
-                const res = e.results[e.results.length - 1][0].transcript;
-                addLog(res, "あなたの発言");
-            };
-        }
-
-        function toggleMic() {
-            if (!recognition) return alert("マイクに対応していません");
-            if (isMicOn) {
-                recognition.stop();
-                document.getElementById('mic-toggle').classList.remove('active');
-            } else {
-                recognition.start();
-                document.getElementById('mic-toggle').classList.add('active');
-            }
-            isMicOn = !isMicOn;
-        }
-
-        // --- 初期設定 ---
-        function generateNameInputs() {
-            const count = document.getElementById('human-count').value;
-            document.getElementById('setup-screen').classList.add('hidden');
-            document.getElementById('name-input-screen').classList.remove('hidden');
-            const area = document.getElementById('name-fields');
-            area.innerHTML = "";
-            for (let i = 1; i <= count; i++) {
-                area.innerHTML += `<input type="text" class="h-name" value="プレイヤー${i}">`;
-            }
-        }
-
-        function startGame() {
-            const total = parseInt(document.getElementById('total-players').value);
-            const hNames = document.querySelectorAll('.h-name');
-            players = [];
-            hNames.forEach(input => {
-                players.push({ name: input.value, isAI: false, role: '', alive: true, done: false, willDie: false });
-            });
-            const aiNames = ["タナカ", "サトウ", "スズキ", "イトウ", "ヤマダ", "カトウ"];
-            while (players.length < total) {
-                players.push({ name: aiNames[players.length % aiNames.length], isAI: true, role: '', alive: true, done: false, willDie: false });
-            }
-            let roles = [ROLE.WOLF, ROLE.SEER];
-            if (total >= 8) roles.push(ROLE.WOLF);
-            while (roles.length < total) roles.push(ROLE.VILLAGER);
-            roles.sort(() => Math.random() - 0.5);
-            players.forEach((p, i) => p.role = roles[i]);
-
-            document.getElementById('name-input-screen').classList.add('hidden');
-            document.getElementById('game-screen').classList.remove('hidden');
-            startNightPhase();
-        }
-
-        // --- 夜フェーズ ---
-        function startNightPhase() {
-            phase = 'NIGHT';
-            players.forEach(p => p.done = false);
-            document.getElementById('phase-label').innerText = `${day}日目：夜`;
-            document.getElementById('next-phase-btn').classList.add('hidden');
-            document.getElementById('mic-toggle').classList.add('hidden');
-            document.getElementById('timer-display').classList.add('hidden');
-            if (isMicOn) toggleMic();
-            
-            updateStep();
-        }
-
-        function updateStep() {
-            const currentHuman = players.find(p => !p.isAI && p.alive && !p.done);
-            
-            if (currentHuman) {
-                // 人間の番
-                document.getElementById('privacy-overlay').classList.add('hidden'); // 安全のため一度隠す
-                document.getElementById('privacy-screen').classList.remove('hidden');
-                document.getElementById('turn-player-name').innerText = currentHuman.name;
-                document.getElementById('guide-msg').innerText = "順番に役職を確認してください。";
-                updateGrid(true);
-            } else {
-                // AIの処理
-                players.forEach(p => {
-                    if (p.isAI && p.alive && p.role === ROLE.WOLF) {
-                        const targets = players.filter(t => t.alive && t.role !== ROLE.WOLF);
-                        if(targets.length > 0) targets[Math.floor(Math.random()*targets.length)].willDie = true;
+                if (state.phase === 'NIGHT') {
+                    if (p.role === ROLES.WOLF) {
+                        actionHtml = `<p>襲撃する相手を選んでください</p>${getTargetSelect(p)}`;
+                    } else if (p.role === ROLES.SEER) {
+                        actionHtml = `<p>占う相手を選んでください</p>${getTargetSelect(p)}`;
+                    } else {
+                        actionHtml = `<p>村人は夜の行動はありません。そのまま完了を押してください。</p>`;
                     }
-                });
-                // 全員終了
-                document.getElementById('privacy-screen').classList.add('hidden');
-                document.getElementById('action-ui').classList.add('hidden');
-                document.getElementById('finish-turn-btn').classList.add('hidden');
-                document.getElementById('next-phase-btn').classList.remove('hidden');
-                document.getElementById('next-phase-btn').innerText = "朝にする";
-                document.getElementById('guide-msg').innerText = "全員の夜の行動が終わりました。";
-                updateGrid(false);
-            }
-        }
-
-        function showSecret() {
-            document.getElementById('privacy-screen').classList.add('hidden');
-            document.getElementById('action-ui').classList.remove('hidden');
-            const p = players.find(p => !p.isAI && p.alive && !p.done);
-            
-            document.getElementById('role-display').innerText = `あなたは【${p.role}】です`;
-            const sel = document.getElementById('target-select');
-            sel.innerHTML = "";
-            
-            if (phase === 'NIGHT') {
-                if (p.role === ROLE.WOLF) {
-                    document.getElementById('action-hint').innerText = "襲撃する相手を選んでください：";
-                    players.filter(t => t.alive && t.name !== p.name).forEach((t, i) => sel.add(new Option(t.name, players.indexOf(t))));
-                } else if (p.role === ROLE.SEER) {
-                    document.getElementById('action-hint').innerText = "占う相手を選んでください：";
-                    players.filter(t => t.alive && t.name !== p.name).forEach((t, i) => sel.add(new Option(t.name, players.indexOf(t))));
-                } else {
-                    document.getElementById('action-hint').innerText = "村人は夜の行動はありません。";
-                    document.getElementById('target-select').classList.add('hidden');
-                    document.getElementById('submit-btn').innerText = "確認しました";
+                } else if (state.phase === 'VOTE') {
+                    actionHtml = `<p>追放したい相手に投票してください</p>${getTargetSelect(p)}`;
                 }
-            } else if (phase === 'VOTE') {
-                document.getElementById('action-hint').innerText = "追放したい相手に投票してください：";
-                document.getElementById('target-select').classList.remove('hidden');
-                document.getElementById('submit-btn').innerText = "投票する";
-                players.filter(t => t.alive && t.name !== p.name).forEach((t, i) => sel.add(new Option(t.name, players.indexOf(t))));
+
+                content.innerHTML = `
+                    <div class="status-bar">${state.day}日目：${state.phase === 'NIGHT' ? '夜' : '投票'}</div>
+                    <div class="info-text" style="color:#ffcc00; font-weight:bold; text-align:center; font-size:20px;">
+                        あなたの正体：${p.role}
+                    </div>
+                    ${actionHtml}
+                    <button onclick="submitAction()">決定</button>
+                `;
             }
-        }
-
-        function onActionClick() {
-            const p = players.find(p => !p.isAI && p.alive && !p.done);
-            const targetIdx = document.getElementById('target-select').value;
-            
-            if (phase === 'NIGHT') {
-                if (p.role === ROLE.WOLF) players[targetIdx].willDie = true;
-                if (p.role === ROLE.SEER) alert(`${players[targetIdx].name}さんは【${players[targetIdx].role === ROLE.WOLF ? '人狼' : '人間'}】でした！`);
-            } else {
-                p.voteTo = players[targetIdx].name;
+            else if (state.view === 'RESULT') {
+                content.innerHTML = `
+                    <div class="status-bar">${state.day}日目：朝</div>
+                    <div class="info-text">${state.log}</div>
+                    ${getPlayerListHtml()}
+                    <button onclick="startDiscuss()">議論を開始する</button>
+                `;
             }
-
-            p.done = true;
-            document.getElementById('action-ui').classList.add('hidden');
-            document.getElementById('finish-turn-btn').classList.remove('hidden');
-            document.getElementById('guide-msg').innerText = "行動を記録しました。次の人に渡してください。";
-        }
-
-        function finishCurrentTurn() {
-            document.getElementById('finish-turn-btn').classList.add('hidden');
-            document.getElementById('target-select').classList.remove('hidden');
-            document.getElementById('submit-btn').innerText = "決定";
-            
-            if (phase === 'NIGHT') updateStep();
-            else updateVoteStep();
-        }
-
-        // --- フェーズ進行 ---
-        function advanceToNextPhase() {
-            document.getElementById('next-phase-btn').classList.add('hidden');
-            
-            if (phase === 'NIGHT') {
-                // 朝
-                phase = 'MORNING';
-                document.getElementById('phase-label').innerText = "朝";
-                killedThisMorning = null;
-                players.forEach(p => { if(p.willDie){ p.alive = false; killedThisMorning = p; p.willDie = false; } });
-                const msg = killedThisMorning ? `犠牲者は ${killedThisMorning.name} さんです。` : "犠牲者はいませんでした。";
-                speak(msg);
-                updateGrid(false);
-                if (!checkGameOver()) {
-                    document.getElementById('next-phase-btn').classList.remove('hidden');
-                    document.getElementById('next-phase-btn').innerText = "議論を始める";
-                }
-            } else if (phase === 'MORNING') {
-                // 議論
-                phase = 'DISCUSS';
-                document.getElementById('phase-label').innerText = "議論";
-                document.getElementById('timer-display').classList.remove('hidden');
-                document.getElementById('mic-toggle').classList.remove('hidden');
-                startDiscussTimer();
-            } else if (phase === 'DISCUSS') {
-                // 投票
-                phase = 'VOTE';
-                document.getElementById('phase-label').innerText = "投票";
-                players.forEach(p => p.done = false);
-                updateVoteStep();
-            } else if (phase === 'VOTE') {
-                // 夜へ
-                day++;
-                startNightPhase();
-            }
-        }
-
-        function startDiscussTimer() {
-            let sec = 60;
-            timerId = setInterval(() => {
-                sec--;
-                document.getElementById('timer-display').innerText = `0:${sec < 10 ? '0'+sec : sec}`;
-                if (sec % 20 === 0 && sec > 0) {
-                    const ais = players.filter(p => p.isAI && p.alive);
-                    const spk = ais[Math.floor(Math.random()*ais.length)];
-                    speak("誰が人狼でしょうか？怪しい人を話し合いましょう。", spk.name);
-                }
-                if (sec <= 0) {
-                    clearInterval(timerId);
-                    document.getElementById('timer-display').classList.add('hidden');
-                    document.getElementById('next-phase-btn').classList.remove('hidden');
-                    document.getElementById('next-phase-btn').innerText = "投票に進む";
-                    speak("話し合い終了です。投票に移ってください。");
-                }
-            }, 1000);
-        }
-
-        function updateVoteStep() {
-            const currentHuman = players.find(p => !p.isAI && p.alive && !p.done);
-            if (currentHuman) {
-                document.getElementById('privacy-screen').classList.remove('hidden');
-                document.getElementById('turn-player-name').innerText = currentHuman.name;
-            } else {
-                // 投票結果
-                const votes = {};
-                const alives = players.filter(p => p.alive);
-                alives.forEach(p => {
-                    const v = p.voteTo || alives.filter(t => t !== p)[Math.floor(Math.random()*(alives.length-1))].name;
-                    votes[v] = (votes[v] || 0) + 1;
-                });
-                let max = -1; let res = "";
-                for (let n in votes) { if(votes[n] > max){ max = votes[n]; res = n; } }
-                const target = players.find(p => p.name === res);
-                target.alive = false;
-                speak(`${res} さんが追放されました。`);
-                updateGrid(false);
-                if (!checkGameOver()) {
-                    document.getElementById('next-phase-btn').classList.remove('hidden');
-                    document.getElementById('next-phase-btn').innerText = "次の夜へ";
-                }
-            }
-        }
-
-        function checkGameOver() {
-            const w = players.filter(p => p.alive && p.role === ROLE.WOLF).length;
-            const v = players.filter(p => p.alive && p.role !== ROLE.WOLF).length;
-            if (w === 0) { alert("村人の勝利です！"); location.reload(); return true; }
-            if (w >= v) { alert("人狼の勝利です！"); location.reload(); return true; }
-            return false;
-        }
-
-        function updateGrid(hide) {
-            const grid = document.getElementById('player-grid');
-            grid.innerHTML = '';
-            players.forEach(p => {
-                const card = document.createElement('div');
-                card.className = `p-card ${p.alive ? '' : 'dead'}`;
-                card.innerHTML = `<div>${p.name}</div><div class="role-tag">${(!hide || !p.alive) ? p.role : '???'}</div>`;
-                grid.appendChild(card);
-            });
-        }
-    </script>
-</body>
-</html>
+            else if (state.view === 'DISCUSS') {
+                content.innerHTML = `
+                    <div class="status-bar">${state.day}日目：議論</div>
+                    <div cl
