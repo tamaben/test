@@ -2,373 +2,365 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>連帯・大縄アリーナ V9 - 職人魂</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI人狼 - ソロバトルアリーナ</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=Zen+Maru+Gothic:wght@700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&display=swap');
 
         :root {
-            --primary: #00f2ff;
-            --secondary: #ff0055;
-            --accent: #ffee00;
-            --dark: #0a0b10;
+            --bg: #1a1a1a;
+            --wolf: #ff4d4d;
+            --villager: #4d94ff;
+            --seer: #cc33ff;
+            --accent: #ffd700;
         }
 
-        body { 
-            font-family: 'Zen Maru Gothic', sans-serif; 
-            margin: 0; background: var(--dark); color: white; 
-            overflow: hidden; touch-action: none;
+        body {
+            font-family: 'Zen Maru Gothic', sans-serif;
+            background-color: var(--bg);
+            color: white;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
         }
 
-        .full-screen { position: absolute; top:0; left:0; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .container { width: 95%; max-width: 600px; padding: 20px; }
+        h1 { color: var(--accent); text-align: center; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+
+        /* キャラクターリスト */
+        .player-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-bottom: 20px; }
+        .player-card {
+            background: #333; padding: 10px; border-radius: 8px; text-align: center;
+            border: 2px solid transparent; transition: 0.3s;
+        }
+        .player-card.dead { opacity: 0.5; background: #111; text-decoration: line-through; }
+        .player-card.active { border-color: var(--accent); transform: scale(1.05); }
+        .player-card.me { border-color: var(--villager); }
+
+        /* ログエリア */
+        #log {
+            background: #000; height: 250px; overflow-y: auto;
+            padding: 10px; border-radius: 8px; font-size: 14px;
+            line-height: 1.6; border: 1px solid #444; margin-bottom: 15px;
+        }
+        .log-night { color: var(--seer); }
+        .log-wolf { color: var(--wolf); }
+        .log-day { color: #fff; }
+        .log-system { color: var(--accent); font-weight: bold; }
+
+        /* 操作パネル */
+        .panel { background: #222; padding: 15px; border-radius: 12px; text-align: center; }
+        button {
+            background: var(--accent); border: none; padding: 10px 20px;
+            border-radius: 50px; font-weight: bold; cursor: pointer;
+            margin: 5px; font-size: 16px; transition: 0.2s;
+        }
+        button:hover { transform: scale(1.1); }
+        button:disabled { background: #555; cursor: not-allowed; }
+
+        select { padding: 10px; border-radius: 8px; font-size: 16px; width: 100%; margin-bottom: 10px; }
+
         .hidden { display: none !important; }
-
-        /* --- ホスト画面 --- */
-        #top-ui {
-            position: absolute; top: 0; width: 100%; height: 80px;
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 0 50px; box-sizing: border-box; background: rgba(0,0,0,0.9); border-bottom: 2px solid var(--accent); z-index: 100;
-        }
-
-        .combo-area { text-align: center; margin-top: 50px; z-index: 10; }
-        .combo-num { font-family: 'Rajdhani'; font-size: 130px; line-height: 1; color: #fff; text-shadow: 0 0 40px var(--accent); }
-
-        #arena {
-            display: flex; align-items: flex-end; justify-content: center;
-            height: 45vh; width: 95%; gap: 15px; border-bottom: 5px solid #333;
-            position: relative; perspective: 1200px;
-        }
-
-        /* 左右のパワーメーター */
-        .power-meter { position: absolute; bottom: 100px; width: 120px; height: 10px; background: #222; border-radius: 5px; overflow: hidden; }
-        .power-fill { width: 0%; height: 100%; transition: width 0.1s; }
-        #left-meter { left: 50px; border: 1px solid var(--secondary); }
-        #right-meter { right: 50px; border: 1px solid var(--secondary); }
-
-        #rope-visual {
-            position: absolute; width: 100%; height: 150%;
-            border: 12px solid var(--accent); border-radius: 50%;
-            top: -75%; left: 0; transform-origin: center;
-            display: none; pointer-events: none; opacity: 0.8;
-            box-shadow: 0 0 50px var(--accent);
-            transform: rotateX(0deg);
-        }
-
-        .player-unit { display: flex; flex-direction: column; align-items: center; width: 80px; z-index: 5; }
-        .p-char { width: 40px; height: 60px; background: #fff; border-radius: 6px; transition: transform 0.1s; border: 3px solid #555; }
-        .role-badge { font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-bottom: 6px; font-weight: 900; }
-        .badge-left { background: var(--secondary); color: white; }
-        .badge-right { background: #ff9900; color: white; }
-        .badge-jumper { background: var(--primary); color: #000; }
-
-        .btn-ready { background: var(--secondary); border: none; color: white; padding: 18px 50px; font-size: 28px; cursor: pointer; border-radius: 50px; font-weight: 900; box-shadow: 0 0 30px var(--secondary); }
-        .btn-ready:disabled { opacity: 0.3; }
-
-        /* --- コントローラー --- */
-        #ctrl-pad {
-            width: 280px; height: 280px; border-radius: 50%; border: 12px solid var(--primary);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: rgba(255,255,255,0.05); transition: 0.1s;
-        }
+        .role-display { font-size: 18px; color: var(--accent); margin-bottom: 10px; }
     </style>
 </head>
 <body>
-    <div class="full-screen" style="background: radial-gradient(circle, #1a1e2a 0%, #000 100%); z-index: -1;"></div>
 
-    <!-- ホスト画面 -->
-    <div id="host-view" class="full-screen hidden">
-        <div id="top-ui">
-            <div style="font-size: 20px; color: var(--accent);">最高： <span id="max-combo-val">0</span> 回</div>
-            <div id="game-timer" style="font-family: 'Rajdhani'; font-size: 45px;">00:00</div>
-            <div style="color: var(--primary); font-weight: 900;">大縄協力戦 V9</div>
-        </div>
+    <div class="container">
+        <h1>AI人狼 ARENA</h1>
 
-        <div class="combo-area">
-            <div style="letter-spacing: 10px; color: var(--accent); font-weight: 900; font-size: 20px;">TEAM COMBO</div>
-            <div id="combo-num" class="combo-num">0</div>
-        </div>
-
-        <div id="lobby-ui" style="background: rgba(0,0,0,0.85); padding: 30px; border-radius: 20px; text-align: center; border: 2px solid var(--primary); z-index: 200;">
-            <h1 style="margin: 0 0 10px 0;">シンクロ大縄跳び</h1>
-            <p>【左まわし】【右まわし】が息を合わせて縄を回せ！</p>
-            <div id="qrcode" style="background:white; padding:10px; display:inline-block; margin:20px; border-radius:10px;"></div>
-            <div><button id="start-btn" class="btn-ready" onclick="hostStart()" disabled>試合開始</button></div>
-            <p id="p-count-msg" style="margin-top:20px; color:var(--primary); font-weight:bold;">選手の入場を待っています...</p>
-        </div>
-
-        <div id="arena" class="hidden">
-            <div id="rope-visual"></div>
-            <div id="left-meter" class="power-meter"><div id="left-fill" class="power-fill" style="background: var(--secondary);"></div></div>
-            <div id="right-meter" class="power-meter"><div id="right-fill" class="power-fill" style="background: #ff9900;"></div></div>
-            <div style="position:absolute; bottom:115px; left:50px; font-size:12px; color:var(--secondary);">LEFT TURNER</div>
-            <div style="position:absolute; bottom:115px; right:50px; font-size:12px; color:#ff9900;">RIGHT TURNER</div>
-        </div>
-        <div id="overlay-msg" style="position:absolute; font-size:15vw; font-weight:900; opacity:0; transition:0.2s; z-index:300; text-shadow: 0 0 50px #000; text-align:center;"></div>
-    </div>
-
-    <!-- コントローラー画面 -->
-    <div id="ctrl-view" class="full-screen hidden">
-        <div id="ctrl-login" style="background: rgba(0,0,0,0.85); padding: 30px; border-radius: 20px; text-align: center; border: 2px solid var(--primary); width:85%;">
-            <h2>選手入場</h2>
-            <input type="text" id="user-name" placeholder="名前" maxlength="8" style="padding:15px; width:80%; font-size:20px; text-align:center; border-radius:10px; border:none; margin:20px 0; background:#222; color:white;">
-            <button class="btn-ready" onclick="ctrlJoin()">入場</button>
-        </div>
-
-        <div id="ctrl-game" class="hidden" style="text-align:center;">
-            <div id="my-role-badge" class="role-badge" style="display:inline-block; font-size:20px; margin-bottom:15px;">役割判定中</div>
-            <div id="ctrl-pad">
-                <div id="role-icon" style="font-size:70px;">⏳</div>
-                <div id="role-hint" style="font-size:18px; font-weight:bold; margin-top:15px; color:var(--accent);">準備してください</div>
+        <!-- ロビー画面 -->
+        <div id="lobby">
+            <div class="panel">
+                <p>5人村 (自分 + AI 4人)</p>
+                <p>構成：人狼1, 占い師1, 村人3</p>
+                <input type="text" id="player-name" placeholder="あなたの名前" value="プレイヤー" style="padding: 10px; border-radius: 8px; margin-bottom: 10px;">
+                <br>
+                <button onclick="startGame()">ゲーム開始</button>
             </div>
-            <div id="player-status" style="font-size:24px; font-weight:900; margin-top:25px; color:var(--primary);">READY</div>
+        </div>
+
+        <!-- ゲーム画面 -->
+        <div id="game" class="hidden">
+            <div id="role-info" class="role-display"></div>
+            <div class="player-list" id="player-list-ui"></div>
+            
+            <div id="log"></div>
+
+            <div class="panel">
+                <div id="phase-title" style="margin-bottom: 10px; font-weight: bold;"></div>
+                
+                <!-- プレイヤーの行動用 -->
+                <div id="action-ui">
+                    <select id="target-select"></select>
+                    <button id="action-btn" onclick="humanAction()">決定</button>
+                </div>
+                
+                <!-- 次へ進むボタン -->
+                <button id="next-btn" class="hidden" onclick="nextPhase()">次へ進む</button>
+                <button id="restart-btn" class="hidden" onclick="location.reload()">もう一度遊ぶ</button>
+            </div>
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue, update, onDisconnect, runTransaction } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+    <script>
+        const ROLES = { WOLF: '人狼', SEER: '占い師', VILLAGER: '村人' };
+        let players = [];
+        let phase = 'INIT'; // NIGHT, DAY, VOTE, RESULT
+        let dayCount = 1;
+        let myIndex = 0;
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDbZzTMvUkG2LXIGY4ux0KBTmnAdqP236s",
-            authDomain: "game-4f2d9.firebaseapp.com",
-            databaseURL: "https://game-4f2d9-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "game-4f2d9",
-            storageBucket: "game-4f2d9.firebasestorage.app",
-            messagingSenderId: "574316347824",
-            appId: "1:574316347824:web:cf686040628e25ad615675"
-        };
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+        const logEl = document.getElementById('log');
 
-        const audio = new (window.AudioContext || window.webkitAudioContext)();
-        function playSfx(f, t, d, v=0.1) {
-            const o = audio.createOscillator(); const g = audio.createGain();
-            o.type = t; o.frequency.value = f; g.gain.setValueAtTime(v, audio.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.01, audio.currentTime+d);
-            o.connect(g); g.connect(audio.destination); o.start(); o.stop(audio.currentTime+d);
+        function addLog(msg, type = 'day') {
+            const p = document.createElement('div');
+            p.className = `log-${type}`;
+            p.innerText = msg;
+            logEl.appendChild(p);
+            logEl.scrollTop = logEl.scrollHeight;
         }
 
-        const params = new URLSearchParams(window.location.search);
-        const role = params.get('role') || 'host';
-        const roomId = params.get('room');
-        const myId = Math.random().toString(36).substr(2, 6).toUpperCase();
+        function startGame() {
+            const name = document.getElementById('player-name').value || 'プレイヤー';
+            document.getElementById('lobby').classList.add('hidden');
+            document.getElementById('game').classList.remove('hidden');
 
-        if (role === 'host') {
-            if (!roomId) window.location.replace(`?role=host&room=${Math.random().toString(36).substr(2,4).toUpperCase()}`);
-            document.getElementById('host-view').classList.remove('hidden');
-            new QRCode(document.getElementById("qrcode"), { text: `${window.location.origin}${window.location.pathname}?role=ctrl&room=${roomId}`, width: 140, height: 140 });
+            // プレイヤー初期化
+            const aiNames = ['タナカ', 'サトウ', 'スズキ', 'イトウ'];
+            players = [
+                { name: name, role: '', isAI: false, alive: true, known: false },
+                { name: 'タナカ', role: '', isAI: true, alive: true, known: false },
+                { name: 'サトウ', role: '', isAI: true, alive: true, known: false },
+                { name: 'スズキ', role: '', isAI: true, alive: true, known: false },
+                { name: 'イトウ', role: '', isAI: true, alive: true, known: false }
+            ];
 
-            const playersRef = ref(db, `v9/${roomId}/players`);
-            const stateRef = ref(db, `v9/${roomId}/state`);
-            const teamRef = ref(db, `v9/${roomId}/team`);
+            // 役職配分
+            let roles = [ROLES.WOLF, ROLES.SEER, ROLES.VILLAGER, ROLES.VILLAGER, ROLES.VILLAGER];
+            roles = roles.sort(() => Math.random() - 0.5);
+            players.forEach((p, i) => p.role = roles[i]);
 
-            let ropeAngle = 0;
-            let ropeSpeed = 0;
-            let isRunning = false;
-            let lastCheckAngle = 0;
+            document.getElementById('role-info').innerText = `あなたの役職：${players[0].role}`;
+            addLog(`--- 1日目の夜が来ました ---`, 'system');
+            updateUI();
+            startNight();
+        }
 
-            onValue(playersRef, snap => {
-                const players = snap.val() || {};
-                document.getElementById('p-count-msg').innerText = `現在 ${Object.keys(players).length} 名が入場中`;
-                document.getElementById('start-btn').disabled = Object.keys(players).length < 3; // まわし2人+ジャンパー1人以上
-                renderArena(players);
+        function updateUI() {
+            const listUI = document.getElementById('player-list-ui');
+            listUI.innerHTML = '';
+            players.forEach((p, i) => {
+                const card = document.createElement('div');
+                card.className = `player-card ${p.alive ? '' : 'dead'} ${p.isAI ? '' : 'me'}`;
+                card.innerText = `${p.name}\n${(!p.alive || !p.isAI) ? '('+p.role+')' : (p.known ? '('+p.role+')' : '')}`;
+                listUI.appendChild(card);
             });
+        }
 
-            onValue(teamRef, snap => {
-                const d = snap.val() || { combo: 0, maxCombo: 0 };
-                document.getElementById('combo-num').innerText = d.combo;
-                document.getElementById('max-combo-val').innerText = d.maxCombo;
-            });
+        // --- 夜のフェーズ ---
+        function startNight() {
+            phase = 'NIGHT';
+            document.getElementById('phase-title').innerText = `${dayCount}日目：夜の行動`;
+            document.getElementById('next-btn').classList.add('hidden');
+            document.getElementById('action-ui').classList.remove('hidden');
 
-            function renderArena(players) {
-                const arena = document.getElementById('arena');
-                let leftPower = 0;
-                let rightPower = 0;
+            const select = document.getElementById('target-select');
+            select.innerHTML = '';
 
-                Object.keys(players).forEach(id => {
-                    let el = document.getElementById(`p-${id}`);
-                    if (!el) {
-                        el = document.createElement('div'); el.id = `p-${id}`; el.className = 'player-unit';
-                        el.innerHTML = `<div class="role-badge">---</div><div class="p-char"></div><div style="font-size:10px; margin-top:5px;">${players[id].name}</div>`;
-                        arena.appendChild(el);
-                    }
-                    const p = players[id];
-                    const char = el.querySelector('.p-char');
-                    const badge = el.querySelector('.role-badge');
+            const myRole = players[0].role;
+            if (myRole === ROLES.WOLF) {
+                addLog("人狼は今夜襲撃する相手を選んでください。", "wolf");
+                getLivingPlayers(false).forEach(p => select.add(new Option(p.name, p.id)));
+            } else if (myRole === ROLES.SEER) {
+                addLog("占い師は占う相手を選んでください。", "night");
+                getLivingPlayers(false).forEach(p => select.add(new Option(p.name, p.id)));
+            } else {
+                addLog("あなたは静かに夜を過ごしています...", "day");
+                document.getElementById('action-ui').classList.add('hidden');
+                document.getElementById('next-btn').classList.remove('hidden');
+            }
+        }
 
-                    if (p.role === 'turner_l') {
-                        badge.innerText = "左まわし"; badge.className = "role-badge badge-left";
-                        char.style.background = "var(--secondary)";
-                        leftPower = p.power || 0;
-                    } else if (p.role === 'turner_r') {
-                        badge.innerText = "右まわし"; badge.className = "role-badge badge-right";
-                        char.style.background = "#ff9900";
-                        rightPower = p.power || 0;
-                    } else if (p.role === 'jumper') {
-                        badge.innerText = "ジャンパー"; badge.className = "role-badge badge-jumper";
-                        char.style.background = "#fff";
-                        if (p.state === 'jump') { char.style.transform = 'translateY(-50px)'; setTimeout(() => char.style.transform = 'translateY(0)', 150); }
-                    }
-                });
+        function humanAction() {
+            const targetId = document.getElementById('target-select').value;
+            const myRole = players[0].role;
+
+            if (myRole === ROLES.WOLF) {
+                players[targetId].willDie = true;
+                addLog(`${players[targetId].name}を襲撃対象に選びました。`);
+            } else if (myRole === ROLES.SEER) {
+                const res = players[targetId].role === ROLES.WOLF ? "人狼でした！" : "人間でした。";
+                addLog(`占い結果：${players[targetId].name}は${res}`, "night");
+                players[targetId].known = true;
+            }
+            
+            processNightAI();
+            document.getElementById('action-ui').classList.add('hidden');
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        function processNightAI() {
+            players.forEach((p, i) => {
+                if (!p.isAI || !p.alive) return;
                 
-                if (isRunning) {
-                    document.getElementById('left-fill').style.width = (leftPower * 10) + '%';
-                    document.getElementById('right-fill').style.width = (rightPower * 10) + '%';
-                    
-                    // 左右のパワーの相乗効果で縄を回す（物理シミュレーション風）
-                    // 片方が0ならほとんど回らないように設定
-                    const combinedPower = (leftPower + rightPower) * (Math.min(leftPower, rightPower) > 0.5 ? 1 : 0.2);
-                    ropeSpeed = (combinedPower * 0.15) + (ropeSpeed * 0.94); // 0.94は空気抵抗/摩擦
-                    if (ropeSpeed < 0.1) ropeSpeed = 0;
+                if (p.role === ROLES.WOLF) {
+                    const targets = getLivingPlayers().filter(t => t.role !== ROLES.WOLF);
+                    const target = targets[Math.floor(Math.random() * targets.length)];
+                    target.willDie = true;
+                } else if (p.role === ROLES.SEER) {
+                    const targets = getLivingPlayers().filter(t => t.id !== i);
+                    const target = targets[Math.floor(Math.random() * targets.length)];
+                    if (i === 0) return; // プレイヤーが占い師ならスキップ
+                }
+            });
+        }
+
+        function nextPhase() {
+            if (phase === 'NIGHT') {
+                startDay();
+            } else if (phase === 'DAY') {
+                startVote();
+            } else if (phase === 'VOTE') {
+                // 自動で夜へ
+                dayCount++;
+                startNight();
+            }
+        }
+
+        // --- 昼のフェーズ ---
+        function startDay() {
+            phase = 'DAY';
+            let deadThisNight = null;
+            players.forEach(p => {
+                if (p.willDie) {
+                    p.alive = false;
+                    deadThisNight = p;
+                    p.willDie = false;
+                }
+            });
+
+            addLog(`--- ${dayCount}日目の朝 ---`, "system");
+            if (deadThisNight) {
+                addLog(`無残な姿で発見されたのは ${deadThisNight.name} でした。`);
+            } else {
+                addLog(`昨夜は誰も死にませんでした。`);
+            }
+
+            updateUI();
+            if (checkGameOver()) return;
+
+            document.getElementById('phase-title').innerText = `${dayCount}日目：議論`;
+            addLog("AIたちが話し合っています...");
+            
+            // AIの独り言（雰囲気用）
+            const living = getLivingPlayers();
+            living.forEach(p => {
+                if (!p.isAI) return;
+                const suspects = living.filter(s => s.id !== p.id);
+                const target = suspects[Math.floor(Math.random() * suspects.length)];
+                const msg = [
+                    `私は${target.name}さんが怪しいと思います。`,
+                    `${target.name}さんは人狼っぽいですね。`,
+                    `正直、まだ誰が人狼か分かりません...`,
+                    `私は${players[0].name}さんを信じています。`
+                ];
+                setTimeout(() => addLog(`${p.name}：「${msg[Math.floor(Math.random()*msg.length)]}」`), Math.random() * 1000);
+            });
+
+            document.getElementById('next-btn').innerText = "投票へ進む";
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        // --- 投票フェーズ ---
+        function startVote() {
+            phase = 'VOTE';
+            document.getElementById('phase-title').innerText = `${dayCount}日目：投票`;
+            document.getElementById('next-btn').classList.add('hidden');
+            document.getElementById('action-ui').classList.remove('hidden');
+            document.getElementById('next-btn').innerText = "次へ進む";
+
+            const select = document.getElementById('target-select');
+            select.innerHTML = '';
+            getLivingPlayers(false).forEach(p => select.add(new Option(p.name, p.id)));
+
+            window.humanAction = () => {
+                const targetId = document.getElementById('target-select').value;
+                executeVote(targetId);
+            };
+        }
+
+        function executeVote(myTargetId) {
+            const votes = {};
+            players.forEach((p, i) => { if(p.alive) votes[i] = 0; });
+
+            // プレイヤーの投票
+            votes[myTargetId]++;
+            addLog(`あなた（${players[0].name}）は ${players[myTargetId].name} に投票しました。`);
+
+            // AIの投票
+            players.forEach((p, i) => {
+                if (!p.isAI || !p.alive) return;
+                const suspects = getLivingPlayers().filter(s => s.id !== i);
+                const target = suspects[Math.floor(Math.random() * suspects.length)];
+                votes[target.id]++;
+                addLog(`${p.name} は ${target.name} に投票しました。`);
+            });
+
+            // 集計
+            let maxVotes = -1;
+            let executedId = -1;
+            for (let id in votes) {
+                if (votes[id] > maxVotes) {
+                    maxVotes = votes[id];
+                    executedId = id;
                 }
             }
 
-            function animate() {
-                if (!isRunning) return;
-                const rope = document.getElementById('rope-visual');
-                ropeAngle += ropeSpeed;
-                rope.style.transform = `rotateX(${ropeAngle}deg)`;
+            addLog(`投票の結果、${players[executedId].name} が処刑されました。`, "system");
+            players[executedId].alive = false;
+            updateUI();
 
-                const normAngle = ropeAngle % 360;
-                if (lastCheckAngle < 90 && normAngle >= 90) processHit();
-                lastCheckAngle = normAngle;
-                requestAnimationFrame(animate);
-            }
-
-            function processHit() {
-                playSfx(150, 'triangle', 0.1, 0.05);
-                onValue(playersRef, snap => {
-                    const players = snap.val() || {};
-                    const jumpers = Object.values(players).filter(p => p.role === 'jumper');
-                    if (jumpers.length === 0) return;
-                    const allSuccess = jumpers.every(p => p.state === 'jump');
-                    if (allSuccess) {
-                        playSfx(600, 'sine', 0.1, 0.2);
-                        runTransaction(teamRef, c => { if(c){ c.combo++; if(c.combo > c.maxCombo) c.maxCombo = c.combo; } return c; });
-                    } else {
-                        update(teamRef, { combo: 0 });
-                        playSfx(100, 'sawtooth', 0.2, 0.1);
-                    }
-                }, {onlyOnce: true});
-            }
-
-            window.hostStart = () => {
-                document.getElementById('lobby-ui').classList.add('hidden');
-                document.getElementById('arena').classList.remove('hidden');
-                document.getElementById('rope-visual').style.display = 'block';
-                
-                onValue(playersRef, snap => {
-                    const ids = Object.keys(snap.val() || {});
-                    const updates = {};
-                    const shuffled = ids.sort(() => Math.random() - 0.5);
-                    shuffled.forEach((id, idx) => {
-                        let r = 'jumper';
-                        if (idx === 0) r = 'turner_l';
-                        if (idx === 1) r = 'turner_r';
-                        updates[id + '/role'] = r;
-                        updates[id + '/power'] = 0;
-                        updates[id + '/state'] = 'idle';
-                    });
-                    update(playersRef, updates);
-                }, {onlyOnce: true});
-                set(teamRef, { combo: 0, maxCombo: 0 });
-                ropeAngle = 0; ropeSpeed = 0; // 開始時に縄を静止
-
-                let count = 3;
-                const ov = document.getElementById('overlay-msg'); ov.style.opacity = 1;
-                const cd = setInterval(() => {
-                    if (count > 0) { playSfx(800, 'sine', 0.1); ov.innerText = count; }
-                    else {
-                        clearInterval(cd); playSfx(400, 'square', 0.4); ov.innerText = "スタート！";
-                        setTimeout(() => ov.style.opacity = 0, 1000);
-                        isRunning = true;
-                        update(stateRef, { status: 'running' });
-                        animate();
-                        startTimer();
-                    }
-                    count--;
-                }, 1000);
-            };
-
-            function startTimer() {
-                let time = 30;
-                const timer = setInterval(() => {
-                    time--;
-                    document.getElementById('game-timer').innerText = `00:${time < 10 ? '0'+time : time}`;
-                    if (time <= 0) {
-                        clearInterval(timer); isRunning = false;
-                        update(stateRef, { status: 'finished' });
-                        document.getElementById('overlay-msg').innerText = "終了！";
-                        document.getElementById('overlay-msg').style.opacity = 1;
-                        setTimeout(() => location.reload(), 10000);
-                    }
-                }, 1000);
+            document.getElementById('action-ui').classList.add('hidden');
+            if (!checkGameOver()) {
+                document.getElementById('next-btn').classList.remove('hidden');
             }
         }
 
-        // --- コントローラー ---
-        else {
-            document.getElementById('ctrl-view').classList.remove('hidden');
-            let status = 'lobby', myRole = '';
-
-            window.ctrlJoin = () => {
-                const n = document.getElementById('user-name').value;
-                if(!n) return alert("名前を入力！");
-                if(typeof DeviceMotionEvent.requestPermission === 'function') {
-                    DeviceMotionEvent.requestPermission().then(r => { if(r==='granted') init(n); });
-                } else init(n);
-            };
-
-            function init(name) {
-                document.getElementById('ctrl-login').classList.add('hidden');
-                document.getElementById('ctrl-game').classList.remove('hidden');
-                const pRef = ref(db, `v9/${roomId}/players/${myId}`);
-                set(pRef, { name: name, role: 'waiting', power: 0, state: 'idle' });
-                onDisconnect(pRef).remove();
-
-                onValue(ref(db, `v9/${roomId}/state`), s => { status = (s.val() || {}).status; });
-                onValue(pRef, snap => {
-                    const d = snap.val(); if(!d) return;
-                    myRole = d.role;
-                    const badge = document.getElementById('my-role-badge');
-                    const icon = document.getElementById('role-icon');
-                    const hint = document.getElementById('role-hint');
-
-                    if (myRole === 'turner_l') {
-                        badge.innerText = "あなたは【左まわし手】"; badge.className = "role-badge badge-left";
-                        icon.innerText = "⬅️🌀"; hint.innerText = "スマホを回して縄に力を送れ！";
-                    } else if (myRole === 'turner_r') {
-                        badge.innerText = "あなたは【右まわし手】"; badge.className = "role-badge badge-right";
-                        icon.innerText = "🌀➡️"; hint.innerText = "スマホを回して縄に力を送れ！";
-                    } else if (myRole === 'jumper') {
-                        badge.innerText = "あなたは【ジャンパー】"; badge.className = "role-badge badge-jumper";
-                        icon.innerText = "👖"; hint.innerText = "スマホをポケットに入れて跳べ！";
-                    }
-                });
-
-                let lastX=0, lastY=0, lastJumpTime = 0;
-                window.addEventListener('devicemotion', e => {
-                    if (status !== 'running') return;
-                    const acc = e.accelerationIncludingGravity;
-                    const now = Date.now();
-
-                    if (myRole.startsWith('turner')) {
-                        const power = Math.min(10, (Math.abs(acc.x - lastX) + Math.abs(acc.y - lastY)));
-                        update(pRef, { power: power });
-                        document.getElementById('player-status').innerText = "全力まわし中！";
-                        lastX = acc.x; lastY = acc.y;
-                    } else if (myRole === 'jumper') {
-                        if (acc.y > 16 && now - lastJumpTime > 500) {
-                            lastJumpTime = now;
-                            update(pRef, { state: 'jump' });
-                            document.getElementById('player-status').innerText = "JUMP!!";
-                            setTimeout(() => { update(pRef, { state: 'idle' }); document.getElementById('player-status').innerText = "待機中"; }, 400);
-                        }
-                    }
-                });
-            }
+        // --- 共通処理 ---
+        function getLivingPlayers(includeMe = true) {
+            return players
+                .map((p, i) => ({...p, id: i}))
+                .filter(p => p.alive && (includeMe || p.id !== 0));
         }
+
+        function checkGameOver() {
+            const wolfCount = players.filter(p => p.alive && p.role === ROLES.WOLF).length;
+            const villagerCount = players.filter(p => p.alive && p.role !== ROLES.WOLF).length;
+
+            if (wolfCount === 0) {
+                endGame("人狼をすべて追放しました！村人陣営の勝利です！");
+                return true;
+            } else if (wolfCount >= villagerCount) {
+                endGame("人狼が村を支配しました...人狼陣営の勝利です。");
+                return true;
+            }
+            return false;
+        }
+
+        function endGame(msg) {
+            addLog(`=== ゲーム終了 ===`, "system");
+            addLog(msg, "system");
+            document.getElementById('phase-title').innerText = "リザルト";
+            document.getElementById('next-btn').classList.add('hidden');
+            document.getElementById('restart-btn').classList.remove('hidden');
+            
+            // 全員の正体を明かす
+            players.forEach(p => p.known = true);
+            updateUI();
+        }
+
     </script>
 </body>
 </html>
