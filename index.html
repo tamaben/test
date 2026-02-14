@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SHAKE CHAMPIONSHIP - OFFICIAL</title>
+    <title>CHAMPIONSHIP V2 - NEXT GEN</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Teko:wght@300;600&display=swap');
@@ -13,256 +13,142 @@
             --secondary: #ff0055;
             --accent: #ffee00;
             --dark-bg: #0b0c10;
-            --glass: rgba(255, 255, 255, 0.05);
         }
 
         body { 
             font-family: 'Rajdhani', sans-serif; 
-            margin: 0; 
-            background-color: var(--dark-bg);
-            background-image: 
-                linear-gradient(rgba(0, 242, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
-            color: white; 
-            overflow: hidden; 
-            touch-action: none; 
+            margin: 0; background-color: var(--dark-bg); color: white; 
+            overflow: hidden; touch-action: none;
         }
 
-        .full-screen { 
-            position: absolute; top:0; left:0; width: 100vw; height: 100vh; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            background: radial-gradient(circle at center, rgba(20,20,30,0) 0%, #000 100%);
+        /* --- 背景・グリッド演出 --- */
+        .bg-grid {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(0, 242, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 242, 255, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px; z-index: -1;
         }
+
+        .full-screen { position: absolute; top:0; left:0; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .hidden { display: none !important; }
 
-        /* --- UI COMPONENTS --- */
-        h1 {
-            font-family: 'Teko', sans-serif;
-            font-size: 6vw;
-            margin: 0;
-            letter-spacing: 5px;
-            text-transform: uppercase;
-            background: linear-gradient(to bottom, #fff, #aaa);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        .panel {
-            background: var(--glass);
-            border: 1px solid rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            padding: 30px;
-            border-radius: 4px;
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
-            position: relative;
-            overflow: hidden;
-        }
-        .panel::before {
-            content:''; position:absolute; top:0; left:0; width:4px; height:100%; background: var(--primary);
-        }
-
-        .btn {
-            background: transparent;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            padding: 15px 40px;
-            font-family: 'Rajdhani';
-            font-weight: 700;
-            font-size: 24px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: 0.3s;
-            position: relative;
-            overflow: hidden;
-            letter-spacing: 2px;
-        }
-        .btn:hover { background: var(--primary); color: #000; box-shadow: 0 0 30px var(--primary); }
-        .btn:disabled { border-color: #555; color: #555; pointer-events: none; box-shadow: none; }
-
-        /* --- HOST: LOBBY ANIMATION --- */
-        .scanner-line {
-            position: absolute; top:0; left:0; width:100%; height:2px;
-            background: var(--primary);
-            box-shadow: 0 0 10px var(--primary);
-            animation: scan 3s infinite linear;
-            opacity: 0.5;
-            pointer-events: none;
-        }
-        @keyframes scan { 0% {top:0} 100% {top:100%} }
-
-        .orbit-container {
-            position: relative; width: 200px; height: 200px; margin: 20px auto;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .orbit-ring {
-            position: absolute; border-radius: 50%; border: 1px solid rgba(0, 242, 255, 0.3);
-            border-top: 1px solid var(--primary);
-            animation: spin 4s infinite linear;
-        }
-        .r1 { width: 100%; height: 100%; animation-duration: 4s; }
-        .r2 { width: 70%; height: 70%; animation-duration: 2s; animation-direction: reverse; border-color: rgba(255, 0, 85, 0.3); border-top-color: var(--secondary); }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        /* --- HOST: GAME UI --- */
+        /* --- ホスト: 競技画面演出 --- */
         #top-bar {
-            position: absolute; top: 0; left: 0; width: 100%; height: 80px;
+            position: absolute; top: 0; left: 0; width: 100%; height: 70px;
             display: flex; justify-content: space-between; align-items: center;
-            padding: 0 40px; box-sizing: border-box;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            background: rgba(0,0,0,0.8);
-            z-index: 100;
+            padding: 0 40px; box-sizing: border-box; background: rgba(0,0,0,0.8); border-bottom: 2px solid var(--primary);
         }
-        .record-box { color: var(--accent); font-size: 24px; font-weight: bold; display: flex; align-items: center; gap: 10px; }
-        .timer-box { font-family: 'Teko'; font-size: 60px; color: #fff; text-shadow: 0 0 20px var(--secondary); }
 
-        #arena {
-            width: 90%; height: 50vh; 
-            display: flex; align-items: flex-end; justify-content: center; 
-            gap: 30px; margin-top: 100px;
-            border-bottom: 2px solid #333;
-            perspective: 1000px;
+        .hype-container {
+            position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%);
+            width: 80%; height: 10px; background: #222; border-radius: 5px; overflow: hidden;
         }
-        .player-col {
-            width: 120px; height: 100%; 
-            display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
-            position: relative;
-        }
-        .bar-wrap {
-            width: 60px; height: 0%;
-            background: linear-gradient(to top, rgba(0,242,255,0.2), var(--primary));
-            box-shadow: 0 0 20px var(--primary);
-            transition: height 0.3s ease-out;
-            position: relative;
-        }
-        .bar-wrap.flash { animation: barFlash 0.2s ease-out; }
-        @keyframes barFlash { 0% { filter: brightness(1); } 50% { filter: brightness(3); box-shadow: 0 0 50px #fff; } 100% { filter: brightness(1); } }
+        #hype-bar { width: 0%; height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); transition: 0.3s; box-shadow: 0 0 20px var(--primary); }
 
-        .p-score { 
-            font-family: 'Teko'; font-size: 40px; color: #fff; margin-bottom: 10px; 
-            text-shadow: 0 0 10px var(--primary);
+        #ticker {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 50px;
+            background: var(--secondary); color: white; display: flex; align-items: center;
+            font-weight: bold; font-size: 20px; overflow: hidden; white-space: nowrap;
         }
-        .p-name {
-            margin-top: 15px; font-weight: 700; font-size: 18px; color: #aaa; text-transform: uppercase; letter-spacing: 1px;
-            text-align: center; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        .hidden-score { filter: blur(4px); opacity: 0.7; }
+        .ticker-text { display: inline-block; padding-left: 100%; animation: ticker 20s linear infinite; }
+        @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
 
-        /* --- CONTROLLER DESIGN --- */
-        #shake-area {
-            width: 300px; height: 300px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #222, #000);
-            border: 4px solid var(--secondary);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            box-shadow: 0 0 30px var(--secondary);
-            position: relative;
+        /* --- 縄跳びアニメーション --- */
+        .rope-container {
+            width: 100px; height: 150px; border: 3px solid rgba(255,255,255,0.2); position: relative; margin-bottom: 10px;
+        }
+        .jumper {
+            width: 40px; height: 60px; background: var(--primary); position: absolute; bottom: 10px; left: 30px;
             transition: transform 0.1s;
         }
-        #shake-area::after {
-            content: ''; position: absolute; top: -10px; left: -10px; right: -10px; bottom: -10px;
-            border-radius: 50%; border: 1px dashed rgba(255,255,255,0.3);
-            animation: spin 10s infinite linear;
+        .rope {
+            width: 80px; height: 120px; border: 2px solid var(--accent); border-radius: 50%;
+            position: absolute; top: 10px; left: 10px; transform-origin: center;
         }
-        .shake-active { animation: ripple 0.3s ease-out; }
-        @keyframes ripple { 
-            0% { transform: scale(1); box-shadow: 0 0 30px var(--secondary); } 
-            50% { transform: scale(0.95); box-shadow: 0 0 80px var(--secondary), inset 0 0 30px var(--secondary); }
-            100% { transform: scale(1); } 
-        }
+        .rope-spin { animation: spin 0.2s linear infinite; }
+        @keyframes spin { from { transform: rotateX(0deg); } to { transform: rotateX(360deg); } }
 
-        input.conf-input {
-            background: transparent; border: none; border-bottom: 2px solid var(--primary);
-            color: #fff; font-family: 'Teko'; font-size: 40px; text-align: center; width: 80px;
+        /* --- ボタン・入力 --- */
+        .btn {
+            background: transparent; border: 2px solid var(--primary); color: var(--primary);
+            padding: 12px 30px; font-family: 'Rajdhani'; font-weight: 700; cursor: pointer; transition: 0.3s;
         }
+        .btn:hover { background: var(--primary); color: #000; }
+        .mode-select { display: flex; gap: 10px; margin: 20px 0; }
+        .mode-btn { border: 1px solid #555; padding: 10px; cursor: pointer; opacity: 0.5; }
+        .mode-btn.active { border-color: var(--accent); opacity: 1; color: var(--accent); }
 
-        /* --- OVERLAYS --- */
-        #overlay-msg {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 999;
-            font-family: 'Teko'; font-size: 15vw; color: white;
-            text-shadow: 0 0 50px var(--secondary);
-            pointer-events: none;
-            opacity: 0; transition: opacity 0.3s;
+        /* --- スマホ操作画面 --- */
+        #ctrl-pad { text-align: center; }
+        #action-circle {
+            width: 250px; height: 250px; border-radius: 50%; border: 10px solid var(--primary);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            margin: 30px; box-shadow: 0 0 30px var(--primary);
         }
-        .show-overlay { opacity: 1 !important; }
+        .impact { animation: impact-anim 0.2s ease-out; }
+        @keyframes impact-anim { 0% { transform: scale(1); } 50% { transform: scale(1.1); border-color: #fff; } 100% { transform: scale(1); } }
 
     </style>
 </head>
 <body>
 
+    <div class="bg-grid"></div>
+
     <!-- ================= HOST VIEW ================= -->
     <div id="host-view" class="full-screen hidden">
-        <div class="scanner-line"></div>
-        
-        <!-- HEADER -->
         <div id="top-bar">
-            <div class="record-box">
-                <span style="color:#888; font-size:14px;">WORLD RECORD</span>
-                <span id="wr-score">000</span>
-                <span id="wr-name" style="font-size:14px; color:#fff;">---</span>
-            </div>
-            <div class="timer-box" id="main-timer">00:00</div>
+            <div style="color: var(--accent); font-size: 20px;">🏆 WR: <span id="wr-val">0</span> <small id="wr-name"></small></div>
+            <div id="mode-display" style="font-family: Teko; font-size: 30px; letter-spacing: 2px;">MODE: SHAKE</div>
+            <div id="main-timer" style="font-family: Teko; font-size: 50px; color: var(--secondary);">00:00</div>
         </div>
 
-        <!-- WAITING LOBBY -->
-        <div id="lobby-panel" class="panel" style="text-align: center; margin-top: 50px;">
-            <h1>SHAKE BATTLE</h1>
-            <div class="orbit-container">
-                <div class="orbit-ring r1"></div>
-                <div class="orbit-ring r2"></div>
-                <div id="qrcode" style="padding:5px; background:white; border-radius:50%; width:120px; height:120px; display:flex; align-items:center; justify-content:center;"></div>
-            </div>
-            <p style="letter-spacing:2px; color:#aaa; margin-bottom:20px;">SCAN TO JOIN</p>
+        <!-- LOBBY -->
+        <div id="lobby-panel" style="text-align: center; background: rgba(0,0,0,0.8); padding: 40px; border: 1px solid var(--primary);">
+            <h1 style="font-family: Teko; font-size: 60px; margin: 0;">CHAMPIONSHIP V2</h1>
             
-            <div style="display:flex; justify-content:center; align-items:center; gap:20px; margin-bottom:20px;">
-                <span style="font-size:20px;">DURATION:</span>
-                <input type="number" id="game-duration" value="15" class="conf-input">
-                <span style="font-size:20px;">SEC</span>
+            <div class="mode-select">
+                <div id="mode-shake" class="mode-btn active" onclick="window.setMode('SHAKE')">SHAKE MODE<br><small>腕を振れ！</small></div>
+                <div id="mode-jump" class="mode-btn" onclick="window.setMode('JUMP')">JUMP ROPE<br><small>ジャンプしろ！</small></div>
             </div>
 
-            <button id="start-btn" class="btn" disabled onclick="window.hostStart()">START MATCH</button>
-            <div id="player-count" style="margin-top:15px; color:var(--primary);">PLAYERS: 0</div>
+            <div id="qrcode" style="background: white; padding: 10px; display: inline-block; margin: 20px;"></div>
+            
+            <div>
+                TIME: <input type="number" id="game-duration" value="15" style="width: 50px; background: none; border: 1px solid var(--primary); color: white; padding: 5px;">
+                <button class="btn" id="start-btn" disabled onclick="window.hostStart()" style="margin-left: 20px;">START MATCH</button>
+            </div>
+            <div id="player-count" style="margin-top: 20px; color: var(--primary);">CONNECTED: 0</div>
         </div>
 
-        <!-- GAME ARENA -->
-        <div id="arena" class="hidden">
-            <!-- Player bars generated here -->
+        <!-- ARENA -->
+        <div id="arena" class="hidden" style="display: flex; align-items: flex-end; justify-content: center; height: 50vh; gap: 20px; width: 100%;">
+            <!-- Bars generated here -->
         </div>
 
-        <!-- OVERLAY MESSAGE (GO! / FINISH!) -->
-        <div id="overlay-msg"></div>
+        <!-- HYPE METER -->
+        <div class="hype-container"><div id="hype-bar"></div></div>
+
+        <!-- TICKER -->
+        <div id="ticker"><div class="ticker-text" id="ticker-content">WELCOME TO THE OFFICIAL CHAMPIONSHIP... PREPARE FOR BATTLE...</div></div>
+
+        <!-- OVERLAY -->
+        <div id="overlay-msg" style="position: absolute; font-family: Teko; font-size: 15vw; pointer-events: none; opacity: 0; transition: 0.3s; z-index: 100;"></div>
     </div>
 
     <!-- ================= CONTROLLER VIEW ================= -->
     <div id="ctrl-view" class="full-screen hidden">
-        <!-- Login -->
-        <div id="ctrl-login" class="panel" style="width: 80%; text-align:center;">
-            <h2 style="color:var(--primary); margin:0 0 20px 0;">ATHLETE ENTRY</h2>
-            <input type="text" id="p-name" placeholder="YOUR NAME" style="width:90%; padding:15px; background:#222; border:1px solid #444; color:white; font-size:20px; text-align:center; margin-bottom:20px;">
-            <button class="btn" onclick="window.ctrlJoin()">ENTER ARENA</button>
+        <div id="ctrl-login" style="text-align: center;">
+            <h2 style="font-family: Teko; font-size: 40px;">ATHLETE ENTRY</h2>
+            <input type="text" id="p-name" placeholder="NAME" style="padding: 15px; width: 200px; text-align: center;"><br><br>
+            <button class="btn" onclick="window.ctrlJoin()">JOIN ARENA</button>
         </div>
 
-        <!-- Permission -->
-        <div id="ctrl-perm" class="panel hidden" style="width:80%; text-align:center;">
-            <h2 style="color:var(--secondary)">SENSOR ACCESS</h2>
-            <p>Motion sensor access is required for competition.</p>
-            <button class="btn" onclick="window.reqPerm()">ALLOW ACCESS</button>
-        </div>
-
-        <!-- Main Game Pad -->
-        <div id="ctrl-pad" class="full-screen hidden">
-            <div id="status-text" style="position:absolute; top:10%; font-size:24px; letter-spacing:2px;">STANDBY</div>
-            
-            <div id="shake-area">
-                <div style="font-size:20px; color:#aaa;">SCORE</div>
-                <div id="my-score" style="font-family:'Teko'; font-size:100px; line-height:1;">0</div>
+        <div id="ctrl-pad" class="hidden">
+            <h2 id="ctrl-mode-text">SHAKE!</h2>
+            <div id="action-circle">
+                <div style="font-size: 20px;">COUNT</div>
+                <div id="my-score" style="font-family: Teko; font-size: 80px;">0</div>
             </div>
-            
-            <div style="position:absolute; bottom:10%; color:#555; font-size:14px;">SHAKE YOUR DEVICE!</div>
+            <div id="ctrl-status">WAITING FOR HOST...</div>
         </div>
     </div>
 
@@ -283,296 +169,247 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // --- GLOBAL VARS ---
+        // --- SOUND SYSTEM ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(freq, type, dur) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + dur);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + dur);
+        }
+
+        const sounds = {
+            beep: () => playSound(880, 'sine', 0.1),
+            go: () => playSound(440, 'square', 0.4),
+            hit: () => playSound(150, 'sine', 0.05),
+            whistle: () => { playSound(1000, 'triangle', 0.2); setTimeout(()=>playSound(1000,'triangle',0.5), 200); }
+        };
+
+        // --- GLOBAL ---
         const params = new URLSearchParams(window.location.search);
         let role = params.get('role') || 'host';
         let roomId = params.get('room');
         const myId = Math.random().toString(36).substr(2, 6).toUpperCase();
-        
-        // --- HOST LOGIC ---
+        let gameMode = 'SHAKE';
+
         if (role === 'host') {
             if (!roomId) {
                 roomId = Math.random().toString(36).substring(2, 6).toUpperCase();
                 window.location.replace(`?role=host&room=${roomId}`);
             }
-
-            const roomRef = ref(db, `shake_pro/${roomId}`);
-            const stateRef = ref(db, `shake_pro/${roomId}/state`);
-            const playersRef = ref(db, `shake_pro/${roomId}/players`);
-            
-            // Initial Setup
             document.getElementById('host-view').classList.remove('hidden');
-            
-            // QR Code
-            new QRCode(document.getElementById("qrcode"), {
-                text: `${window.location.origin}${window.location.pathname}?role=ctrl&room=${roomId}`,
-                width: 100, height: 100,
-                colorDark : "#000000", colorLight : "#ffffff"
-            });
+            new QRCode(document.getElementById("qrcode"), { text: `${window.location.origin}${window.location.pathname}?role=ctrl&room=${roomId}`, width: 120, height: 120 });
 
-            // Monitor World Record
-            onValue(ref(db, `shake_pro_global/best`), snap => {
+            const playersRef = ref(db, `v2/${roomId}/players`);
+            const stateRef = ref(db, `v2/${roomId}/state`);
+
+            window.setMode = (m) => {
+                gameMode = m;
+                document.getElementById('mode-shake').className = m === 'SHAKE' ? 'mode-btn active' : 'mode-btn';
+                document.getElementById('mode-jump').className = m === 'JUMP' ? 'mode-btn active' : 'mode-btn';
+                document.getElementById('mode-display').innerText = `MODE: ${m}`;
+                update(stateRef, { mode: m });
+            };
+
+            onValue(ref(db, `v2_global/best`), snap => {
                 const d = snap.val() || {score:0, name:'---'};
-                document.getElementById('wr-score').innerText = d.score;
-                document.getElementById('wr-name').innerText = d.name;
+                document.getElementById('wr-val').innerText = d.score;
+                document.getElementById('wr-name').innerText = `by ${d.name}`;
             });
 
-            // Monitor Players
             onValue(playersRef, snap => {
                 const players = snap.val() || {};
-                const count = Object.keys(players).length;
-                document.getElementById('player-count').innerText = `PLAYERS: ${count}`;
-                document.getElementById('start-btn').disabled = count === 0;
-                
+                document.getElementById('player-count').innerText = `CONNECTED: ${Object.keys(players).length}`;
+                document.getElementById('start-btn').disabled = Object.keys(players).length === 0;
                 renderArena(players);
             });
 
-            // Render Arena Loop
-            let lastScores = {};
+            let totalActions = 0;
             function renderArena(players) {
                 const arena = document.getElementById('arena');
-                // Check status to determine visibility
-                const isBlind = document.getElementById('lobby-panel').classList.contains('hidden') && !document.getElementById('overlay-msg').innerText.includes('FINISH');
+                const isRunning = arena.getAttribute('data-running') === 'true';
+                let currentTotal = 0;
 
                 Object.keys(players).forEach(pid => {
                     let col = document.getElementById(`p-${pid}`);
                     if (!col) {
                         col = document.createElement('div');
-                        col.className = 'player-col';
                         col.id = `p-${pid}`;
+                        col.style.textAlign = 'center';
                         col.innerHTML = `
-                            <div class="p-score">0</div>
-                            <div class="bar-wrap"></div>
-                            <div class="p-name">${players[pid].name}</div>
+                            <div class="p-val" style="font-family:Teko; font-size:30px;">0</div>
+                            <div class="rope-container hidden"><div class="jumper"></div><div class="rope"></div></div>
+                            <div class="bar" style="width:50px; background:var(--primary); transition:0.1s;"></div>
+                            <div style="font-size:12px;">${players[pid].name}</div>
                         `;
                         arena.appendChild(col);
                     }
+                    const p = players[pid];
+                    currentTotal += (p.count || 0);
                     
-                    const score = players[pid].count || 0;
-                    const prev = lastScores[pid] || 0;
-                    const bar = col.querySelector('.bar-wrap');
-                    const scoreText = col.querySelector('.p-score');
+                    const bar = col.querySelector('.bar');
+                    const valText = col.querySelector('.p-val');
+                    const ropeCont = col.querySelector('.rope-container');
+                    const jumper = col.querySelector('.jumper');
+                    const rope = col.querySelector('.rope');
 
-                    // Animation Trigger (Flash on shake)
-                    if (score > prev) {
-                        bar.classList.remove('flash');
-                        void bar.offsetWidth; // trigger reflow
-                        bar.classList.add('flash');
-                    }
-
-                    // Blind Mode Logic
-                    if (isBlind) {
-                        scoreText.innerText = "???";
-                        scoreText.classList.add('hidden-score');
-                        // Fake visual height or capped height to hide progress
-                        // Let's make it move slightly to show activity but hide real value
-                        const visualHeight = Math.min((score % 10) * 5 + 20, 100); 
-                        bar.style.height = `${Math.min(score, 100)}%`; // Actually show height for excitement but hide number? 
-                        // Request was "伏せる" (hide). Let's hide exact number but show vague bar or hide bar too?
-                        // Let's hide exact rank. We will show bar height relative to a fixed max to create tension without knowing who is winning exactly?
-                        // Better: Show height but randomize color or make it hard to compare? 
-                        // Simply: Hide Number, show Bar. It's exciting to see bars race.
-                        bar.style.height = `${Math.min(score * 1.5, 100)}%`; 
-                    } else {
-                        scoreText.innerText = score;
-                        scoreText.classList.remove('hidden-score');
-                        bar.style.height = `${Math.min(score * 1.5, 100)}%`;
-                        // Highlight winner if finished
-                        if (document.getElementById('overlay-msg').innerText.includes('FINISH')) {
-                           // simple highlight logic could go here
+                    if (gameMode === 'JUMP') {
+                        bar.classList.add('hidden');
+                        ropeCont.classList.remove('hidden');
+                        if (p.count > (parseInt(valText.innerText) || 0)) {
+                            sounds.hit();
+                            jumper.style.transform = 'translateY(-30px)';
+                            rope.classList.add('rope-spin');
+                            setTimeout(() => { jumper.style.transform = 'translateY(0)'; rope.classList.remove('rope-spin'); }, 200);
                         }
+                    } else {
+                        bar.classList.remove('hidden');
+                        ropeCont.classList.add('hidden');
+                        bar.style.height = `${Math.min(p.count * 2, 300)}px`;
+                        if (p.count > (parseInt(valText.innerText) || 0)) sounds.hit();
                     }
-                    
-                    lastScores[pid] = score;
+
+                    valText.innerText = isRunning ? '???' : (p.count || 0);
                 });
+
+                // Hype Bar & Ticker
+                const hype = Math.min((currentTotal / 500) * 100, 100);
+                document.getElementById('hype-bar').style.width = hype + '%';
+                if (currentTotal > totalActions + 50) {
+                    totalActions = currentTotal;
+                    document.getElementById('ticker-content').innerText = `AMAZING! TOTAL ACTIONS EXCEEDED ${currentTotal}! KEEP GOING!`;
+                }
             }
 
             window.hostStart = () => {
-                const dur = parseInt(document.getElementById('game-duration').value) || 15;
+                const dur = parseInt(document.getElementById('game-duration').value);
+                document.getElementById('lobby-panel').classList.add('hidden');
+                document.getElementById('arena').classList.remove('hidden');
+                document.getElementById('arena').setAttribute('data-running', 'true');
                 
-                // Reset Scores
+                // Reset
                 onValue(playersRef, snap => {
                     const updates = {};
-                    if(snap.val()) Object.keys(snap.val()).forEach(k => updates[k + '/count'] = 0);
+                    Object.keys(snap.val() || {}).forEach(k => updates[k+'/count'] = 0);
                     update(playersRef, updates);
                 }, {onlyOnce:true});
 
-                // UI Transition
-                document.getElementById('lobby-panel').classList.add('hidden');
-                document.getElementById('arena').classList.remove('hidden');
-                update(stateRef, { status: 'ready', duration: dur });
-
                 // Countdown
-                showOverlay("READY");
-                setTimeout(() => showOverlay("3"), 1000);
-                setTimeout(() => showOverlay("2"), 2000);
-                setTimeout(() => showOverlay("1"), 3000);
-                setTimeout(() => {
-                    showOverlay("GO!");
-                    setTimeout(() => showOverlay(null), 1000); // Hide overlay
-                    startGameLoop(dur);
-                }, 4000);
+                let cd = 3;
+                const ov = document.getElementById('overlay-msg');
+                ov.style.opacity = 1;
+                const timer = setInterval(() => {
+                    if (cd > 0) { sounds.beep(); ov.innerText = cd; }
+                    else if (cd === 0) { 
+                        sounds.go(); ov.innerText = "GO!"; 
+                        setTimeout(() => ov.style.opacity = 0, 1000);
+                        startBattle(dur);
+                        clearInterval(timer);
+                    }
+                    cd--;
+                }, 1000);
             };
 
-            function startGameLoop(duration) {
+            function startBattle(dur) {
                 update(stateRef, { status: 'running' });
-                let left = duration;
-                const timerEl = document.getElementById('main-timer');
-                
-                const interval = setInterval(() => {
+                let left = dur;
+                const tEl = document.getElementById('main-timer');
+                const timer = setInterval(() => {
                     left--;
-                    timerEl.innerText = `00:${left.toString().padStart(2, '0')}`;
+                    tEl.innerText = `00:${left < 10 ? '0'+left : left}`;
                     if (left <= 0) {
-                        clearInterval(interval);
-                        finishGame();
+                        clearInterval(timer);
+                        finishBattle();
                     }
                 }, 1000);
             }
 
-            function finishGame() {
+            function finishBattle() {
+                sounds.whistle();
                 update(stateRef, { status: 'finished' });
-                showOverlay("FINISH!");
-                
-                // Calculate Winner
+                document.getElementById('arena').setAttribute('data-running', 'false');
+                document.getElementById('overlay-msg').innerText = "FINISH!";
+                document.getElementById('overlay-msg').style.opacity = 1;
+
                 onValue(playersRef, snap => {
                     const players = snap.val();
-                    let max = -1; let winner = "";
+                    let max = -1, winName = "";
                     Object.keys(players).forEach(k => {
-                        if (players[k].count > max) {
-                            max = players[k].count;
-                            winner = players[k].name;
-                        }
+                        if (players[k].count > max) { max = players[k].count; winName = players[k].name; }
                     });
-
-                    // Update UI (Reveal scores happens automatically via renderArena logic change)
+                    
                     setTimeout(() => {
-                        showOverlay(`WINNER<br><span style="font-size:50%; color:var(--primary)">${winner}</span>`);
+                        document.getElementById('overlay-msg').innerHTML = `WINNER<br><span style="color:var(--primary)">${winName}</span>`;
+                        if (max > 0) {
+                            runTransaction(ref(db, `v2_global/best`), curr => {
+                                if (!curr || max > curr.score) return { score: max, name: winName };
+                                return;
+                            });
+                        }
                     }, 2000);
 
-                    // Update Global Record
-                    if (max > 0) {
-                        runTransaction(ref(db, `shake_pro_global/best`), (current) => {
-                            if (!current || max > current.score) {
-                                return { score: max, name: winner };
-                            }
-                            return;
-                        });
-                    }
-
-                    // Reset Button after delay
-                    setTimeout(() => {
-                        document.getElementById('lobby-panel').classList.remove('hidden');
-                        document.getElementById('arena').classList.add('hidden');
-                        document.getElementById('overlay-msg').classList.remove('show-overlay');
-                        document.getElementById('main-timer').innerText = "00:00";
-                    }, 8000);
-
+                    setTimeout(() => location.reload(), 10000);
                 }, {onlyOnce:true});
             }
-
-            function showOverlay(text) {
-                const el = document.getElementById('overlay-msg');
-                if (!text) {
-                    el.classList.remove('show-overlay');
-                } else {
-                    el.innerHTML = text;
-                    el.classList.add('show-overlay');
-                }
-            }
-        }
-
+        } 
+        
         // --- CONTROLLER LOGIC ---
         else {
             document.getElementById('ctrl-view').classList.remove('hidden');
-            let currentStatus = 'lobby';
-            let myScore = 0;
+            let status = 'lobby', count = 0, mode = 'SHAKE';
 
             window.ctrlJoin = () => {
                 const name = document.getElementById('p-name').value;
-                if(!name) return alert("Please enter name");
-                
-                // Permission Check for iOS
-                if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                    document.getElementById('ctrl-login').classList.add('hidden');
-                    document.getElementById('ctrl-perm').classList.remove('hidden');
-                } else {
-                    enterGame(name);
-                }
+                if (!name) return;
+                if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                    DeviceMotionEvent.requestPermission().then(res => { if(res==='granted') setup(name); });
+                } else { setup(name); }
             };
 
-            window.reqPerm = () => {
-                DeviceMotionEvent.requestPermission().then(res => {
-                    if (res === 'granted') enterGame(document.getElementById('p-name').value);
-                }).catch(alert);
-            };
-
-            function enterGame(name) {
+            function setup(name) {
                 document.getElementById('ctrl-login').classList.add('hidden');
-                document.getElementById('ctrl-perm').classList.add('hidden');
                 document.getElementById('ctrl-pad').classList.remove('hidden');
-
-                const pRef = ref(db, `shake_pro/${roomId}/players/${myId}`);
+                const pRef = ref(db, `v2/${roomId}/players/${myId}`);
                 set(pRef, { name: name, count: 0 });
                 onDisconnect(pRef).remove();
 
-                // Listen to Game State
-                onValue(ref(db, `shake_pro/${roomId}/state`), snap => {
+                onValue(ref(db, `v2/${roomId}/state`), snap => {
                     const s = snap.val() || {};
-                    currentStatus = s.status || 'lobby';
-                    const stText = document.getElementById('status-text');
-                    
-                    if (currentStatus === 'ready') {
-                        myScore = 0;
-                        document.getElementById('my-score').innerText = 0;
-                        stText.innerText = "GET READY";
-                        stText.style.color = "#fff";
-                    } else if (currentStatus === 'running') {
-                        stText.innerText = "SHAKE!!!";
-                        stText.style.color = "var(--secondary)";
-                        if(navigator.vibrate) navigator.vibrate(200);
-                    } else if (currentStatus === 'finished') {
-                        stText.innerText = "FINISHED";
-                        stText.style.color = "#aaa";
-                    } else {
-                        stText.innerText = "WAITING...";
-                        stText.style.color = "#aaa";
-                    }
+                    status = s.status;
+                    mode = s.mode || 'SHAKE';
+                    document.getElementById('ctrl-mode-text').innerText = mode + "!";
+                    if (status === 'ready') { count = 0; document.getElementById('my-score').innerText = 0; }
                 });
 
-                initSensor(pRef);
-            }
-
-            function initSensor(pRef) {
-                let lastX=0, lastY=0, lastZ=0;
-                let lastUpdate = 0;
-                const shakeArea = document.getElementById('shake-area');
-
+                let lastY = 0, lastTime = 0;
                 window.addEventListener('devicemotion', e => {
-                    if (currentStatus !== 'running') return;
-
-                    const acc = e.accelerationIncludingGravity || e.acceleration;
-                    if(!acc) return;
-
-                    const delta = Math.abs(acc.x - lastX) + Math.abs(acc.y - lastY) + Math.abs(acc.z - lastZ);
+                    if (status !== 'running') return;
+                    const acc = e.accelerationIncludingGravity;
                     
-                    if (delta > 20) { // Shake Threshold
-                        myScore++;
-                        document.getElementById('my-score').innerText = myScore;
-                        
-                        // Visual Feedback
-                        shakeArea.classList.remove('shake-active');
-                        void shakeArea.offsetWidth;
-                        shakeArea.classList.add('shake-active');
-
-                        // Throttled Database Update (every 200ms)
-                        const now = Date.now();
-                        if (now - lastUpdate > 200) {
-                            update(pRef, { count: myScore });
-                            lastUpdate = now;
-                        }
+                    if (mode === 'SHAKE') {
+                        const delta = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
+                        if (delta > 30) trigger();
+                    } else {
+                        // JUMP: Vertical acceleration peak
+                        if (acc.y > 15 && lastY <= 15) trigger();
+                        lastY = acc.y;
                     }
-                    lastX = acc.x; lastY = acc.y; lastZ = acc.z;
                 });
+
+                function trigger() {
+                    const now = Date.now();
+                    if (now - lastTime < 150) return;
+                    lastTime = now;
+                    count++;
+                    document.getElementById('my-score').innerText = count;
+                    document.getElementById('action-circle').classList.add('impact');
+                    setTimeout(() => document.getElementById('action-circle').classList.remove('impact'), 200);
+                    update(pRef, { count: count });
+                }
             }
         }
     </script>
