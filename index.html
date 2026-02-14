@@ -89,4 +89,325 @@
             
             <button id="mic-toggle" class="mic-btn hidden" onclick="toggleMic()">🎤 マイクで話し合いに参加</button>
 
-            <div id="action-panel" class="panel" style="margin-top
+            <div id="action-panel" class="panel" style="margin-top:10px;">
+                <div id="secret-area" class="hidden">
+                    <div id="role-display" style="font-size:20px; font-weight:bold; color:#ffcc00; margin-bottom:10px;"></div>
+                    <p id="action-hint"></p>
+                    <select id="target-select"></select>
+                    <button id="action-btn" onclick="submitAction()">決定</button>
+                </div>
+                <button id="end-turn-btn" class="hidden" onclick="finishTurn()">OK (次へ回す)</button>
+                <button id="next-phase-btn" class="hidden" onclick="advancePhase()">次へ進む</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- データ管理 ---
+        const ROLE = { WOLF: '人狼', SEER: '占い師', VILLAGER: '村人' };
+        let players = [];
+        let day = 1;
+        let phase = 'NIGHT';
+        let killedThisMorning = null;
+        let timerInterval = null;
+
+        // --- AI発言生成エンジン (Realistic) ---
+        const getAIChat = (speaker) => {
+            const aliveJumpers = players.filter(p => p.alive && p.name !== speaker.name);
+            const target = aliveJumpers[Math.floor(Math.random() * aliveJumpers.length)];
+            const timerText = document.getElementById('timer-display').innerText;
+            const sec = parseInt(timerText.split(':')[1]);
+
+            // 状況別台本
+            const morningReacts = [
+                `うわぁ、まさか${killedThisMorning ? killedThisMorning.name : '誰もいない'}がやられるなんて…。`,
+                `${killedThisMorning ? killedThisMorning.name : '誰もいない'}さん、村人っぽかったのに。人狼の狙いがエグい。`,
+                `朝からショックです…。${killedThisMorning ? killedThisMorning.name : '誰も'}が死ぬなんて全然予想してなかった。`
+            ];
+            const generalLines = [
+                `ぶっちゃけ、${target.name}さんのさっきの反応、ちょっと不自然じゃなかったですか？`,
+                `私は村人です。信じてもらえないかもしれないけど、本当なんです。`,
+                `占い師さん、潜伏してないでそろそろ名乗り出たほうがいいんじゃないですか？`,
+                `まだ誰が狼か全然絞れない…。${target.name}さんはどう思います？`,
+                `沈黙してる人が一番怪しい気がするんですよね。`,
+                `もし私が占うなら、次は${target.name}さんかなぁ。`
+            ];
+            const hurryLines = [
+                `あと30秒！？ ちょっと待って、まだ決められないよ！`,
+                `時間がない！ とりあえず一番怪しい${target.name}さんに入れるしかないかな…。`,
+                `もう投票の時間？ 早すぎるって！`
+            ];
+
+            // 序盤・中盤・終盤で切り替え
+            if (sec > 50 && day > 1) return morningReacts[Math.floor(Math.random()*morningReacts.length)];
+            if (sec < 20) return hurryLines[Math.floor(Math.random()*hurryLines.length)];
+            return generalLines[Math.floor(Math.random()*generalLines.length)];
+        };
+
+        // --- 音声認識 ---
+        let recognition;
+        let isMicOn = false;
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'ja-JP';
+            recognition.continuous = true;
+            recognition.interimResults = false;
+            recognition.onresult = (e) => {
+                const res = e.results[e.results.length - 1][0].transcript;
+                const activeHuman = players.find(p => !p.isAI && p.alive);
+                addLog(res, activeHuman ? activeHuman.name : "あなた", "tag-human");
+            };
+        }
+
+        function toggleMic() {
+            if (isMicOn) {
+                recognition.stop();
+                document.getElementById('mic-toggle').innerText = "🎤 マイクで話し合いに参加";
+                document.getElementById('mic-toggle').classList.remove('active');
+            } else {
+                recognition.start();
+                document.getElementById('mic-toggle').innerText = "🎤 録音中... (タップで停止)";
+                document.getElementById('mic-toggle').classList.add('active');
+            }
+            isMicOn = !isMicOn;
+        }
+
+        // --- 音声合成 ---
+        function speak(text, speakerName = null) {
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+                const uttr = new SpeechSynthesisUtterance(text);
+                uttr.lang = "ja-JP";
+                uttr.rate = 1.2;
+                window.speechSynthesis.speak(uttr);
+            }
+            if (speakerName) addLog(text, speakerName, "tag-ai");
+        }
+
+        function addLog(msg, name = "システム", nameClass = "") {
+            const log = document.getElementById('log-area');
+            const div = document.createElement('div');
+            div.className = "speech-msg";
+            div.innerHTML = `<span class="name-lbl ${nameClass}">${name}:</span><span>${msg}</span>`;
+            log.appendChild(div);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // --- ゲーム進行ロジック ---
+        function generateNameInputs() {
+            const hCount = parseInt(document.getElementById('human-count').value);
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('name-input-screen').classList.remove('hidden');
+            const container = document.getElementById('name-fields');
+            container.innerHTML = "";
+            for (let i = 1; i <= hCount; i++) {
+                container.innerHTML += `<label>プレイヤー ${i}の名前</label><input type="text" class="human-name-input" value="プレイヤー ${i}">`;
+            }
+        }
+
+        function startGame() {
+            const tCount = parseInt(document.getElementById('total-players').value);
+            const nameInputs = document.querySelectorAll('.human-name-input');
+            players = [];
+            nameInputs.forEach(input => {
+                players.push({ name: input.value, isAI: false, role: '', alive: true, done: false, willDie: false });
+            });
+            const aiNames = ["タナカ", "サトウ", "スズキ", "イトウ", "ヤマダ", "カトウ", "ヨシダ"];
+            while (players.length < tCount) {
+                players.push({ name: aiNames[players.length % aiNames.length], isAI: true, role: '', alive: true, done: false, willDie: false });
+            }
+            let roles = [ROLE.WOLF, ROLE.SEER];
+            if (tCount >= 8) roles.push(ROLE.WOLF);
+            while (roles.length < tCount) roles.push(ROLE.VILLAGER);
+            roles.sort(() => Math.random() - 0.5);
+            players.forEach((p, i) => p.role = roles[i]);
+
+            document.getElementById('name-input-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            startNight();
+        }
+
+        function startNight() {
+            phase = 'NIGHT';
+            players.forEach(p => p.done = false);
+            document.getElementById('phase-label').innerText = `${day}日目：夜`;
+            document.getElementById('mic-toggle').classList.add('hidden');
+            document.getElementById('next-phase-btn').classList.add('hidden');
+            document.getElementById('timer-display').classList.add('hidden');
+            if (isMicOn) toggleMic();
+            processHumanTurn();
+        }
+
+        function processHumanTurn() {
+            const humans = players.filter(p => !p.isAI && p.alive && !p.done);
+            if (humans.length > 0) {
+                document.getElementById('privacy-screen').classList.remove('hidden');
+                document.getElementById('turn-player-name').innerText = humans[0].name;
+                updateGrid(true);
+            } else {
+                players.forEach(p => {
+                    if (p.isAI && p.alive && p.role === ROLE.WOLF) {
+                        const ts = players.filter(t => t.alive && t.role !== ROLE.WOLF);
+                        if(ts.length > 0) ts[Math.floor(Math.random()*ts.length)].willDie = true;
+                    }
+                });
+                document.getElementById('privacy-screen').classList.add('hidden');
+                document.getElementById('secret-area').classList.add('hidden');
+                document.getElementById('next-phase-btn').classList.remove('hidden');
+                addLog("全員の行動が終了しました。");
+            }
+        }
+
+        function showSecret() {
+            document.getElementById('privacy-screen').classList.add('hidden');
+            document.getElementById('secret-area').classList.remove('hidden');
+            document.getElementById('end-turn-btn').classList.add('hidden');
+            const p = players.filter(p => !p.isAI && p.alive && !p.done)[0];
+            document.getElementById('role-display').innerText = `あなたの正体は【${p.role}】です`;
+            const sel = document.getElementById('target-select');
+            sel.innerHTML = "";
+            document.getElementById('action-btn').classList.remove('hidden');
+
+            if (p.role === ROLE.WOLF) {
+                document.getElementById('action-hint').innerText = "今夜襲撃する相手を選んでください。";
+                players.filter(t => t.alive && t.name !== p.name).forEach((t, i) => sel.add(new Option(t.name, i)));
+            } else if (p.role === ROLE.SEER) {
+                document.getElementById('action-hint').innerText = "今夜占う相手を選んでください。";
+                players.filter(t => t.alive && t.name !== p.name).forEach((t, i) => sel.add(new Option(t.name, i)));
+            } else {
+                document.getElementById('action-hint').innerText = "村人は夜にできることはありません。";
+                document.getElementById('action-btn').classList.add('hidden');
+                document.getElementById('end-turn-btn').classList.remove('hidden');
+            }
+        }
+
+        function submitAction() {
+            const p = players.filter(p => !p.isAI && p.alive && !p.done)[0];
+            const tIdx = document.getElementById('target-select').value;
+            const target = players.filter(t => t.alive && t.name !== p.name)[tIdx];
+            if (p.role === ROLE.WOLF) target.willDie = true;
+            if (p.role === ROLE.SEER) alert(`${target.name}さんは【${target.role === ROLE.WOLF ? '人狼' : '人間'}】でした！`);
+            p.done = true;
+            document.getElementById('secret-area').classList.add('hidden');
+            document.getElementById('end-turn-btn').classList.remove('hidden');
+        }
+
+        function finishTurn() {
+            const p = players.filter(p => !p.isAI && p.alive && !p.done)[0];
+            if(p) p.done = true;
+            document.getElementById('end-turn-btn').classList.add('hidden');
+            processHumanTurn();
+        }
+
+        function advancePhase() {
+            if (phase === 'NIGHT') {
+                phase = 'MORNING';
+                document.getElementById('phase-label').innerText = `${day}日目：朝`;
+                killedThisMorning = null;
+                players.forEach(p => { if (p.willDie) { p.alive = false; killedThisMorning = p; p.willDie = false; } });
+                const msg = killedThisMorning ? `無残な姿で発見されたのは ${killedThisMorning.name} さんでした。` : "昨夜は誰も死にませんでした。";
+                addLog(msg); speak(msg);
+                updateGrid(false);
+                if (!checkEnd()) document.getElementById('next-phase-btn').classList.remove('hidden');
+            } else if (phase === 'MORNING') {
+                phase = 'DISCUSS';
+                document.getElementById('phase-label').innerText = `${day}日目：議論タイム`;
+                document.getElementById('next-phase-btn').classList.add('hidden');
+                document.getElementById('timer-display').classList.remove('hidden');
+                document.getElementById('mic-toggle').classList.remove('hidden');
+                let time = 60;
+                timerInterval = setInterval(() => {
+                    time--;
+                    const m = Math.floor(time / 60); const s = time % 60;
+                    document.getElementById('timer-display').innerText = `${m}:${s < 10 ? '0' + s : s}`;
+                    if (time > 0 && time % 12 === 0) {
+                        const ai = players.filter(p => p.isAI && p.alive);
+                        if(ai.length > 0) {
+                            const spk = ai[Math.floor(Math.random()*ai.length)];
+                            speak(getAIChat(spk), spk.name);
+                        }
+                    }
+                    if (time <= 0) {
+                        clearInterval(timerInterval);
+                        document.getElementById('timer-display').classList.add('hidden');
+                        document.getElementById('next-phase-btn').classList.remove('hidden');
+                        speak("議論終了です。投票の準備をしてください。");
+                    }
+                }, 1000);
+            } else if (phase === 'DISCUSS') {
+                phase = 'VOTE';
+                document.getElementById('phase-label').innerText = `${day}日目：投票`;
+                document.getElementById('mic-toggle').classList.add('hidden');
+                document.getElementById('next-phase-btn').classList.add('hidden');
+                players.forEach(p => p.done = false);
+                processVoteHuman();
+            } else {
+                day++; startNight();
+            }
+        }
+
+        function processVoteHuman() {
+            const humans = players.filter(p => !p.isAI && p.alive && !p.done);
+            if (humans.length > 0) {
+                document.getElementById('privacy-screen').classList.remove('hidden');
+                document.getElementById('turn-player-name').innerText = humans[0].name;
+            } else {
+                executeVote();
+            }
+        }
+
+        function executeVote() {
+            const votes = {};
+            const alives = players.filter(p => p.alive);
+            alives.forEach(p => votes[p.name] = 0);
+            players.forEach(p => {
+                if (p.alive) {
+                    const ts = alives.filter(t => t.name !== p.name);
+                    const v = p.voteT || ts[Math.floor(Math.random()*ts.length)].name;
+                    votes[v]++;
+                }
+            });
+            let max = -1; let res = "";
+            for (let n in votes) { if (votes[n] > max) { max = votes[n]; res = n; } }
+            const target = players.find(p => p.name === res);
+            target.alive = false;
+            addLog(`${res} さんが追放されました。`);
+            speak(`${res} さんが追放されました。`);
+            updateGrid(false);
+            if (!checkEnd()) document.getElementById('next-phase-btn').classList.remove('hidden');
+        }
+
+        window.submitAction = function() {
+            if (phase === 'VOTE') {
+                const p = players.filter(p => !p.isAI && p.alive && !p.done)[0];
+                p.voteT = players[document.getElementById('target-select').value].name;
+                p.done = true;
+                document.getElementById('secret-area').classList.add('hidden');
+                document.getElementById('end-turn-btn').classList.remove('hidden');
+            } else {
+                submitAction();
+            }
+        }
+
+        function checkEnd() {
+            const w = players.filter(p => p.alive && p.role === ROLE.WOLF).length;
+            const v = players.filter(p => p.alive && p.role !== ROLE.WOLF).length;
+            if (w === 0) { alert("村人勝利！"); location.reload(); return true; }
+            if (w >= v) { alert("人狼勝利！"); location.reload(); return true; }
+            return false;
+        }
+
+        function updateGrid(hide) {
+            const grid = document.getElementById('player-grid');
+            grid.innerHTML = '';
+            players.forEach(p => {
+                const card = document.createElement('div');
+                card.className = `p-card ${p.alive ? '' : 'dead'}`;
+                card.innerHTML = `<div>${p.name}</div><div class="role-tag">${(!hide || !p.alive) ? p.role : '???'}</div>`;
+                grid.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>
