@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CHAMPIONSHIP V3 - ARENA</title>
+    <title>フリフリ＆ジャンプ決定戦 - ARENA</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=Teko:wght@600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Rajdhani:wght@700&family=Zen+Maru+Gothic:wght@700;900&display=swap');
 
         :root {
             --primary: #00f2ff;
@@ -16,7 +16,7 @@
         }
 
         body { 
-            font-family: 'Rajdhani', sans-serif; 
+            font-family: 'Zen Maru Gothic', sans-serif; 
             margin: 0; background: var(--dark); color: white; 
             overflow: hidden; touch-action: none;
         }
@@ -27,115 +27,127 @@
         /* --- 背景演出 --- */
         .bg-vfx { position: fixed; top:0; left:0; width:100%; height:100%; z-index:-1; background: radial-gradient(circle at 50% 50%, #111 0%, #000 100%); opacity: 0.8; }
         
-        /* --- ホスト画面 --- */
+        /* --- ホスト画面 UI --- */
         #top-ui {
             position: absolute; top: 0; width: 100%; height: 80px;
             display: flex; justify-content: space-between; align-items: center;
             padding: 0 50px; box-sizing: border-box; background: rgba(0,0,0,0.9); border-bottom: 3px solid var(--primary);
+            z-index: 10;
         }
 
         #arena {
             display: flex; align-items: flex-end; justify-content: center;
-            height: 40vh; width: 90%; gap: 20px; border-bottom: 5px solid #222;
-            position: relative;
+            height: 45vh; width: 90%; gap: 20px; border-bottom: 5px solid #222;
+            position: relative; margin-top: 50px;
         }
 
-        /* --- 大縄のアニメーション --- */
+        /* --- 大なわのアニメーション --- */
         #long-rope {
-            position: absolute; width: 100%; height: 120%;
-            border: 6px dashed var(--accent); border-radius: 50%;
-            top: -60%; left: 0; transform-origin: center;
+            position: absolute; width: 100%; height: 140%;
+            border: 8px dashed var(--accent); border-radius: 50%;
+            top: -70%; left: 0; transform-origin: center;
             display: none; pointer-events: none; opacity: 0.6;
             box-shadow: 0 0 50px var(--accent);
         }
         .rope-swing { display: block !important; animation: swing 1.2s infinite linear; }
         @keyframes swing {
             0% { transform: rotateX(0deg); opacity: 0.2; }
-            50% { transform: rotateX(90deg); opacity: 1; } /* ここが地面 */
+            50% { transform: rotateX(90deg); opacity: 1; } /* ここが地面接地 */
             100% { transform: rotateX(180deg); opacity: 0.2; }
         }
 
-        .player-unit { display: flex; flex-direction: column; align-items: center; width: 100px; }
-        .bar { width: 40px; background: linear-gradient(to top, var(--primary), #fff); transition: 0.1s; box-shadow: 0 0 15px var(--primary); }
-        .jump-box { width: 50px; height: 80px; border: 2px solid #333; position: relative; }
-        .character { width: 30px; height: 40px; background: #fff; position: absolute; bottom: 0; left: 10px; transition: transform 0.1s; }
+        .player-unit { display: flex; flex-direction: column; align-items: center; width: 100px; position: relative; }
+        .bar { width: 45px; background: linear-gradient(to top, var(--primary), #fff); transition: 0.1s; box-shadow: 0 0 15px var(--primary); border-radius: 5px 5px 0 0; }
+        .jump-box { width: 60px; height: 100px; border-bottom: 2px solid #444; position: relative; }
+        .character { width: 30px; height: 40px; background: #fff; position: absolute; bottom: 0; left: 15px; transition: transform 0.1s; border-radius: 5px; }
 
-        /* --- ボタン・モード選択 --- */
-        .panel { background: rgba(255,255,255,0.05); padding: 30px; border-radius: 10px; text-align: center; backdrop-filter: blur(10px); }
+        /* --- モード選択パネル --- */
+        .panel { background: rgba(255,255,255,0.05); padding: 30px; border-radius: 15px; text-align: center; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
         .mode-btn { 
             padding: 15px; border: 2px solid #444; cursor: pointer; color: #888; transition: 0.3s;
-            font-size: 14px; flex: 1;
+            font-size: 16px; flex: 1; border-radius: 8px; font-weight: bold;
         }
-        .mode-btn.active { border-color: var(--primary); color: var(--primary); background: rgba(0,242,255,0.1); }
-        .btn-main { background: var(--secondary); border: none; color: white; padding: 15px 40px; font-size: 24px; cursor: pointer; font-family: 'Rajdhani'; box-shadow: 0 0 20px var(--secondary); }
-        .btn-main:disabled { opacity: 0.3; }
+        .mode-btn.active { border-color: var(--primary); color: var(--primary); background: rgba(0,242,255,0.1); box-shadow: 0 0 15px var(--primary); }
+        .btn-main { background: var(--secondary); border: none; color: white; padding: 15px 50px; font-size: 26px; cursor: pointer; font-family: 'Zen Maru Gothic'; font-weight: 900; border-radius: 50px; box-shadow: 0 0 20px var(--secondary); transition: 0.2s; }
+        .btn-main:hover { transform: scale(1.05); }
+        .btn-main:disabled { opacity: 0.3; transform: scale(1); }
 
         /* --- 実況テロップ --- */
         #news-feed {
             position: absolute; bottom: 0; width: 100%; background: var(--secondary);
-            color: white; padding: 10px 0; font-weight: bold; overflow: hidden;
+            color: white; padding: 12px 0; font-weight: 900; overflow: hidden; font-size: 20px;
         }
         .news-scroll { display: inline-block; white-space: nowrap; animation: scroll 15s linear infinite; }
         @keyframes scroll { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
 
-        /* --- コントローラー --- */
+        /* --- コントローラー UI --- */
         #action-btn {
-            width: 250px; height: 250px; border-radius: 50%; border: 8px solid var(--primary);
+            width: 260px; height: 260px; border-radius: 50%; border: 10px solid var(--primary);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            box-shadow: 0 0 30px var(--primary); transition: 0.1s;
+            box-shadow: 0 0 40px var(--primary); transition: 0.1s; background: rgba(0,0,0,0.5);
         }
         .active-jump { background: var(--primary); transform: scale(0.9); }
+        .p-score-display { font-family: 'Rajdhani'; font-size: 100px; font-weight: 700; line-height: 1; margin: 0; }
+
+        #overlay {
+            position: absolute; font-family: 'Zen Maru Gothic'; font-weight: 900; font-size: 12vw; 
+            opacity: 0; transition: 0.2s; pointer-events: none; z-index: 100; color: white; text-shadow: 0 0 50px var(--secondary);
+        }
     </style>
 </head>
 <body>
     <div class="bg-vfx"></div>
 
-    <!-- HOST VIEW -->
+    <!-- ホスト画面 -->
     <div id="host-view" class="full-screen hidden">
         <div id="top-ui">
-            <div style="font-size: 20px; color: var(--accent);">WORLD RECORD: <span id="wr-score">0</span></div>
-            <div id="main-timer" style="font-family: Teko; font-size: 60px; color: #fff;">00:00</div>
-            <div id="current-mode-label" style="font-size: 20px; color: var(--primary);">MODE: SHAKE</div>
+            <div style="font-size: 20px; color: var(--accent);">歴代最高記録: <span id="wr-score">0</span> <small id="wr-name"></small></div>
+            <div id="main-timer" style="font-family: 'Rajdhani'; font-size: 60px; color: #fff;">00:00</div>
+            <div id="current-mode-label" style="font-size: 20px; color: var(--primary);">種目：フリフリ</div>
         </div>
 
         <div id="lobby-ui" class="panel">
-            <h1 style="font-family: Teko; font-size: 50px; margin: 0 0 20px 0;">CHAMPIONSHIP V3</h1>
-            <div style="display:flex; gap:10px; margin-bottom:20px;">
-                <div id="m-shake" class="mode-btn active" onclick="setMode('SHAKE')">SHAKE<br>腕を振れ</div>
-                <div id="m-jump" class="mode-btn" onclick="setMode('JUMP')">SINGLE JUMP<br>個人縄跳び</div>
-                <div id="m-long" class="mode-btn" onclick="setMode('LONG')">LONG ROPE<br>大縄跳び</div>
+            <h1 style="font-size: 45px; margin: 0 0 10px 0;">競技アリーナ V3</h1>
+            <p style="color: #aaa; margin-bottom: 25px;">種目を選択して参加者を待とう！</p>
+            
+            <div style="display:flex; gap:15px; margin-bottom:30px;">
+                <div id="m-shake" class="mode-btn active" onclick="setMode('SHAKE')">フリフリ<br><small>腕を振りまくれ！</small></div>
+                <div id="m-jump" class="mode-btn" onclick="setMode('JUMP')">なわとび<br><small>自分のペースで跳べ！</small></div>
+                <div id="m-long" class="mode-btn" onclick="setMode('LONG')">大なわとび<br><small>リズムに合わせて跳べ！</small></div>
             </div>
-            <div id="qrcode" style="background:white; padding:10px; display:inline-block; margin-bottom:20px;"></div>
-            <div>
-                <input type="number" id="game-sec" value="20" style="width:60px; background:none; border:1px solid #555; color:white; font-size:20px; text-align:center;"> SEC 
-                <button id="start-btn" class="btn-main" onclick="hostStart()" disabled>START MATCH</button>
+
+            <div id="qrcode" style="background:white; padding:15px; display:inline-block; margin-bottom:25px; border-radius: 10px;"></div>
+            
+            <div style="margin-bottom: 20px;">
+                制限時間: <input type="number" id="game-sec" value="20" style="width:70px; background:#000; border:2px solid var(--primary); color:white; font-size:24px; text-align:center; border-radius:5px;"> 秒 
+                <button id="start-btn" class="btn-main" onclick="hostStart()" disabled style="margin-left: 20px;">試合開始！</button>
             </div>
-            <p id="player-count" style="color:var(--primary); margin-top:15px;">WAITING FOR PLAYERS...</p>
+            <p id="player-count" style="color:var(--primary); font-weight: bold;">参加者を待っています...</p>
         </div>
 
         <div id="arena" class="hidden">
             <div id="long-rope"></div>
         </div>
 
-        <div id="news-feed"><div class="news-scroll" id="news-text">ARE YOU READY? JOIN NOW AND BECOME THE CHAMPION!</div></div>
-        <div id="overlay" style="position:absolute; font-family:Teko; font-size:15vw; opacity:0; transition:0.2s; pointer-events:none; z-index:100;"></div>
+        <div id="news-feed"><div class="news-scroll" id="news-text">QRコードを読み取って選手登録！世界一を目指せ！</div></div>
+        <div id="overlay" style="text-align:center;"></div>
     </div>
 
-    <!-- CONTROLLER VIEW -->
+    <!-- コントローラー画面 -->
     <div id="ctrl-view" class="full-screen hidden">
-        <div id="ctrl-login" class="panel">
-            <h2 style="font-family: Teko; font-size: 40px; margin:0;">ENTRY</h2>
-            <input type="text" id="p-name" placeholder="PLAYER NAME" maxlength="10" style="padding:15px; width:80%; margin:20px 0; text-align:center;">
-            <button class="btn-main" onclick="ctrlJoin()">JOIN</button>
+        <div id="ctrl-login" class="panel" style="width: 80%;">
+            <h2 style="font-size: 32px; margin:0;">選手入場</h2>
+            <input type="text" id="p-name" placeholder="ニックネーム" maxlength="8" style="padding:18px; width:80%; margin:25px 0; text-align:center; font-size:20px; border-radius:10px; border:none; background:#222; color:white;">
+            <button class="btn-main" onclick="ctrlJoin()">入場する</button>
         </div>
 
         <div id="ctrl-game" class="hidden" style="text-align:center;">
-            <h2 id="mode-hint">SHAKE IT!</h2>
+            <h2 id="mode-hint" style="color:var(--accent); letter-spacing: 2px;">準備中...</h2>
             <div id="action-btn">
-                <div style="font-size: 20px; color: #aaa;">COUNT</div>
-                <div id="my-count" style="font-family: Teko; font-size: 100px;">0</div>
+                <div style="font-size: 20px; color: #aaa; font-weight:bold;">カウント</div>
+                <div id="my-count" class="p-score-display">0</div>
             </div>
-            <p id="ctrl-status" style="margin-top:20px; color:var(--primary);">READY...</p>
+            <p id="ctrl-status" style="margin-top:25px; color:var(--primary); font-size: 24px; font-weight: 900;">ホストの開始を待っています</p>
         </div>
     </div>
 
@@ -143,6 +155,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
         import { getDatabase, ref, set, onValue, update, onDisconnect, runTransaction } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
+        // Firebase 設定
         const firebaseConfig = {
             apiKey: "AIzaSyDbZzTMvUkG2LXIGY4ux0KBTmnAdqP236s",
             authDomain: "game-4f2d9.firebaseapp.com",
@@ -155,7 +168,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // --- SOUNDS ---
+        // --- 効果音 ---
         const audio = new (window.AudioContext || window.webkitAudioContext)();
         function playTone(f, t, d, v=0.1) {
             const o = audio.createOscillator(); const g = audio.createGain();
@@ -171,7 +184,7 @@
             finish: () => { playTone(1000, 'sine', 0.5); playTone(500, 'sine', 0.5); }
         };
 
-        // --- GLOBALS ---
+        // --- 変数管理 ---
         const params = new URLSearchParams(window.location.search);
         const role = params.get('role') || 'host';
         const roomId = params.get('room');
@@ -181,7 +194,11 @@
         if (role === 'host') {
             if (!roomId) window.location.replace(`?role=host&room=${Math.random().toString(36).substr(2,4).toUpperCase()}`);
             document.getElementById('host-view').classList.remove('hidden');
-            new QRCode(document.getElementById("qrcode"), { text: `${window.location.origin}${window.location.pathname}?role=ctrl&room=${roomId}`, width: 120, height: 120 });
+            
+            new QRCode(document.getElementById("qrcode"), { 
+                text: `${window.location.origin}${window.location.pathname}?role=ctrl&room=${roomId}`, 
+                width: 140, height: 140 
+            });
 
             const stateRef = ref(db, `v3/${roomId}/state`);
             const playersRef = ref(db, `v3/${roomId}/players`);
@@ -190,16 +207,21 @@
                 gameMode = m;
                 document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
                 document.getElementById(`m-${m.toLowerCase()}`).classList.add('active');
-                document.getElementById('current-mode-label').innerText = "MODE: " + m;
+                const labels = {'SHAKE': '種目：フリフリ', 'JUMP': '種目：なわとび', 'LONG': '種目：大なわとび'};
+                document.getElementById('current-mode-label').innerText = labels[m];
                 update(stateRef, { mode: m });
             };
 
-            onValue(ref(db, `v3_global/best`), s => { document.getElementById('wr-score').innerText = (s.val()||{score:0}).score; });
+            onValue(ref(db, `v3_global/best`), s => { 
+                const d = s.val() || {score:0, name:''};
+                document.getElementById('wr-score').innerText = d.score; 
+                document.getElementById('wr-name').innerText = d.name ? `(${d.name} 選手)` : "";
+            });
             
             onValue(playersRef, snap => {
                 const players = snap.val() || {};
                 const pCount = Object.keys(players).length;
-                document.getElementById('player-count').innerText = `CONNECTED PLAYERS: ${pCount}`;
+                document.getElementById('player-count').innerText = `現在参加中： ${pCount} 名`;
                 document.getElementById('start-btn').disabled = pCount === 0;
                 renderArena(players);
             });
@@ -214,10 +236,10 @@
                         el = document.createElement('div');
                         el.id = `p-${id}`;
                         el.className = 'player-unit';
-                        el.innerHTML = `<div class="p-score" style="font-family:Teko; font-size:24px;">0</div>
+                        el.innerHTML = `<div class="p-score" style="font-family:'Rajdhani'; font-size:28px; font-weight:bold;">0</div>
                                        <div class="jump-box hidden"><div class="character"></div></div>
                                        <div class="bar"></div>
-                                       <div style="font-size:12px; color:#aaa;">${players[id].name}</div>`;
+                                       <div class="p-name-label" style="font-size:14px; color:#aaa; margin-top:5px;">${players[id].name}</div>`;
                         arena.appendChild(el);
                     }
                     const p = players[id];
@@ -230,15 +252,17 @@
                     if (p.count > oldVal) {
                         sfx.hit();
                         if(gameMode !== 'SHAKE') {
-                            char.style.transform = 'translateY(-40px)';
-                            setTimeout(() => char.style.transform = 'translateY(0)', 200);
+                            char.style.transform = 'translateY(-50px)';
+                            setTimeout(() => char.style.transform = 'translateY(0)', 150);
                         }
                     }
 
+                    // 競技中はスコアを「???」にする
                     scoreText.innerText = isRunning ? "???" : (p.count || 0);
+                    
                     if (gameMode === 'SHAKE') {
                         bar.classList.remove('hidden'); jumpBox.classList.add('hidden');
-                        bar.style.height = Math.min(p.count * 2, 250) + 'px';
+                        bar.style.height = Math.min(p.count * 2, 280) + 'px';
                     } else {
                         bar.classList.add('hidden'); jumpBox.classList.remove('hidden');
                     }
@@ -250,21 +274,20 @@
                 document.getElementById('lobby-ui').classList.add('hidden');
                 document.getElementById('arena').classList.remove('hidden');
                 
-                // 完全スコアリセット
+                // 開始時にスコアを確実に 0 リセット
                 onValue(playersRef, snap => {
                     const updates = {};
                     Object.keys(snap.val()||{}).forEach(k => updates[k+'/count'] = 0);
                     update(playersRef, updates);
                 }, {onlyOnce:true});
 
-                // カウントダウン
                 let count = 3;
                 const ov = document.getElementById('overlay');
                 ov.style.opacity = 1;
                 const cd = setInterval(() => {
                     if (count > 0) { sfx.tick(); ov.innerText = count; }
                     else {
-                        clearInterval(cd); sfx.go(); ov.innerText = "GO!";
+                        clearInterval(cd); sfx.go(); ov.innerText = "スタート！";
                         setTimeout(() => ov.style.opacity = 0, 1000);
                         startMatch(sec);
                     }
@@ -277,14 +300,15 @@
                 if (gameMode === 'LONG') document.getElementById('long-rope').classList.add('rope-swing');
                 
                 let time = sec;
-                update(stateRef, { status: 'running', startTime: Date.now() });
+                const startTime = Date.now();
+                update(stateRef, { status: 'running', startTime: startTime });
 
                 const timer = setInterval(() => {
                     time--;
                     document.getElementById('main-timer').innerText = `00:${time < 10 ? '0'+time : time}`;
                     
                     if (gameMode === 'LONG' && time > 0) {
-                        sfx.swish(); // リズム音
+                        sfx.swish(); // リズムガイド音
                     }
 
                     if (time <= 0) {
@@ -300,7 +324,7 @@
                 document.getElementById('long-rope').classList.remove('rope-swing');
                 document.getElementById('arena').setAttribute('data-run', 'false');
                 const ov = document.getElementById('overlay');
-                ov.innerText = "FINISH!"; ov.style.opacity = 1;
+                ov.innerText = "終了！"; ov.style.opacity = 1;
 
                 onValue(playersRef, snap => {
                     const players = snap.val() || {};
@@ -308,7 +332,8 @@
                     Object.keys(players).forEach(k => { if(players[k].count > top){ top = players[k].count; win = players[k].name; } });
                     
                     setTimeout(() => {
-                        ov.innerHTML = `CHAMPION<br><span style="color:var(--primary)">${win}</span>`;
+                        ov.innerHTML = `優勝<br><span style="color:var(--primary); font-size:1.2em;">${win} 選手</span>`;
+                        document.getElementById('news-text').innerText = `${win} 選手が ${top} 回で優勝！おめでとうございます！`;
                         if(top > 0) runTransaction(ref(db, `v3_global/best`), c => { if(!c || top > c.score) return {score:top, name:win}; return; });
                     }, 2000);
                     setTimeout(() => location.reload(), 10000);
@@ -316,14 +341,14 @@
             }
         } 
         
-        // --- CONTROLLER ---
+        // --- コントローラー ---
         else {
             document.getElementById('ctrl-view').classList.remove('hidden');
             let status = 'lobby', count = 0, mode = 'SHAKE', startTime = 0;
 
             window.ctrlJoin = () => {
                 const n = document.getElementById('p-name').value;
-                if(!n) return;
+                if(!n) return alert("名前を入力してください");
                 if(typeof DeviceMotionEvent.requestPermission === 'function') {
                     DeviceMotionEvent.requestPermission().then(r => { if(r==='granted') init(n); });
                 } else init(n);
@@ -341,13 +366,17 @@
                     status = data.status;
                     mode = data.mode;
                     startTime = data.startTime;
-                    document.getElementById('mode-hint').innerText = mode + " MODE";
+                    
+                    const hints = {'SHAKE':'全力で振れ！', 'JUMP':'リズムよく跳べ！', 'LONG':'縄に合わせて跳べ！'};
+                    document.getElementById('mode-hint').innerText = hints[mode] || "準備中...";
+                    
                     if(status === 'running') {
-                        document.getElementById('ctrl-status').innerText = "FIGHT!!";
+                        document.getElementById('ctrl-status').innerText = "競技中！！";
                     } else if(status === 'finished') {
-                        document.getElementById('ctrl-status').innerText = "ENDED";
+                        document.getElementById('ctrl-status').innerText = "終了しました";
                     } else {
                         count = 0; document.getElementById('my-count').innerText = 0;
+                        document.getElementById('ctrl-status').innerText = "開始を待っています...";
                     }
                 });
 
@@ -358,25 +387,23 @@
                     const now = Date.now();
 
                     if (mode === 'SHAKE') {
-                        if (Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z) > 35) {
-                            if(now - lastJump > 100) trigger();
-                        }
+                        const power = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
+                        if (power > 35) { if(now - lastJump > 100) trigger(); }
                     } else if (mode === 'JUMP') {
-                        if (acc.y > 15) {
-                            if(now - lastJump > 300) trigger();
-                        }
+                        if (acc.y > 15) { if(now - lastJump > 300) trigger(); }
                     } else if (mode === 'LONG') {
-                        // 大縄跳び: リズム（1.2秒周期）に合わせる
-                        // ホスト開始時間からの経過時間で判定
+                        // 大なわとび判定: 1.2秒周期のリズム合わせ
                         if (acc.y > 15 && now - lastJump > 400) {
                             const elapsed = (now - startTime) % 1200;
-                            // 縄が地面に来るのが 600ms 地点 (0.6秒)
+                            // 縄が地面に来るのは 600ms 地点。許容誤差 ±150ms
                             if (elapsed > 450 && elapsed < 750) {
                                 trigger();
-                                document.getElementById('ctrl-status').innerText = "GREAT!!";
+                                document.getElementById('ctrl-status').innerText = "ナイス！";
+                                document.getElementById('ctrl-status').style.color = "var(--accent)";
                             } else {
-                                document.getElementById('ctrl-status').innerText = "MISS!";
-                                lastJump = now; // カウントはしないが、連打防止
+                                document.getElementById('ctrl-status').innerText = "ミス！";
+                                document.getElementById('ctrl-status').style.color = "var(--secondary)";
+                                lastJump = now;
                             }
                         }
                     }
