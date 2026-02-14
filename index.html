@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>AI人狼 V14 - 安定版</title>
+    <title>AI人狼 V15 - ボイス対応版</title>
     <style>
-        /* --- デザイン設定 --- */
+        /* --- 基本デザイン --- */
         body {
             background-color: #121212;
             color: #ffffff;
@@ -33,104 +33,107 @@
         }
 
         h1 { color: #ff4757; margin-top: 0; font-size: 24px; }
-        h2 { color: #ffa502; font-size: 20px; margin: 10px 0; }
-        p { font-size: 16px; line-height: 1.6; }
+        .status-bar { color: #ffa502; font-weight: bold; margin-bottom: 10px; }
 
         /* ボタン */
         button {
-            background: #3742fa;
-            color: white;
-            border: none;
-            padding: 15px;
-            font-size: 18px;
-            font-weight: bold;
-            border-radius: 8px;
-            width: 100%;
-            margin-top: 15px;
-            cursor: pointer;
+            background: #3742fa; color: white; border: none; padding: 15px;
+            font-size: 18px; font-weight: bold; border-radius: 8px;
+            width: 100%; margin-top: 15px; cursor: pointer;
         }
         button:active { opacity: 0.8; }
-        button.action { background: #ff4757; } /* アクション用 */
-        button.next { background: #2ed573; color: #000; } /* 進行用 */
+        button.action { background: #ff4757; }
+        button.next { background: #2ed573; color: #000; }
 
-        /* 入力フォーム */
+        /* 入力・リスト */
         input, select {
-            width: 100%;
-            padding: 12px;
-            margin: 5px 0 15px 0;
-            border-radius: 5px;
-            border: 1px solid #555;
-            background: #2f3542;
-            color: white;
-            font-size: 16px;
-            box-sizing: border-box;
+            width: 100%; padding: 12px; margin: 5px 0 15px 0; border-radius: 5px;
+            border: 1px solid #555; background: #2f3542; color: white; font-size: 16px; box-sizing: border-box;
         }
-
-        /* プレイヤーリスト表示 */
-        .player-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin: 15px 0;
-        }
-        .player-card {
-            background: #2f3542;
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 14px;
-            border: 2px solid transparent;
-        }
+        .player-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px 0; }
+        .player-card { background: #2f3542; padding: 10px; border-radius: 5px; font-size: 14px; }
         .player-card.dead { opacity: 0.4; text-decoration: line-through; background: #000; }
-        .player-card.human { border-color: #3742fa; }
 
-        /* ログエリア */
+        /* ログエリア (会話表示用) */
         #log-box {
-            background: #000;
-            height: 100px;
-            overflow-y: auto;
-            text-align: left;
-            padding: 10px;
-            font-size: 12px;
-            border: 1px solid #444;
-            border-radius: 5px;
-            margin-bottom: 10px;
+            background: #000; height: 150px; overflow-y: auto; text-align: left;
+            padding: 10px; font-size: 13px; border: 1px solid #444; border-radius: 5px;
+            margin-bottom: 10px; display: flex; flex-direction: column-reverse; /* 新しいものを下に */
         }
+        .log-ai { color: #ffa502; margin: 2px 0; }
+        .log-human { color: #00a8ff; font-weight: bold; margin: 2px 0; border-left: 3px solid #00a8ff; padding-left: 5px; }
+        .log-sys { color: #ccc; font-size: 11px; margin: 2px 0; }
+
+        /* マイクインジケーター */
+        .mic-status {
+            color: #ff4757; font-weight: bold; animation: blink 1.5s infinite;
+            display: none; margin-bottom: 5px;
+        }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <div id="app">
-        <!-- ここにJavaScriptで画面を描画します -->
-    </div>
+    <div id="app"></div>
 
     <script>
-        /**
-         * ゲームの全データとロジックを管理するクラス
-         */
         class WerewolfGame {
             constructor() {
                 this.app = document.getElementById('app');
+                
+                // 音声認識の準備
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (SpeechRecognition) {
+                    this.recognition = new SpeechRecognition();
+                    this.recognition.lang = 'ja-JP';
+                    this.recognition.continuous = true;
+                    this.recognition.interimResults = false;
+
+                    this.recognition.onresult = (event) => {
+                        const transcript = event.results[event.results.length - 1][0].transcript;
+                        this.addLog(`あなた: ${transcript}`, 'human');
+                    };
+                    this.recognition.onerror = (event) => {
+                        console.log("マイクエラー:", event.error);
+                    };
+                    this.hasMic = true;
+                } else {
+                    this.hasMic = false;
+                }
+
                 this.reset();
             }
 
             reset() {
-                this.players = [];     // プレイヤー情報
-                this.day = 1;          // 日数
-                this.phase = 'SETUP';  // SETUP, NIGHT, MORNING, DISCUSS, VOTE, END
-                this.queue = [];       // 行動順（人間のインデックス）
-                this.queueIndex = 0;   // 現在の行動者
-                this.timer = null;     // タイマーID
-                this.logs = [];        // ログ履歴
-                
+                this.players = [];
+                this.day = 1;
+                this.phase = 'SETUP';
+                this.queue = [];
+                this.queueIndex = 0;
+                this.timer = null;
+                this.logs = []; // ログデータ
                 this.renderSetup();
             }
 
-            /* --- 画面描画メソッド群 --- */
+            /* --- ログ管理 --- */
+            addLog(text, type = 'sys') {
+                // 配列の先頭に追加（表示はflex-direction: column-reverseで制御）
+                this.logs.unshift({ text, type });
+                this.updateLogDisplay();
+            }
 
-            // 1. 設定画面
+            updateLogDisplay() {
+                const box = document.getElementById('log-box');
+                if (!box) return;
+                box.innerHTML = this.logs.map(l => 
+                    `<div class="log-${l.type}">${l.text}</div>`
+                ).join('');
+            }
+
+            /* --- 画面描画 --- */
             renderSetup() {
                 this.app.innerHTML = `
-                    <h1>AI人狼 V14</h1>
+                    <h1>AI人狼 V15 <span style="font-size:12px">Voice</span></h1>
                     <p>設定を入力してください</p>
                     <label>総人数 (5〜10人)</label>
                     <input type="number" id="total" value="5" min="5" max="10">
@@ -140,354 +143,256 @@
                 `;
             }
 
-            // 2. 名前入力
             setupNames() {
                 const total = parseInt(document.getElementById('total').value);
                 const humans = parseInt(document.getElementById('humans').value);
                 if (humans > total) return alert("人間の数が多すぎます");
 
-                let html = `<h1>プレイヤー名入力</h1>`;
+                let html = `<h1>プレイヤー名</h1>`;
                 for (let i = 0; i < humans; i++) {
-                    html += `<input type="text" id="name_${i}" value="プレイヤー${i+1}" placeholder="名前">`;
+                    html += `<input type="text" id="name_${i}" value="プレイヤー${i+1}">`;
                 }
                 html += `<button onclick="game.startGame(${total}, ${humans})">ゲーム開始</button>`;
                 this.app.innerHTML = html;
             }
 
-            // 3. ゲーム開始処理
             startGame(total, humans) {
                 const humanNames = [];
                 for (let i = 0; i < humans; i++) {
                     humanNames.push(document.getElementById(`name_${i}`).value || `P${i+1}`);
                 }
-
-                // AIの名前リスト
-                const aiNames = ["タナカ", "サトウ", "スズキ", "イトウ", "ワタナベ", "ヤマモト", "ナカムラ", "コバヤシ"];
+                const aiNames = ["タナカ", "サトウ", "スズキ", "イトウ", "ワタナベ", "ヤマモト"];
                 
-                // プレイヤー生成
                 this.players = [];
-                // 人間を追加
-                humanNames.forEach(name => {
-                    this.players.push({ name: name, isAI: false, alive: true, role: '', target: -1, votes: 0 });
-                });
-                // AIを追加
+                humanNames.forEach(name => this.players.push({ name: name, isAI: false, alive: true, role: '', target: -1, votes: 0 }));
                 while (this.players.length < total) {
                     const name = aiNames[(this.players.length - humans) % aiNames.length];
                     this.players.push({ name: name + "(AI)", isAI: true, alive: true, role: '', target: -1, votes: 0 });
                 }
 
-                // 役職割り当て (人狼1, 占い1, 残り村人。8人以上なら人狼2)
                 const roles = ['人狼', '占い師'];
                 if (total >= 8) roles.push('人狼');
                 while (roles.length < total) roles.push('村人');
                 
-                // シャッフル
                 for (let i = roles.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [roles[i], roles[j]] = [roles[j], roles[i]];
                 }
-                
                 this.players.forEach((p, i) => p.role = roles[i]);
 
-                this.addLog("ゲーム開始！");
+                this.addLog("--- ゲーム開始 ---");
                 this.startNight();
             }
 
             /* --- 夜フェーズ --- */
             startNight() {
                 this.phase = 'NIGHT';
-                // 生きている人間だけをキューに入れる
-                this.queue = this.players
-                    .map((p, i) => ({ ...p, idx: i }))
-                    .filter(p => !p.isAI && p.alive)
-                    .map(p => p.idx);
-                
+                this.queue = this.players.map((p, i) => ({ ...p, idx: i })).filter(p => !p.isAI && p.alive).map(p => p.idx);
                 this.queueIndex = 0;
-                this.players.forEach(p => p.target = -1); // ターゲットリセット
-
+                this.players.forEach(p => p.target = -1);
                 this.processNightQueue();
             }
 
             processNightQueue() {
-                // 人間のターンが終わったらAI処理へ
                 if (this.queueIndex >= this.queue.length) {
                     this.runAINightAction();
                     this.startMorning();
                     return;
                 }
-
-                const playerIdx = this.queue[this.queueIndex];
-                const player = this.players[playerIdx];
-                
-                // 端末受け渡し画面
+                const p = this.players[this.queue[this.queueIndex]];
                 this.app.innerHTML = `
                     <h1>${this.day}日目：夜</h1>
-                    <h2 style="color:#00ffcc;">${player.name} さんの番</h2>
-                    <p>この画面を ${player.name} さんに渡してください。<br>他の人は見ないでください。</p>
-                    <button class="next" onclick="game.showNightAction(${playerIdx})">確認する</button>
+                    <h2 style="color:#00a8ff;">${p.name} さんの番</h2>
+                    <p>この画面を ${p.name} さんに渡してください</p>
+                    <button class="next" onclick="game.showNightAction(${this.queue[this.queueIndex]})">確認する</button>
                 `;
             }
 
             showNightAction(idx) {
                 const p = this.players[idx];
-                let contentHtml = `<h2>あなたは【${p.role}】です</h2>`;
-                let actionHtml = "";
-
-                // 自分以外の生きているプレイヤーのリスト
-                const targets = this.players
-                    .map((tp, i) => ({ ...tp, idx: i }))
-                    .filter(tp => tp.alive && tp.idx !== idx);
-
+                const targets = this.players.map((tp, i) => ({ ...tp, idx: i })).filter(tp => tp.alive && tp.idx !== idx);
                 let options = targets.map(t => `<option value="${t.idx}">${t.name}</option>`).join('');
+                let html = `<h2>あなたの役職：${p.role}</h2>`;
 
-                if (p.role === '人狼') {
-                    contentHtml += `<p>襲撃する相手を選んでください</p>`;
-                    actionHtml = `<select id="target">${options}</select>`;
-                } else if (p.role === '占い師') {
-                    contentHtml += `<p>占う相手を選んでください</p>`;
-                    actionHtml = `<select id="target">${options}</select>`;
-                } else {
-                    contentHtml += `<p>村人は夜の行動はありません。<br>正体がバレないよう、適当な時間待ってから次へ進んでください。</p>`;
-                }
+                if (p.role === '人狼') html += `<p>襲撃先を選んでください</p><select id="target">${options}</select>`;
+                else if (p.role === '占い師') html += `<p>占う相手を選んでください</p><select id="target">${options}</select>`;
+                else html += `<p>村人は行動がありません。<br>適当な時間待ってから次へ進んでください。</p>`;
 
-                this.app.innerHTML = `
-                    <h1>夜のアクション</h1>
-                    ${contentHtml}
-                    ${actionHtml}
-                    <button class="action" onclick="game.submitNightAction(${idx}, '${p.role}')">決定・次へ</button>
-                `;
+                this.app.innerHTML = `<h1>夜のアクション</h1>${html}<button class="action" onclick="game.submitNightAction(${idx}, '${p.role}')">決定</button>`;
             }
 
             submitNightAction(idx, role) {
                 if (role === '人狼' || role === '占い師') {
-                    const targetId = parseInt(document.getElementById('target').value);
-                    this.players[idx].target = targetId;
-
+                    const tid = parseInt(document.getElementById('target').value);
+                    this.players[idx].target = tid;
                     if (role === '占い師') {
-                        const targetP = this.players[targetId];
-                        const result = (targetP.role === '人狼') ? '人狼' : '人間';
-                        alert(`占い結果：\n\n${targetP.name} は 【${result}】 でした。`);
+                        const res = (this.players[tid].role === '人狼') ? '人狼' : '人間';
+                        alert(`占い結果：${this.players[tid].name} は 【${res}】 でした`);
                     }
                 }
-                
                 this.queueIndex++;
                 this.processNightQueue();
             }
 
             runAINightAction() {
-                // AIの人狼がターゲットを決める
-                this.players.forEach((p, i) => {
+                this.players.forEach(p => {
                     if (p.isAI && p.alive && p.role === '人狼') {
-                        // 人狼以外の生存者からランダム
-                        const targets = this.players
-                            .map((tp, ti) => ({ ...tp, idx: ti }))
-                            .filter(tp => tp.alive && tp.role !== '人狼');
-                        if (targets.length > 0) {
-                            p.target = targets[Math.floor(Math.random() * targets.length)].idx;
-                        }
+                        const t = this.players.map((tp, i) => ({...tp, idx:i})).filter(tp => tp.alive && tp.role !== '人狼');
+                        if (t.length) p.target = t[Math.floor(Math.random() * t.length)].idx;
                     }
                 });
             }
 
-            /* --- 朝フェーズ --- */
+            /* --- 朝・議論フェーズ --- */
             startMorning() {
-                this.phase = 'MORNING';
-                
-                // 襲撃処理（人狼のターゲットを集計）
                 const votes = {};
                 this.players.forEach(p => {
-                    if (p.alive && p.role === '人狼' && p.target !== -1) {
-                        votes[p.target] = (votes[p.target] || 0) + 1;
-                    }
+                    if (p.alive && p.role === '人狼' && p.target !== -1) votes[p.target] = (votes[p.target] || 0) + 1;
                 });
-
-                let victim = -1;
-                let maxVotes = 0;
-                for (const [targetId, count] of Object.entries(votes)) {
-                    if (count > maxVotes) {
-                        maxVotes = count;
-                        victim = parseInt(targetId);
-                    }
+                
+                let victim = -1, max = 0;
+                for (const [id, cnt] of Object.entries(votes)) {
+                    if (cnt > max) { max = cnt; victim = parseInt(id); }
                 }
 
-                // 死亡処理
-                let msg = "";
+                let msg = "昨夜は誰も死にませんでした。";
                 if (victim !== -1) {
                     this.players[victim].alive = false;
                     msg = `昨夜の犠牲者は ${this.players[victim].name} でした。`;
-                    this.speakAI(msg);
-                } else {
-                    msg = "昨夜は誰も死にませんでした。";
-                    this.speakAI(msg);
                 }
                 this.addLog(msg);
+                this.speak(msg);
 
-                // 勝敗判定
                 if (this.checkGameOver()) return;
 
                 this.app.innerHTML = `
                     <h1>${this.day}日目：朝</h1>
-                    <div class="player-card" style="font-size:18px; margin:20px;">${msg}</div>
-                    ${this.getPlayerGridHTML()}
+                    <p>${msg}</p>
+                    ${this.getPlayerGrid()}
                     <button class="next" onclick="game.startDiscuss()">議論へ進む</button>
                 `;
             }
 
-            /* --- 議論フェーズ --- */
             startDiscuss() {
-                this.phase = 'DISCUSS';
-                let timeLeft = 60; // 60秒
+                let timeLeft = 60;
+                
+                // マイク開始
+                if (this.hasMic) this.recognition.start();
 
-                this.app.innerHTML = `
-                    <h1>${this.day}日目：議論</h1>
-                    <h2 id="timer" style="font-size:50px;">60</h2>
-                    <p>誰が人狼か話し合ってください。<br>AIも発言します。</p>
-                    <div id="log-box">${this.getLogHTML()}</div>
-                    <button class="action" onclick="game.startVoteSetup()">投票へ進む（スキップ）</button>
-                `;
+                const renderDiscuss = () => {
+                    this.app.innerHTML = `
+                        <h1>議論中</h1>
+                        <h2 id="timer" style="font-size:50px;">${timeLeft}</h2>
+                        <div class="mic-status" ${this.hasMic ? 'style="display:block"' : ''}>🎤 会話を聞き取っています...</div>
+                        <div id="log-box"></div>
+                        <p style="font-size:12px;">話し合ってください。あなたの声も記録されます。</p>
+                        <button class="action" onclick="game.endDiscuss()">投票へ進む</button>
+                    `;
+                    this.updateLogDisplay();
+                };
+                renderDiscuss();
 
                 this.timer = setInterval(() => {
                     timeLeft--;
-                    const timerEl = document.getElementById('timer');
-                    if(timerEl) timerEl.innerText = timeLeft;
+                    const tEl = document.getElementById('timer');
+                    if (tEl) tEl.innerText = timeLeft;
 
-                    // AIの発言
+                    // AI発言
                     if (timeLeft % 15 === 0 && timeLeft > 0) {
-                        this.triggerAIChat();
+                        const ai = this.players.filter(p => p.isAI && p.alive);
+                        if (ai.length) {
+                            const spk = ai[Math.floor(Math.random() * ai.length)];
+                            const txt = ["怪しい人は誰ですか？", "私は村人です。", "占い師さんは？", "投票悩みますね..."][Math.floor(Math.random()*4)];
+                            this.speak(txt);
+                            this.addLog(`${spk.name}: ${txt}`, 'ai');
+                        }
                     }
 
-                    if (timeLeft <= 0) {
-                        clearInterval(this.timer);
-                        this.speakAI("議論終了です。投票に移ってください。");
-                        this.startVoteSetup();
-                    }
+                    if (timeLeft <= 0) this.endDiscuss();
                 }, 1000);
             }
 
-            triggerAIChat() {
-                const aliveAI = this.players.filter(p => p.isAI && p.alive);
-                if (aliveAI.length === 0) return;
-                
-                const speaker = aliveAI[Math.floor(Math.random() * aliveAI.length)];
-                const msgList = [
-                    "私は村人です。信じてください。",
-                    "静かな人が怪しいと思います。",
-                    "誰に投票すればいいんでしょうか…",
-                    "占い師さんは早く出てください。",
-                    "直感ですが、あの人が怪しい気がします。"
-                ];
-                const msg = msgList[Math.floor(Math.random() * msgList.length)];
-                
-                this.addLog(`${speaker.name}: ${msg}`);
-                this.speakAI(msg);
-                
-                // ログ更新
-                const logBox = document.getElementById('log-box');
-                if(logBox) logBox.innerHTML = this.getLogHTML();
+            endDiscuss() {
+                clearInterval(this.timer);
+                if (this.hasMic) this.recognition.stop();
+                this.speak("議論終了です。");
+                this.startVoteSetup();
             }
 
             /* --- 投票フェーズ --- */
             startVoteSetup() {
-                if(this.timer) clearInterval(this.timer);
-                
-                this.queue = this.players
-                    .map((p, i) => ({ ...p, idx: i }))
-                    .filter(p => !p.isAI && p.alive)
-                    .map(p => p.idx);
+                this.queue = this.players.map((p, i) => ({ ...p, idx: i })).filter(p => !p.isAI && p.alive).map(p => p.idx);
                 this.queueIndex = 0;
                 this.players.forEach(p => p.target = -1);
-
                 this.processVoteQueue();
             }
 
             processVoteQueue() {
                 if (this.queueIndex >= this.queue.length) {
-                    this.calcVoteResult();
+                    this.calcVote();
                     return;
                 }
-
-                const playerIdx = this.queue[this.queueIndex];
-                const player = this.players[playerIdx];
-
+                const p = this.players[this.queue[this.queueIndex]];
                 this.app.innerHTML = `
-                    <h1>投票タイム</h1>
-                    <h2 style="color:#00ffcc;">${player.name} さんの番</h2>
-                    <p>他の人は画面を見ないでください。</p>
-                    <button class="next" onclick="game.showVoteAction(${playerIdx})">投票する</button>
+                    <h1>投票</h1>
+                    <h2 style="color:#00a8ff;">${p.name} さんの番</h2>
+                    <p>他の人は見ないでください</p>
+                    <button class="next" onclick="game.showVoteAction(${this.queue[this.queueIndex]})">投票する</button>
                 `;
             }
 
             showVoteAction(idx) {
-                // 生存者リスト（自分以外）
-                const targets = this.players
-                    .map((tp, i) => ({ ...tp, idx: i }))
-                    .filter(tp => tp.alive && tp.idx !== idx);
-                
-                const options = targets.map(t => `<option value="${t.idx}">${t.name}</option>`).join('');
-
+                const targets = this.players.map((tp, i) => ({ ...tp, idx: i })).filter(tp => tp.alive && tp.idx !== idx);
+                let options = targets.map(t => `<option value="${t.idx}">${t.name}</option>`).join('');
                 this.app.innerHTML = `
                     <h1>投票</h1>
                     <p>追放したい人を選んでください</p>
-                    <select id="voteTarget">${options}</select>
+                    <select id="vt">${options}</select>
                     <button class="action" onclick="game.submitVote(${idx})">決定</button>
                 `;
             }
 
             submitVote(idx) {
-                const targetId = parseInt(document.getElementById('voteTarget').value);
-                this.players[idx].target = targetId;
+                this.players[idx].target = parseInt(document.getElementById('vt').value);
                 this.queueIndex++;
                 this.processVoteQueue();
             }
 
-            calcVoteResult() {
-                // AIの投票（ランダム）
-                const alive = this.players.map((p, i) => ({...p, idx: i})).filter(p => p.alive);
-                
-                this.players.forEach((p, i) => {
-                    p.votes = 0; // 票リセット
-                    if (p.isAI && p.alive) {
-                        const targets = alive.filter(t => t.idx !== i);
-                        p.target = targets[Math.floor(Math.random() * targets.length)].idx;
+            calcVote() {
+                const alive = this.players.map((p, i) => ({...p, idx:i})).filter(p => p.alive);
+                // AI投票
+                this.players.forEach(p => {
+                    p.votes = 0;
+                    if(p.isAI && p.alive) {
+                        const t = alive.filter(v => v.idx !== this.players.indexOf(p));
+                        p.target = t[Math.floor(Math.random()*t.length)].idx;
                     }
                 });
-
                 // 集計
                 this.players.forEach(p => {
-                    if (p.alive && p.target !== -1) {
-                        this.players[p.target].votes++;
-                    }
+                    if(p.alive && p.target !== -1) this.players[p.target].votes++;
                 });
-
-                // 最多得票者を探す
-                let maxVotes = -1;
-                let candidates = [];
+                // 結果
+                let max = -1, candidates = [];
                 this.players.forEach((p, i) => {
-                    if (p.alive) {
-                        if (p.votes > maxVotes) {
-                            maxVotes = p.votes;
-                            candidates = [i];
-                        } else if (p.votes === maxVotes) {
-                            candidates.push(i);
-                        }
+                    if(p.alive) {
+                        if(p.votes > max) { max = p.votes; candidates = [i]; }
+                        else if(p.votes === max) candidates.push(i);
                     }
                 });
-
-                // 処刑者決定（同数の場合はランダム）
-                const executedIdx = candidates[Math.floor(Math.random() * candidates.length)];
-                const executed = this.players[executedIdx];
-                executed.alive = false;
-
-                const msg = `投票の結果、${executed.name} が追放されました。`;
+                
+                const executedIdx = candidates[Math.floor(Math.random()*candidates.length)];
+                this.players[executedIdx].alive = false;
+                const msg = `${this.players[executedIdx].name} が追放されました。`;
                 this.addLog(msg);
-                this.speakAI(msg);
+                this.speak(msg);
 
                 if (this.checkGameOver()) return;
 
                 this.app.innerHTML = `
                     <h1>投票結果</h1>
-                    <div class="player-card" style="font-size:18px; margin:20px;">${msg}</div>
-                    ${this.getPlayerGridHTML()}
+                    <p style="font-size:18px; font-weight:bold;">${msg}</p>
+                    ${this.getPlayerGrid()}
                     <button class="next" onclick="game.nextDay()">次の夜へ</button>
                 `;
             }
@@ -497,50 +402,31 @@
                 this.startNight();
             }
 
-            /* --- 共通ヘルパー --- */
             checkGameOver() {
-                const wolves = this.players.filter(p => p.alive && p.role === '人狼').length;
-                const villagers = this.players.filter(p => p.alive && p.role !== '人狼').length;
-
-                let result = "";
-                if (wolves === 0) result = "村人の勝利！すべての人狼を追放しました。";
-                else if (wolves >= villagers) result = "人狼の勝利！村は乗っ取られました。";
+                const w = this.players.filter(p => p.alive && p.role === '人狼').length;
+                const v = this.players.filter(p => p.alive && p.role !== '人狼').length;
+                let res = "";
+                if (w === 0) res = "村人陣営の勝利！";
+                else if (w >= v) res = "人狼陣営の勝利！";
                 
-                if (result) {
-                    this.app.innerHTML = `
-                        <h1>ゲーム終了</h1>
-                        <h2 style="color:#ff4757; font-size:24px;">${result}</h2>
-                        ${this.getPlayerGridHTML(true)}
-                        <button onclick="location.reload()">タイトルに戻る</button>
-                    `;
-                    this.speakAI(result);
+                if (res) {
+                    this.app.innerHTML = `<h1>ゲーム終了</h1><h2>${res}</h2>${this.getPlayerGrid(true)}<button onclick="location.reload()">TOPへ</button>`;
                     return true;
                 }
                 return false;
             }
 
-            getPlayerGridHTML(reveal = false) {
-                let html = `<div class="player-grid">`;
+            getPlayerGrid(showRole = false) {
+                let html = '<div class="player-grid">';
                 this.players.forEach(p => {
-                    const statusClass = p.alive ? (p.isAI ? '' : 'human') : 'dead';
-                    const roleText = (reveal || !p.alive || !p.isAI) ? `<br>[${p.role}]` : '';
-                    html += `<div class="player-card ${statusClass}">
-                        ${p.name}${roleText}
-                    </div>`;
+                    const st = p.alive ? (p.isAI ? '' : 'border:2px solid #00a8ff') : 'opacity:0.4; text-decoration:line-through; background:#000;';
+                    const role = (showRole || !p.alive) ? `<br>[${p.role}]` : '';
+                    html += `<div class="player-card" style="${st}">${p.name}${role}</div>`;
                 });
-                html += `</div>`;
-                return html;
+                return html + '</div>';
             }
 
-            addLog(text) {
-                this.logs.unshift(text); // 新しいものを上に
-            }
-
-            getLogHTML() {
-                return this.logs.map(l => `<div>> ${l}</div>`).join('');
-            }
-
-            speakAI(text) {
+            speak(text) {
                 if ('speechSynthesis' in window) {
                     window.speechSynthesis.cancel();
                     const uttr = new SpeechSynthesisUtterance(text);
@@ -550,9 +436,7 @@
             }
         }
 
-        // ゲーム起動
         const game = new WerewolfGame();
-
     </script>
 </body>
 </html>
