@@ -3,152 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CHAMPIONSHIP V2 - NEXT GEN</title>
+    <title>CHAMPIONSHIP V3 - ARENA</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Teko:wght@300;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=Teko:wght@600&display=swap');
 
         :root {
             --primary: #00f2ff;
             --secondary: #ff0055;
             --accent: #ffee00;
-            --dark-bg: #0b0c10;
+            --dark: #050505;
         }
 
         body { 
             font-family: 'Rajdhani', sans-serif; 
-            margin: 0; background-color: var(--dark-bg); color: white; 
+            margin: 0; background: var(--dark); color: white; 
             overflow: hidden; touch-action: none;
-        }
-
-        /* --- 背景・グリッド演出 --- */
-        .bg-grid {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: linear-gradient(rgba(0, 242, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 242, 255, 0.05) 1px, transparent 1px);
-            background-size: 40px 40px; z-index: -1;
         }
 
         .full-screen { position: absolute; top:0; left:0; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .hidden { display: none !important; }
 
-        /* --- ホスト: 競技画面演出 --- */
-        #top-bar {
-            position: absolute; top: 0; left: 0; width: 100%; height: 70px;
+        /* --- 背景演出 --- */
+        .bg-vfx { position: fixed; top:0; left:0; width:100%; height:100%; z-index:-1; background: radial-gradient(circle at 50% 50%, #111 0%, #000 100%); opacity: 0.8; }
+        
+        /* --- ホスト画面 --- */
+        #top-ui {
+            position: absolute; top: 0; width: 100%; height: 80px;
             display: flex; justify-content: space-between; align-items: center;
-            padding: 0 40px; box-sizing: border-box; background: rgba(0,0,0,0.8); border-bottom: 2px solid var(--primary);
+            padding: 0 50px; box-sizing: border-box; background: rgba(0,0,0,0.9); border-bottom: 3px solid var(--primary);
         }
 
-        .hype-container {
-            position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%);
-            width: 80%; height: 10px; background: #222; border-radius: 5px; overflow: hidden;
+        #arena {
+            display: flex; align-items: flex-end; justify-content: center;
+            height: 40vh; width: 90%; gap: 20px; border-bottom: 5px solid #222;
+            position: relative;
         }
-        #hype-bar { width: 0%; height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); transition: 0.3s; box-shadow: 0 0 20px var(--primary); }
 
-        #ticker {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 50px;
-            background: var(--secondary); color: white; display: flex; align-items: center;
-            font-weight: bold; font-size: 20px; overflow: hidden; white-space: nowrap;
+        /* --- 大縄のアニメーション --- */
+        #long-rope {
+            position: absolute; width: 100%; height: 120%;
+            border: 6px dashed var(--accent); border-radius: 50%;
+            top: -60%; left: 0; transform-origin: center;
+            display: none; pointer-events: none; opacity: 0.6;
+            box-shadow: 0 0 50px var(--accent);
         }
-        .ticker-text { display: inline-block; padding-left: 100%; animation: ticker 20s linear infinite; }
-        @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+        .rope-swing { display: block !important; animation: swing 1.2s infinite linear; }
+        @keyframes swing {
+            0% { transform: rotateX(0deg); opacity: 0.2; }
+            50% { transform: rotateX(90deg); opacity: 1; } /* ここが地面 */
+            100% { transform: rotateX(180deg); opacity: 0.2; }
+        }
 
-        /* --- 縄跳びアニメーション --- */
-        .rope-container {
-            width: 100px; height: 150px; border: 3px solid rgba(255,255,255,0.2); position: relative; margin-bottom: 10px;
-        }
-        .jumper {
-            width: 40px; height: 60px; background: var(--primary); position: absolute; bottom: 10px; left: 30px;
-            transition: transform 0.1s;
-        }
-        .rope {
-            width: 80px; height: 120px; border: 2px solid var(--accent); border-radius: 50%;
-            position: absolute; top: 10px; left: 10px; transform-origin: center;
-        }
-        .rope-spin { animation: spin 0.2s linear infinite; }
-        @keyframes spin { from { transform: rotateX(0deg); } to { transform: rotateX(360deg); } }
+        .player-unit { display: flex; flex-direction: column; align-items: center; width: 100px; }
+        .bar { width: 40px; background: linear-gradient(to top, var(--primary), #fff); transition: 0.1s; box-shadow: 0 0 15px var(--primary); }
+        .jump-box { width: 50px; height: 80px; border: 2px solid #333; position: relative; }
+        .character { width: 30px; height: 40px; background: #fff; position: absolute; bottom: 0; left: 10px; transition: transform 0.1s; }
 
-        /* --- ボタン・入力 --- */
-        .btn {
-            background: transparent; border: 2px solid var(--primary); color: var(--primary);
-            padding: 12px 30px; font-family: 'Rajdhani'; font-weight: 700; cursor: pointer; transition: 0.3s;
+        /* --- ボタン・モード選択 --- */
+        .panel { background: rgba(255,255,255,0.05); padding: 30px; border-radius: 10px; text-align: center; backdrop-filter: blur(10px); }
+        .mode-btn { 
+            padding: 15px; border: 2px solid #444; cursor: pointer; color: #888; transition: 0.3s;
+            font-size: 14px; flex: 1;
         }
-        .btn:hover { background: var(--primary); color: #000; }
-        .mode-select { display: flex; gap: 10px; margin: 20px 0; }
-        .mode-btn { border: 1px solid #555; padding: 10px; cursor: pointer; opacity: 0.5; }
-        .mode-btn.active { border-color: var(--accent); opacity: 1; color: var(--accent); }
+        .mode-btn.active { border-color: var(--primary); color: var(--primary); background: rgba(0,242,255,0.1); }
+        .btn-main { background: var(--secondary); border: none; color: white; padding: 15px 40px; font-size: 24px; cursor: pointer; font-family: 'Rajdhani'; box-shadow: 0 0 20px var(--secondary); }
+        .btn-main:disabled { opacity: 0.3; }
 
-        /* --- スマホ操作画面 --- */
-        #ctrl-pad { text-align: center; }
-        #action-circle {
-            width: 250px; height: 250px; border-radius: 50%; border: 10px solid var(--primary);
+        /* --- 実況テロップ --- */
+        #news-feed {
+            position: absolute; bottom: 0; width: 100%; background: var(--secondary);
+            color: white; padding: 10px 0; font-weight: bold; overflow: hidden;
+        }
+        .news-scroll { display: inline-block; white-space: nowrap; animation: scroll 15s linear infinite; }
+        @keyframes scroll { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
+
+        /* --- コントローラー --- */
+        #action-btn {
+            width: 250px; height: 250px; border-radius: 50%; border: 8px solid var(--primary);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            margin: 30px; box-shadow: 0 0 30px var(--primary);
+            box-shadow: 0 0 30px var(--primary); transition: 0.1s;
         }
-        .impact { animation: impact-anim 0.2s ease-out; }
-        @keyframes impact-anim { 0% { transform: scale(1); } 50% { transform: scale(1.1); border-color: #fff; } 100% { transform: scale(1); } }
-
+        .active-jump { background: var(--primary); transform: scale(0.9); }
     </style>
 </head>
 <body>
+    <div class="bg-vfx"></div>
 
-    <div class="bg-grid"></div>
-
-    <!-- ================= HOST VIEW ================= -->
+    <!-- HOST VIEW -->
     <div id="host-view" class="full-screen hidden">
-        <div id="top-bar">
-            <div style="color: var(--accent); font-size: 20px;">🏆 WR: <span id="wr-val">0</span> <small id="wr-name"></small></div>
-            <div id="mode-display" style="font-family: Teko; font-size: 30px; letter-spacing: 2px;">MODE: SHAKE</div>
-            <div id="main-timer" style="font-family: Teko; font-size: 50px; color: var(--secondary);">00:00</div>
+        <div id="top-ui">
+            <div style="font-size: 20px; color: var(--accent);">WORLD RECORD: <span id="wr-score">0</span></div>
+            <div id="main-timer" style="font-family: Teko; font-size: 60px; color: #fff;">00:00</div>
+            <div id="current-mode-label" style="font-size: 20px; color: var(--primary);">MODE: SHAKE</div>
         </div>
 
-        <!-- LOBBY -->
-        <div id="lobby-panel" style="text-align: center; background: rgba(0,0,0,0.8); padding: 40px; border: 1px solid var(--primary);">
-            <h1 style="font-family: Teko; font-size: 60px; margin: 0;">CHAMPIONSHIP V2</h1>
-            
-            <div class="mode-select">
-                <div id="mode-shake" class="mode-btn active" onclick="window.setMode('SHAKE')">SHAKE MODE<br><small>腕を振れ！</small></div>
-                <div id="mode-jump" class="mode-btn" onclick="window.setMode('JUMP')">JUMP ROPE<br><small>ジャンプしろ！</small></div>
+        <div id="lobby-ui" class="panel">
+            <h1 style="font-family: Teko; font-size: 50px; margin: 0 0 20px 0;">CHAMPIONSHIP V3</h1>
+            <div style="display:flex; gap:10px; margin-bottom:20px;">
+                <div id="m-shake" class="mode-btn active" onclick="setMode('SHAKE')">SHAKE<br>腕を振れ</div>
+                <div id="m-jump" class="mode-btn" onclick="setMode('JUMP')">SINGLE JUMP<br>個人縄跳び</div>
+                <div id="m-long" class="mode-btn" onclick="setMode('LONG')">LONG ROPE<br>大縄跳び</div>
             </div>
-
-            <div id="qrcode" style="background: white; padding: 10px; display: inline-block; margin: 20px;"></div>
-            
+            <div id="qrcode" style="background:white; padding:10px; display:inline-block; margin-bottom:20px;"></div>
             <div>
-                TIME: <input type="number" id="game-duration" value="15" style="width: 50px; background: none; border: 1px solid var(--primary); color: white; padding: 5px;">
-                <button class="btn" id="start-btn" disabled onclick="window.hostStart()" style="margin-left: 20px;">START MATCH</button>
+                <input type="number" id="game-sec" value="20" style="width:60px; background:none; border:1px solid #555; color:white; font-size:20px; text-align:center;"> SEC 
+                <button id="start-btn" class="btn-main" onclick="hostStart()" disabled>START MATCH</button>
             </div>
-            <div id="player-count" style="margin-top: 20px; color: var(--primary);">CONNECTED: 0</div>
+            <p id="player-count" style="color:var(--primary); margin-top:15px;">WAITING FOR PLAYERS...</p>
         </div>
 
-        <!-- ARENA -->
-        <div id="arena" class="hidden" style="display: flex; align-items: flex-end; justify-content: center; height: 50vh; gap: 20px; width: 100%;">
-            <!-- Bars generated here -->
+        <div id="arena" class="hidden">
+            <div id="long-rope"></div>
         </div>
 
-        <!-- HYPE METER -->
-        <div class="hype-container"><div id="hype-bar"></div></div>
-
-        <!-- TICKER -->
-        <div id="ticker"><div class="ticker-text" id="ticker-content">WELCOME TO THE OFFICIAL CHAMPIONSHIP... PREPARE FOR BATTLE...</div></div>
-
-        <!-- OVERLAY -->
-        <div id="overlay-msg" style="position: absolute; font-family: Teko; font-size: 15vw; pointer-events: none; opacity: 0; transition: 0.3s; z-index: 100;"></div>
+        <div id="news-feed"><div class="news-scroll" id="news-text">ARE YOU READY? JOIN NOW AND BECOME THE CHAMPION!</div></div>
+        <div id="overlay" style="position:absolute; font-family:Teko; font-size:15vw; opacity:0; transition:0.2s; pointer-events:none; z-index:100;"></div>
     </div>
 
-    <!-- ================= CONTROLLER VIEW ================= -->
+    <!-- CONTROLLER VIEW -->
     <div id="ctrl-view" class="full-screen hidden">
-        <div id="ctrl-login" style="text-align: center;">
-            <h2 style="font-family: Teko; font-size: 40px;">ATHLETE ENTRY</h2>
-            <input type="text" id="p-name" placeholder="NAME" style="padding: 15px; width: 200px; text-align: center;"><br><br>
-            <button class="btn" onclick="window.ctrlJoin()">JOIN ARENA</button>
+        <div id="ctrl-login" class="panel">
+            <h2 style="font-family: Teko; font-size: 40px; margin:0;">ENTRY</h2>
+            <input type="text" id="p-name" placeholder="PLAYER NAME" maxlength="10" style="padding:15px; width:80%; margin:20px 0; text-align:center;">
+            <button class="btn-main" onclick="ctrlJoin()">JOIN</button>
         </div>
 
-        <div id="ctrl-pad" class="hidden">
-            <h2 id="ctrl-mode-text">SHAKE!</h2>
-            <div id="action-circle">
-                <div style="font-size: 20px;">COUNT</div>
-                <div id="my-score" style="font-family: Teko; font-size: 80px;">0</div>
+        <div id="ctrl-game" class="hidden" style="text-align:center;">
+            <h2 id="mode-hint">SHAKE IT!</h2>
+            <div id="action-btn">
+                <div style="font-size: 20px; color: #aaa;">COUNT</div>
+                <div id="my-count" style="font-family: Teko; font-size: 100px;">0</div>
             </div>
-            <div id="ctrl-status">WAITING FOR HOST...</div>
+            <p id="ctrl-status" style="margin-top:20px; color:var(--primary);">READY...</p>
         </div>
     </div>
 
@@ -165,249 +152,241 @@
             messagingSenderId: "574316347824",
             appId: "1:574316347824:web:cf686040628e25ad615675"
         };
-
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // --- SOUND SYSTEM ---
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playSound(freq, type, dur) {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = type;
-            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + dur);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + dur);
+        // --- SOUNDS ---
+        const audio = new (window.AudioContext || window.webkitAudioContext)();
+        function playTone(f, t, d, v=0.1) {
+            const o = audio.createOscillator(); const g = audio.createGain();
+            o.type = t; o.frequency.value = f; g.gain.setValueAtTime(v, audio.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.01, audio.currentTime+d);
+            o.connect(g); g.connect(audio.destination); o.start(); o.stop(audio.currentTime+d);
         }
-
-        const sounds = {
-            beep: () => playSound(880, 'sine', 0.1),
-            go: () => playSound(440, 'square', 0.4),
-            hit: () => playSound(150, 'sine', 0.05),
-            whistle: () => { playSound(1000, 'triangle', 0.2); setTimeout(()=>playSound(1000,'triangle',0.5), 200); }
+        const sfx = {
+            tick: () => playTone(800, 'sine', 0.1),
+            go: () => playTone(400, 'square', 0.4),
+            swish: () => playTone(150, 'triangle', 0.2, 0.05),
+            hit: () => playTone(600, 'sine', 0.05, 0.2),
+            finish: () => { playTone(1000, 'sine', 0.5); playTone(500, 'sine', 0.5); }
         };
 
-        // --- GLOBAL ---
+        // --- GLOBALS ---
         const params = new URLSearchParams(window.location.search);
-        let role = params.get('role') || 'host';
-        let roomId = params.get('room');
+        const role = params.get('role') || 'host';
+        const roomId = params.get('room');
         const myId = Math.random().toString(36).substr(2, 6).toUpperCase();
         let gameMode = 'SHAKE';
 
         if (role === 'host') {
-            if (!roomId) {
-                roomId = Math.random().toString(36).substring(2, 6).toUpperCase();
-                window.location.replace(`?role=host&room=${roomId}`);
-            }
+            if (!roomId) window.location.replace(`?role=host&room=${Math.random().toString(36).substr(2,4).toUpperCase()}`);
             document.getElementById('host-view').classList.remove('hidden');
             new QRCode(document.getElementById("qrcode"), { text: `${window.location.origin}${window.location.pathname}?role=ctrl&room=${roomId}`, width: 120, height: 120 });
 
-            const playersRef = ref(db, `v2/${roomId}/players`);
-            const stateRef = ref(db, `v2/${roomId}/state`);
+            const stateRef = ref(db, `v3/${roomId}/state`);
+            const playersRef = ref(db, `v3/${roomId}/players`);
 
             window.setMode = (m) => {
                 gameMode = m;
-                document.getElementById('mode-shake').className = m === 'SHAKE' ? 'mode-btn active' : 'mode-btn';
-                document.getElementById('mode-jump').className = m === 'JUMP' ? 'mode-btn active' : 'mode-btn';
-                document.getElementById('mode-display').innerText = `MODE: ${m}`;
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                document.getElementById(`m-${m.toLowerCase()}`).classList.add('active');
+                document.getElementById('current-mode-label').innerText = "MODE: " + m;
                 update(stateRef, { mode: m });
             };
 
-            onValue(ref(db, `v2_global/best`), snap => {
-                const d = snap.val() || {score:0, name:'---'};
-                document.getElementById('wr-val').innerText = d.score;
-                document.getElementById('wr-name').innerText = `by ${d.name}`;
-            });
-
+            onValue(ref(db, `v3_global/best`), s => { document.getElementById('wr-score').innerText = (s.val()||{score:0}).score; });
+            
             onValue(playersRef, snap => {
                 const players = snap.val() || {};
-                document.getElementById('player-count').innerText = `CONNECTED: ${Object.keys(players).length}`;
-                document.getElementById('start-btn').disabled = Object.keys(players).length === 0;
+                const pCount = Object.keys(players).length;
+                document.getElementById('player-count').innerText = `CONNECTED PLAYERS: ${pCount}`;
+                document.getElementById('start-btn').disabled = pCount === 0;
                 renderArena(players);
             });
 
-            let totalActions = 0;
             function renderArena(players) {
                 const arena = document.getElementById('arena');
-                const isRunning = arena.getAttribute('data-running') === 'true';
-                let currentTotal = 0;
-
-                Object.keys(players).forEach(pid => {
-                    let col = document.getElementById(`p-${pid}`);
-                    if (!col) {
-                        col = document.createElement('div');
-                        col.id = `p-${pid}`;
-                        col.style.textAlign = 'center';
-                        col.innerHTML = `
-                            <div class="p-val" style="font-family:Teko; font-size:30px;">0</div>
-                            <div class="rope-container hidden"><div class="jumper"></div><div class="rope"></div></div>
-                            <div class="bar" style="width:50px; background:var(--primary); transition:0.1s;"></div>
-                            <div style="font-size:12px;">${players[pid].name}</div>
-                        `;
-                        arena.appendChild(col);
+                const isRunning = arena.getAttribute('data-run') === 'true';
+                
+                Object.keys(players).forEach(id => {
+                    let el = document.getElementById(`p-${id}`);
+                    if (!el) {
+                        el = document.createElement('div');
+                        el.id = `p-${id}`;
+                        el.className = 'player-unit';
+                        el.innerHTML = `<div class="p-score" style="font-family:Teko; font-size:24px;">0</div>
+                                       <div class="jump-box hidden"><div class="character"></div></div>
+                                       <div class="bar"></div>
+                                       <div style="font-size:12px; color:#aaa;">${players[id].name}</div>`;
+                        arena.appendChild(el);
                     }
-                    const p = players[pid];
-                    currentTotal += (p.count || 0);
-                    
-                    const bar = col.querySelector('.bar');
-                    const valText = col.querySelector('.p-val');
-                    const ropeCont = col.querySelector('.rope-container');
-                    const jumper = col.querySelector('.jumper');
-                    const rope = col.querySelector('.rope');
+                    const p = players[id];
+                    const scoreText = el.querySelector('.p-score');
+                    const bar = el.querySelector('.bar');
+                    const jumpBox = el.querySelector('.jump-box');
+                    const char = el.querySelector('.character');
 
-                    if (gameMode === 'JUMP') {
-                        bar.classList.add('hidden');
-                        ropeCont.classList.remove('hidden');
-                        if (p.count > (parseInt(valText.innerText) || 0)) {
-                            sounds.hit();
-                            jumper.style.transform = 'translateY(-30px)';
-                            rope.classList.add('rope-spin');
-                            setTimeout(() => { jumper.style.transform = 'translateY(0)'; rope.classList.remove('rope-spin'); }, 200);
+                    const oldVal = parseInt(scoreText.innerText) || 0;
+                    if (p.count > oldVal) {
+                        sfx.hit();
+                        if(gameMode !== 'SHAKE') {
+                            char.style.transform = 'translateY(-40px)';
+                            setTimeout(() => char.style.transform = 'translateY(0)', 200);
                         }
-                    } else {
-                        bar.classList.remove('hidden');
-                        ropeCont.classList.add('hidden');
-                        bar.style.height = `${Math.min(p.count * 2, 300)}px`;
-                        if (p.count > (parseInt(valText.innerText) || 0)) sounds.hit();
                     }
 
-                    valText.innerText = isRunning ? '???' : (p.count || 0);
+                    scoreText.innerText = isRunning ? "???" : (p.count || 0);
+                    if (gameMode === 'SHAKE') {
+                        bar.classList.remove('hidden'); jumpBox.classList.add('hidden');
+                        bar.style.height = Math.min(p.count * 2, 250) + 'px';
+                    } else {
+                        bar.classList.add('hidden'); jumpBox.classList.remove('hidden');
+                    }
                 });
-
-                // Hype Bar & Ticker
-                const hype = Math.min((currentTotal / 500) * 100, 100);
-                document.getElementById('hype-bar').style.width = hype + '%';
-                if (currentTotal > totalActions + 50) {
-                    totalActions = currentTotal;
-                    document.getElementById('ticker-content').innerText = `AMAZING! TOTAL ACTIONS EXCEEDED ${currentTotal}! KEEP GOING!`;
-                }
             }
 
             window.hostStart = () => {
-                const dur = parseInt(document.getElementById('game-duration').value);
-                document.getElementById('lobby-panel').classList.add('hidden');
+                const sec = parseInt(document.getElementById('game-sec').value);
+                document.getElementById('lobby-ui').classList.add('hidden');
                 document.getElementById('arena').classList.remove('hidden');
-                document.getElementById('arena').setAttribute('data-running', 'true');
                 
-                // Reset
+                // 完全スコアリセット
                 onValue(playersRef, snap => {
                     const updates = {};
-                    Object.keys(snap.val() || {}).forEach(k => updates[k+'/count'] = 0);
+                    Object.keys(snap.val()||{}).forEach(k => updates[k+'/count'] = 0);
                     update(playersRef, updates);
                 }, {onlyOnce:true});
 
-                // Countdown
-                let cd = 3;
-                const ov = document.getElementById('overlay-msg');
+                // カウントダウン
+                let count = 3;
+                const ov = document.getElementById('overlay');
                 ov.style.opacity = 1;
-                const timer = setInterval(() => {
-                    if (cd > 0) { sounds.beep(); ov.innerText = cd; }
-                    else if (cd === 0) { 
-                        sounds.go(); ov.innerText = "GO!"; 
+                const cd = setInterval(() => {
+                    if (count > 0) { sfx.tick(); ov.innerText = count; }
+                    else {
+                        clearInterval(cd); sfx.go(); ov.innerText = "GO!";
                         setTimeout(() => ov.style.opacity = 0, 1000);
-                        startBattle(dur);
-                        clearInterval(timer);
+                        startMatch(sec);
                     }
-                    cd--;
+                    count--;
                 }, 1000);
             };
 
-            function startBattle(dur) {
-                update(stateRef, { status: 'running' });
-                let left = dur;
-                const tEl = document.getElementById('main-timer');
+            function startMatch(sec) {
+                document.getElementById('arena').setAttribute('data-run', 'true');
+                if (gameMode === 'LONG') document.getElementById('long-rope').classList.add('rope-swing');
+                
+                let time = sec;
+                update(stateRef, { status: 'running', startTime: Date.now() });
+
                 const timer = setInterval(() => {
-                    left--;
-                    tEl.innerText = `00:${left < 10 ? '0'+left : left}`;
-                    if (left <= 0) {
+                    time--;
+                    document.getElementById('main-timer').innerText = `00:${time < 10 ? '0'+time : time}`;
+                    
+                    if (gameMode === 'LONG' && time > 0) {
+                        sfx.swish(); // リズム音
+                    }
+
+                    if (time <= 0) {
                         clearInterval(timer);
-                        finishBattle();
+                        finishMatch();
                     }
                 }, 1000);
             }
 
-            function finishBattle() {
-                sounds.whistle();
+            function finishMatch() {
+                sfx.finish();
                 update(stateRef, { status: 'finished' });
-                document.getElementById('arena').setAttribute('data-running', 'false');
-                document.getElementById('overlay-msg').innerText = "FINISH!";
-                document.getElementById('overlay-msg').style.opacity = 1;
+                document.getElementById('long-rope').classList.remove('rope-swing');
+                document.getElementById('arena').setAttribute('data-run', 'false');
+                const ov = document.getElementById('overlay');
+                ov.innerText = "FINISH!"; ov.style.opacity = 1;
 
                 onValue(playersRef, snap => {
-                    const players = snap.val();
-                    let max = -1, winName = "";
-                    Object.keys(players).forEach(k => {
-                        if (players[k].count > max) { max = players[k].count; winName = players[k].name; }
-                    });
+                    const players = snap.val() || {};
+                    let top = -1; let win = "";
+                    Object.keys(players).forEach(k => { if(players[k].count > top){ top = players[k].count; win = players[k].name; } });
                     
                     setTimeout(() => {
-                        document.getElementById('overlay-msg').innerHTML = `WINNER<br><span style="color:var(--primary)">${winName}</span>`;
-                        if (max > 0) {
-                            runTransaction(ref(db, `v2_global/best`), curr => {
-                                if (!curr || max > curr.score) return { score: max, name: winName };
-                                return;
-                            });
-                        }
+                        ov.innerHTML = `CHAMPION<br><span style="color:var(--primary)">${win}</span>`;
+                        if(top > 0) runTransaction(ref(db, `v3_global/best`), c => { if(!c || top > c.score) return {score:top, name:win}; return; });
                     }, 2000);
-
                     setTimeout(() => location.reload(), 10000);
                 }, {onlyOnce:true});
             }
         } 
         
-        // --- CONTROLLER LOGIC ---
+        // --- CONTROLLER ---
         else {
             document.getElementById('ctrl-view').classList.remove('hidden');
-            let status = 'lobby', count = 0, mode = 'SHAKE';
+            let status = 'lobby', count = 0, mode = 'SHAKE', startTime = 0;
 
             window.ctrlJoin = () => {
-                const name = document.getElementById('p-name').value;
-                if (!name) return;
-                if (typeof DeviceMotionEvent.requestPermission === 'function') {
-                    DeviceMotionEvent.requestPermission().then(res => { if(res==='granted') setup(name); });
-                } else { setup(name); }
+                const n = document.getElementById('p-name').value;
+                if(!n) return;
+                if(typeof DeviceMotionEvent.requestPermission === 'function') {
+                    DeviceMotionEvent.requestPermission().then(r => { if(r==='granted') init(n); });
+                } else init(n);
             };
 
-            function setup(name) {
+            function init(name) {
                 document.getElementById('ctrl-login').classList.add('hidden');
-                document.getElementById('ctrl-pad').classList.remove('hidden');
-                const pRef = ref(db, `v2/${roomId}/players/${myId}`);
+                document.getElementById('ctrl-game').classList.remove('hidden');
+                const pRef = ref(db, `v3/${roomId}/players/${myId}`);
                 set(pRef, { name: name, count: 0 });
                 onDisconnect(pRef).remove();
 
-                onValue(ref(db, `v2/${roomId}/state`), snap => {
-                    const s = snap.val() || {};
-                    status = s.status;
-                    mode = s.mode || 'SHAKE';
-                    document.getElementById('ctrl-mode-text').innerText = mode + "!";
-                    if (status === 'ready') { count = 0; document.getElementById('my-score').innerText = 0; }
+                onValue(ref(db, `v3/${roomId}/state`), s => {
+                    const data = s.val() || {};
+                    status = data.status;
+                    mode = data.mode;
+                    startTime = data.startTime;
+                    document.getElementById('mode-hint').innerText = mode + " MODE";
+                    if(status === 'running') {
+                        document.getElementById('ctrl-status').innerText = "FIGHT!!";
+                    } else if(status === 'finished') {
+                        document.getElementById('ctrl-status').innerText = "ENDED";
+                    } else {
+                        count = 0; document.getElementById('my-count').innerText = 0;
+                    }
                 });
 
-                let lastY = 0, lastTime = 0;
+                let lastJump = 0;
                 window.addEventListener('devicemotion', e => {
                     if (status !== 'running') return;
                     const acc = e.accelerationIncludingGravity;
-                    
+                    const now = Date.now();
+
                     if (mode === 'SHAKE') {
-                        const delta = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
-                        if (delta > 30) trigger();
-                    } else {
-                        // JUMP: Vertical acceleration peak
-                        if (acc.y > 15 && lastY <= 15) trigger();
-                        lastY = acc.y;
+                        if (Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z) > 35) {
+                            if(now - lastJump > 100) trigger();
+                        }
+                    } else if (mode === 'JUMP') {
+                        if (acc.y > 15) {
+                            if(now - lastJump > 300) trigger();
+                        }
+                    } else if (mode === 'LONG') {
+                        // 大縄跳び: リズム（1.2秒周期）に合わせる
+                        // ホスト開始時間からの経過時間で判定
+                        if (acc.y > 15 && now - lastJump > 400) {
+                            const elapsed = (now - startTime) % 1200;
+                            // 縄が地面に来るのが 600ms 地点 (0.6秒)
+                            if (elapsed > 450 && elapsed < 750) {
+                                trigger();
+                                document.getElementById('ctrl-status').innerText = "GREAT!!";
+                            } else {
+                                document.getElementById('ctrl-status').innerText = "MISS!";
+                                lastJump = now; // カウントはしないが、連打防止
+                            }
+                        }
                     }
                 });
 
                 function trigger() {
-                    const now = Date.now();
-                    if (now - lastTime < 150) return;
-                    lastTime = now;
-                    count++;
-                    document.getElementById('my-score').innerText = count;
-                    document.getElementById('action-circle').classList.add('impact');
-                    setTimeout(() => document.getElementById('action-circle').classList.remove('impact'), 200);
+                    count++; lastJump = Date.now();
+                    document.getElementById('my-count').innerText = count;
+                    document.getElementById('action-btn').classList.add('active-jump');
+                    setTimeout(() => document.getElementById('action-btn').classList.remove('active-jump'), 100);
                     update(pRef, { count: count });
                 }
             }
