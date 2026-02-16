@@ -253,7 +253,7 @@
                     <svg class="icon" viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-2.2 2.2c-3.23-1.61-5.81-4.19-7.43-7.43l2.2-2.2c.27-.27.35-.66.24-1.01-.36-1.11-.56-2.3-.56-3.53 0-.54-.45-1-1-1H4.17c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-2.65c0-.54-.45-1-1-1z"/></svg>
                 </button>
                 <button id="btn-hangup" class="call-btn hangup" onclick="app.endCall()">
-                    <svg class="icon" viewBox="0 0 24 24"><path d="M12 9c-1.6 0-3.15.25-4.6.72-.36.11-.55.48-.47.84l.55 2.44c.1.47.53.8 1.01.8.84 0 1.64-.13 2.39-.36.27-.08.46-.33.46-.61V10.5c0-.28.22-.5.5-.5h.33c.28 0 .5.22.5.5v2.33c0 .28.19.53.46.61.75.23 1.55.36 2.39.36.48 0 .91-.33 1.01-.8l.55-2.44c.08-.36-.11-.73-.47-.84C15.15 9.25 13.6 9 12 9z"/></svg>
+                    <svg class="icon" viewBox="0 0 24 24" fill="white"><path d="M12 9c-1.6 0-3.15.25-4.6.72-.81.26-1.38.94-1.38 1.81l-.01 3.07c0 .84.53 1.58 1.3 1.87 1.58.6 3.26.93 5.01.93 1.76 0 3.45-.33 5.03-.94.77-.29 1.28-1.03 1.28-1.87l-.01-3.07c0-.88-.58-1.56-1.4-1.81C15.58 9.25 14.03 9 12 9zm7.04 6.69c-1.11.41-2.29.69-3.52.83v-1.96c0-.52-.39-.96-.89-1.05-.72-.12-1.47-.19-2.23-.19s-1.51.07-2.23.19c-.5.09-.89.53-.89 1.05v1.96c-1.23-.14-2.41-.42-3.52-.83-.34-.13-.52-.51-.44-.86l.63-2.61c.1-.4.49-.66.89-.57 1.15.26 2.37.43 3.63.43 1.25 0 2.47-.17 3.63-.43.41-.09.79.17.89.57l.63 2.61c.08.35-.1.73-.44.86z"/></svg>
                 </button>
             </div>
         </div>
@@ -840,44 +840,77 @@
                 }
             },
             
-            setupPeerConnection: (docId, isCaller) => {
-                const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+            setupPeerConnection: async (docId, isCaller) => {
+                const pc = new RTCPeerConnection({ 
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:stun1.l.google.com:19302' }
+                    ] 
+                });
                 app.peerConn = pc;
                 
+                // Add Tracks
                 if (app.localStream) {
-                    app.localStream.getTracks().forEach(track => pc.addTrack(track, app.localStream));
+                    app.localStream.getTracks().forEach(track => {
+                        pc.addTrack(track, app.localStream);
+                    });
                 }
                 
+                // Handle Remote Stream
                 pc.ontrack = event => {
-                    if(event.track.kind === 'video') {
-                        document.getElementById('remote-video').srcObject = event.streams[0];
-                        document.getElementById('call-avatar').style.display = 'none';
-                    } else {
-                        document.getElementById('remote-audio').srcObject = event.streams[0];
+                    const vid = document.getElementById('remote-video');
+                    const aud = document.getElementById('remote-audio');
+                    
+                    if (event.streams && event.streams[0]) {
+                        if(event.track.kind === 'video') {
+                            vid.srcObject = event.streams[0];
+                            document.getElementById('call-avatar').style.display = 'none';
+                        } else {
+                            aud.srcObject = event.streams[0];
+                        }
                     }
                 };
 
+                // ICE Candidates
                 pc.onicecandidate = event => {
                     if (event.candidate) {
                         const field = isCaller ? 'callerCandidates' : 'calleeCandidates';
-                        updateDoc(doc(db, "calls", docId), { [field]: arrayUnion(event.candidate.toJSON()) }).catch(()=>{});
+                        updateDoc(doc(db, "calls", docId), { [field]: arrayUnion(event.candidate.toJSON()) }).catch(console.error);
                     }
                 };
                 
-                pc.oniceconnectionstatechange = () => {
-                    if (pc.iceConnectionState === 'disconnected' || pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'closed') {
-                        app.endCall(true); 
-                        app.toast("接続が切れました");
+                // Connection State
+                pc.onconnectionstatechange = () => {
+                    if(pc.connectionState === 'connected') {
+                        document.getElementById('call-status').innerText = "通話中";
+                        document.getElementById('call-avatar').classList.remove('avatar-pulse');
+                    }
+                    if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected' || pc.connectionState === 'closed') {
+                         if(pc.connectionState !== 'disconnected') app.endCall(true);
                     }
                 };
-                
+
+                // Perfect Negotiation Logic
+                let makingOffer = false;
+                let ignoreOffer = false;
+                const polite = !isCaller; // Callee is polite
+
                 pc.onnegotiationneeded = async () => {
                     try {
-                        if (pc.signalingState !== 'stable') return; // Check BEFORE creating offer to avoid glare
+                        makingOffer = true;
+                        // Use classic createOffer for compatibility/control
                         const offer = await pc.createOffer();
                         await pc.setLocalDescription(offer);
-                        await updateDoc(doc(db, "calls", docId), { offer: { type: offer.type, sdp: offer.sdp } });
-                    } catch(e) { console.error("Negotiation error:", e); }
+                        
+                        await updateDoc(doc(db, "calls", docId), { 
+                            offer: { type: offer.type, sdp: offer.sdp },
+                            offerOrigin: isCaller ? 'caller' : 'callee'
+                        });
+                    } catch (err) {
+                        console.error(err);
+                    } finally {
+                        makingOffer = false;
+                    }
                 };
 
                 app.callUnsub = onSnapshot(doc(db, "calls", docId), async snap => {
@@ -885,39 +918,64 @@
                     const data = snap.data();
                     if (data.status === 'ended') { app.endCall(false); return; }
 
-                    // Handle Offer
-                    if (data.offer) {
-                        const isLocal = pc.currentLocalDescription && pc.currentLocalDescription.sdp === data.offer.sdp;
-                        const isRemote = pc.currentRemoteDescription && pc.currentRemoteDescription.sdp === data.offer.sdp;
-                        if (!isLocal && !isRemote && pc.signalingState !== 'closed') {
-                             try {
-                                 await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
-                                 const answer = await pc.createAnswer();
-                                 await pc.setLocalDescription(answer);
-                                 await updateDoc(doc(db, "calls", docId), { answer: { type: answer.type, sdp: answer.sdp }, status: 'answered' });
-                                 document.getElementById('call-status').innerText = "通話中";
-                                 document.getElementById('call-avatar').classList.remove('avatar-pulse');
-                             } catch(e) { console.error("Offer Error", e); }
-                        }
-                    }
+                    try {
+                        // HANDLE OFFER
+                        if (data.offer && data.offerOrigin !== (isCaller ? 'caller' : 'callee')) {
+                            const offerSdp = data.offer.sdp;
+                            // Check uniqueness to avoid processing same offer
+                            const currentRemote = pc.remoteDescription;
+                            if (!currentRemote || currentRemote.sdp !== offerSdp) {
+                                // Glare handling
+                                const offerCollision = (makingOffer || pc.signalingState !== "stable");
+                                ignoreOffer = !polite && offerCollision;
+                                
+                                if (ignoreOffer) {
+                                    return; // Impolite peer ignores colliding offer
+                                }
+                                
+                                if (offerCollision) {
+                                    // Polite peer rolls back
+                                    await Promise.all([
+                                        pc.setLocalDescription({type: "rollback"}),
+                                        pc.setRemoteDescription(new RTCSessionDescription(data.offer))
+                                    ]);
+                                } else {
+                                    await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+                                }
 
-                    // Handle Answer
-                    if (data.answer) {
-                        const isRemote = pc.currentRemoteDescription && pc.currentRemoteDescription.sdp === data.answer.sdp;
-                        if (!isRemote && pc.signalingState === 'have-local-offer') {
-                            try {
-                                await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
-                                document.getElementById('call-status').innerText = "通話中";
-                                document.getElementById('call-avatar').classList.remove('avatar-pulse');
-                            } catch(e) { console.error("Answer Error", e); }
+                                // Create Answer
+                                if (pc.remoteDescription.type === 'offer') {
+                                    const answer = await pc.createAnswer();
+                                    await pc.setLocalDescription(answer);
+                                    await updateDoc(doc(db, "calls", docId), { 
+                                        answer: { type: answer.type, sdp: answer.sdp },
+                                        answerOrigin: isCaller ? 'caller' : 'callee'
+                                    });
+                                }
+                            }
                         }
-                    }
 
-                    // ICE Candidates
-                    const candidates = isCaller ? data.calleeCandidates : data.callerCandidates;
-                    if (candidates) {
-                        candidates.forEach(c => pc.addIceCandidate(new RTCIceCandidate(c)).catch(e=>{}));
-                    }
+                        // HANDLE ANSWER
+                        if (data.answer && data.answerOrigin !== (isCaller ? 'caller' : 'callee')) {
+                             const answerSdp = data.answer.sdp;
+                             if (!pc.currentRemoteDescription || pc.currentRemoteDescription.sdp !== answerSdp) {
+                                 if(pc.signalingState === 'have-local-offer') {
+                                     await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+                                 }
+                             }
+                        }
+
+                        // ICE CANDIDATES
+                        const candidates = isCaller ? data.calleeCandidates : data.callerCandidates;
+                        if (candidates && candidates.length > 0) {
+                            for(const c of candidates) {
+                                try {
+                                    await pc.addIceCandidate(new RTCIceCandidate(c));
+                                } catch(e) {}
+                            }
+                        }
+
+                    } catch(e) { console.error("Signaling Error", e); }
                 });
             },
 
