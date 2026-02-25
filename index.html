@@ -15,82 +15,52 @@
             --text-main: #c9d1d9; --text-sub: #8b949e; --border: #30363d;
             --radius: 12px; --nav-h-mobile: 60px; --sidebar-w: 240px;
         }
-
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { background: var(--bg-body); color: var(--text-main); font-family: 'Inter', 'Noto Sans JP', sans-serif; margin: 0; padding: 0; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
-        
         .hidden { display: none !important; }
         .flex { display: flex; } .flex-col { flex-direction: column; } .items-center { align-items: center; } .justify-between { justify-content: space-between; }
         .gap-2 { gap: 8px; } .gap-4 { gap: 16px; }
         .font-bold { font-weight: 700; } .text-sm { font-size: 0.85rem; } .text-xs { font-size: 0.75rem; }
         .mb-2 { margin-bottom: 8px; } .mb-4 { margin-bottom: 16px; } .w-full { width: 100%; } .text-sub { color: var(--text-sub); }
-
         .icon { width: 20px; height: 20px; fill: currentColor; flex-shrink: 0; }
-
         .screen { position: absolute; inset: 0; background: var(--bg-body); z-index: 10; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; display: flex; flex-direction: column; }
         .screen.active { opacity: 1; pointer-events: auto; z-index: 20; }
-
-        /* Splash Screen */
-        #splash-screen {
-            position: fixed; inset: 0; background: var(--bg-body); z-index: 9999;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: opacity 0.5s ease, visibility 0.5s;
-        }
+        #splash-screen { position: fixed; inset: 0; background: var(--bg-body); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease, visibility 0.5s; }
         #splash-screen.fade-out { opacity: 0; visibility: hidden; }
         .splash-logo { font-size: 3rem; font-weight: 900; background: linear-gradient(135deg, #58a6ff, #bc8cff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 20px; letter-spacing: 2px; }
         .loader { width: 40px; height: 40px; border: 4px solid var(--bg-input); border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
         .auth-container { flex: 1; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at center, #1f2937 0%, #0b0f19 100%); padding: 20px; }
         .auth-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 24px; padding: 40px 30px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
         .brand-title { font-size: 2rem; font-weight: 900; background: linear-gradient(135deg, #58a6ff, #bc8cff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 2rem; letter-spacing: 1px; }
-
         .input-group { position: relative; width: 100%; }
         .input { width: 100%; padding: 12px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: #fff; font-size: 1rem; transition: border-color 0.2s; touch-action: manipulation; }
         .input:focus { border-color: var(--primary); }
-        .input.error { border-color: var(--danger); animation: shake 0.3s; }
         .pass-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-sub); cursor: pointer; font-size: 1.2rem; padding: 0; }
-        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
-
         .app-layout { display: flex; width: 100%; height: 100%; overflow: hidden; }
         .sidebar { width: var(--sidebar-w); background: var(--bg-sidebar); border-right: 1px solid var(--border); display: none; flex-direction: column; padding: 20px; flex-shrink: 0; }
         .sidebar-brand { font-size: 1.2rem; font-weight: 800; color: var(--text-main); margin-bottom: 30px; padding-left: 10px; cursor: pointer; }
         .nav-link { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: var(--text-sub); border-radius: 8px; cursor: pointer; margin-bottom: 4px; font-weight: 600; font-size: 0.95rem; }
         .nav-link.active { background: var(--primary-dim); color: var(--primary); }
-        
         .main-content { flex: 1; display: flex; flex-direction: column; height: 100%; position: relative; overflow: hidden; background: var(--bg-body); }
         .header-mobile { height: 56px; background: var(--bg-sidebar); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: center; padding: 0 16px; flex-shrink: 0; font-weight: 700; font-size: 1.1rem; position: relative; }
         .header-user { position: absolute; right: 16px; font-size: 0.8rem; color: var(--text-sub); }
         .scroll-view { flex: 1; min-height:0; overflow-y: auto; padding: 20px; padding-bottom: 80px; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; touch-action: pan-y; }
-
-        #scr-stamp-maker { height: 100vh; }
-        #scr-stamp-maker .scroll-view { height: calc(100vh - 50px); flex: none; }
-
+        #scr-stamp-maker { height: 100vh; } #scr-stamp-maker .scroll-view { height: calc(100vh - 50px); flex: none; }
         .bottom-nav { height: var(--nav-h-mobile); background: var(--bg-sidebar); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-around; position: absolute; bottom: 0; left: 0; right: 0; z-index: 50; padding-bottom: env(safe-area-inset-bottom); transition: transform 0.3s; }
         .b-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-sub); font-size: 0.65rem; gap: 4px; cursor: pointer; }
         .b-nav-item.active { color: var(--primary); }
-
-        body.chat-mode .bottom-nav { transform: translateY(100%); } 
-        body.chat-mode .sidebar { display: none !important; }
-        body.chat-mode .scroll-view { padding-bottom: 0 !important; }
-
+        body.chat-mode .bottom-nav { transform: translateY(100%); } body.chat-mode .sidebar { display: none !important; } body.chat-mode .scroll-view { padding-bottom: 0 !important; }
         .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; position: relative; }
-        
         .btn { width: 100%; padding: 12px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.95rem; color: white; transition: 0.2s; }
         .btn:active { opacity: 0.7; transform: scale(0.98); }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-primary { background: var(--success); }
-        .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-sub); }
+        .btn-primary { background: var(--success); } .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-sub); }
         .btn-danger { background: rgba(218, 54, 51, 0.15); color: var(--danger); border: 1px solid var(--danger); }
-        .btn-warning { background: var(--warning); color: #000; }
-        .btn-sm { padding: 6px 12px; font-size: 0.8rem; width: auto; }
-
+        .btn-warning { background: var(--warning); color: #000; } .btn-sm { padding: 6px 12px; font-size: 0.8rem; width: auto; }
         .res-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
         .res-box { background: var(--bg-input); padding: 10px; border-radius: 10px; text-align: center; border: 1px solid var(--border); }
         .res-label { font-size: 0.65rem; color: var(--text-sub); display: block; font-weight: 700; }
         .res-val { font-size: 1.1rem; font-weight: 800; }
-
-        /* Badges */
         .badge { display: inline-flex; align-items: center; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; margin-left: 6px; font-weight: bold; border: 1px solid currentColor; }
         .badge-developer { color: #fff; background: linear-gradient(135deg, #ff4b4b, #9b0000); border: none; }
         .badge-staff { color: #fff; background: linear-gradient(135deg, #d29922, #b87c00); border: none; }
@@ -100,26 +70,22 @@
         .badge-level { color: #58a6ff; border: 1px solid #58a6ff; }
         .badge-rich { color: #d29922; border: 1px solid #d29922; }
         .badge-whale { color: #bc8cff; border: 1px solid #bc8cff; }
-
         /* Chat */
         .chat-header { height: 50px; background: var(--bg-sidebar); display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid var(--border); font-weight: bold; justify-content: space-between; flex-shrink: 0; }
         .chat-list { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 16px; }
         .chat-input-wrapper { background: var(--bg-sidebar); border-top: 1px solid var(--border); padding-bottom: calc(10px + env(safe-area-inset-bottom)); flex-shrink: 0; }
         #chat-preview { display: none; padding: 10px 15px 0; align-items: center; gap: 10px; }
         .preview-thumb { height: 60px; border-radius: 8px; border: 1px solid var(--primary); object-fit: cover; }
-        
         #chat-reply-preview, #dm-reply-preview { display: none; padding: 8px 15px 0; align-items: center; gap: 10px; background: var(--bg-card); border-bottom: 1px solid var(--border); border-top: 1px solid var(--border); }
         .reply-thumb { height: 40px; border-radius: 4px; object-fit: cover; }
         .reply-text-preview { font-size: 0.8rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
         .reply-name-preview { font-size: 0.7rem; color: var(--text-sub); margin-bottom: 2px; }
         .reply-box-in-msg { font-size: 0.75rem; color: var(--text-sub); background: rgba(255,255,255,0.05); padding: 6px 8px; border-radius: 6px; margin-bottom: 6px; border-left: 3px solid var(--primary); display: flex; align-items: center; gap: 6px; cursor: pointer; }
         .reply-box-in-msg img { height: 24px; border-radius: 4px; object-fit: cover; }
-
         .chat-input-area { padding: 10px 15px; display: flex; gap: 10px; align-items: center; }
         .chat-switcher { display: flex; justify-content: center; gap: 10px; flex: 1; }
         .chat-sw-btn { padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; color: var(--text-sub); cursor: pointer; transition: 0.2s; }
         .chat-sw-btn.active { background: var(--primary-dim); color: var(--primary); font-weight: bold; }
-
         .msg-row { display: flex; flex-direction: column; max-width: 85%; position: relative; }
         .msg-row.mine { align-self: flex-end; align-items: flex-end; }
         .msg-row.other { align-self: flex-start; align-items: flex-start; }
@@ -128,30 +94,22 @@
         .msg-bubble:active { opacity: 0.8; }
         .msg-row.mine .msg-bubble { background: #1f6feb; color: white; border-bottom-right-radius: 4px; }
         .msg-row.other .msg-bubble { background: var(--bg-card); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
-        
         .chat-img { max-width: 100%; border-radius: 8px; margin-top: 6px; display: block; cursor: zoom-in; }
-        /* Stamp Size Increased */
-        .stamp-img { width: 130px; height: 130px; object-fit: contain; display: block; cursor: default; }
-
+        .stamp-img { width: 140px; height: 140px; object-fit: contain; display: block; cursor: default; }
         .dm-item { display: flex; align-items: center; gap: 12px; padding: 15px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
         .dm-item:hover { background: var(--bg-input); }
         .dm-icon { width: 40px; height: 40px; background: var(--primary-dim); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; }
-
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
         .modal-box { background: var(--bg-card); width: 100%; max-width: 500px; border-radius: 16px; border: 1px solid var(--border); overflow: hidden; max-height: 80vh; display: flex; flex-direction: column; }
         .modal-head { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
         .modal-body { padding: 20px; overflow-y: auto; }
-        
         .bottom-sheet { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; display: none; flex-direction: column; justify-content: flex-end; }
         .bottom-sheet-content { background: var(--bg-card); border-top-left-radius: 16px; border-top-right-radius: 16px; padding: 20px; padding-bottom: calc(20px + env(safe-area-inset-bottom)); transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.1, 0.8, 0.3, 1); }
         .bottom-sheet.show { display: flex; }
         .bottom-sheet.show .bottom-sheet-content { transform: translateY(0); }
         .sheet-btn { width: 100%; padding: 16px; text-align: left; background: transparent; border: none; border-bottom: 1px solid var(--border); color: var(--text-main); font-size: 1rem; cursor: pointer; display: flex; align-items: center; gap: 12px; }
-
         .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--primary); color: #fff; padding: 10px 24px; border-radius: 50px; font-weight: 700; z-index: 2000; opacity: 0; transition: 0.3s; pointer-events: none; }
         .toast.show { opacity: 1; }
-
-        /* Stamp Grid (3 columns for larger stamps) */
         .stamp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 10px 0; }
         .stamp-item { aspect-ratio: 1; background: var(--bg-input); border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid transparent; position: relative; }
         .stamp-item:hover { border-color: var(--primary); }
@@ -159,8 +117,6 @@
         .stamp-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
         .stamp-tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; color: var(--text-sub); border-bottom: 2px solid transparent; }
         .stamp-tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: bold; }
-
-        /* Maker Canvas */
         .mk-toolbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
         .mk-toolbtn { padding:8px 10px; border-radius:10px; border:1px solid var(--border); background:rgba(255,255,255,0.03); color:var(--text-main); font-weight:700; font-size:0.8rem; cursor:pointer; }
         .mk-toolbtn.active { border-color: var(--primary); background: var(--primary-dim); color: var(--primary); }
@@ -172,8 +128,6 @@
         .pk-slot { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 14px; padding: 10px; position: relative; overflow:hidden; }
         .pk-thumb { width: 100%; aspect-ratio: 1; border-radius: 12px; background: conic-gradient(from 90deg, rgba(255,255,255,0.08) 0 25%, rgba(255,255,255,0.02) 0 50%, rgba(255,255,255,0.08) 0 75%, rgba(255,255,255,0.02) 0 100%); background-size: 18px 18px; display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.06); }
         .pk-thumb img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
-
-        /* Call Screen */
         #scr-call { background: #000; z-index: 50; overflow: hidden; }
         .video-container { position: absolute; inset: 0; z-index: 0; display: flex; align-items: center; justify-content: center; background: #000; }
         #remote-video { width: 100%; height: 100%; object-fit: contain; }
@@ -184,7 +138,6 @@
         .call-avatar { width: 100px; height: 100px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; font-size: 3rem; margin: 0 auto 20px; border: 2px solid var(--text-main); }
         .call-controls { display: flex; justify-content: center; gap: 15px; pointer-events: auto; padding-bottom: 20px; }
         .call-btn { width: 60px; height: 60px; border-radius: 50%; border: none; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); }
-
         @media (min-width: 768px) {
             .sidebar { display: flex; } .bottom-nav { display: none; } .header-mobile { display: none; } .scroll-view { padding-bottom: 20px; }
             .pk-grid { grid-template-columns: repeat(6, 1fr); }
@@ -392,7 +345,6 @@
                     <button class="btn btn-ghost btn-sm" onclick="app.go('scr-register')">新規登録</button>
                     <button class="btn btn-ghost btn-sm" onclick="app.go('scr-reset-pass')">パスワードを忘れた</button>
                 </div>
-                <div id="loading-msg" class="text-xs text-sub mt-4 hidden"></div>
             </div>
         </div>
     </div>
@@ -469,10 +421,14 @@
 
                 <div id="tab-chat" class="hidden" style="height:100%; flex-direction:column; background:var(--bg-body);">
                     <div class="chat-header">
+                        <div onclick="app.tab('home')" style="cursor:pointer; display:flex; align-items:center; gap:4px; color:var(--primary); font-size:0.9rem; white-space:nowrap;">
+                            <svg class="icon" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>戻る
+                        </div>
                         <div class="chat-switcher">
                             <span class="chat-sw-btn active" id="sw-all" onclick="app.switchChatMode('all')">全体チャット</span>
                             <span class="chat-sw-btn" id="sw-dm" onclick="app.switchChatMode('dm')">友達・DM</span>
                         </div>
+                        <div style="width:50px;"></div>
                     </div>
                     
                     <div id="area-all-chat" style="display:flex; flex-direction:column; flex:1; overflow:hidden;">
@@ -516,7 +472,9 @@
 
                 <div id="scr-dm-talk" class="screen" style="background:var(--bg-body); z-index:30;">
                     <div class="chat-header">
-                        <div onclick="app.closeDM()" style="cursor:pointer; color:var(--primary);">← 戻る</div>
+                        <div onclick="app.closeDM()" style="cursor:pointer; display:flex; align-items:center; gap:4px; color:var(--primary); font-size:0.9rem; white-space:nowrap;">
+                            <svg class="icon" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>戻る
+                        </div>
                         <span id="dm-talk-name">相手の名前</span>
                         <div style="display:flex; align-items:center;">
                              <button class="btn btn-ghost" style="width:40px; padding:0; margin-right:5px; color:var(--success);" onclick="app.startCall(false)">📞</button>
@@ -890,8 +848,9 @@
                     const target = snap.data();
                     const isFriend = currentUser.friends && currentUser.friends.includes(uid);
                     let btnHtml = isFriend ? `<button class="btn btn-success mt-2" onclick="app.startDM('${uid}', '${name.replace(/'/g,"\\'")}')">チャットする</button>` : `<button class="btn btn-primary mt-2" onclick="app.sendRequest('${uid}')">友達申請する</button>`;
+                    
                     const myB = currentUser.badges || [];
-                    if(myB.includes('developer') || myB.includes('staff')) {
+                    if(app.checkAdmSess() || myB.includes('developer') || myB.includes('staff')) {
                         btnHtml += `<button class="btn btn-warning mt-2" onclick="app.manageBadges('${uid}')">バッジを管理する</button>`;
                     }
                     app.mdl("プロフィール", `<div style="text-align:center"><div style="font-size:3rem; margin-bottom:10px;">👤</div><h3>${target.name}</h3><div class="mb-2">${app.getBadgesHtml(target.badges)}</div><p class="text-sub text-xs mb-4">ID: ${uid}</p>${btnHtml}</div>`);
@@ -1664,13 +1623,13 @@
             },
             checkAdmSess: () => { 
                 const e=localStorage.getItem(ADM_KEY); 
-                if(e&&parseInt(e)>Date.now() && (currentUser?.badges||[]).includes('developer')){ document.getElementById('nav-adm-pc').classList.remove('hidden'); return true; }
+                if(e&&parseInt(e)>Date.now()){ document.getElementById('nav-adm-pc').classList.remove('hidden'); return true; }
                 document.getElementById('nav-adm-pc').classList.add('hidden'); return false; 
             },
             authAdmin: async () => {
                 const c=document.getElementById('adm-code').value; 
                 let vc="cotobato-admin"; try { const d=await getDoc(doc(db,"system","config")); if(d.exists() && d.data().code) vc=d.data().code; } catch(e) {}
-                if(c===vc){ localStorage.setItem(ADM_KEY, Date.now()+1800000); app.tab('admin'); app.toast("認証成功"); document.getElementById('adm-code').value=""; } else app.toast("違います");
+                if(c===vc){ localStorage.setItem(ADM_KEY, Date.now()+1800000); document.getElementById('nav-adm-pc').classList.remove('hidden'); app.tab('admin'); app.toast("認証成功"); document.getElementById('adm-code').value=""; } else app.toast("違います");
             },
             subAdmList: () => {
                 onSnapshot(query(collection(db,"announcements"), limit(50)), s=>{
