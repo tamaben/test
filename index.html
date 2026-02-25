@@ -59,6 +59,7 @@
         .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; position: relative; }
         .btn { width: 100%; padding: 12px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.95rem; color: white; transition: 0.2s; }
         .btn:active { opacity: 0.7; transform: scale(0.98); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-primary { background: var(--success); } .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-sub); }
         .btn-danger { background: rgba(218, 54, 51, 0.15); color: var(--danger); border: 1px solid var(--danger); }
         .btn-warning { background: var(--warning); color: #000; } .btn-sm { padding: 6px 12px; font-size: 0.8rem; width: auto; }
@@ -349,7 +350,7 @@
                     <input type="password" id="inp-pass" class="input" placeholder="パスワード">
                     <button class="pass-toggle" onclick="app.togglePass('inp-pass', this)"><svg class="icon" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></button>
                 </div>
-                <button class="btn btn-primary mb-4" onclick="app.login()">ログイン</button>
+                <button id="btn-login" class="btn btn-primary mb-4" onclick="app.login()">ログイン</button>
                 <div class="flex gap-2 justify-center">
                     <button class="btn btn-ghost btn-sm" onclick="app.go('scr-register')">新規登録</button>
                     <button class="btn btn-ghost btn-sm" onclick="app.go('scr-reset-pass')">パスワードを忘れた</button>
@@ -437,20 +438,7 @@
                             <span class="chat-sw-btn active" id="sw-all" onclick="app.switchChatMode('all')">全体チャット</span>
                             <span class="chat-sw-btn" id="sw-dm" onclick="app.switchChatMode('dm')">友達・DM</span>
                         </div>
-                        <div style="cursor:pointer;" onclick="app.mdl('利用規約・ルール', `<div style='line-height:1.6'>
-                            <b>🚫 禁止事項</b><br>
-                            ・荒らし、連投、スパム行為<br>
-                            ・暴言、誹謗中傷、差別的発言<br>
-                            ・公序良俗に反する投稿<br>
-                            ・個人情報の投稿<br>
-                            <br>
-                            <b>⚠️ 罰則について</b><br>
-                            違反者は運営の判断により以下の処罰を受けます。<br>
-                            1. チャット機能の制限 (Mute)<br>
-                            2. 財産の没収 (Coin/Gemリセット)<br>
-                            3. アカウント凍結 (Ban)<br>
-                            ※財産没収された場合、過去のバックアップからの復元も無効化されます。
-                        </div>`)"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></div>
+                        <div style="width:50px;"></div>
                     </div>
                     
                     <div id="area-all-chat" style="display:flex; flex-direction:column; flex:1; overflow:hidden;">
@@ -568,10 +556,6 @@
                     <div class="card">
                         <h3>プロフィール</h3>
                         <div class="mb-4"><label class="text-xs text-sub">表示名</label><input type="text" id="set-name" class="input"></div>
-                        <div class="mb-4">
-                            <label class="text-xs text-sub">公式バッジ申請</label>
-                            <button class="btn btn-ghost btn-sm" style="width:auto; border-color:var(--primary); color:var(--primary)" onclick="app.openBadgeApply()">申請フォームを開く</button>
-                        </div>
                         <button class="btn btn-primary" onclick="app.updateProfile()">保存</button>
                     </div>
                     <div class="card" style="border-color:var(--primary)">
@@ -738,6 +722,13 @@
             lastChatTime: 0,
             
             init: () => {
+                setTimeout(() => {
+                    if(document.getElementById('splash-screen').style.display !== 'none') {
+                        document.getElementById('splash-screen').style.display = 'none';
+                        if(!document.querySelector('.screen.active')) document.getElementById('scr-login').classList.add('active');
+                    }
+                }, 5000);
+
                 signInAnonymously(auth).then(() => {
                     onAuthStateChanged(auth, u => { if(u) {
                         const uid = localStorage.getItem(SESS_KEY);
@@ -764,12 +755,22 @@
             
             login: async () => {
                 const uid = document.getElementById('inp-uid').value.trim(), pass = document.getElementById('inp-pass').value.trim();
+                const btn = document.getElementById('btn-login');
                 if(!uid || !pass) return app.toast("入力してください");
+                
+                btn.disabled = true; btn.innerText = "接続中...";
                 try {
                     const s = await getDoc(doc(db,"users",uid));
-                    if(s.exists() && s.data().password === pass) { localStorage.setItem(SESS_KEY, uid); app.loadUser(uid); } 
-                    else { app.toast("IDまたはパスワードが違います"); }
-                } catch(e) { app.toast("接続エラー"); }
+                    if(s.exists() && s.data().password === pass) { 
+                        localStorage.setItem(SESS_KEY, uid); app.loadUser(uid); 
+                    } else { 
+                        app.toast("IDまたはパスワードが違います");
+                        btn.disabled = false; btn.innerText = "ログイン";
+                    }
+                } catch(e) { 
+                    app.toast("接続エラー");
+                    btn.disabled = false; btn.innerText = "ログイン";
+                }
             },
             register: async () => {
                 const uid = document.getElementById('reg-uid').value.trim();
@@ -794,15 +795,21 @@
                     if(s.exists()){ 
                         currentUser=s.data(); 
                         if(currentUser.isBanned) { app.toast('アカウントが凍結されています'); app.logout(); return; }
-                        app.checkAutoBadges(); app.renderHead(); app.checkAdmSess();
-                        if(!peer) app.initPeer(currentUser.username);
+                        
+                        // 画面遷移を優先
                         document.getElementById('splash-screen').classList.add('fade-out');
                         setTimeout(() => document.getElementById('splash-screen').style.display = 'none', 500);
                         app.go('scr-main'); 
                         if(document.querySelectorAll('.screen.active').length <= 1) app.tab('home');
+
+                        // バックグラウンド処理
+                        app.renderHead(); app.checkAdmSess();
+                        if(!peer) app.initPeer(currentUser.username);
+                        app.checkAutoBadges().catch(e => console.error("Badge check error", e));
+                        
+                        app.subNews(); app.subChat(); app.subTrade(); app.subMarket(); app.subDMList(uid); app.subRequests(uid);
                     } else { localStorage.removeItem(SESS_KEY); location.reload(); }
                 }));
-                app.subNews(); app.subChat(); app.subTrade(); app.subMarket(); app.subDMList(uid); app.subRequests(uid);
             },
             logout: () => { localStorage.removeItem(SESS_KEY); localStorage.removeItem(ADM_KEY); location.reload(); },
 
@@ -861,12 +868,13 @@
 
             // Chat All (with Anti-Abuse)
             subChat: () => {
-                listeners.push(onSnapshot(query(collection(db,"chat"), limit(50)), s=>{
+                if(listeners.chat) return; // Prevent double sub
+                listeners.chat = onSnapshot(query(collection(db,"chat"), limit(50)), s=>{
                     const b = document.getElementById('chat-box'); b.innerHTML="";
                     let msgs=[]; s.forEach(d=>msgs.push({id:d.id, ...d.data()})); msgs.sort((a,b)=>(a.createdAt?.seconds||0) - (b.createdAt?.seconds||0));
                     msgs.forEach(m => b.innerHTML += app.buildMsgHTML(m, false));
                     if(!document.getElementById('tab-chat').classList.contains('hidden')) setTimeout(()=>b.scrollTop=99999, 100);
-                }));
+                });
             },
             sendChat: async (stampUrl = null) => {
                 if(currentUser.isMuted) return app.toast('チャットが制限されています');
