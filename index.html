@@ -17,45 +17,63 @@
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         body { background: var(--bg-body); color: var(--text-main); font-family: 'Inter', 'Noto Sans JP', sans-serif; margin: 0; padding: 0; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        
+        /* Utility */
         .hidden { display: none !important; }
         .flex { display: flex; } .flex-col { flex-direction: column; } .items-center { align-items: center; } .justify-between { justify-content: space-between; }
         .gap-2 { gap: 8px; } .gap-4 { gap: 16px; }
         .font-bold { font-weight: 700; } .text-sm { font-size: 0.85rem; } .text-xs { font-size: 0.75rem; }
         .mb-2 { margin-bottom: 8px; } .mb-4 { margin-bottom: 16px; } .w-full { width: 100%; } .text-sub { color: var(--text-sub); }
         
-        /* SVG Icons */
+        /* Icons */
         .icon { width: 20px; height: 20px; fill: currentColor; flex-shrink: 0; display: inline-block; vertical-align: middle; }
         .icon-lg { width: 24px; height: 24px; }
         .icon-xl { width: 48px; height: 48px; }
         
+        /* Screens */
         .screen { position: absolute; inset: 0; background: var(--bg-body); z-index: 10; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; display: flex; flex-direction: column; }
         .screen.active { opacity: 1; pointer-events: auto; z-index: 20; }
+        
         #splash-screen { position: fixed; inset: 0; background: var(--bg-body); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease, visibility 0.5s; }
         #splash-screen.fade-out { opacity: 0; visibility: hidden; }
         .splash-logo { font-size: 3rem; font-weight: 900; background: linear-gradient(135deg, #58a6ff, #bc8cff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 20px; letter-spacing: 2px; }
         .loader { width: 40px; height: 40px; border: 4px solid var(--bg-input); border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Auth */
         .auth-container { flex: 1; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at center, #1f2937 0%, #0b0f19 100%); padding: 20px; }
         .auth-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 24px; padding: 40px 30px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
         .brand-title { font-size: 2rem; font-weight: 900; background: linear-gradient(135deg, #58a6ff, #bc8cff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 2rem; letter-spacing: 1px; }
+        
+        /* Form Elements */
         .input-group { position: relative; width: 100%; }
         .input { width: 100%; padding: 12px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: #fff; font-size: 1rem; transition: border-color 0.2s; touch-action: manipulation; }
         .input:focus { border-color: var(--primary); }
         .pass-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-sub); cursor: pointer; padding: 0; display:flex; align-items:center; }
+        
+        /* Layout */
         .app-layout { display: flex; width: 100%; height: 100%; overflow: hidden; }
         .sidebar { width: var(--sidebar-w); background: var(--bg-sidebar); border-right: 1px solid var(--border); display: none; flex-direction: column; padding: 20px; flex-shrink: 0; }
         .sidebar-brand { font-size: 1.2rem; font-weight: 800; color: var(--text-main); margin-bottom: 30px; padding-left: 10px; cursor: pointer; }
         .nav-link { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: var(--text-sub); border-radius: 8px; cursor: pointer; margin-bottom: 4px; font-weight: 600; font-size: 0.95rem; }
         .nav-link.active { background: var(--primary-dim); color: var(--primary); }
+        
         .main-content { flex: 1; display: flex; flex-direction: column; height: 100%; position: relative; overflow: hidden; background: var(--bg-body); }
         .header-mobile { height: 56px; background: var(--bg-sidebar); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: center; padding: 0 16px; flex-shrink: 0; font-weight: 700; font-size: 1.1rem; position: relative; }
         .header-user { position: absolute; right: 16px; font-size: 0.8rem; color: var(--text-sub); }
         .scroll-view { flex: 1; min-height:0; overflow-y: auto; padding: 20px; padding-bottom: 80px; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; touch-action: pan-y; }
-        #scr-stamp-maker { height: 100vh; } #scr-stamp-maker .scroll-view { height: calc(100vh - 50px); flex: none; }
+        
+        #scr-stamp-maker { height: 100vh; }
+        #scr-stamp-maker .scroll-view { height: calc(100vh - 50px); flex: none; }
+
         .bottom-nav { height: var(--nav-h-mobile); background: var(--bg-sidebar); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-around; position: absolute; bottom: 0; left: 0; right: 0; z-index: 50; padding-bottom: env(safe-area-inset-bottom); transition: transform 0.3s; }
         .b-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-sub); font-size: 0.65rem; gap: 4px; cursor: pointer; }
         .b-nav-item.active { color: var(--primary); }
-        body.chat-mode .bottom-nav { transform: translateY(100%); } body.chat-mode .sidebar { display: none !important; } body.chat-mode .scroll-view { padding-bottom: 0 !important; }
+
+        body.chat-mode .bottom-nav { transform: translateY(100%); }
+        body.chat-mode .sidebar { display: none !important; }
+        body.chat-mode .scroll-view { padding-bottom: 0 !important; }
+
         .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; position: relative; }
         .btn { width: 100%; padding: 12px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.95rem; color: white; transition: 0.2s; }
         .btn:active { opacity: 0.7; transform: scale(0.98); }
@@ -63,10 +81,13 @@
         .btn-primary { background: var(--success); } .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-sub); }
         .btn-danger { background: rgba(218, 54, 51, 0.15); color: var(--danger); border: 1px solid var(--danger); }
         .btn-warning { background: var(--warning); color: #000; } .btn-sm { padding: 6px 12px; font-size: 0.8rem; width: auto; }
+        
         .res-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
         .res-box { background: var(--bg-input); padding: 10px; border-radius: 10px; text-align: center; border: 1px solid var(--border); }
         .res-label { font-size: 0.65rem; color: var(--text-sub); display: block; font-weight: 700; }
         .res-val { font-size: 1.1rem; font-weight: 800; }
+
+        /* Badges */
         .badge { display: inline-flex; align-items: center; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; margin-left: 6px; font-weight: bold; border: 1px solid currentColor; }
         .badge-developer { color: #fff; background: linear-gradient(135deg, #ff4b4b, #9b0000); border: none; }
         .badge-staff { color: #fff; background: linear-gradient(135deg, #d29922, #b87c00); border: none; }
@@ -77,22 +98,24 @@
         .badge-level { color: #58a6ff; border: 1px solid #58a6ff; }
         .badge-rich { color: #d29922; border: 1px solid #d29922; }
         .badge-whale { color: #bc8cff; border: 1px solid #bc8cff; }
-        /* Chat */
+
+        /* Chat & DM */
         .chat-header { height: 50px; background: var(--bg-sidebar); display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid var(--border); font-weight: bold; justify-content: space-between; flex-shrink: 0; }
         .chat-list { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 16px; }
         .chat-input-wrapper { background: var(--bg-sidebar); border-top: 1px solid var(--border); padding-bottom: calc(10px + env(safe-area-inset-bottom)); flex-shrink: 0; }
-        #chat-preview { display: none; padding: 10px 15px 0; align-items: center; gap: 10px; }
-        .preview-thumb { height: 60px; border-radius: 8px; border: 1px solid var(--primary); object-fit: cover; }
+        
         #chat-reply-preview, #dm-reply-preview { display: none; padding: 8px 15px 0; align-items: center; gap: 10px; background: var(--bg-card); border-bottom: 1px solid var(--border); border-top: 1px solid var(--border); }
         .reply-thumb { height: 40px; border-radius: 4px; object-fit: cover; }
         .reply-text-preview { font-size: 0.8rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
         .reply-name-preview { font-size: 0.7rem; color: var(--text-sub); margin-bottom: 2px; }
         .reply-box-in-msg { font-size: 0.75rem; color: var(--text-sub); background: rgba(255,255,255,0.05); padding: 6px 8px; border-radius: 6px; margin-bottom: 6px; border-left: 3px solid var(--primary); display: flex; align-items: center; gap: 6px; cursor: pointer; }
         .reply-box-in-msg img { height: 24px; border-radius: 4px; object-fit: cover; }
+
         .chat-input-area { padding: 10px 15px; display: flex; gap: 10px; align-items: center; }
         .chat-switcher { display: flex; justify-content: center; gap: 10px; flex: 1; }
         .chat-sw-btn { padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; color: var(--text-sub); cursor: pointer; transition: 0.2s; }
         .chat-sw-btn.active { background: var(--primary-dim); color: var(--primary); font-weight: bold; }
+
         .msg-row { display: flex; flex-direction: column; max-width: 85%; position: relative; }
         .msg-row.mine { align-self: flex-end; align-items: flex-end; }
         .msg-row.other { align-self: flex-start; align-items: flex-start; }
@@ -103,21 +126,28 @@
         .msg-row.other .msg-bubble { background: var(--bg-card); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
         .chat-img { max-width: 100%; border-radius: 8px; margin-top: 6px; display: block; cursor: zoom-in; }
         .stamp-img { width: 140px; height: 140px; object-fit: contain; display: block; cursor: default; }
+        
         .dm-item { display: flex; align-items: center; gap: 12px; padding: 15px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
         .dm-item:hover { background: var(--bg-input); }
         .dm-icon { width: 40px; height: 40px; background: var(--primary-dim); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; }
+
+        /* Modals & Overlays */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
         .modal-box { background: var(--bg-card); width: 100%; max-width: 500px; border-radius: 16px; border: 1px solid var(--border); overflow: hidden; max-height: 80vh; display: flex; flex-direction: column; }
         .modal-head { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
         .modal-body { padding: 20px; overflow-y: auto; }
+        
         .bottom-sheet { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; display: none; flex-direction: column; justify-content: flex-end; }
         .bottom-sheet-content { background: var(--bg-card); border-top-left-radius: 16px; border-top-right-radius: 16px; padding: 20px; padding-bottom: calc(20px + env(safe-area-inset-bottom)); transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.1, 0.8, 0.3, 1); }
         .bottom-sheet.show { display: flex; }
         .bottom-sheet.show .bottom-sheet-content { transform: translateY(0); }
         .sheet-btn { width: 100%; padding: 16px; text-align: left; background: transparent; border: none; border-bottom: 1px solid var(--border); color: var(--text-main); font-size: 1rem; cursor: pointer; display: flex; align-items: center; gap: 12px; }
         .sheet-btn.danger { color: var(--danger); }
+        
         .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--primary); color: #fff; padding: 10px 24px; border-radius: 50px; font-weight: 700; z-index: 2000; opacity: 0; transition: 0.3s; pointer-events: none; }
         .toast.show { opacity: 1; }
+
+        /* Stamp Grid */
         .stamp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 10px 0; }
         .stamp-item { aspect-ratio: 1; background: var(--bg-input); border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid transparent; position: relative; }
         .stamp-item:hover { border-color: var(--primary); }
@@ -125,6 +155,8 @@
         .stamp-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
         .stamp-tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; color: var(--text-sub); border-bottom: 2px solid transparent; }
         .stamp-tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: bold; }
+
+        /* Maker Canvas */
         .mk-toolbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
         .mk-toolbtn { padding:8px 10px; border-radius:10px; border:1px solid var(--border); background:rgba(255,255,255,0.03); color:var(--text-main); font-weight:700; font-size:0.8rem; cursor:pointer; }
         .mk-toolbtn.active { border-color: var(--primary); background: var(--primary-dim); color: var(--primary); }
@@ -136,6 +168,8 @@
         .pk-slot { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 14px; padding: 10px; position: relative; overflow:hidden; }
         .pk-thumb { width: 100%; aspect-ratio: 1; border-radius: 12px; background: conic-gradient(from 90deg, rgba(255,255,255,0.08) 0 25%, rgba(255,255,255,0.02) 0 50%, rgba(255,255,255,0.08) 0 75%, rgba(255,255,255,0.02) 0 100%); background-size: 18px 18px; display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.06); }
         .pk-thumb img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
+
+        /* Call Screen */
         #scr-call { background: #000; z-index: 50; overflow: hidden; }
         .video-container { position: absolute; inset: 0; z-index: 0; display: flex; align-items: center; justify-content: center; background: #000; }
         #remote-video { width: 100%; height: 100%; object-fit: contain; }
@@ -146,6 +180,7 @@
         .call-avatar { width: 100px; height: 100px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; font-size: 3rem; margin: 0 auto 20px; border: 2px solid var(--text-main); }
         .call-controls { display: flex; justify-content: center; gap: 15px; pointer-events: auto; padding-bottom: 20px; }
         .call-btn { width: 60px; height: 60px; border-radius: 50%; border: none; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); }
+
         @media (min-width: 768px) {
             .sidebar { display: flex; } .bottom-nav { display: none; } .header-mobile { display: none; } .scroll-view { padding-bottom: 20px; }
             .pk-grid { grid-template-columns: repeat(6, 1fr); }
@@ -438,7 +473,7 @@
                             <span class="chat-sw-btn active" id="sw-all" onclick="app.switchChatMode('all')">全体チャット</span>
                             <span class="chat-sw-btn" id="sw-dm" onclick="app.switchChatMode('dm')">友達・DM</span>
                         </div>
-                        <div style="cursor:pointer;" onclick="app.mdl('利用規約・ルール', `<div style='line-height:1.6'><b>🚫 禁止事項</b><br>・荒らし、連投、スパム行為<br>・暴言、誹謗中傷、差別的発言<br>・公序良俗に反する投稿<br>・個人情報の投稿<br><br><b>⚠️ 罰則について</b><br>違反者は運営の判断により以下の処罰を受けます。<br>1. チャット機能の制限 (Mute)<br>2. 財産の没収 (Coin/Gemリセット)<br>3. アカウント凍結 (Ban)<br>※財産没収された場合、過去のバックアップからの復元も無効化されます。</div>`)"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></div>
+                        <div style="width:50px;"></div>
                     </div>
                     
                     <div id="area-all-chat" style="display:flex; flex-direction:column; flex:1; overflow:hidden;">
@@ -685,7 +720,7 @@
         let currentStampTab = 'public';
         const PK_DRAFT_KEY = 'kb_stamp_pack_draft_v1';
         let actionMsg = null; let replyTarget = { all: null, dm: null };
-        const appCache = { news: {}, chat: {}, gifts: {} }; // Added chat cache
+        const appCache = { news: {}, chat: {}, gifts: {} }; 
         const toDate = (ts) => { if (!ts) return new Date(); if (ts.toDate) return ts.toDate(); if (ts instanceof Date) return ts; return new Date(); };
         const safeArgs = (s) => s ? s.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, '\\n') : '';
 
@@ -762,18 +797,18 @@
                 const btn = document.getElementById('btn-login'); // Fixed: defined btn variable
                 if(!uid || !pass) return app.toast("入力してください");
                 
-                btn.disabled = true; btn.innerText = "接続中...";
+                //btn.disabled = true; btn.innerText = "接続中...";
                 try {
                     const s = await getDoc(doc(db,"users",uid));
                     if(s.exists() && s.data().password === pass) { 
                         localStorage.setItem(SESS_KEY, uid); app.loadUser(uid); 
                     } else { 
                         app.toast("IDまたはパスワードが違います");
-                        btn.disabled = false; btn.innerText = "ログイン";
+                        //btn.disabled = false; btn.innerText = "ログイン";
                     }
                 } catch(e) { 
                     app.toast("接続エラー");
-                    btn.disabled = false; btn.innerText = "ログイン";
+                    //btn.disabled = false; btn.innerText = "ログイン";
                 }
             },
             register: async () => {
@@ -1148,8 +1183,7 @@
                 if(dmUnsub) dmUnsub();
                 dmUnsub = onSnapshot(query(collection(db, "rooms", roomId, "messages"), limit(50)), s => {
                     const b = document.getElementById('dm-talk-box'); b.innerHTML = "";
-                    let msgs = []; s.forEach(d => { const m=d.data(); m.id=d.id; appCache.chat[d.id]=m; msgs.push(m); });
-                    msgs.sort((a,b)=>(a.createdAt?.seconds||0) - (b.createdAt?.seconds||0));
+                    let msgs = []; s.forEach(d => msgs.push({id:d.id, ...d.data()})); msgs.sort((a,b)=>(a.createdAt?.seconds||0) - (b.createdAt?.seconds||0));
                     msgs.forEach(m => b.innerHTML += app.buildMsgHTML(m, true));
                     setTimeout(()=>b.scrollTop = 99999, 100);
                 });
@@ -1164,54 +1198,1692 @@
                 i.value = ""; app.clearDMImg(); app.cancelReply('dm');
             },
 
-            // Admin & News & Gifts - FIXED
-            subNews: () => {
-                listeners.push(onSnapshot(query(collection(db,"announcements"), limit(50)), s=>{
-                    const l = document.getElementById('news-list'); l.innerHTML="";
-                    let items = []; s.forEach(d => { const n=d.data(); n.id=d.id; appCache.news[d.id]=n; items.push(n) });
-                    items = items.filter(n => (n.publishAt ? toDate(n.publishAt) : toDate(n.createdAt)) <= new Date());
-                    items.sort((a,b) => { if(a.pin !== b.pin) return b.pin ? 1 : -1; return (b.publishAt?.seconds||b.createdAt.seconds) - (a.publishAt?.seconds||a.createdAt.seconds); });
-                    // Using onclick="app.openNews('id')" to prevent HTML attribute breakage
-                    items.forEach(n => { l.innerHTML += `<div class="card p-3 flex gap-3 cursor-pointer" onclick="app.openNews('${n.id}')">${n.img?`<img src="${n.img}" style="width:50px;height:50px;object-fit:cover;border-radius:8px">`:''}<div><div class="font-bold">${n.pin?'📌 ':''}${n.title}</div><div class="text-xs text-sub">${(n.publishAt?toDate(n.publishAt):toDate(n.createdAt)).toLocaleDateString()}</div></div></div>`; });
-                }));
-            },
-            openNews: (id) => {
-                const n = appCache.news[id];
-                if(n) app.mdl(n.title, `${n.img?`<img src='${n.img}' class='w-full rounded mb-2'>`:''}<div style='white-space:pre-wrap'>${n.body}</div>`);
-            },
-            openMsgAction: (type, msgId, roomId) => {
-                const m = appCache.chat[msgId];
-                if(!m) return;
-                actionMsg = { type, msgId, msgUid: m.username, msgName: m.sender, msgText: m.text, msgImg: m.img, roomId };
-                const isMine = m.username === currentUser.username || (currentUser.badges||[]).includes('developer');
-                let preview = `${m.sender}: `;
-                if(m.text) preview += m.text.substring(0, 30) + (m.text.length > 30 ? '...' : ''); else if(m.img) preview += '[画像/スタンプ]';
-                document.getElementById('msg-action-target').innerText = preview;
-                document.getElementById('msg-action-sheet').classList.add('show');
-                const delBtn = document.getElementById('btn-msg-del');
-                if(isMine) delBtn.classList.remove('hidden'); else delBtn.classList.add('hidden');
-            },
-            // ... (Rest of logic: checkGifts, claimGift, authAdmin, etc. remain the same)
-            checkGifts: async () => {
-                const s = await getDocs(query(collection(db,"gifts"), where("to","in",["all",currentUser.username])));
-                let c=0, h="", now=new Date();
-                s.forEach(d=>{ 
-                    const g=d.data(), cl=g.claimedBy||[];
-                    if(!cl.includes(currentUser.username) && (g.publishAt?toDate(g.publishAt):toDate(g.createdAt))<=now && (!g.expireAt||toDate(g.expireAt)>now)){ 
-                        c++; h+=`<div class="card p-2 flex justify-between items-center mb-2"><div><b>${g.val} ${g.type}</b><br><small>${g.msg}</small></div><button class="btn btn-sm btn-primary" style="width:auto" onclick="app.claimGift('${d.id}')">受取</button></div>`; 
-                    }
+            // Chat All (with Anti-Abuse) - FIXED
+            subChat: () => {
+                if(listeners.chat) return;
+                listeners.chat = onSnapshot(query(collection(db,"chat"), limit(50)), s=>{
+                    const b = document.getElementById('chat-box'); b.innerHTML="";
+                    let msgs=[]; s.forEach(d=>{ const m=d.data(); m.id=d.id; appCache.chat[d.id]=m; msgs.push(m); });
+                    msgs.sort((a,b)=>(a.createdAt?.seconds||0) - (b.createdAt?.seconds||0));
+                    msgs.forEach(m => b.innerHTML += app.buildMsgHTML(m, false));
+                    if(!document.getElementById('tab-chat').classList.contains('hidden')) setTimeout(()=>b.scrollTop=99999, 100);
                 });
-                app.mdl("プレゼントBOX", c>0?h:"<p class='text-center text-sub'>ありません</p>");
             },
-            claimGift: async (id) => {
+            sendChat: async (stampUrl = null) => {
+                if(currentUser.isMuted) return app.toast('チャットが制限されています');
+                const now = Date.now();
+                if(now - app.lastChatTime < 1000) return app.toast('送信が早すぎます');
+                
+                const i=document.getElementById('chat-in'), t=i.value.trim(); const imgPayload = stampUrl || chatImg;
+                if(!t && !imgPayload) return;
+                
+                // Simple NG Word Check
+                const ngWords = ['死ね','殺す','馬鹿','アホ','カス','ゴミ','fuck','shit'];
+                if(ngWords.some(w => t.includes(w))) return app.toast('不適切な言葉が含まれています');
+
+                app.lastChatTime = now;
+                const payload = { text:t, img:imgPayload, username:currentUser.username, sender:currentUser.name, createdAt:serverTimestamp() };
+                if(replyTarget.all) { payload.replyTo = replyTarget.all; }
+                await addDoc(collection(db,"chat"), payload);
+                i.value=""; app.clearChatImg(); app.cancelReply('all');
+            },
+            buildMsgHTML: (m, isDm = false) => {
+                const isMe = m.username === currentUser.username;
+                const name = m.sender || "Unknown";
+                const type = isDm ? 'dm' : 'all';
+                let replyHtml = '';
+                if(m.replyTo) {
+                    const r = m.replyTo;
+                    const rText = r.text ? (r.text.length > 20 ? r.text.substring(0,20)+'...' : r.text) : (r.img ? '画像' : '');
+                    replyHtml = `<div class="reply-box-in-msg">${r.img ? `<img src="${r.img}">` : ''}<div class="reply-content"><div style="font-size:0.65rem; color:var(--primary)">${r.name}</div><div>${rText}</div></div></div>`;
+                }
+                // Use Cache-based openMsgAction call to prevent HTML breakage
+                const tapAction = `app.openMsgAction('${type}', '${m.id}', '${currentRoomId||''}')`;
+                let contentHtml = '';
+                if (m.text) contentHtml += `<div>${m.text}</div>`;
+                if (m.img) {
+                    const isStamp = !m.text && m.img;
+                    const imgClick = isStamp ? "" : `onclick="event.stopPropagation(); document.getElementById('img-full').src=this.src;document.getElementById('img-viewer').style.display='flex'"`;
+                    contentHtml += `<img src="${m.img}" class="${m.text?'chat-img':'stamp-img chat-img'}" ${imgClick}>`;
+                }
+                return `<div class="msg-row ${isMe?'mine':'other'}">
+                    ${!isMe?`<span class="msg-name" onclick="app.showProfile('${m.username}','${name.replace(/'/g,"\\'")}')">${name}</span>`:''}
+                    <div class="msg-bubble" style="${!m.text && m.img ? 'background:transparent; border:none; padding:0;' : ''}" onclick="${tapAction}">${replyHtml}${contentHtml}</div>
+                </div>`;
+            },
+            // ... (Other functions like DM, WebRTC, Stamp Maker remain standard)
+
+            // Pass Reset
+            checkSecurityQuestion: async () => {
+                const uid = document.getElementById('rst-uid').value.trim();
+                if(!uid) return app.toast("IDを入力してください");
                 try {
-                    await runTransaction(db, async tr=>{
-                        const gd=await tr.get(doc(db,"gifts",id)); const g=gd.data(); const cl=g.claimedBy||[]; if(cl.includes(currentUser.username)) throw "済";
-                        cl.push(currentUser.username); tr.update(doc(db,"gifts",id),{claimedBy:cl}); tr.update(doc(db,"users",currentUser.username),{[g.type]:increment(g.val)});
+                    const snap = await getDoc(doc(db, "users", uid));
+                    if(!snap.exists()) return app.toast("ユーザーが見つかりません");
+                    const d = snap.data();
+                    if(!d.secretQ) return app.toast("秘密の質問が未設定です");
+                    const qText = { pet: "初めて飼ったペットの名前は？", school: "小学校の名前は？", mother: "母親の旧姓は？", food: "好きな食べ物は？" }[d.secretQ] || "秘密の質問";
+                    document.getElementById('rst-q-text').innerText = qText;
+                    document.getElementById('rst-step-1').classList.add('hidden');
+                    document.getElementById('rst-step-2').classList.remove('hidden');
+                    app.resetTargetUid = uid;
+                } catch(e) { app.toast("エラー"); }
+            },
+            doResetPass: async () => {
+                const ans = document.getElementById('rst-ans').value.trim();
+                const newPass = document.getElementById('rst-new-pass').value.trim();
+                if(!ans || !newPass) return app.toast("全て入力してください");
+                try {
+                    const snap = await getDoc(doc(db, "users", app.resetTargetUid));
+                    if(snap.data().secretA === ans) {
+                        await updateDoc(doc(db, "users", app.resetTargetUid), { password: newPass });
+                        app.toast("パスワードを変更しました"); app.go('scr-login');
+                    } else app.toast("答えが違います");
+                } catch(e) {}
+            },
+            togglePass: (id, btn) => {
+                const el = document.getElementById(id);
+                if(el) { const isPass = el.type === 'password'; el.type = isPass ? 'text' : 'password'; 
+                btn.innerHTML = isPass ? '<svg class="icon" viewBox="0 0 24 24"><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/></svg>' : '<svg class="icon" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>'; }
+            },
+
+            // Profile & Manage Badges
+            showProfile: async (uid, name) => {
+                if(uid === currentUser.username) return;
+                try {
+                    const snap = await getDoc(doc(db, "users", uid));
+                    if(!snap.exists()) return app.toast("ユーザーが見つかりません");
+                    const target = snap.data();
+                    const isFriend = currentUser.friends && currentUser.friends.includes(uid);
+                    let btnHtml = isFriend ? `<button class="btn btn-success mt-2" onclick="app.startDM('${uid}', '${name.replace(/'/g,"\\'")}')">チャットする</button>` : `<button class="btn btn-primary mt-2" onclick="app.sendRequest('${uid}')">友達申請する</button>`;
+                    
+                    const myB = currentUser.badges || [];
+                    if(app.checkAdmSess() || myB.includes('developer') || myB.includes('staff')) {
+                        btnHtml += `<button class="btn btn-warning mt-2" onclick="app.manageBadges('${uid}')">バッジを管理する</button>`;
+                    }
+                    app.mdl("プロフィール", `<div style="text-align:center"><div style="font-size:3rem; margin-bottom:10px;"><svg class="icon icon-xl" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div><h3>${target.name}</h3><div class="mb-2">${app.getBadgesHtml(target.badges)}</div><p class="text-sub text-xs mb-4">ID: ${uid}</p>${btnHtml}</div>`);
+                } catch(e) {}
+            },
+            manageBadges: async (targetUid) => {
+                const s = await getDoc(doc(db, "users", targetUid));
+                if(!s.exists()) return;
+                const t = s.data(); const b = t.badges || [];
+                let html = `<div class="flex flex-col gap-3 mb-4">
+                    <label><input type="checkbox" id="mb-dev" ${b.includes('developer')?'checked':''}> 開発者</label>
+                    <label><input type="checkbox" id="mb-staff" ${b.includes('staff')?'checked':''}> 関係者</label>
+                    <label><input type="checkbox" id="mb-bug" ${b.includes('bug')?'checked':''}> バグ発見者</label>
+                    <label><input type="checkbox" id="mb-vip" ${b.includes('vip')?'checked':''}> VIP</label>
+                    <label><input type="checkbox" id="mb-veteran" ${b.includes('veteran')?'checked':''}> 古参</label>
+                    <label><input type="checkbox" id="mb-official" ${b.includes('official')?'checked':''}> 公式</label>
+                </div>
+                <button class="btn btn-warning" onclick="app.saveManagedBadges('${targetUid}')">保存</button>`;
+                app.mdl("バッジ管理: " + t.name, html);
+            },
+            saveManagedBadges: async (targetUid) => {
+                const s = await getDoc(doc(db, "users", targetUid));
+                if(!s.exists()) return;
+                const b = s.data().badges || [];
+                const handBadges = ['developer','staff','bug','vip','veteran','official'];
+                const newB = b.filter(x => !handBadges.includes(x));
+                if(document.getElementById('mb-dev').checked) newB.push('developer');
+                if(document.getElementById('mb-staff').checked) newB.push('staff');
+                if(document.getElementById('mb-bug').checked) newB.push('bug');
+                if(document.getElementById('mb-vip').checked) newB.push('vip');
+                if(document.getElementById('mb-veteran').checked) newB.push('veteran');
+                if(document.getElementById('mb-official').checked) newB.push('official');
+                await updateDoc(doc(db, "users", targetUid), { badges: newB });
+                app.toast("更新しました"); app.closeModal(); app.showProfile(targetUid, s.data().name);
+            },
+
+            // WebRTC Call
+            initPeer: (uid) => {
+                if(peer) return;
+                try {
+                    peer = new Peer(uid);
+                    peer.on('call', (c) => {
+                        if(callStatus!=='idle'){c.close();return;}
+                        incomingCallObj=c; callStatus='incoming';
+                        const m=c.metadata||{}; document.getElementById('inc-call-name').innerText=m.name||c.peer; document.getElementById('inc-call-type').innerText=m.video?'ビデオ':'音声';
+                        app.go('scr-call'); document.getElementById('call-ui-incoming').classList.remove('hidden'); document.getElementById('call-ui-calling').classList.add('hidden'); document.getElementById('call-ui-connected').classList.add('hidden');
+                        c.on('close',()=>app.endCall()); c.on('error',()=>app.endCall());
                     });
-                    app.toast("受け取りました"); app.closeModal();
+                    peer.on('error',e=>{ if(e.type==='unavailable-id') app.toast("通話ID重複");});
                 } catch(e){}
             },
+            startCall: async (videoEnabled) => {
+                if(callStatus !== 'idle') return app.toast("通話中です");
+                if(!currentRoomId) return;
+                const targetUid = currentRoomId.split('_').find(m => m !== currentUser.username);
+                if(!targetUid) return;
+                callStatus = 'calling'; app.go('scr-call');
+                document.getElementById('call-ui-calling').classList.remove('hidden'); document.getElementById('call-ui-incoming').classList.add('hidden'); document.getElementById('call-ui-connected').classList.add('hidden');
+                document.getElementById('call-name').innerText = document.getElementById('dm-talk-name').innerText;
+                document.getElementById('remote-video').srcObject = null; document.getElementById('local-video').srcObject = null;
+                try {
+                    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: videoEnabled });
+                    document.getElementById('local-video').srcObject = localStream; document.getElementById('local-video').muted = true;
+                    if(videoEnabled) document.getElementById('local-video').classList.add('active');
+                    if(!peer) app.initPeer(currentUser.username);
+                    const call = peer.call(targetUid, localStream, { metadata: { name: currentUser.name, video: videoEnabled } });
+                    currentCall = call;
+                    call.on('stream', (remote) => {
+                        remoteStream = remote; document.getElementById('remote-video').srcObject = remote; callStatus = 'connected';
+                        document.getElementById('call-ui-calling').classList.add('hidden'); document.getElementById('call-ui-connected').classList.remove('hidden');
+                        document.getElementById('remote-video').play().catch(e=>{});
+                    });
+                    call.on('close', () => app.endCall()); call.on('error', () => app.endCall());
+                } catch(e) { app.toast("エラー"); app.endCall(); }
+            },
+            answerCall: async () => {
+                if(!incomingCallObj) return;
+                try {
+                    const videoEnabled = incomingCallObj.metadata ? incomingCallObj.metadata.video : false;
+                    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: videoEnabled });
+                    document.getElementById('local-video').srcObject = localStream; document.getElementById('local-video').muted = true;
+                    if(videoEnabled) document.getElementById('local-video').classList.add('active');
+                    incomingCallObj.answer(localStream); currentCall = incomingCallObj; callStatus = 'connected';
+                    document.getElementById('call-ui-incoming').classList.add('hidden'); document.getElementById('call-ui-connected').classList.remove('hidden');
+                    currentCall.on('stream', (remote) => {
+                        remoteStream = remote; document.getElementById('remote-video').srcObject = remote;
+                        document.getElementById('remote-video').play().catch(e=>{});
+                    });
+                    currentCall.on('close', () => app.endCall()); currentCall.on('error', () => app.endCall());
+                } catch(e) { app.endCall(); }
+            },
+            endCall: () => {
+                if(currentCall) currentCall.close(); if(incomingCallObj) incomingCallObj.close();
+                if(localStream) localStream.getTracks().forEach(t => t.stop());
+                currentCall = null; incomingCallObj = null; localStream = null; remoteStream = null; callStatus = 'idle';
+                if(currentRoomId) app.go('scr-dm-talk'); else app.tab('home');
+            },
+            toggleMic: () => { if(localStream) { const t = localStream.getAudioTracks()[0]; if(t) { t.enabled = !t.enabled; document.getElementById('btn-mic-toggle').classList.toggle('active', t.enabled); } } },
+            toggleVideo: async () => { app.toast("ビデオ切替"); },
+
+            // Friends & DM (Inline Request)
+            searchUserForFriendInline: async () => {
+                const tid = document.getElementById('inline-friend-id').value.trim();
+                const resDiv = document.getElementById('inline-friend-result');
+                if(!tid) return;
+                if(tid === currentUser.username) return resDiv.innerHTML="<span class='text-warning text-xs'>自分自身です</span>";
+                resDiv.innerHTML = "";
+                try {
+                    const snap = await getDoc(doc(db, "users", tid));
+                    if(!snap.exists()) return resDiv.innerHTML="<span class='text-danger text-xs'>見つかりません</span>";
+                    const t = snap.data();
+                    resDiv.innerHTML = `<div class="p-3 border border-[var(--primary)] rounded mt-2">
+                        <div class="font-bold">${t.name} ${app.getBadgesHtml(t.badges)}</div><div class="text-xs text-sub mb-2">ID: ${tid}</div>
+                        <button class="btn btn-success btn-sm w-full" onclick="app.sendRequest('${tid}')">申請を送る</button></div>`;
+                } catch(e) { resDiv.innerHTML="エラー"; }
+            },
+            sendRequest: async (targetId) => {
+                if(targetId === currentUser.username) return;
+                try {
+                    const snap = await getDoc(doc(db, "users", targetId));
+                    if(!snap.exists()) return app.toast("見つかりません");
+                    const exist = await getDocs(query(collection(db, "requests"), where("from", "==", currentUser.username), where("to", "==", targetId)));
+                    if(!exist.empty) return app.toast("申請済みです");
+                    if(currentUser.friends && currentUser.friends.includes(targetId)) return app.toast("既に友達です");
+                    await addDoc(collection(db, "requests"), { from: currentUser.username, fromName: currentUser.name, to: targetId, toName: snap.data().name, status: 'pending', createdAt: serverTimestamp() });
+                    app.toast("申請を送りました");
+                } catch(e) {}
+            },
+            subRequests: (uid) => {
+                listeners.push(onSnapshot(query(collection(db, "requests"), where("to", "==", uid)), s => {
+                    const list = document.getElementById('requests-list'); list.innerHTML = "";
+                    s.forEach(d => {
+                        const r = d.data();
+                        list.innerHTML += `<div class="flex justify-between items-center mb-2 pb-2 border-b border-[var(--border)]"><div><div class="font-bold text-sm">${r.fromName}</div><div class="text-xs text-sub">ID: ${r.from}</div></div><div class="flex gap-2"><button class="btn btn-sm btn-primary" onclick="app.acceptRequest('${d.id}', '${r.from}')">承認</button><button class="btn btn-sm btn-danger" onclick="app.rejectRequest('${d.id}')">拒否</button></div></div>`;
+                    });
+                }));
+                listeners.push(onSnapshot(query(collection(db, "requests"), where("from", "==", uid)), s => {
+                    const list = document.getElementById('outgoing-list'); list.innerHTML = "";
+                    s.forEach(d => {
+                        list.innerHTML += `<div class="flex justify-between items-center mb-2"><div class="text-sm">${d.data().toName} へ送信中</div><button class="btn btn-sm btn-danger" onclick="app.rejectRequest('${d.id}')">取消</button></div>`;
+                    });
+                }));
+            },
+            acceptRequest: async (reqId, fromUid) => {
+                try {
+                    await runTransaction(db, async tr => {
+                        tr.update(doc(db, "users", currentUser.username), { friends: arrayUnion(fromUid) });
+                        tr.update(doc(db, "users", fromUid), { friends: arrayUnion(currentUser.username) });
+                        tr.delete(doc(db, "requests", reqId));
+                    });
+                    app.toast("友達になりました！");
+                } catch(e) {}
+            },
+            rejectRequest: async (reqId) => { await deleteDoc(doc(db, "requests", reqId)); },
+            subDMList: (uid) => {
+                listeners.push(onSnapshot(doc(db, "users", uid), async s => {
+                    if (!s.exists()) return;
+                    const friends = s.data().friends || [];
+                    const list = document.getElementById('dm-list-box'); list.innerHTML = "";
+                    for(const fid of friends) {
+                        try {
+                            const fSnap = await getDoc(doc(db, "users", fid));
+                            if(fSnap.exists()) {
+                                const fData = fSnap.data();
+                                list.innerHTML += `<div class="dm-item" onclick="app.startDM('${fid}', '${fData.name.replace(/'/g,"\\'")}')"><div class="dm-icon">${fData.name.charAt(0)}</div><div><div class="font-bold text-sm">${fData.name} ${app.getBadgesHtml(fData.badges)}</div><div class="text-xs text-sub">ID: ${fid}</div></div></div>`;
+                            }
+                        } catch(e) {}
+                    }
+                }));
+            },
+            startDM: async (targetUid, targetName) => {
+                app.closeModal(); 
+                const members = [currentUser.username, targetUid].sort(), roomId = members.join("_"), ref = doc(db, "rooms", roomId);
+                const snap = await getDoc(ref);
+                if(!snap.exists()) await setDoc(ref, { members: members, names: { [currentUser.username]: currentUser.name, [targetUid]: targetName }, updatedAt: serverTimestamp() });
+                currentRoomId = roomId; document.getElementById('dm-talk-name').innerText = targetName; document.getElementById('scr-dm-talk').classList.add('active');
+                if(dmUnsub) dmUnsub();
+                dmUnsub = onSnapshot(query(collection(db, "rooms", roomId, "messages"), limit(50)), s => {
+                    const b = document.getElementById('dm-talk-box'); b.innerHTML = "";
+                    let msgs = []; s.forEach(d => msgs.push({id:d.id, ...d.data()})); msgs.sort((a,b)=>(a.createdAt?.seconds||0) - (b.createdAt?.seconds||0));
+                    msgs.forEach(m => b.innerHTML += app.buildMsgHTML(m, true));
+                    setTimeout(()=>b.scrollTop = 99999, 100);
+                });
+            },
+            closeDM: () => { document.getElementById('scr-dm-talk').classList.remove('active'); if(dmUnsub) dmUnsub(); currentRoomId = null; app.cancelReply('dm'); },
+            sendDM: async (stampUrl = null) => {
+                const i = document.getElementById('dm-in'), t = i.value.trim(); const imgPayload = stampUrl || dmImg;
+                if((!t && !imgPayload) || !currentRoomId) return;
+                const payload = { text: t, img: imgPayload, username: currentUser.username, sender: currentUser.name, createdAt: serverTimestamp() };
+                if(replyTarget.dm) { payload.replyTo = replyTarget.dm; }
+                await addDoc(collection(db, "rooms", currentRoomId, "messages"), payload);
+                i.value = ""; app.clearDMImg(); app.cancelReply('dm');
+            },
+
+            // Chat All (with Anti-Abuse) - FIXED
+            subChat: () => {
+                if(listeners.chat) return;
+                listeners.chat = onSnapshot(query(collection(db,"chat"), limit(50)), s=>{
+                    const b = document.getElementById('chat-box'); b.innerHTML="";
+                    let msgs=[]; s.forEach(d=>{ const m=d.data(); m.id=d.id; appCache.chat[d.id]=m; msgs.push(m); });
+                    msgs.sort((a,b)=>(a.createdAt?.seconds||0) - (b.createdAt?.seconds||0));
+                    msgs.forEach(m => b.innerHTML += app.buildMsgHTML(m, false));
+                    if(!document.getElementById('tab-chat').classList.contains('hidden')) setTimeout(()=>b.scrollTop=99999, 100);
+                });
+            },
+            sendChat: async (stampUrl = null) => {
+                if(currentUser.isMuted) return app.toast('チャットが制限されています');
+                const now = Date.now();
+                if(now - app.lastChatTime < 1000) return app.toast('送信が早すぎます');
+                
+                const i=document.getElementById('chat-in'), t=i.value.trim(); const imgPayload = stampUrl || chatImg;
+                if(!t && !imgPayload) return;
+                
+                // Simple NG Word Check
+                const ngWords = ['死ね','殺す','馬鹿','アホ','カス','ゴミ','fuck','shit'];
+                if(ngWords.some(w => t.includes(w))) return app.toast('不適切な言葉が含まれています');
+
+                app.lastChatTime = now;
+                const payload = { text:t, img:imgPayload, username:currentUser.username, sender:currentUser.name, createdAt:serverTimestamp() };
+                if(replyTarget.all) { payload.replyTo = replyTarget.all; }
+                await addDoc(collection(db,"chat"), payload);
+                i.value=""; app.clearChatImg(); app.cancelReply('all');
+            },
+            buildMsgHTML: (m, isDm = false) => {
+                const isMe = m.username === currentUser.username;
+                const name = m.sender || "Unknown";
+                const type = isDm ? 'dm' : 'all';
+                let replyHtml = '';
+                if(m.replyTo) {
+                    const r = m.replyTo;
+                    const rText = r.text ? (r.text.length > 20 ? r.text.substring(0,20)+'...' : r.text) : (r.img ? '画像' : '');
+                    replyHtml = `<div class="reply-box-in-msg">${r.img ? `<img src="${r.img}">` : ''}<div class="reply-content"><div style="font-size:0.65rem; color:var(--primary)">${r.name}</div><div>${rText}</div></div></div>`;
+                }
+                // Use Cache-based openMsgAction call to prevent HTML breakage
+                const tapAction = `app.openMsgAction('${type}', '${m.id}', '${currentRoomId||''}')`;
+                let contentHtml = '';
+                if (m.text) contentHtml += `<div>${m.text}</div>`;
+                if (m.img) {
+                    const isStamp = !m.text && m.img;
+                    const imgClick = isStamp ? "" : `onclick="event.stopPropagation(); document.getElementById('img-full').src=this.src;document.getElementById('img-viewer').style.display='flex'"`;
+                    contentHtml += `<img src="${m.img}" class="${m.text?'chat-img':'stamp-img chat-img'}" ${imgClick}>`;
+                }
+                return `<div class="msg-row ${isMe?'mine':'other'}">
+                    ${!isMe?`<span class="msg-name" onclick="app.showProfile('${m.username}','${name.replace(/'/g,"\\'")}')">${name}</span>`:''}
+                    <div class="msg-bubble" style="${!m.text && m.img ? 'background:transparent; border:none; padding:0;' : ''}" onclick="${tapAction}">${replyHtml}${contentHtml}</div>
+                </div>`;
+            },
+            // ... (Other functions like DM, WebRTC, Stamp Maker remain standard)
+
+            // Pass Reset
+            checkSecurityQuestion: async () => {
+                const uid = document.getElementById('rst-uid').value.trim();
+                if(!uid) return app.toast("IDを入力してください");
+                try {
+                    const snap = await getDoc(doc(db, "users", uid));
+                    if(!snap.exists()) return app.toast("ユーザーが見つかりません");
+                    const d = snap.data();
+                    if(!d.secretQ) return app.toast("秘密の質問が未設定です");
+                    const qText = { pet: "初めて飼ったペットの名前は？", school: "小学校の名前は？", mother: "母親の旧姓は？", food: "好きな食べ物は？" }[d.secretQ] || "秘密の質問";
+                    document.getElementById('rst-q-text').innerText = qText;
+                    document.getElementById('rst-step-1').classList.add('hidden');
+                    document.getElementById('rst-step-2').classList.remove('hidden');
+                    app.resetTargetUid = uid;
+                } catch(e) { app.toast("エラー"); }
+            },
+            doResetPass: async () => {
+                const ans = document.getElementById('rst-ans').value.trim();
+                const newPass = document.getElementById('rst-new-pass').value.trim();
+                if(!ans || !newPass) return app.toast("全て入力してください");
+                try {
+                    const snap = await getDoc(doc(db, "users", app.resetTargetUid));
+                    if(snap.data().secretA === ans) {
+                        await updateDoc(doc(db, "users", app.resetTargetUid), { password: newPass });
+                        app.toast("パスワードを変更しました"); app.go('scr-login');
+                    } else app.toast("答えが違います");
+                } catch(e) {}
+            },
+            togglePass: (id, btn) => {
+                const el = document.getElementById(id);
+                if(el) { const isPass = el.type === 'password'; el.type = isPass ? 'text' : 'password'; 
+                btn.innerHTML = isPass ? '<svg class="icon" viewBox="0 0 24 24"><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/></svg>' : '<svg class="icon" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>'; }
+            },
+
+            // Profile & Manage Badges
+            showProfile: async (uid, name) => {
+                if(uid === currentUser.username) return;
+                try {
+                    const snap = await getDoc(doc(db, "users", uid));
+                    if(!snap.exists()) return app.toast("ユーザーが見つかりません");
+                    const target = snap.data();
+                    const isFriend = currentUser.friends && currentUser.friends.includes(uid);
+                    let btnHtml = isFriend ? `<button class="btn btn-success mt-2" onclick="app.startDM('${uid}', '${name.replace(/'/g,"\\'")}')">チャットする</button>` : `<button class="btn btn-primary mt-2" onclick="app.sendRequest('${uid}')">友達申請する</button>`;
+                    
+                    const myB = currentUser.badges || [];
+                    if(app.checkAdmSess() || myB.includes('developer') || myB.includes('staff')) {
+                        btnHtml += `<button class="btn btn-warning mt-2" onclick="app.manageBadges('${uid}')">バッジを管理する</button>`;
+                    }
+                    app.mdl("プロフィール", `<div style="text-align:center"><div style="font-size:3rem; margin-bottom:10px;"><svg class="icon icon-xl" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div><h3>${target.name}</h3><div class="mb-2">${app.getBadgesHtml(target.badges)}</div><p class="text-sub text-xs mb-4">ID: ${uid}</p>${btnHtml}</div>`);
+                } catch(e) {}
+            },
+            manageBadges: async (targetUid) => {
+                const s = await getDoc(doc(db, "users", targetUid));
+                if(!s.exists()) return;
+                const t = s.data(); const b = t.badges || [];
+                let html = `<div class="flex flex-col gap-3 mb-4">
+                    <label><input type="checkbox" id="mb-dev" ${b.includes('developer')?'checked':''}> 開発者</label>
+                    <label><input type="checkbox" id="mb-staff" ${b.includes('staff')?'checked':''}> 関係者</label>
+                    <label><input type="checkbox" id="mb-bug" ${b.includes('bug')?'checked':''}> バグ発見者</label>
+                    <label><input type="checkbox" id="mb-vip" ${b.includes('vip')?'checked':''}> VIP</label>
+                    <label><input type="checkbox" id="mb-veteran" ${b.includes('veteran')?'checked':''}> 古参</label>
+                    <label><input type="checkbox" id="mb-official" ${b.includes('official')?'checked':''}> 公式</label>
+                </div>
+                <button class="btn btn-warning" onclick="app.saveManagedBadges('${targetUid}')">保存</button>`;
+                app.mdl("バッジ管理: " + t.name, html);
+            },
+            saveManagedBadges: async (targetUid) => {
+                const s = await getDoc(doc(db, "users", targetUid));
+                if(!s.exists()) return;
+                const b = s.data().badges || [];
+                const handBadges = ['developer','staff','bug','vip','veteran','official'];
+                const newB = b.filter(x => !handBadges.includes(x));
+                if(document.getElementById('mb-dev').checked) newB.push('developer');
+                if(document.getElementById('mb-staff').checked) newB.push('staff');
+                if(document.getElementById('mb-bug').checked) newB.push('bug');
+                if(document.getElementById('mb-vip').checked) newB.push('vip');
+                if(document.getElementById('mb-veteran').checked) newB.push('veteran');
+                if(document.getElementById('mb-official').checked) newB.push('official');
+                await updateDoc(doc(db, "users", targetUid), { badges: newB });
+                app.toast("更新しました"); app.closeModal(); app.showProfile(targetUid, s.data().name);
+            },
+
+            // WebRTC Call
+            initPeer: (uid) => {
+                if(peer) return;
+                try {
+                    peer = new Peer(uid);
+                    peer.on('call', (c) => {
+                        if(callStatus!=='idle'){c.close();return;}
+                        incomingCallObj=c; callStatus='incoming';
+                        const m=c.metadata||{}; document.getElementById('inc-call-name').innerText=m.name||c.peer; document.getElementById('inc-call-type').innerText=m.video?'ビデオ':'音声';
+                        app.go('scr-call'); document.getElementById('call-ui-incoming').classList.remove('hidden'); document.getElementById('call-ui-calling').classList.add('hidden'); document.getElementById('call-ui-connected').classList.add('hidden');
+                        c.on('close',()=>app.endCall()); c.on('error',()=>app.endCall());
+                    });
+                    peer.on('error',e=>{ if(e.type==='unavailable-id') app.toast("通話ID重複");});
+                } catch(e){}
+            },
+            startCall: async (videoEnabled) => {
+                if(callStatus !== 'idle') return app.toast("通話中です");
+                if(!currentRoomId) return;
+                const targetUid = currentRoomId.split('_').find(m => m !== currentUser.username);
+                if(!targetUid) return;
+                callStatus = 'calling'; app.go('scr-call');
+                document.getElementById('call-ui-calling').classList.remove('hidden'); document.getElementById('call-ui-incoming').classList.add('hidden'); document.getElementById('call-ui-connected').classList.add('hidden');
+                document.getElementById('call-name').innerText = document.getElementById('dm-talk-name').innerText;
+                document.getElementById('remote-video').srcObject = null; document.getElementById('local-video').srcObject = null;
+                try {
+                    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: videoEnabled });
+                    document.getElementById('local-video').srcObject = localStream; document.getElementById('local-video').muted = true;
+                    if(videoEnabled) document.getElementById('local-video').classList.add('active');
+                    if(!peer) app.initPeer(currentUser.username);
+                    const call = peer.call(targetUid, localStream, { metadata: { name: currentUser.name, video: videoEnabled } });
+                    currentCall = call;
+                    call.on('stream', (remote) => {
+                        remoteStream = remote; document.getElementById('remote-video').srcObject = remote; callStatus = 'connected';
+                        document.getElementById('call-ui-calling').classList.add('hidden'); document.getElementById('call-ui-connected').classList.remove('hidden');
+                        document.getElementById('remote-video').play().catch(e=>{});
+                    });
+                    call.on('close', () => app.endCall()); call.on('error', () => app.endCall());
+                } catch(e) { app.toast("エラー"); app.endCall(); }
+            },
+            answerCall: async () => {
+                if(!incomingCallObj) return;
+                try {
+                    const videoEnabled = incomingCallObj.metadata ? incomingCallObj.metadata.video : false;
+                    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: videoEnabled });
+                    document.getElementById('local-video').srcObject = localStream; document.getElementById('local-video').muted = true;
+                    if(videoEnabled) document.getElementById('local-video').classList.add('active');
+                    incomingCallObj.answer(localStream); currentCall = incomingCallObj; callStatus = 'connected';
+                    document.getElementById('call-ui-incoming').classList.add('hidden'); document.getElementById('call-ui-connected').classList.remove('hidden');
+                    currentCall.on('stream', (remote) => {
+                        remoteStream = remote; document.getElementById('remote-video').srcObject = remote;
+                        document.getElementById('remote-video').play().catch(e=>{});
+                    });
+                    currentCall.on('close', () => app.endCall()); currentCall.on('error', () => app.endCall());
+                } catch(e) { app.endCall(); }
+            },
+            endCall: () => {
+                if(currentCall) currentCall.close(); if(incomingCallObj) incomingCallObj.close();
+                if(localStream) localStream.getTracks().forEach(t => t.stop());
+                currentCall = null; incomingCallObj = null; localStream = null; remoteStream = null; callStatus = 'idle';
+                if(currentRoomId) app.go('scr-dm-talk'); else app.tab('home');
+            },
+            toggleMic: () => { if(localStream) { const t = localStream.getAudioTracks()[0]; if(t) { t.enabled = !t.enabled; document.getElementById('btn-mic-toggle').classList.toggle('active', t.enabled); } } },
+            toggleVideo: async () => { app.toast("ビデオ切替"); },
+
+            // Friends & DM (Inline Request)
+            searchUserForFriendInline: async () => {
+                const tid = document.getElementById('inline-friend-id').value.trim();
+                const resDiv = document.getElementById('inline-friend-result');
+                if(!tid) return;
+                if(tid === currentUser.username) return resDiv.innerHTML="<span class='text-warning text-xs'>自分自身です</span>";
+                resDiv.innerHTML = "";
+                try {
+                    const snap = await getDoc(doc(db, "users", tid));
+                    if(!snap.exists()) return resDiv.innerHTML="<span class='text-danger text-xs'>見つかりません</span>";
+                    const t = snap.data();
+                    resDiv.innerHTML = `<div class="p-3 border border-[var(--primary)] rounded mt-2">
+                        <div class="font-bold">${t.name} ${app.getBadgesHtml(t.badges)}</div><div class="text-xs text-sub mb-2">ID: ${tid}</div>
+                        <button class="btn btn-success btn-sm w-full" onclick="app.sendRequest('${tid}')">申請を送る</button></div>`;
+                } catch(e) { resDiv.innerHTML="エラー"; }
+            },
+            sendRequest: async (targetId) => {
+                if(targetId === currentUser.username) return;
+                try {
+                    const snap = await getDoc(doc(db, "users", targetId));
+                    if(!snap.exists()) return app.toast("見つかりません");
+                    const exist = await getDocs(query(collection(db, "requests"), where("from", "==", currentUser.username), where("to", "==", targetId)));
+                    if(!exist.empty) return app.toast("申請済みです");
+                    if(currentUser.friends && currentUser.friends.includes(targetId)) return app.toast("既に友達です");
+                    await addDoc(collection(db, "requests"), { from: currentUser.username, fromName: currentUser.name, to: targetId, toName: snap.data().name, status: 'pending', createdAt: serverTimestamp() });
+                    app.toast("申請を送りました");
+                } catch(e) {}
+            },
+            subRequests: (uid) => {
+                listeners.push(onSnapshot(query(collection(db, "requests"), where("to", "==", uid)), s => {
+                    const list = document.getElementById('requests-list'); list.innerHTML = "";
+                    s.forEach(d => {
+                        const r = d.data();
+                        list.innerHTML += `<div class="flex justify-between items-center mb-2 pb-2 border-b border-[var(--border)]"><div><div class="font-bold text-sm">${r.fromName}</div><div class="text-xs text-sub">ID: ${r.from}</div></div><div class="flex gap-2"><button class="btn btn-sm btn-primary" onclick="app.acceptRequest('${d.id}', '${r.from}')">承認</button><button class="btn btn-sm btn-danger" onclick="app.rejectRequest('${d.id}')">拒否</button></div></div>`;
+                    });
+                }));
+                listeners.push(onSnapshot(query(collection(db, "requests"), where("from", "==", uid)), s => {
+                    const list = document.getElementById('outgoing-list'); list.innerHTML = "";
+                    s.forEach(d => {
+                        list.innerHTML += `<div class="flex justify-between items-center mb-2"><div class="text-sm">${d.data().toName} へ送信中</div><button class="btn btn-sm btn-danger" onclick="app.rejectRequest('${d.id}')">取消</button></div>`;
+                    });
+                }));
+            },
+            acceptRequest: async (reqId, fromUid) => {
+                try {
+                    await runTransaction(db, async tr => {
+                        tr.update(doc(db, "users", currentUser.username), { friends: arrayUnion(fromUid) });
+                        tr.update(doc(db, "users", fromUid), { friends: arrayUnion(currentUser.username) });
+                        tr.delete(doc(db, "requests", reqId));
+                    });
+                    app.toast("友達になりました！");
+                } catch(e) {}
+            },
+            rejectRequest: async (reqId) => { await deleteDoc(doc(db, "requests", reqId)); },
+            subDMList: (uid) => {
+                listeners.push(onSnapshot(doc(db, "users", uid), async s => {
+                    if (!s.exists()) return;
+                    const friends = s.data().friends || [];
+                    const list = document.getElementById('dm-list-box'); list.innerHTML = "";
+                    for(const fid of friends) {
+                        try {
+                            const fSnap = await getDoc(doc(db, "users", fid));
+                            if(fSnap.exists()) {
+                                const fData = fSnap.data();
+                                list.innerHTML += `<div class="dm-item" onclick="app.startDM('${fid}', '${fData.name.replace(/'/g,"\\'")}')"><div class="dm-icon">${fData.name.charAt(0)}</div><div><div class="font-bold text-sm">${fData.name} ${app.getBadgesHtml(fData.badges)}</div><div class="text-xs text-sub">ID: ${fid}</div></div></div>`;
+                            }
+                        } catch(e) {}
+                    }
+                }));
+            },
+            startDM: async (targetUid, targetName) => {
+                app.closeModal(); 
+                const members = [currentUser.username, targetUid].sort(), roomId = members.join("_"), ref = doc(db, "rooms", roomId);
+                const snap = await getDoc(ref);
+                if(!snap.exists()) await setDoc(ref, { members: members, names: { [currentUser.username]: currentUser.name, [targetUid]: targetName }, updatedAt: serverTimestamp() });
+                currentRoomId = roomId; document.getElementById('dm-talk-name').innerText = targetName; document.getElementById('scr-dm-talk').classList.add('active');
+                if(dmUnsub) dmUnsub();
+                dmUnsub = onSnapshot(query(collection(db, "rooms", roomId, "messages"), limit(50)), s => {
+                    const b = document.getElementById('dm-talk-box'); b.innerHTML = "";
+                    let msgs = []; s.forEach(d => msgs.push({id:d.id, ...d.data()})); msgs.sort((a,b)=>(a.createdAt?.seconds||0) - (b.createdAt?.seconds||0));
+                    msgs.forEach(m => b.innerHTML += app.buildMsgHTML(m, true));
+                    setTimeout(()=>b.scrollTop = 99999, 100);
+                });
+            },
+            closeDM: () => { document.getElementById('scr-dm-talk').classList.remove('active'); if(dmUnsub) dmUnsub(); currentRoomId = null; app.cancelReply('dm'); },
+            sendDM: async (stampUrl = null) => {
+                const i = document.getElementById('dm-in'), t = i.value.trim(); const imgPayload = stampUrl || dmImg;
+                if((!t && !imgPayload) || !currentRoomId) return;
+                const payload = { text: t, img: imgPayload, username: currentUser.username, sender: currentUser.name, createdAt: serverTimestamp() };
+                if(replyTarget.dm) { payload.replyTo = replyTarget.dm; }
+                await addDoc(collection(db, "rooms", currentRoomId, "messages"), payload);
+                i.value = ""; app.clearDMImg(); app.cancelReply('dm');
+            },
+
+            // Chat All (with Anti-Abuse) - FIXED
+            subChat: () => {
+                if(listeners.chat) return;
+                listeners.chat = onSnapshot(query(collection(db,"chat"), limit(50)), s=>{
+                    const b = document.getElementById('chat-box'); b.innerHTML="";
+                    let msgs=[]; s.forEach(d=>{ const m=d.data(); m.id=d.id; appCache.chat[d.id]=m; msgs.push(m); });
+                    msgs.sort((a,b)=>(a.createdAt?.seconds||0) - (b.createdAt?.seconds||0));
+                    msgs.forEach(m => b.innerHTML += app.buildMsgHTML(m, false));
+                    if(!document.getElementById('tab-chat').classList.contains('hidden')) setTimeout(()=>b.scrollTop=99999, 100);
+                });
+            },
+            sendChat: async (stampUrl = null) => {
+                if(currentUser.isMuted) return app.toast('チャットが制限されています');
+                const now = Date.now();
+                if(now - app.lastChatTime < 1000) return app.toast('送信が早すぎます');
+                
+                const i=document.getElementById('chat-in'), t=i.value.trim(); const imgPayload = stampUrl || chatImg;
+                if(!t && !imgPayload) return;
+                
+                // Simple NG Word Check
+                const ngWords = ['死ね','殺す','馬鹿','アホ','カス','ゴミ','fuck','shit'];
+                if(ngWords.some(w => t.includes(w))) return app.toast('不適切な言葉が含まれています');
+
+                app.lastChatTime = now;
+                const payload = { text:t, img:imgPayload, username:currentUser.username, sender:currentUser.name, createdAt:serverTimestamp() };
+                if(replyTarget.all) { payload.replyTo = replyTarget.all; }
+                await addDoc(collection(db,"chat"), payload);
+                i.value=""; app.clearChatImg(); app.cancelReply('all');
+            },
+            buildMsgHTML: (m, isDm = false) => {
+                const isMe = m.username === currentUser.username;
+                const name = m.sender || "Unknown";
+                const type = isDm ? 'dm' : 'all';
+                let replyHtml = '';
+                if(m.replyTo) {
+                    const r = m.replyTo;
+                    const rText = r.text ? (r.text.length > 20 ? r.text.substring(0,20)+'...' : r.text) : (r.img ? '画像' : '');
+                    replyHtml = `<div class="reply-box-in-msg">${r.img ? `<img src="${r.img}">` : ''}<div class="reply-content"><div style="font-size:0.65rem; color:var(--primary)">${r.name}</div><div>${rText}</div></div></div>`;
+                }
+                // Use Cache-based openMsgAction call to prevent HTML breakage
+                const tapAction = `app.openMsgAction('${type}', '${m.id}', '${currentRoomId||''}')`;
+                let contentHtml = '';
+                if (m.text) contentHtml += `<div>${m.text}</div>`;
+                if (m.img) {
+                    const isStamp = !m.text && m.img;
+                    const imgClick = isStamp ? "" : `onclick="event.stopPropagation(); document.getElementById('img-full').src=this.src;document.getElementById('img-viewer').style.display='flex'"`;
+                    contentHtml += `<img src="${m.img}" class="${m.text?'chat-img':'stamp-img chat-img'}" ${imgClick}>`;
+                }
+                return `<div class="msg-row ${isMe?'mine':'other'}">
+                    ${!isMe?`<span class="msg-name" onclick="app.showProfile('${m.username}','${name.replace(/'/g,"\\'")}')">${name}</span>`:''}
+                    <div class="msg-bubble" style="${!m.text && m.img ? 'background:transparent; border:none; padding:0;' : ''}" onclick="${tapAction}">${replyHtml}${contentHtml}</div>
+                </div>`;
+            },
+            // ... (Other functions like DM, WebRTC, Stamp Maker remain standard)
+
+            // Pass Reset
+            checkSecurityQuestion: async () => {
+                const uid = document.getElementById('rst-uid').value.trim();
+                if(!uid) return app.toast("IDを入力してください");
+                try {
+                    const snap = await getDoc(doc(db, "users", uid));
+                    if(!snap.exists()) return app.toast("ユーザーが見つかりません");
+                    const d = snap.data();
+                    if(!d.secretQ) return app.toast("秘密の質問が未設定です");
+                    const qText = { pet: "初めて飼ったペットの名前は？", school: "小学校の名前は？", mother: "母親の旧姓は？", food: "好きな食べ物は？" }[d.secretQ] || "秘密の質問";
+                    document.getElementById('rst-q-text').innerText = qText;
+                    document.getElementById('rst-step-1').classList.add('hidden');
+                    document.getElementById('rst-step-2').classList.remove('hidden');
+                    app.resetTargetUid = uid;
+                } catch(e) { app.toast("エラー"); }
+            },
+            doResetPass: async () => {
+                const ans = document.getElementById('rst-ans').value.trim();
+                const newPass = document.getElementById('rst-new-pass').value.trim();
+                if(!ans || !newPass) return app.toast("全て入力してください");
+                try {
+                    const snap = await getDoc(doc(db, "users", app.resetTargetUid));
+                    if(snap.data().secretA === ans) {
+                        await updateDoc(doc(db, "users", app.resetTargetUid), { password: newPass });
+                        app.toast("パスワードを変更しました"); app.go('scr-login');
+                    } else app.toast("答えが違います");
+                } catch(e) {}
+            },
+            togglePass: (id, btn) => {
+                const el = document.getElementById(id);
+                if(el) { const isPass = el.type === 'password'; el.type = isPass ? 'text' : 'password'; 
+                btn.innerHTML = isPass ? '<svg class="icon" viewBox="0 0 24 24"><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/></svg>' : '<svg class="icon" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>'; }
+            },
+
+            // Profile & Manage Badges
+            showProfile: async (uid, name) => {
+                if(uid === currentUser.username) return;
+                try {
+                    const snap = await getDoc(doc(db, "users", uid));
+                    if(!snap.exists()) return app.toast("ユーザーが見つかりません");
+                    const target = snap.data();
+                    const isFriend = currentUser.friends && currentUser.friends.includes(uid);
+                    let btnHtml = isFriend ? `<button class="btn btn-success mt-2" onclick="app.startDM('${uid}', '${name.replace(/'/g,"\\'")}')">チャットする</button>` : `<button class="btn btn-primary mt-2" onclick="app.sendRequest('${uid}')">友達申請する</button>`;
+                    
+                    const myB = currentUser.badges || [];
+                    if(app.checkAdmSess() || myB.includes('developer') || myB.includes('staff')) {
+                        btnHtml += `<button class="btn btn-warning mt-2" onclick="app.manageBadges('${uid}')">バッジを管理する</button>`;
+                    }
+                    app.mdl("プロフィール", `<div style="text-align:center"><div style="font-size:3rem; margin-bottom:10px;"><svg class="icon icon-xl" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div><h3>${target.name}</h3><div class="mb-2">${app.getBadgesHtml(target.badges)}</div><p class="text-sub text-xs mb-4">ID: ${uid}</p>${btnHtml}</div>`);
+                } catch(e) {}
+            },
+            manageBadges: async (targetUid) => {
+                const s = await getDoc(doc(db, "users", targetUid));
+                if(!s.exists()) return;
+                const t = s.data(); const b = t.badges || [];
+                let html = `<div class="flex flex-col gap-3 mb-4">
+                    <label><input type="checkbox" id="mb-dev" ${b.includes('developer')?'checked':''}> 開発者</label>
+                    <label><input type="checkbox" id="mb-staff" ${b.includes('staff')?'checked':''}> 関係者</label>
+                    <label><input type="checkbox" id="mb-bug" ${b.includes('bug')?'checked':''}> バグ発見者</label>
+                    <label><input type="checkbox" id="mb-vip" ${b.includes('vip')?'checked':''}> VIP</label>
+                    <label><input type="checkbox" id="mb-veteran" ${b.includes('veteran')?'checked':''}> 古参</label>
+                    <label><input type="checkbox" id="mb-official" ${b.includes('official')?'checked':''}> 公式</label>
+                </div>
+                <button class="btn btn-warning" onclick="app.saveManagedBadges('${targetUid}')">保存</button>`;
+                app.mdl("バッジ管理: " + t.name, html);
+            },
+            saveManagedBadges: async (targetUid) => {
+                const s = await getDoc(doc(db, "users", targetUid));
+                if(!s.exists()) return;
+                const b = s.data().badges || [];
+                const handBadges = ['developer','staff','bug','vip','veteran','official'];
+                const newB = b.filter(x => !handBadges.includes(x));
+                if(document.getElementById('mb-dev').checked) newB.push('developer');
+                if(document.getElementById('mb-staff').checked) newB.push('staff');
+                if(document.getElementById('mb-bug').checked) newB.push('bug');
+                if(document.getElementById('mb-vip').checked) newB.push('vip');
+                if(document.getElementById('mb-veteran').checked) newB.push('veteran');
+                if(document.getElementById('mb-official').checked) newB.push('official');
+                await updateDoc(doc(db, "users", targetUid), { badges: newB });
+                app.toast("更新しました"); app.closeModal(); app.showProfile(targetUid, s.data().name);
+            },
+
+            // WebRTC Call
+            initPeer: (uid) => {
+                if(peer) return;
+                try {
+                    peer = new Peer(uid);
+                    peer.on('call', (c) => {
+                        if(callStatus!=='idle'){c.close();return;}
+                        incomingCallObj=c; callStatus='incoming';
+                        const m=c.metadata||{}; document.getElementById('inc-call-name').innerText=m.name||c.peer; document.getElementById('inc-call-type').innerText=m.video?'ビデオ':'音声';
+                        app.go('scr-call'); document.getElementById('call-ui-incoming').classList.remove('hidden'); document.getElementById('call-ui-calling').classList.add('hidden'); document.getElementById('call-ui-connected').classList.add('hidden');
+                        c.on('close',()=>app.endCall()); c.on('error',()=>app.endCall());
+                    });
+                    peer.on('error',e=>{ if(e.type==='unavailable-id') app.toast("通話ID重複");});
+                } catch(e){}
+            },
+            startCall: async (videoEnabled) => {
+                if(callStatus !== 'idle') return app.toast("通話中です");
+                if(!currentRoomId) return;
+                const targetUid = currentRoomId.split('_').find(m => m !== currentUser.username);
+                if(!targetUid) return;
+                callStatus = 'calling'; app.go('scr-call');
+                document.getElementById('call-ui-calling').classList.remove('hidden'); document.getElementById('call-ui-incoming').classList.add('hidden'); document.getElementById('call-ui-connected').classList.add('hidden');
+                document.getElementById('call-name').innerText = document.getElementById('dm-talk-name').innerText;
+                document.getElementById('remote-video').srcObject = null; document.getElementById('local-video').srcObject = null;
+                try {
+                    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: videoEnabled });
+                    document.getElementById('local-video').srcObject = localStream; document.getElementById('local-video').muted = true;
+                    if(videoEnabled) document.getElementById('local-video').classList.add('active');
+                    if(!peer) app.initPeer(currentUser.username);
+                    const call = peer.call(targetUid, localStream, { metadata: { name: currentUser.name, video: videoEnabled } });
+                    currentCall = call;
+                    call.on('stream', (remote) => {
+                        remoteStream = remote; document.getElementById('remote-video').srcObject = remote; callStatus = 'connected';
+                        document.getElementById('call-ui-calling').classList.add('hidden'); document.getElementById('call-ui-connected').classList.remove('hidden');
+                        document.getElementById('remote-video').play().catch(e=>{});
+                    });
+                    call.on('close', () => app.endCall()); call.on('error', () => app.endCall());
+                } catch(e) { app.toast("エラー"); app.endCall(); }
+            },
+            answerCall: async () => {
+                if(!incomingCallObj) return;
+                try {
+                    const videoEnabled = incomingCallObj.metadata ? incomingCallObj.metadata.video : false;
+                    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: videoEnabled });
+                    document.getElementById('local-video').srcObject = localStream; document.getElementById('local-video').muted = true;
+                    if(videoEnabled) document.getElementById('local-video').classList.add('active');
+                    incomingCallObj.answer(localStream); currentCall = incomingCallObj; callStatus = 'connected';
+                    document.getElementById('call-ui-incoming').classList.add('hidden'); document.getElementById('call-ui-connected').classList.remove('hidden');
+                    currentCall.on('stream', (remote) => {
+                        remoteStream = remote; document.getElementById('remote-video').srcObject = remote;
+                        document.getElementById('remote-video').play().catch(e=>{});
+                    });
+                    currentCall.on('close', () => app.endCall()); currentCall.on('error', () => app.endCall());
+                } catch(e) { app.endCall(); }
+            },
+            endCall: () => {
+                if(currentCall) currentCall.close(); if(incomingCallObj) incomingCallObj.close();
+                if(localStream) localStream.getTracks().forEach(t => t.stop());
+                currentCall = null; incomingCallObj = null; localStream = null; remoteStream = null; callStatus = 'idle';
+                if(currentRoomId) app.go('scr-dm-talk'); else app.tab('home');
+            },
+            toggleMic: () => { if(localStream) { const t = localStream.getAudioTracks()[0]; if(t) { t.enabled = !t.enabled; document.getElementById('btn-mic-toggle').classList.toggle('active', t.enabled); } } },
+            toggleVideo: async () => { app.toast("ビデオ切替"); },
+
+            // Friends & DM (Inline Request)
+            searchUserForFriendInline: async () => {
+                const tid = document.getElementById('inline-friend-id').value.trim();
+                const resDiv = document.getElementById('inline-friend-result');
+                if(!tid) return;
+                if(tid === currentUser.username) return resDiv.innerHTML="<span class='text-warning text-xs'>自分自身です</span>";
+                resDiv.innerHTML = "";
+                try {
+                    const snap = await getDoc(doc(db, "users", tid));
+                    if(!snap.exists()) return resDiv.innerHTML="<span class='text-danger text-xs'>見つかりません</span>";
+                    const t = snap.data();
+                    resDiv.innerHTML = `<div class="p-3 border border-[var(--primary)] rounded mt-2">
+                        <div class="font-bold">${t.name} ${app.getBadgesHtml(t.badges)}</div><div class="text-xs text-sub mb-2">ID: ${tid}</div>
+                        <button class="btn btn-success btn-sm w-full" onclick="app.sendRequest('${tid}')">申請を送る</button></div>`;
+                } catch(e) { resDiv.innerHTML="エラー"; }
+            },
+            sendRequest: async (targetId) => {
+                if(targetId === currentUser.username) return;
+                try {
+                    const snap = await getDoc(doc(db, "users", targetId));
+                    if(!snap.exists()) return app.toast("見つかりません");
+                    const exist = await getDocs(query(collection(db, "requests"), where("from", "==", currentUser.username), where("to", "==", targetId)));
+                    if(!exist.empty) return app.toast("申請済みです");
+                    if(currentUser.friends && currentUser.friends.includes(targetId)) return app.toast("既に友達です");
+                    await addDoc(collection(db, "requests"), { from: currentUser.username, fromName: currentUser.name, to: targetId, toName: snap.data().name, status: 'pending', createdAt: serverTimestamp() });
+                    app.toast("申請を送りました");
+                } catch(e) {}
+            },
+            subRequests: (uid) => {
+                listeners.push(onSnapshot(query(collection(db, "requests"), where("to", "==", uid)), s => {
+                    const list = document.getElementById('requests-list'); list.innerHTML = "";
+                    s.forEach(d => {
+                        const r = d.data();
+                        list.innerHTML += `<div class="flex justify-between items-center mb-2 pb-2 border-b border-[var(--border)]"><div><div class="font-bold text-sm">${r.fromName}</div><div class="text-xs text-sub">ID: ${r.from}</div></div><div class="flex gap-2"><button class="btn btn-sm btn-primary" onclick="app.acceptRequest('${d.id}', '${r.from}')">承認</button><button class="btn btn-sm btn-danger" onclick="app.rejectRequest('${d.id}')">拒否</button></div></div>`;
+                    });
+                }));
+                listeners.push(onSnapshot(query(collection(db, "requests"), where("from", "==", uid)), s => {
+                    const list = document.getElementById('outgoing-list'); list.innerHTML = "";
+                    s.forEach(d => {
+                        list.innerHTML += `<div class="flex justify-between items-center mb-2"><div class="text-sm">${d.data().toName} へ送信中</div><button class="btn btn-sm btn-danger" onclick="app.rejectRequest('${d.id}')">取消</button></div>`;
+                    });
+                }));
+            },
+            acceptRequest: async (reqId, fromUid) => {
+                try {
+                    await runTransaction(db, async tr => {
+                        tr.update(doc(db, "users", currentUser.username), { friends: arrayUnion(fromUid) });
+                        tr.update(doc(db, "users", fromUid), { friends: arrayUnion(currentUser.username) });
+                        tr.delete(doc(db, "requests", reqId));
+                    });
+                    app.toast("友達になりました！");
+                } catch(e) {}
+            },
+            rejectRequest: async (reqId) => { await deleteDoc(doc(db, "requests", reqId)); },
+            subDMList: (uid) => {
+                listeners.push(onSnapshot(doc(db, "users", uid), async s => {
+                    if (!s.exists()) return;
+                    const friends = s.data().friends || [];
+                    const list = document.getElementById('dm-list-box'); list.innerHTML = "";
+                    for(const fid of friends) {
+                        try {
+                            const fSnap = await getDoc(doc(db, "users", fid));
+                            if(fSnap.exists()) {
+                                const fData = fSnap.data();
+                                list.innerHTML += `<div class="dm-item" onclick="app.startDM('${fid}', '${fData.name.replace(/'/g,"\\'")}')"><div class="dm-icon">${fData.name.charAt(0)}</div><div><div class="font-bold text-sm">${fData.name} ${app.getBadgesHtml(fData.badges)}</div><div class="text-xs text-sub">ID: ${fid}</div></div></div>`;
+                            }
+                        } catch(e) {}
+                    }
+                }));
+            },
+            startDM: async (targetUid, targetName) => {
+                app.closeModal(); 
+                const members = [currentUser.username, targetUid].sort(), roomId = members.join("_"), ref = doc(db, "rooms", roomId);
+                const snap = await getDoc(ref);
+                if(!snap.exists()) await setDoc(ref, { members: members, names: { [currentUser.username]: currentUser.name, [targetUid]: targetName }, updatedAt: serverTimestamp() });
+                currentRoomId = roomId; document.getElementById('dm-talk-name').innerText = targetName; document.getElementById('scr-dm-talk').classList.add('active');
+                if(dmUnsub) dmUnsub();
+                dmUnsub = onSnapshot(query(collection(db, "rooms", roomId, "messages"), limit(50)), s => {
+                    const b = document.getElementById('dm-talk-box'); b.innerHTML = "";
+                    let msgs = []; s.forEach(d => msgs.push({id:d.id, ...d.data()})); msgs.sort((a,b)=>(a.createdAt?.seconds||0) - (b.createdAt?.seconds||0));
+                    msgs.forEach(m => b.innerHTML += app.buildMsgHTML(m, true));
+                    setTimeout(()=>b.scrollTop = 99999, 100);
+                });
+            },
+            closeDM: () => { document.getElementById('scr-dm-talk').classList.remove('active'); if(dmUnsub) dmUnsub(); currentRoomId = null; app.cancelReply('dm'); },
+            sendDM: async (stampUrl = null) => {
+                const i = document.getElementById('dm-in'), t = i.value.trim(); const imgPayload = stampUrl || dmImg;
+                if((!t && !imgPayload) || !currentRoomId) return;
+                const payload = { text: t, img: imgPayload, username: currentUser.username, sender: currentUser.name, createdAt: serverTimestamp() };
+                if(replyTarget.dm) { payload.replyTo = replyTarget.dm; }
+                await addDoc(collection(db, "rooms", currentRoomId, "messages"), payload);
+                i.value = ""; app.clearDMImg(); app.cancelReply('dm');
+            },
+
+            // Chat All (with Anti-Abuse) - FIXED
+            subChat: () => {
+                if(listeners.chat) return;
+                listeners.chat = onSnapshot(query(collection(db,"chat"), limit(50)), s=>{
+                    const b = document.getElementById('chat-box'); b.innerHTML="";
+                    let msgs=[]; s.forEach(d=>{ const m=d.data(); m.id=d.id; appCache.chat[d.id]=m; msgs.push(m); });
+                    msgs.sort((a,b)=>(a.createdAt?.seconds||0) - (b.createdAt?.seconds||0));
+                    msgs.forEach(m => b.innerHTML += app.buildMsgHTML(m, false));
+                    if(!document.getElementById('tab-chat').classList.contains('hidden')) setTimeout(()=>b.scrollTop=99999, 100);
+                });
+            },
+            sendChat: async (stampUrl = null) => {
+                if(currentUser.isMuted) return app.toast('チャットが制限されています');
+                const now = Date.now();
+                if(now - app.lastChatTime < 1000) return app.toast('送信が早すぎます');
+                
+                const i=document.getElementById('chat-in'), t=i.value.trim(); const imgPayload = stampUrl || chatImg;
+                if(!t && !imgPayload) return;
+                
+                // Simple NG Word Check
+                const ngWords = ['死ね','殺す','馬鹿','アホ','カス','ゴミ','fuck','shit'];
+                if(ngWords.some(w => t.includes(w))) return app.toast('不適切な言葉が含まれています');
+
+                app.lastChatTime = now;
+                const payload = { text:t, img:imgPayload, username:currentUser.username, sender:currentUser.name, createdAt:serverTimestamp() };
+                if(replyTarget.all) { payload.replyTo = replyTarget.all; }
+                await addDoc(collection(db,"chat"), payload);
+                i.value=""; app.clearChatImg(); app.cancelReply('all');
+            },
+            buildMsgHTML: (m, isDm = false) => {
+                const isMe = m.username === currentUser.username;
+                const name = m.sender || "Unknown";
+                const type = isDm ? 'dm' : 'all';
+                let replyHtml = '';
+                if(m.replyTo) {
+                    const r = m.replyTo;
+                    const rText = r.text ? (r.text.length > 20 ? r.text.substring(0,20)+'...' : r.text) : (r.img ? '画像' : '');
+                    replyHtml = `<div class="reply-box-in-msg">${r.img ? `<img src="${r.img}">` : ''}<div class="reply-content"><div style="font-size:0.65rem; color:var(--primary)">${r.name}</div><div>${rText}</div></div></div>`;
+                }
+                // Use Cache-based openMsgAction call to prevent HTML breakage
+                const tapAction = `app.openMsgAction('${type}', '${m.id}', '${currentRoomId||''}')`;
+                let contentHtml = '';
+                if (m.text) contentHtml += `<div>${m.text}</div>`;
+                if (m.img) {
+                    const isStamp = !m.text && m.img;
+                    const imgClick = isStamp ? "" : `onclick="event.stopPropagation(); document.getElementById('img-full').src=this.src;document.getElementById('img-viewer').style.display='flex'"`;
+                    contentHtml += `<img src="${m.img}" class="${m.text?'chat-img':'stamp-img chat-img'}" ${imgClick}>`;
+                }
+                return `<div class="msg-row ${isMe?'mine':'other'}">
+                    ${!isMe?`<span class="msg-name" onclick="app.showProfile('${m.username}','${name.replace(/'/g,"\\'")}')">${name}</span>`:''}
+                    <div class="msg-bubble" style="${!m.text && m.img ? 'background:transparent; border:none; padding:0;' : ''}" onclick="${tapAction}">${replyHtml}${contentHtml}</div>
+                </div>`;
+            },
+            // ... (Other functions like DM, WebRTC, Stamp Maker remain standard)
+
+            // Pass Reset
+            checkSecurityQuestion: async () => {
+                const uid = document.getElementById('rst-uid').value.trim();
+                if(!uid) return app.toast("IDを入力してください");
+                try {
+                    const snap = await getDoc(doc(db, "users", uid));
+                    if(!snap.exists()) return app.toast("ユーザーが見つかりません");
+                    const d = snap.data();
+                    if(!d.secretQ) return app.toast("秘密の質問が未設定です");
+                    const qText = { pet: "初めて飼ったペットの名前は？", school: "小学校の名前は？", mother: "母親の旧姓は？", food: "好きな食べ物は？" }[d.secretQ] || "秘密の質問";
+                    document.getElementById('rst-q-text').innerText = qText;
+                    document.getElementById('rst-step-1').classList.add('hidden');
+                    document.getElementById('rst-step-2').classList.remove('hidden');
+                    app.resetTargetUid = uid;
+                } catch(e) { app.toast("エラー"); }
+            },
+            doResetPass: async () => {
+                const ans = document.getElementById('rst-ans').value.trim();
+                const newPass = document.getElementById('rst-new-pass').value.trim();
+                if(!ans || !newPass) return app.toast("全て入力してください");
+                try {
+                    const snap = await getDoc(doc(db, "users", app.resetTargetUid));
+                    if(snap.data().secretA === ans) {
+                        await updateDoc(doc(db, "users", app.resetTargetUid), { password: newPass });
+                        app.toast("パスワードを変更しました"); app.go('scr-login');
+                    } else app.toast("答えが違います");
+                } catch(e) {}
+            },
+            togglePass: (id, btn) => {
+                const el = document.getElementById(id);
+                if(el) { const isPass = el.type === 'password'; el.type = isPass ? 'text' : 'password'; 
+                btn.innerHTML = isPass ? '<svg class="icon" viewBox="0 0 24 24"><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/></svg>' : '<svg class="icon" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>'; }
+            },
+
+            // Profile & Manage Badges
+            showProfile: async (uid, name) => {
+                if(uid === currentUser.username) return;
+                try {
+                    const snap = await getDoc(doc(db, "users", uid));
+                    if(!snap.exists()) return app.toast("ユーザーが見つかりません");
+                    const target = snap.data();
+                    const isFriend = currentUser.friends && currentUser.friends.includes(uid);
+                    let btnHtml = isFriend ? `<button class="btn btn-success mt-2" onclick="app.startDM('${uid}', '${name.replace(/'/g,"\\'")}')">チャットする</button>` : `<button class="btn btn-primary mt-2" onclick="app.sendRequest('${uid}')">友達申請する</button>`;
+                    
+                    const myB = currentUser.badges || [];
+                    if(app.checkAdmSess() || myB.includes('developer') || myB.includes('staff')) {
+                        btnHtml += `<button class="btn btn-warning mt-2" onclick="app.manageBadges('${uid}')">バッジを管理する</button>`;
+                    }
+                    app.mdl("プロフィール", `<div style="text-align:center"><div style="font-size:3rem; margin-bottom:10px;"><svg class="icon icon-xl" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div><h3>${target.name}</h3><div class="mb-2">${app.getBadgesHtml(target.badges)}</div><p class="text-sub text-xs mb-4">ID: ${uid}</p>${btnHtml}</div>`);
+                } catch(e) {}
+            },
+            manageBadges: async (targetUid) => {
+                const s = await getDoc(doc(db, "users", targetUid));
+                if(!s.exists()) return;
+                const t = s.data(); const b = t.badges || [];
+                let html = `<div class="flex flex-col gap-3 mb-4">
+                    <label><input type="checkbox" id="mb-dev" ${b.includes('developer')?'checked':''}> 開発者</label>
+                    <label><input type="checkbox" id="mb-staff" ${b.includes('staff')?'checked':''}> 関係者</label>
+                    <label><input type="checkbox" id="mb-bug" ${b.includes('bug')?'checked':''}> バグ発見者</label>
+                    <label><input type="checkbox" id="mb-vip" ${b.includes('vip')?'checked':''}> VIP</label>
+                    <label><input type="checkbox" id="mb-veteran" ${b.includes('veteran')?'checked':''}> 古参</label>
+                    <label><input type="checkbox" id="mb-official" ${b.includes('official')?'checked':''}> 公式</label>
+                </div>
+                <button class="btn btn-warning" onclick="app.saveManagedBadges('${targetUid}')">保存</button>`;
+                app.mdl("バッジ管理: " + t.name, html);
+            },
+            saveManagedBadges: async (targetUid) => {
+                const s = await getDoc(doc(db, "users", targetUid));
+                if(!s.exists()) return;
+                const b = s.data().badges || [];
+                const handBadges = ['developer','staff','bug','vip','veteran','official'];
+                const newB = b.filter(x => !handBadges.includes(x));
+                if(document.getElementById('mb-dev').checked) newB.push('developer');
+                if(document.getElementById('mb-staff').checked) newB.push('staff');
+                if(document.getElementById('mb-bug').checked) newB.push('bug');
+                if(document.getElementById('mb-vip').checked) newB.push('vip');
+                if(document.getElementById('mb-veteran').checked) newB.push('veteran');
+                if(document.getElementById('mb-official').checked) newB.push('official');
+                await updateDoc(doc(db, "users", targetUid), { badges: newB });
+                app.toast("更新しました"); app.closeModal(); app.showProfile(targetUid, s.data().name);
+            },
+
+            // WebRTC Call
+            initPeer: (uid) => {
+                if(peer) return;
+                try {
+                    peer = new Peer(uid);
+                    peer.on('call', (c) => {
+                        if(callStatus!=='idle'){c.close();return;}
+                        incomingCallObj=c; callStatus='incoming';
+                        const m=c.metadata||{}; document.getElementById('inc-call-name').innerText=m.name||c.peer; document.getElementById('inc-call-type').innerText=m.video?'ビデオ':'音声';
+                        app.go('scr-call'); document.getElementById('call-ui-incoming').classList.remove('hidden'); document.getElementById('call-ui-calling').classList.add('hidden'); document.getElementById('call-ui-connected').classList.add('hidden');
+                        c.on('close',()=>app.endCall()); c.on('error',()=>app.endCall());
+                    });
+                    peer.on('error',e=>{ if(e.type==='unavailable-id') app.toast("通話ID重複");});
+                } catch(e){}
+            },
+            startCall: async (videoEnabled) => {
+                if(callStatus !== 'idle') return app.toast("通話中です");
+                if(!currentRoomId) return;
+                const targetUid = currentRoomId.split('_').find(m => m !== currentUser.username);
+                if(!targetUid) return;
+                callStatus = 'calling'; app.go('scr-call');
+                document.getElementById('call-ui-calling').classList.remove('hidden'); document.getElementById('call-ui-incoming').classList.add('hidden'); document.getElementById('call-ui-connected').classList.add('hidden');
+                document.getElementById('call-name').innerText = document.getElementById('dm-talk-name').innerText;
+                document.getElementById('remote-video').srcObject = null; document.getElementById('local-video').srcObject = null;
+                try {
+                    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: videoEnabled });
+                    document.getElementById('local-video').srcObject = localStream; document.getElementById('local-video').muted = true;
+                    if(videoEnabled) document.getElementById('local-video').classList.add('active');
+                    if(!peer) app.initPeer(currentUser.username);
+                    const call = peer.call(targetUid, localStream, { metadata: { name: currentUser.name, video: videoEnabled } });
+                    currentCall = call;
+                    call.on('stream', (remote) => {
+                        remoteStream = remote; document.getElementById('remote-video').srcObject = remote; callStatus = 'connected';
+                        document.getElementById('call-ui-calling').classList.add('hidden'); document.getElementById('call-ui-connected').classList.remove('hidden');
+                        document.getElementById('remote-video').play().catch(e=>{});
+                    });
+                    call.on('close', () => app.endCall()); call.on('error', () => app.endCall());
+                } catch(e) { app.toast("エラー"); app.endCall(); }
+            },
+            answerCall: async () => {
+                if(!incomingCallObj) return;
+                try {
+                    const videoEnabled = incomingCallObj.metadata ? incomingCallObj.metadata.video : false;
+                    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: videoEnabled });
+                    document.getElementById('local-video').srcObject = localStream; document.getElementById('local-video').muted = true;
+                    if(videoEnabled) document.getElementById('local-video').classList.add('active');
+                    incomingCallObj.answer(localStream); currentCall = incomingCallObj; callStatus = 'connected';
+                    document.getElementById('call-ui-incoming').classList.add('hidden'); document.getElementById('call-ui-connected').classList.remove('hidden');
+                    currentCall.on('stream', (remote) => {
+                        remoteStream = remote; document.getElementById('remote-video').srcObject = remote;
+                        document.getElementById('remote-video').play().catch(e=>{});
+                    });
+                    currentCall.on('close', () => app.endCall()); currentCall.on('error', () => app.endCall());
+                } catch(e) { app.endCall(); }
+            },
+            endCall: () => {
+                if(currentCall) currentCall.close(); if(incomingCallObj) incomingCallObj.close();
+                if(localStream) localStream.getTracks().forEach(t => t.stop());
+                currentCall = null; incomingCallObj = null; localStream = null; remoteStream = null; callStatus = 'idle';
+                if(currentRoomId) app.go('scr-dm-talk'); else app.tab('home');
+            },
+            toggleMic: () => { if(localStream) { const t = localStream.getAudioTracks()[0]; if(t) { t.enabled = !t.enabled; document.getElementById('btn-mic-toggle').classList.toggle('active', t.enabled); } } },
+            toggleVideo: async () => { app.toast("ビデオ切替"); },
+
+            // Friends & DM (Inline Request)
+            searchUserForFriendInline: async () => {
+                const tid = document.getElementById('inline-friend-id').value.trim();
+                const resDiv = document.getElementById('inline-friend-result');
+                if(!tid) return;
+                if(tid === currentUser.username) return resDiv.innerHTML="<span class='text-warning text-xs'>自分自身です</span>";
+                resDiv.innerHTML = "";
+                try {
+                    const snap = await getDoc(doc(db, "users", tid));
+                    if(!snap.exists()) return resDiv.innerHTML="<span class='text-danger text-xs'>見つかりません</span>";
+                    const t = snap.data();
+                    resDiv.innerHTML = `<div class="p-3 border border-[var(--primary)] rounded mt-2">
+                        <div class="font-bold">${t.name} ${app.getBadgesHtml(t.badges)}</div><div class="text-xs text-sub mb-2">ID: ${tid}</div>
+                        <button class="btn btn-success btn-sm w-full" onclick="app.sendRequest('${tid}')">申請を送る</button></div>`;
+                } catch(e) { resDiv.innerHTML="エラー"; }
+            },
+            sendRequest: async (targetId) => {
+                if(targetId === currentUser.username) return;
+                try {
+                    const snap = await getDoc(doc(db, "users", targetId));
+                    if(!snap.exists()) return app.toast("見つかりません");
+                    const exist = await getDocs(query(collection(db, "requests"), where("from", "==", currentUser.username), where("to", "==", targetId)));
+                    if(!exist.empty) return app.toast("申請済みです");
+                    if(currentUser.friends && currentUser.friends.includes(targetId)) return app.toast("既に友達です");
+                    await addDoc(collection(db, "requests"), { from: currentUser.username, fromName: currentUser.name, to: targetId, toName: snap.data().name, status: 'pending', createdAt: serverTimestamp() });
+                    app.toast("申請を送りました");
+                } catch(e) {}
+            },
+            subRequests: (uid) => {
+                listeners.push(onSnapshot(query(collection(db, "requests"), where("to", "==", uid)), s => {
+                    const list = document.getElementById('requests-list'); list.innerHTML = "";
+                    s.forEach(d => {
+                        const r = d.data();
+                        list.innerHTML += `<div class="flex justify-between items-center mb-2 pb-2 border-b border-[var(--border)]"><div><div class="font-bold text-sm">${r.fromName}</div><div class="text-xs text-sub">ID: ${r.from}</div></div><div class="flex gap-2"><button class="btn btn-sm btn-primary" onclick="app.acceptRequest('${d.id}', '${r.from}')">承認</button><button class="btn btn-sm btn-danger" onclick="app.rejectRequest('${d.id}')">拒否</button></div></div>`;
+                    });
+                }));
+                listeners.push(onSnapshot(query(collection(db, "requests"), where("from", "==", uid)), s => {
+                    const list = document.getElementById('outgoing-list'); list.innerHTML = "";
+                    s.forEach(d => {
+                        list.innerHTML += `<div class="flex justify-between items-center mb-2"><div class="text-sm">${d.data().toName} へ送信中</div><button class="btn btn-sm btn-danger" onclick="app.rejectRequest('${d.id}')">取消</button></div>`;
+                    });
+                }));
+            },
+            acceptRequest: async (reqId, fromUid) => {
+                try {
+                    await runTransaction(db, async tr => {
+                        tr.update(doc(db, "users", currentUser.username), { friends: arrayUnion(fromUid) });
+                        tr.update(doc(db, "users", fromUid), { friends: arrayUnion(currentUser.username) });
+                        tr.delete(doc(db, "requests", reqId));
+                    });
+                    app.toast("友達になりました！");
+                } catch(e) {}
+            },
+            rejectRequest: async (reqId) => { await deleteDoc(doc(db, "requests", reqId)); },
+            subDMList: (uid) => {
+                listeners.push(onSnapshot(doc(db, "users", uid), async s => {
+                    if (!s.exists()) return;
+                    const friends = s.data().friends || [];
+                    const list = document.getElementById('dm-list-box'); list.innerHTML = "";
+                    for(const fid of friends) {
+                        try {
+                            const fSnap = await getDoc(doc(db, "users", fid));
+                            if(fSnap.exists()) {
+                                const fData = fSnap.data();
+                                list.innerHTML += `<div class="dm-item" onclick="app.startDM('${fid}', '${fData.name.replace(/'/g,"\\'")}')"><div class="dm-icon">${fData.name.charAt(0)}</div><div><div class="font-bold text-sm">${fData.name} ${app.getBadgesHtml(fData.badges)}</div><div class="text-xs text-sub">ID: ${fid}</div></div></div>`;
+                            }
+                        } catch(e) {}
+                    }
+                }));
+            },
+            startDM: async (targetUid, targetName) => {
+                app.closeModal(); 
+                const members = [currentUser.username, targetUid].sort(), roomId = members.join("_"), ref = doc(db, "rooms", roomId);
+                const snap = await getDoc(ref);
+                if(!snap.exists()) await setDoc(ref, { members: members, names: { [currentUser.username]: currentUser.name, [targetUid]: targetName }, updatedAt: serverTimestamp() });
+                currentRoomId = roomId; document.getElementById('dm-talk-name').innerText = targetName; document.getElementById('scr-dm-talk').classList.add('active');
+                if(dmUnsub) dmUnsub();
+                dmUnsub = onSnapshot(query(collection(db, "rooms", roomId, "messages"), limit(50)), s => {
+                    const b = document.getElementById('dm-talk-box'); b.innerHTML = "";
+                    let msgs = []; s.forEach(d => msgs.push({id:d.id, ...d.data()})); msgs.sort((a,b)=>(a.createdAt?.seconds||0) - (b.createdAt?.seconds||0));
+                    msgs.forEach(m => b.innerHTML += app.buildMsgHTML(m, true));
+                    setTimeout(()=>b.scrollTop = 99999, 100);
+                });
+            },
+            closeDM: () => { document.getElementById('scr-dm-talk').classList.remove('active'); if(dmUnsub) dmUnsub(); currentRoomId = null; app.cancelReply('dm'); },
+            sendDM: async (stampUrl = null) => {
+                const i = document.getElementById('dm-in'), t = i.value.trim(); const imgPayload = stampUrl || dmImg;
+                if((!t && !imgPayload) || !currentRoomId) return;
+                const payload = { text: t, img: imgPayload, username: currentUser.username, sender: currentUser.name, createdAt: serverTimestamp() };
+                if(replyTarget.dm) { payload.replyTo = replyTarget.dm; }
+                await addDoc(collection(db, "rooms", currentRoomId, "messages"), payload);
+                i.value = ""; app.clearDMImg(); app.cancelReply('dm');
+            },
+
+            // Chat All (with Anti-Abuse) - FIXED
+            subChat: () => {
+                if(listeners.chat) return;
+                listeners.chat = onSnapshot(query(collection(db,"chat"), limit(50)), s=>{
+                    const b = document.getElementById('chat-box'); b.innerHTML="";
+                    let msgs=[]; s.forEach(d=>{ const m=d.data(); m.id=d.id; appCache.chat[d.id]=m; msgs.push(m); });
+                    msgs.sort((a,b)=>(a.createdAt?.seconds||0) - (b.createdAt?.seconds||0));
+                    msgs.forEach(m => b.innerHTML += app.buildMsgHTML(m, false));
+                    if(!document.getElementById('tab-chat').classList.contains('hidden')) setTimeout(()=>b.scrollTop=99999, 100);
+                });
+            },
+            sendChat: async (stampUrl = null) => {
+                if(currentUser.isMuted) return app.toast('チャットが制限されています');
+                const now = Date.now();
+                if(now - app.lastChatTime < 1000) return app.toast('送信が早すぎます');
+                
+                const i=document.getElementById('chat-in'), t=i.value.trim(); const imgPayload = stampUrl || chatImg;
+                if(!t && !imgPayload) return;
+                
+                // Simple NG Word Check
+                const ngWords = ['死ね','殺す','馬鹿','アホ','カス','ゴミ','fuck','shit'];
+                if(ngWords.some(w => t.includes(w))) return app.toast('不適切な言葉が含まれています');
+
+                app.lastChatTime = now;
+                const payload = { text:t, img:imgPayload, username:currentUser.username, sender:currentUser.name, createdAt:serverTimestamp() };
+                if(replyTarget.all) { payload.replyTo = replyTarget.all; }
+                await addDoc(collection(db,"chat"), payload);
+                i.value=""; app.clearChatImg(); app.cancelReply('all');
+            },
+            buildMsgHTML: (m, isDm = false) => {
+                const isMe = m.username === currentUser.username;
+                const name = m.sender || "Unknown";
+                const type = isDm ? 'dm' : 'all';
+                let replyHtml = '';
+                if(m.replyTo) {
+                    const r = m.replyTo;
+                    const rText = r.text ? (r.text.length > 20 ? r.text.substring(0,20)+'...' : r.text) : (r.img ? '画像' : '');
+                    replyHtml = `<div class="reply-box-in-msg">${r.img ? `<img src="${r.img}">` : ''}<div class="reply-content"><div style="font-size:0.65rem; color:var(--primary)">${r.name}</div><div>${rText}</div></div></div>`;
+                }
+                // Use Cache-based openMsgAction call to prevent HTML breakage
+                const tapAction = `app.openMsgAction('${type}', '${m.id}', '${currentRoomId||''}')`;
+                let contentHtml = '';
+                if (m.text) contentHtml += `<div>${m.text}</div>`;
+                if (m.img) {
+                    const isStamp = !m.text && m.img;
+                    const imgClick = isStamp ? "" : `onclick="event.stopPropagation(); document.getElementById('img-full').src=this.src;document.getElementById('img-viewer').style.display='flex'"`;
+                    contentHtml += `<img src="${m.img}" class="${m.text?'chat-img':'stamp-img chat-img'}" ${imgClick}>`;
+                }
+                return `<div class="msg-row ${isMe?'mine':'other'}">
+                    ${!isMe?`<span class="msg-name" onclick="app.showProfile('${m.username}','${name.replace(/'/g,"\\'")}')">${name}</span>`:''}
+                    <div class="msg-bubble" style="${!m.text && m.img ? 'background:transparent; border:none; padding:0;' : ''}" onclick="${tapAction}">${replyHtml}${contentHtml}</div>
+                </div>`;
+            },
+            // ... (Other functions like DM, WebRTC, Stamp Maker remain standard)
+
+            // Pass Reset
+            checkSecurityQuestion: async () => {
+                const uid = document.getElementById('rst-uid').value.trim();
+                if(!uid) return app.toast("IDを入力してください");
+                try {
+                    const snap = await getDoc(doc(db, "users", uid));
+                    if(!snap.exists()) return app.toast("ユーザーが見つかりません");
+                    const d = snap.data();
+                    if(!d.secretQ) return app.toast("秘密の質問が未設定です");
+                    const qText = { pet: "初めて飼ったペットの名前は？", school: "小学校の名前は？", mother: "母親の旧姓は？", food: "好きな食べ物は？" }[d.secretQ] || "秘密の質問";
+                    document.getElementById('rst-q-text').innerText = qText;
+                    document.getElementById('rst-step-1').classList.add('hidden');
+                    document.getElementById('rst-step-2').classList.remove('hidden');
+                    app.resetTargetUid = uid;
+                } catch(e) { app.toast("エラー"); }
+            },
+            doResetPass: async () => {
+                const ans = document.getElementById('rst-ans').value.trim();
+                const newPass = document.getElementById('rst-new-pass').value.trim();
+                if(!ans || !newPass) return app.toast("全て入力してください");
+                try {
+                    const snap = await getDoc(doc(db, "users", app.resetTargetUid));
+                    if(snap.data().secretA === ans) {
+                        await updateDoc(doc(db, "users", app.resetTargetUid), { password: newPass });
+                        app.toast("パスワードを変更しました"); app.go('scr-login');
+                    } else app.toast("答えが違います");
+                } catch(e) {}
+            },
+            togglePass: (id, btn) => {
+                const el = document.getElementById(id);
+                if(el) { const isPass = el.type === 'password'; el.type = isPass ? 'text' : 'password'; 
+                btn.innerHTML = isPass ? '<svg class="icon" viewBox="0 0 24 24"><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/></svg>' : '<svg class="icon" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>'; }
+            },
+            handleFileSelect: (i, type) => {
+                if(i.files[0]){
+                    const r = new FileReader();
+                    r.onload = e => {
+                        const img = new Image(); img.onload = () => {
+                            const c = document.createElement('canvas'), MAX=800; let w=img.width, h=img.height;
+                            if(w>MAX){h*=MAX/w;w=MAX} c.width=w; c.height=h; c.getContext('2d').drawImage(img,0,0,w,h);
+                            const d = c.toDataURL('image/jpeg',0.7);
+                            if(type==='chat') { chatImg=d; document.getElementById('chat-preview').style.display='flex'; document.getElementById('chat-preview-img').src=d; }
+                            else if(type==='dm') { dmImg=d; document.getElementById('dm-preview').style.display='flex'; document.getElementById('dm-preview-img').src=d; }
+                            else { newsImg=d; document.getElementById('adm-news-file-status').innerText="選択済"; }
+                        }; img.src = e.target.result;
+                    }; r.readAsDataURL(i.files[0]);
+                }
+            },
+            clearChatImg: () => { chatImg = null; document.getElementById('chat-file').value = ""; document.getElementById('chat-preview').style.display = 'none'; },
+            clearDMImg: () => { dmImg = null; document.getElementById('dm-file').value = ""; document.getElementById('dm-preview').style.display = 'none'; },
+            switchChatMode: (mode) => {
+                document.getElementById('area-all-chat').style.display = mode==='all'?'flex':'none';
+                document.getElementById('area-dm-list').style.display = mode==='dm'?'flex':'none';
+                document.getElementById('sw-all').classList.toggle('active', mode==='all');
+                document.getElementById('sw-dm').classList.toggle('active', mode==='dm');
+            },
+
+            // Stamp Maker & Paid Stamps
+            openStampModal: () => { document.getElementById('stamp-modal').style.display = 'flex'; app.switchStampTab('public'); },
+            closeStampModal: () => { document.getElementById('stamp-modal').style.display = 'none'; },
+            switchStampTab: (tab) => {
+                currentStampTab = tab;
+                document.querySelectorAll('.stamp-tab').forEach(el => el.classList.remove('active'));
+                document.getElementById(`tab-stamp-${tab}`).classList.add('active');
+                app.loadStamps();
+            },
+            loadStamps: async (packId = null) => {
+                const list = document.getElementById('stamp-list'); list.innerHTML = "";
+                if (packId) {
+                    const snap = await getDocs(query(collection(db, "stamps"), where("packId", "==", packId), where("status", "==", "approved")));
+                    list.innerHTML = "<div class='col-span-3 btn btn-ghost btn-sm mb-2' onclick='app.loadStamps()'>← 戻る</div>";
+                    const rows=[]; snap.forEach(d=>rows.push(d.data())); rows.sort((a,b)=>(a.order||0)-(b.order||0));
+                    rows.forEach(d => {
+                        const item = document.createElement('div'); item.className = 'stamp-item'; item.innerHTML = `<img src="${d.url}">`;
+                        item.onclick = () => { if(currentRoomId) app.sendDM(d.url); else app.sendChat(d.url); app.closeStampModal(); };
+                        list.appendChild(item);
+                    });
+                } else {
+                    let q = currentStampTab === 'public' ? query(collection(db, "stampPacks"), where("isPublic", "==", true), where("status", "==", "approved"), limit(50)) : query(collection(db, "stampPacks"), where("ownerUid", "==", currentUser.username), limit(50));
+                    const snap = await getDocs(q);
+                    const packs=[]; snap.forEach(d=>packs.push({id:d.id, ...d.data()})); packs.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+                    packs.forEach(p => {
+                        const item = document.createElement('div'); item.className = 'stamp-item'; item.style.border = '1px solid var(--border)';
+                        let badge = p.ownerUid===currentUser.username ? (p.status==='approved'?"":`<div style='position:absolute;bottom:0;width:100%;background:rgba(0,0,0,0.7);font-size:0.6rem;text-align:center'>申請中</div>`) : '';
+                        let priceBadge = '';
+                        const myPurchases = currentUser.purchasedPacks || [];
+                        const needBuy = p.isPaid && p.ownerUid !== currentUser.username && !myPurchases.includes(p.id);
+                        if(needBuy) priceBadge = `<div style="position:absolute; top:2px; right:2px; background:var(--warning); color:#000; font-size:0.6rem; padding:2px 4px; border-radius:4px; font-weight:bold;">🪙${p.price}</div>`;
+
+                        item.innerHTML = `<img src="${p.mainUrl}" style="padding:0; object-fit:cover; border-radius:8px;">${badge}${priceBadge}`;
+                        item.onclick = () => {
+                            if(p.status !== 'approved' && p.ownerUid !== currentUser.username) return;
+                            if(needBuy) app.promptPurchasePack(p); else app.loadStamps(p.id);
+                        };
+                        list.appendChild(item);
+                    });
+                }
+            },
+            promptPurchasePack: async (p) => {
+                if(!confirm(`「${p.title}」を ${p.price} コインで購入しますか？\n(作成者に70%が還元されます)`)) return;
+                if((currentUser.coins||0) < p.price) return app.toast("コインが足りません");
+                try {
+                    await runTransaction(db, async tr => {
+                        const meRef = doc(db, "users", currentUser.username);
+                        const sellerRef = doc(db, "users", p.ownerUid);
+                        const sysRef = doc(db, "system", "stats");
+                        
+                        const meSnap = await tr.get(meRef);
+                        if((meSnap.data().coins||0) < p.price) throw "コイン不足";
+                        
+                        const devFee = Math.floor(p.price * 0.3);
+                        const sellerProfit = p.price - devFee;
+                        
+                        tr.update(meRef, { coins: increment(-p.price), purchasedPacks: arrayUnion(p.id) });
+                        tr.update(sellerRef, { coins: increment(sellerProfit) });
+                        tr.set(sysRef, { devCoins: increment(devFee) }, {merge:true});
+                    });
+                    app.toast("購入しました！"); app.loadStamps();
+                } catch(e) { app.toast("エラー: " + e); }
+            },
+
+            openStampMaker: () => { app.go('scr-stamp-maker'); app.pkLoadDraft(); app.pkRender(); app.loadMyStampsTop(); setTimeout(()=>app.mkInit(), 50); },
+            closeStampMaker: () => { app.pkCloseEditor(); app.go('scr-main'); },
+            pkSaveDraft: () => {
+                app.pkDraft.title = document.getElementById('pk-title').value;
+                app.pkDraft.isPublic = document.getElementById('pk-public').value === 'true';
+                app.pkDraft.isPaid = document.getElementById('pk-price-type').value === 'paid';
+                app.pkDraft.price = parseInt(document.getElementById('pk-price-val').value||'0');
+                localStorage.setItem(PK_DRAFT_KEY, JSON.stringify(app.pkDraft)); app.toast('保存しました');
+            },
+            pkLoadDraft: () => {
+                try { const r = localStorage.getItem(PK_DRAFT_KEY); if(r) { const d=JSON.parse(r); app.pkDraft={id:d.id||null, title:d.title||'', isPublic:!!d.isPublic, isPaid:!!d.isPaid, price:d.price||0, mainDataUrl:d.mainDataUrl||'', stamps:Array.isArray(d.stamps)?d.stamps:[]}; } } catch(e) {}
+                document.getElementById('pk-title').value = app.pkDraft.title;
+                document.getElementById('pk-public').value = app.pkDraft.isPublic?'true':'false';
+                document.getElementById('pk-price-type').value = app.pkDraft.isPaid?'paid':'free';
+                document.getElementById('pk-price-val').value = app.pkDraft.price || '';
+                const mp = document.getElementById('pk-main-preview');
+                if(app.pkDraft.mainDataUrl){ mp.src=app.pkDraft.mainDataUrl; mp.style.display='block'; } else mp.style.display='none';
+                document.getElementById('pk-price-type').dispatchEvent(new Event('change'));
+            },
+            pkResetDraft: () => { if(confirm('リセットしますか？')){ localStorage.removeItem(PK_DRAFT_KEY); app.pkDraft={id:null, title:'',isPublic:true,isPaid:false,price:0,mainDataUrl:'',stamps:[]}; app.pkLoadDraft(); app.pkRender(); app.pkGoToStep1(); } },
+            pkGoToStep1: () => { document.getElementById('pk-step-basic').style.display='block'; document.getElementById('pk-step-stamps').style.display='none'; },
+            pkGoToStep2: () => { app.pkRender(); document.getElementById('pk-step-basic').style.display='none'; document.getElementById('pk-step-stamps').style.display='block'; },
+            pkAddEmptySlot: (c=1) => { const add=Math.min(c, 40-app.pkDraft.stamps.length); for(let i=0;i<add;i++) app.pkDraft.stamps.push({dataUrl:''}); app.pkRender(); },
+            pkRender: () => {
+                app.pkDraft.title = document.getElementById('pk-title').value.trim();
+                const grid = document.getElementById('pk-grid'); if(!grid) return;
+                while(app.pkDraft.stamps.length < 8) app.pkDraft.stamps.push({dataUrl:''});
+                grid.innerHTML = '';
+                app.pkDraft.stamps.forEach((s, i) => {
+                    grid.innerHTML += `<div class="pk-slot">
+                        <div class="pk-thumb">${s.dataUrl?`<img src="${s.dataUrl}">`:`<div class='text-xs text-sub'>未設定</div>`}</div>
+                        <div class="mt-2 flex gap-2"><button class="btn btn-ghost btn-sm" onclick="app.pkUploadToSlot(${i})">${s.dataUrl?'変更':'追加'}</button><button class="btn btn-primary btn-sm" onclick="app.pkOpenEditor('slot', ${i})">編集</button><button class="btn btn-danger btn-sm" onclick="app.pkRemoveSlot(${i})">✕</button></div>
+                    </div>`;
+                });
+                app.pkValidate();
+            },
+            pkRemoveSlot: (i) => { app.pkDraft.stamps.splice(i,1); app.pkRender(); },
+            pkHandleMainFile: async (i) => { if(i.files[0]){ const u=await app.pkNormalizeImg(i.files[0]); if(u){ app.pkDraft.mainDataUrl=u; document.getElementById('pk-main-preview').src=u; document.getElementById('pk-main-preview').style.display='block'; app.pkRender(); } i.value=''; } },
+            pkHandleBulkFiles: async (i) => { if(i.files.length){ for(const f of i.files){ const u=await app.pkNormalizeImg(f); if(u) app.pkDraft.stamps.push({dataUrl:u}); } i.value=''; app.pkRender(); } },
+            pkUploadToSlot: (i) => { const p=document.createElement('input'); p.type='file'; p.accept='image/*'; p.onchange=async()=>{ if(p.files[0]){ const u=await app.pkNormalizeImg(p.files[0]); if(u) app.pkDraft.stamps[i].dataUrl=u; app.pkRender(); } }; p.click(); },
+            pkNormalizeImg: async (file) => {
+                if(file.size > 2*1024*1024) { app.toast('大きすぎます(2MBまで)'); return null; }
+                const url = URL.createObjectURL(file); const img = new Image();
+                await new Promise(r => { img.onload=r; img.src=url; });
+                const c = document.createElement('canvas'); c.width=150; c.height=150; const ctx=c.getContext('2d');
+                const scale = Math.min(150/img.width, 150/img.height); const w=img.width*scale, h=img.height*scale;
+                ctx.drawImage(img, (150-w)/2, (150-h)/2, w, h);
+                return c.toDataURL('image/webp', 0.9);
+            },
+            pkValidate: () => {
+                const title = document.getElementById('pk-title')?.value.trim();
+                const isPaid = document.getElementById('pk-price-type')?.value === 'paid';
+                const price = parseInt(document.getElementById('pk-price-val')?.value || '0');
+                const hasMain = !!app.pkDraft.mainDataUrl;
+                let okTitle = title.length>=1 && title.length<=24;
+                let okPrice = isPaid ? (price >= 100 && price <= 10000) : true;
+                
+                const bNext = document.getElementById('pk-btn-next');
+                if(bNext) {
+                    if(okTitle && okPrice && hasMain) { bNext.disabled=false; bNext.className='btn btn-primary'; }
+                    else { bNext.disabled=true; bNext.className='btn btn-ghost'; }
+                }
+                const vBox = document.getElementById('pk-validate'); if(!vBox) return;
+                const stamps = app.pkDraft.stamps.filter(s=>!!s.dataUrl);
+                if(stamps.length < 8) { vBox.innerText = `スタンプ不足 (${stamps.length}/8)`; vBox.className='mk-pill mk-warn'; }
+                else { vBox.innerText = 'OK (申請可能)'; vBox.className='mk-pill'; }
+            },
+            pkSubmitPack: async () => {
+                const t=app.pkDraft.title, pub=document.getElementById('pk-public').value==='true';
+                const isPaid = document.getElementById('pk-price-type').value === 'paid', price = parseInt(document.getElementById('pk-price-val').value||'0');
+                const sts = app.pkDraft.stamps.filter(s=>!!s.dataUrl);
+                if(sts.length<8) return app.toast('8個以上必要です');
+                if(isPaid && (price<100 || price>10000)) return app.toast('価格が不正です');
+                if(!confirm(app.pkDraft.id ? `このパックを更新して再申請しますか？\n(ステータスは審査待ちに戻ります)` : `申請しますか？`)) return;
+                try {
+                    const packId = app.pkDraft.id || doc(collection(db,'stampPacks')).id;
+                    const packRef = doc(db, 'stampPacks', packId);
+                    
+                    if(app.pkDraft.id) {
+                        const oldStamps = await getDocs(query(collection(db, 'stamps'), where('packId', '==', packId)));
+                        const batch = writeBatch(db);
+                        oldStamps.forEach(d => batch.delete(d.ref));
+                        await batch.commit();
+                    }
+
+                    await setDoc(packRef, { title:t, mainUrl:app.pkDraft.mainDataUrl, ownerUid:currentUser.username, isPublic:pub, isPaid, price, status:'pending', createdAt:serverTimestamp(), count:sts.length });
+                    const batch = writeBatch(db);
+                    for(let i=0;i<sts.length;i++) {
+                        const sRef = doc(collection(db,'stamps'));
+                        batch.set(sRef, { url:sts[i].dataUrl, ownerUid:currentUser.username, status:'pending', packId:packId, order:i });
+                    }
+                    await batch.commit();
+
+                    app.toast(app.pkDraft.id ? '更新して再申請しました' : '申請しました'); 
+                    localStorage.removeItem(PK_DRAFT_KEY); app.pkGoToStep1(); app.closeStampMaker();
+                } catch(e) { console.error(e); app.toast('エラー'); }
+            },
+            
+            loadMyStampsTop: async () => {
+                const list = document.getElementById('stamps-top-list'); if(!list) return; list.innerHTML = "";
+                const snap = await getDocs(query(collection(db, 'stampPacks'), where('ownerUid','==', currentUser.username), limit(20)));
+                let html=''; const rows=[]; snap.forEach(d=>rows.push({id:d.id, ...d.data()})); rows.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+                for(const p of rows) {
+                    const st = p.status || 'pending';
+                    html += `<div class="flex items-center gap-3 border-b border-[var(--border)] p-2">
+                        <img src="${p.mainUrl}" style="width:44px;height:44px;border-radius:8px">
+                        <div class="flex-1"><div class="font-bold">${p.title}</div><div class="text-xs text-sub">${p.count}個 / ${p.isPaid?`有料(${p.price})`:'無料'} / ${st==='approved'?'承認':(st==='rejected'?'却下':'申請中')}</div></div>
+                        <button class="btn btn-ghost btn-sm" onclick="app.editPack('${p.id}')">編集</button>
+                    </div>`;
+                }
+                list.innerHTML = html;
+            },
+            editPack: async (packId) => {
+                if(!confirm('承認済みのパックを編集すると、再び審査待ちになります。よろしいですか？')) return;
+                try {
+                    const packSnap = await getDoc(doc(db, 'stampPacks', packId));
+                    if(!packSnap.exists()) return;
+                    const p = packSnap.data();
+                    const stampsSnap = await getDocs(query(collection(db, 'stamps'), where('packId', '==', packId)));
+                    const stamps = [];
+                    stampsSnap.forEach(d => stamps.push(d.data()));
+                    stamps.sort((a,b)=>(a.order||0)-(b.order||0));
+                    
+                    app.pkDraft = { id: packId, title: p.title, isPublic: p.isPublic, isPaid: !!p.isPaid, price: p.price || 0, mainDataUrl: p.mainUrl, stamps: stamps.map(s => ({ dataUrl: s.url })) };
+                    localStorage.setItem(PK_DRAFT_KEY, JSON.stringify(app.pkDraft));
+                    app.openStampMaker(); 
+                } catch(e) { app.toast('読み込みエラー'); }
+            },
+
+            // Stamp Editor Canvas
+            mkState: { tool: 'move', color: '#ffffff', stroke: 8, eraser: false, bg: 'transparent', history: [], dragging: false, last: null, imgObj: null, imgTransform: { x: 0, y: 0, s: 1 }, tempShape: null },
+            mkCanvas: null, mkCtx: null,
+            pkEditing: { kind: null, index: null },
+            pkOpenEditor: (kind, index=null) => {
+                app.pkEditing = { kind, index }; document.getElementById('mk-editor-card').style.display = 'block';
+                document.getElementById('mk-edit-target').innerText = kind === 'main' ? 'メイン画像' : `スタンプ #${(index||0)+1}`;
+                app.mkState.history = []; app.mkState.imgObj = null; app.mkState.imgTransform = { x:0, y:0, s:1 };
+                try { app.mkCtx?.clearRect(0,0,app.mkCanvas.width, app.mkCanvas.height); } catch(e) {}
+                app.mkPushHistory();
+                const u = (kind==='main') ? app.pkDraft.mainDataUrl : (app.pkDraft.stamps[index]?.dataUrl||'');
+                if(u) {
+                    const img = new Image(); img.onload = () => { app.mkState.imgObj = img; app.mkState.imgTransform = { x:0, y:0, s: Math.min(1, 512/Math.max(img.width, img.height)) }; app.mkRedrawAll(); }; img.src = u;
+                }
+                setTimeout(()=>document.getElementById('mk-editor-card').scrollIntoView({behavior:'smooth'}), 50);
+            },
+            pkCloseEditor: () => { document.getElementById('mk-editor-card').style.display = 'none'; },
+            mkInit: () => {
+                const c = document.getElementById('mk-canvas'); if(!c) return; app.mkCanvas = c; app.mkCtx = c.getContext('2d'); app.mkPushHistory();
+                const getPos = (ev) => { const r = c.getBoundingClientRect(), x = (('touches' in ev) ? ev.touches[0].clientX : ev.clientX) - r.left, y = (('touches' in ev) ? ev.touches[0].clientY : ev.clientY) - r.top; return { x: x * (c.width/r.width), y: y * (c.height/r.height) }; };
+                const onDown = (ev) => {
+                    ev.preventDefault(); const p = getPos(ev); app.mkState.dragging = true; app.mkState.last = p;
+                    if(app.mkState.tool === 'text') { const txt = prompt('文字を入力'); if(txt) { app.mkDrawText(txt, p.x, p.y); app.mkState.dragging = false; } return; }
+                    if(app.mkState.tool === 'rect') { app.mkState.tempShape = { x0:p.x, y0:p.y, x1:p.x, y1:p.y }; return; }
+                    if(app.mkState.tool === 'move') return;
+                    app.mkCtx.lineCap = 'round'; app.mkCtx.lineJoin = 'round'; app.mkCtx.beginPath(); app.mkCtx.moveTo(p.x, p.y);
+                };
+                const onMove = (ev) => {
+                    if(!app.mkState.dragging) return; ev.preventDefault(); const p = getPos(ev), last = app.mkState.last; if(!last) { app.mkState.last = p; return; }
+                    if(app.mkState.tool === 'move') { app.mkState.imgTransform.x += (p.x-last.x); app.mkState.imgTransform.y += (p.y-last.y); app.mkRedrawAll(); app.mkState.last = p; return; }
+                    if(app.mkState.tool === 'rect') { app.mkState.tempShape.x1 = p.x; app.mkState.tempShape.y1 = p.y; app.mkRedrawAll(true); app.mkState.last = p; return; }
+                    app.mkCtx.strokeStyle = app.mkState.eraser ? 'rgba(0,0,0,1)' : app.mkState.color; app.mkCtx.globalCompositeOperation = app.mkState.eraser ? 'destination-out' : 'source-over'; app.mkCtx.lineWidth = app.mkState.stroke; app.mkCtx.lineTo(p.x, p.y); app.mkCtx.stroke(); app.mkState.last = p;
+                };
+                const onUp = (ev) => {
+                    if(!app.mkState.dragging) return; ev.preventDefault(); app.mkState.dragging = false;
+                    if(app.mkState.tool === 'rect' && app.mkState.tempShape) { app.mkCommitRect(app.mkState.tempShape); app.mkState.tempShape = null; }
+                    app.mkCtx.globalCompositeOperation = 'source-over'; app.mkPushHistory();
+                };
+                c.addEventListener('mousedown', onDown); window.addEventListener('mousemove', onMove); window.addEventListener('mouseup', onUp);
+                c.addEventListener('touchstart', onDown, {passive:false}); c.addEventListener('touchmove', onMove, {passive:false}); c.addEventListener('touchend', onUp, {passive:false});
+            },
+            mkPushHistory: () => { try { if(!app.mkCanvas) return; const url = app.mkCanvas.toDataURL('image/png'); app.mkState.history.push(url); if(app.mkState.history.length > 30) app.mkState.history.shift(); } catch(e) {} },
+            mkUndo: () => { if(app.mkState.history.length <= 1) return; app.mkState.history.pop(); const url = app.mkState.history[app.mkState.history.length-1]; const img = new Image(); img.onload = () => { app.mkCtx.clearRect(0,0,app.mkCanvas.width, app.mkCanvas.height); app.mkCtx.drawImage(img, 0,0); }; img.src = url; },
+            mkClear: () => { if(!confirm('クリアしますか？')) return; app.mkCtx.clearRect(0,0,app.mkCanvas.width, app.mkCanvas.height); app.mkState.imgObj = null; app.mkState.imgTransform = { x:0, y:0, s:1 }; app.mkState.tempShape = null; app.mkPushHistory(); },
+            mkSetTool: (t) => { app.mkState.tool = t; ['move','pen','rect','text'].forEach(x => { const el=document.getElementById('tool-'+x); if(el) el.classList.toggle('active', x===t); }); },
+            mkUpdateStyle: () => { app.mkState.stroke = parseInt(document.getElementById('mk-stroke').value||'8'); document.getElementById('mk-stroke-v').innerText=app.mkState.stroke; app.mkState.color = document.getElementById('mk-color').value; },
+            mkToggleEraser: () => { app.mkState.eraser = !app.mkState.eraser; document.getElementById('mk-eraser').classList.toggle('active', app.mkState.eraser); },
+            mkSetBgTransparent: () => { app.mkState.bg = 'transparent'; },
+            mkSetBgWhite: () => { app.mkState.bg = 'white'; const tmp = document.createElement('canvas'); tmp.width = app.mkCanvas.width; tmp.height = app.mkCanvas.height; const tctx = tmp.getContext('2d'); tctx.fillStyle = '#fff'; tctx.fillRect(0,0,tmp.width,tmp.height); tctx.drawImage(app.mkCanvas,0,0); app.mkCtx.clearRect(0,0,app.mkCanvas.width, app.mkCanvas.height); app.mkCtx.drawImage(tmp,0,0); app.mkPushHistory(); },
+            mkRedrawAll: (pre=false) => {
+                const baseImg = new Image(); baseImg.onload = () => {
+                    app.mkCtx.clearRect(0,0,app.mkCanvas.width, app.mkCanvas.height); app.mkCtx.drawImage(baseImg,0,0);
+                    if(app.mkState.imgObj) { const im = app.mkState.imgObj, tr = app.mkState.imgTransform, w = im.width * tr.s, h = im.height * tr.s; app.mkCtx.drawImage(im, (app.mkCanvas.width-w)/2 + tr.x, (app.mkCanvas.height-h)/2 + tr.y, w, h); }
+                    if(pre && app.mkState.tempShape) { const sh = app.mkState.tempShape; app.mkCtx.save(); app.mkCtx.globalCompositeOperation = 'source-over'; app.mkCtx.strokeStyle = app.mkState.color; app.mkCtx.lineWidth = app.mkState.stroke; app.mkCtx.strokeRect(sh.x0, sh.y0, sh.x1-sh.x0, sh.y1-sh.y0); app.mkCtx.restore(); }
+                }; baseImg.src = app.mkState.history[app.mkState.history.length-1];
+            },
+            mkCommitRect: (sh) => { app.mkCtx.save(); app.mkCtx.globalCompositeOperation = app.mkState.eraser ? 'destination-out' : 'source-over'; app.mkCtx.strokeStyle = app.mkState.color; app.mkCtx.lineWidth = app.mkState.stroke; app.mkCtx.strokeRect(sh.x0, sh.y0, sh.x1-sh.x0, sh.y1-sh.y0); app.mkCtx.restore(); app.mkPushHistory(); },
+            mkDrawText: (txt, x, y) => { app.mkCtx.save(); app.mkCtx.globalCompositeOperation = 'source-over'; app.mkCtx.fillStyle = app.mkState.color; app.mkCtx.font = 'bold 72px Inter, sans-serif'; app.mkCtx.textBaseline = 'middle'; app.mkCtx.fillText(txt, x, y); app.mkCtx.restore(); app.mkPushHistory(); },
+            mkExportWebP: async () => { const out = document.createElement('canvas'); out.width = 150; out.height = 150; const octx = out.getContext('2d'); if(app.mkState.bg === 'white') { octx.fillStyle = '#fff'; octx.fillRect(0,0,150,150); } octx.drawImage(app.mkCanvas, 0, 0, 150, 150); return out.toDataURL('image/webp', 0.9); },
+            pkSaveEditedStamp: async () => {
+                const u = await app.mkExportWebP();
+                if(app.pkEditing.kind === 'main') { app.pkDraft.mainDataUrl = u; document.getElementById('pk-main-preview').src = u; document.getElementById('pk-main-preview').style.display='block'; }
+                else if(app.pkEditing.kind === 'slot') { app.pkDraft.stamps[app.pkEditing.index].dataUrl = u; }
+                app.pkRender(); app.toast('反映しました'); app.pkCloseEditor();
+            },
+            pkSetAsMainFromCurrent: async () => {
+                const u = await app.mkExportWebP(); app.pkDraft.mainDataUrl = u; document.getElementById('pk-main-preview').src = u; document.getElementById('pk-main-preview').style.display='block'; app.pkRender(); app.toast('メイン画像に設定しました');
+            },
+
+            // Trade & Market (Shop)
+            switchTradeTab: (mode) => {
+                document.getElementById('trade-area-exchange').classList.toggle('hidden', mode!=='exchange');
+                document.getElementById('trade-area-market').classList.toggle('hidden', mode!=='market');
+                document.getElementById('sw-trade-exchange').classList.toggle('active', mode==='exchange');
+                document.getElementById('sw-trade-market').classList.toggle('active', mode==='market');
+            },
+            tradeRowSeq: 0,
+            initTradeUI: () => {
+                const g = document.getElementById('tr-give-rows'), w = document.getElementById('tr-want-rows');
+                if(g && g.childElementCount===0) app.addTradeRow('give');
+                if(w && w.childElementCount===0) app.addTradeRow('want');
+            },
+            addTradeRow: (side) => {
+                const wrap = document.getElementById(side === 'give' ? 'tr-give-rows' : 'tr-want-rows');
+                const idx = ++app.tradeRowSeq;
+                let opts = `<option value="coins">コイン</option><option value="diamonds">ダイヤ</option><option value="item">消費アイテム(ID)</option><option value="amulet">お守り(ID)</option>`;
+                wrap.innerHTML += `<div class="flex gap-2 items-center mb-2" data-idx="${idx}"><select class="input" style="width:40%" id="tr-${side}-type-${idx}">${opts}</select><input type="text" class="input flex-1" id="tr-${side}-val-${idx}" placeholder="量またはID"><button class="btn btn-ghost btn-sm" onclick="this.parentElement.remove()">✕</button></div>`;
+            },
+            clearTradeRows: (side) => { document.getElementById(side === 'give' ? 'tr-give-rows' : 'tr-want-rows').innerHTML = ''; app.addTradeRow(side); },
+            readTradeRows: (side) => {
+                const rows = [];
+                document.getElementById(side === 'give' ? 'tr-give-rows' : 'tr-want-rows').querySelectorAll('[data-idx]').forEach(el => {
+                    const idx = el.dataset.idx, type = document.getElementById(`tr-${side}-type-${idx}`).value, val = document.getElementById(`tr-${side}-val-${idx}`).value;
+                    if(val) { if(type==='coins'||type==='diamonds') rows.push({type, amount:parseInt(val)}); else rows.push({type, id:val, qty:1}); }
+                });
+                return rows;
+            },
+            createTrade: async () => {
+                const give = app.readTradeRows('give'), want = app.readTradeRows('want'), pass = document.getElementById('tr-pass').value.trim();
+                if(give.length===0 || want.length===0) return app.toast('内容を入力してください');
+                try {
+                    await addDoc(collection(db, 'trades'), { makerUid: currentUser.username, makerName: currentUser.name, give, want, passcode: pass, status: 'open', createdAt: serverTimestamp() });
+                    app.toast('出品しました'); app.clearTradeRows('give'); app.clearTradeRows('want'); document.getElementById('tr-pass').value='';
+                } catch(e) {}
+            },
+            cancelTrade: async (id) => { if(confirm('取り消しますか？')) await deleteDoc(doc(db, 'trades', id)); },
+            doTrade: async (id, pass) => {
+                if(pass && prompt('あいことば')!==pass) return app.toast('違います');
+                if(!confirm('交換しますか？(※ロジック簡易版)')) return;
+                await deleteDoc(doc(db, 'trades', id)); app.toast('成立！(アイテムは自動増減されません)');
+            },
+            subTrade: () => {
+                listeners.push(onSnapshot(query(collection(db,"trades"), where("status","==","open"), limit(100)), s=>{
+                    const l=document.getElementById('trade-list'); l.innerHTML="";
+                    let items = []; s.forEach(d => items.push({id:d.id, ...d.data()})); items.sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
+                    items.forEach(t=>{
+                        const me=t.makerUid===currentUser.username; const pass = t.passcode ? `'${t.passcode.replace(/'/g,"\\'")}'` : "''";
+                        const fmt = (arr) => arr.map(o=>(o.type==='coins'||o.type==='diamonds')?`${o.amount}${o.type}`:`${o.id}x${o.qty}`).join(', ');
+                        l.innerHTML += `<div class="card flex justify-between items-center" style="margin-bottom:8px"><div style="flex:1"><div class="text-xs text-sub mb-1">${t.makerName} ${t.passcode?'🔒':''}</div><div class="font-bold">出: ${fmt(t.give)}</div><div class="font-bold text-primary">求: ${fmt(t.want)}</div></div><button class="btn btn-sm ${me?'btn-danger':'btn-primary'}" style="width:auto" onclick="${me?`app.cancelTrade('${t.id}')`:`app.doTrade('${t.id}',${pass})`}">${me?'取消':'交換'}</button></div>`;
+                    });
+                }));
+            },
+
+            // Market
+            onMarketTypeChange: () => {
+                const type = document.getElementById('mk-sell-type').value;
+                const wrap = document.getElementById('mk-sell-valwrap');
+                let opts = '';
+                if(type === 'item') {
+                    for(const [k,v] of Object.entries(currentUser.items||{})) if(v>0) opts += `<option value="${k}">${getMeta('item', k).name} (所持:${v})</option>`;
+                } else if(type === 'amulet') {
+                    const map = {}; (currentUser.amulets||[]).forEach(a => { const id = typeof a==='string'?a:a.id; map[id]=(map[id]||0)+1; });
+                    for(const [id,c] of Object.entries(map)) opts += `<option value="${id}">${getMeta('amulet', id).name} (所持:${c})</option>`;
+                }
+                if(!opts) opts = `<option value="">出品できるものがありません</option>`;
+                wrap.innerHTML = `<div class="flex gap-2"><select id="mk-sell-val" class="input flex-1">${opts}</select><input type="number" id="mk-sell-qty" class="input" style="width:70px" min="1" value="1"></div>`;
+            },
+            createMarketItem: async () => {
+                const type = document.getElementById('mk-sell-type').value, val = document.getElementById('mk-sell-val').value, qty = parseInt(document.getElementById('mk-sell-qty').value || '1'), price = parseInt(document.getElementById('mk-sell-price').value || '0');
+                if(!val || qty<1 || price<10) return app.toast('正しく入力してください（価格は10コイン以上）');
+                try {
+                    await runTransaction(db, async tr => {
+                        const meRef = doc(db, 'users', currentUser.username); const meSnap = await tr.get(meRef); const u = meSnap.data();
+                        const items = u.items || {}; const amulets = u.amulets || [];
+                        if(type === 'item') { if((items[val]||0) < qty) throw "所持数が足りません"; items[val] -= qty; if(items[val]<=0) delete items[val]; } 
+                        else if(type === 'amulet') {
+                            const have = amulets.filter(a => (typeof a==='string'?a:a.id) === val);
+                            if(have.length < qty) throw "所持数が足りません";
+                            for(let i=0; i<qty; i++) { const idx = amulets.findIndex(a => (typeof a==='string'?a:a.id) === val); amulets.splice(idx, 1); }
+                        }
+                        tr.update(meRef, { items, amulets });
+                        tr.set(doc(collection(db, 'market')), { sellerUid: currentUser.username, sellerName: currentUser.name, type, itemId: val, qty, price, status: 'open', createdAt: serverTimestamp() });
+                    });
+                    app.toast('出品しました'); document.getElementById('mk-sell-price').value=''; app.onMarketTypeChange();
+                } catch(e) { app.toast('エラー: ' + e); }
+            },
+            buyMarketItem: async (mId) => {
+                if(!confirm("このアイテムをコインで購入しますか？")) return;
+                try {
+                    await runTransaction(db, async tr => {
+                        const mRef = doc(db, 'market', mId); const mSnap = await tr.get(mRef);
+                        if(!mSnap.exists() || mSnap.data().status !== 'open') throw "売却済みか存在しません";
+                        const m = mSnap.data(); if(m.sellerUid === currentUser.username) throw "自分の出品です";
+                        const meRef = doc(db, 'users', currentUser.username), sellerRef = doc(db, 'users', m.sellerUid);
+                        const meSnap = await tr.get(meRef); const u = meSnap.data();
+                        if((u.coins||0) < m.price) throw "コイン不足";
+                        const items = u.items || {}; const amulets = u.amulets || [];
+                        if(m.type === 'item') items[m.itemId] = (items[m.itemId]||0) + m.qty;
+                        else if(m.type === 'amulet') { for(let i=0; i<m.qty; i++) amulets.push({ id: m.itemId, durability: getMeta('amulet', m.itemId).durability || 100 }); }
+                        tr.update(meRef, { coins: increment(-m.price), items, amulets }); tr.update(sellerRef, { coins: increment(m.price) }); tr.delete(mRef);
+                    });
+                    app.toast("購入しました！");
+                } catch(e) { app.toast("エラー: " + e); }
+            },
+            cancelMarketItem: async (mId) => {
+                if(!confirm("出品を取り消しますか？")) return;
+                try {
+                    await runTransaction(db, async tr => {
+                        const mRef = doc(db, 'market', mId); const mSnap = await tr.get(mRef);
+                        if(!mSnap.exists()) throw "存在しません"; const m = mSnap.data(); if(m.sellerUid !== currentUser.username) throw "権限がありません";
+                        const meRef = doc(db, 'users', currentUser.username); const meSnap = await tr.get(meRef);
+                        const items = meSnap.data().items || {}; const amulets = meSnap.data().amulets || [];
+                        if(m.type === 'item') items[m.itemId] = (items[m.itemId]||0) + m.qty;
+                        else if(m.type === 'amulet') { for(let i=0; i<m.qty; i++) amulets.push({ id: m.itemId, durability: 100 }); }
+                        tr.update(meRef, { items, amulets }); tr.delete(mRef);
+                    });
+                    app.toast("取り消しました"); app.onMarketTypeChange();
+                } catch(e) { app.toast("エラー"); }
+            },
+            subMarket: () => {
+                listeners.push(onSnapshot(query(collection(db, "market"), where("status", "==", "open"), limit(100)), s => {
+                    const l = document.getElementById('market-list'); if(!l) return; l.innerHTML = "";
+                    let items = []; s.forEach(d => items.push({ id: d.id, ...d.data() })); items.sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
+                    items.forEach(m => {
+                        const isMe = m.sellerUid === currentUser.username; const meta = getMeta(m.type, m.itemId);
+                        l.innerHTML += `<div class="card flex justify-between items-center" style="margin-bottom:8px"><div style="flex:1; padding-right:10px"><div class="text-xs text-sub mb-1">出品者: ${m.sellerName}</div><div class="font-bold">${meta.icon} ${meta.name} ×${m.qty}</div><div class="font-bold mt-1" style="color:var(--warning)">🪙 ${m.price} コイン</div></div><button class="btn btn-sm ${isMe ? 'btn-ghost' : 'btn-primary'}" style="width:auto" onclick="${isMe ? `app.cancelMarketItem('${m.id}')` : `app.buyMarketItem('${m.id}')`}">${isMe ? '取消' : '購入'}</button></div>`;
+                    });
+                }));
+            },
+
+            // Admin Logic
             checkAdmSess: () => { 
                 const e=localStorage.getItem(ADM_KEY); 
                 if(e&&parseInt(e)>Date.now()){ document.getElementById('nav-adm-pc').classList.remove('hidden'); return true; }
@@ -1221,6 +2893,21 @@
                 const c=document.getElementById('adm-code').value; 
                 let vc="cotobato-admin"; try { const d=await getDoc(doc(db,"system","config")); if(d.exists() && d.data().code) vc=d.data().code; } catch(e) {}
                 if(c===vc){ localStorage.setItem(ADM_KEY, Date.now()+1800000); document.getElementById('nav-adm-pc').classList.remove('hidden'); app.tab('admin'); app.toast("認証成功"); document.getElementById('adm-code').value=""; } else app.toast("違います");
+            },
+            applyPenalty: async (type) => {
+                if(!app.checkAdmSess()) return;
+                const uid = document.getElementById('adm-police-uid').value.trim();
+                if(!uid) return app.toast('IDを入力してください');
+                if(!confirm(`ユーザー ${uid} に ${type} を実行しますか？`)) return;
+                try {
+                    const ref = doc(db, "users", uid);
+                    const changes = { lastPenaltyAt: serverTimestamp() };
+                    if(type === 'mute') changes.isMuted = true;
+                    if(type === 'ban') changes.isBanned = true;
+                    if(type === 'wipe') { changes.coins = 0; changes.diamonds = 0; }
+                    await updateDoc(ref, changes);
+                    app.toast(`実行しました: ${type}`);
+                } catch(e) { app.toast('エラー: ユーザー不在など'); }
             },
             subAdmList: () => {
                 onSnapshot(query(collection(db,"announcements"), limit(50)), s=>{
