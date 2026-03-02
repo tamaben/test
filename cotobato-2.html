@@ -744,7 +744,7 @@
     const KB_SAVE_KEY = "kb_save_v60"; 
 
     let currentUser = null;
-    let listeners = { core: [] };
+    let listeners = {}; // 修正: オブジェクトとして初期化
     let chatImg = null; let dmImg = null; let newsImg = null;
     let currentRoomId = null; 
     let dmUnsub = null;
@@ -856,13 +856,10 @@
             } catch(e) { app.toast("登録エラー"); }
         },
         loadUser: async (uid) => {
-            if(listeners.core) listeners.core.forEach(u => u());
-            listeners.core = [];
-
-            listeners.core.push(onSnapshot(doc(db,"users",uid), async s=>{
+            if(listeners.core) listeners.core();
+            listeners.core = onSnapshot(doc(db,"users",uid), async s=>{
                 if(s.exists()){ 
                     currentUser=s.data(); 
-                    // 修正: BANされていてもログインは可能にするが警告
                     if(currentUser.isBanned) {
                         app.toast('アカウントが凍結されています。機能が制限されます。');
                     }
@@ -878,7 +875,7 @@
                     
                     app.subNews(); app.subChat(); app.subTrade(); app.subMarket(); app.subDMList(uid); app.subRequests(uid);
                 } else { localStorage.removeItem(SESS_KEY); location.reload(); }
-            }));
+            });
         },
         logout: () => { localStorage.removeItem(SESS_KEY); localStorage.removeItem(ADM_KEY); location.reload(); },
 
@@ -935,17 +932,22 @@
             app.toast("更新しました");
         },
 
-        // News (Fix)
+        // News (Fixed)
         subNews: () => {
             if(listeners.news) return;
-            listeners.news = onSnapshot(query(collection(db, "announcements"), orderBy("createdAt", "desc"), limit(10)), s => {
+            listeners.news = onSnapshot(query(collection(db, "announcements"), orderBy("createdAt", "desc"), limit(20)), s => {
                 const el = document.getElementById('news-list-box'); 
                 if(!el) return;
                 el.innerHTML = "";
                 if(s.empty) el.innerHTML = `<div class="p-4 text-center text-sub text-xs">お知らせはありません</div>`;
+                
+                const now = new Date();
                 s.forEach(d => {
                     const n = d.data();
-                    appCache.news[d.id] = n; // キャッシュ
+                    // 未来の予約投稿はスキップ
+                    if(n.publishAt && toDate(n.publishAt) > now) return;
+
+                    appCache.news[d.id] = n;
                     const date = n.createdAt ? toDate(n.createdAt).toLocaleDateString() : '';
                     const thumb = n.img ? `<img src="${n.img}" class="news-thumb">` : `<div class="news-thumb flex items-center justify-center text-xs text-sub">No Img</div>`;
                     
@@ -971,6 +973,49 @@
             app.mdl(n.title, html);
         },
 
+        // Gifts
+        checkGifts: async () => {
+            const snap = await getDocs(query(collection(db, "gifts"), limit(50)));
+            let html = "";
+            const now = new Date();
+            
+            snap.forEach(d => {
+                const g = d.data();
+                if(g.to !== 'all' && g.to !== currentUser.username) return;
+                if(g.claimedBy && g.claimedBy.includes(currentUser.username)) return;
+                // 有効期限切れチェック
+                // if(g.expireAt && toDate(g.expireAt) < now) return; 
+
+                html += `<div class="card p-3 mb-2 flex justify-between items-center">
+                    <div>
+                        <div class="font-bold text-warning">${g.val} ${g.type}</div>
+                        <div class="text-xs text-sub">${g.msg || "プレゼント"}</div>
+                    </div>
+                    <button class="btn btn-primary btn-sm" onclick="app.claimGift('${d.id}')">受け取る</button>
+                </div>`;
+            });
+
+            if(!html) html = "<div class='text-center p-4 text-sub'>受け取れるプレゼントはありません</div>";
+            app.mdl("プレゼントBOX", html);
+        },
+        claimGift: async (id) => {
+            try {
+                await runTransaction(db, async tr => {
+                    const gRef = doc(db, "gifts", id);
+                    const uRef = doc(db, "users", currentUser.username);
+                    const gSnap = await tr.get(gRef);
+                    if(!gSnap.exists()) throw "存在しません";
+                    const g = gSnap.data();
+                    if(g.claimedBy && g.claimedBy.includes(currentUser.username)) throw "受取済みです";
+                    
+                    tr.update(gRef, { claimedBy: arrayUnion(currentUser.username) });
+                    if(g.type === 'coins') tr.update(uRef, { coins: increment(g.val) });
+                    else if(g.type === 'diamonds') tr.update(uRef, { diamonds: increment(g.val) });
+                });
+                app.toast("受け取りました！"); app.checkGifts();
+            } catch(e) { app.toast("エラー: " + e); }
+        },
+
         // Chat
         subChat: () => {
             if(listeners.chat) return;
@@ -986,7 +1031,6 @@
         },
         sendChat: async (stampUrl = null) => {
             if(currentUser.isMuted) {
-                // Mute期限チェック (1週間など)
                 const now = Date.now();
                 const exp = currentUser.muteExpiresAt ? toDate(currentUser.muteExpiresAt).getTime() : 0;
                 if(exp > now) return app.toast(`チャット禁止期間中です (${new Date(exp).toLocaleDateString()}まで)`);
@@ -1120,7 +1164,6 @@
                 const isFriend = currentUser.friends && currentUser.friends.includes(uid);
                 let btnHtml = isFriend ? `<button class="btn btn-success mt-2" onclick="app.startDM('${uid}', '${name.replace(/'/g,"\\'")}')">チャットする</button>` : `<button class="btn btn-primary mt-2" onclick="app.sendRequest('${uid}')">友達申請する</button>`;
                 
-                // 運営者のみバッジ管理可能に変更
                 if(app.checkAdmSess()) {
                     btnHtml += `<button class="btn btn-warning mt-2" onclick="app.manageBadges('${uid}')">バッジを管理する (運営)</button>`;
                 }
@@ -1129,7 +1172,6 @@
             } catch(e) {}
         },
         manageBadges: async (targetUid) => {
-            // 運営者セッション確認
             if(!app.checkAdmSess()) return app.toast("権限がありません");
 
             const s = await getDoc(doc(db, "users", targetUid));
@@ -1159,12 +1201,9 @@
         },
         saveManagedBadges: async (targetUid) => {
             if(!app.checkAdmSess()) return;
-            
             const s = await getDoc(doc(db, "users", targetUid));
             if(!s.exists()) return;
             const b = s.data().badges || [];
-            
-            // 自動付与系(level, rich, whale)は除外せず維持、手動系を再構築
             const autoBadges = b.filter(x => ['level10','level30','rich','whale'].includes(x));
             const newB = [...autoBadges];
 
@@ -1179,7 +1218,7 @@
             app.toast("更新しました"); app.closeModal(); app.showProfile(targetUid, s.data().name);
         },
 
-        // WebRTC Call
+        // WebRTC
         initPeer: (uid) => {
             if(peer) return;
             try {
@@ -1243,7 +1282,7 @@
         toggleMic: () => { if(localStream) { const t = localStream.getAudioTracks()[0]; if(t) { t.enabled = !t.enabled; document.getElementById('btn-mic-toggle').classList.toggle('active', t.enabled); } } },
         toggleVideo: async () => { app.toast("ビデオ切替"); },
 
-        // Friends & DM (Fix)
+        // Friends & DM (Fixed)
         searchUserForFriendInline: async () => {
             const tid = document.getElementById('inline-friend-id').value.trim();
             const resDiv = document.getElementById('inline-friend-result');
@@ -1307,7 +1346,12 @@
                 const list = document.getElementById('dm-list-box'); if(!list) return; 
                 list.innerHTML = "";
                 
-                // 修正: Promise.allで一括取得して描画（ちらつき防止）
+                if (friends.length === 0) {
+                    list.innerHTML = "<div class='text-xs text-sub p-2'>友達がいません</div>";
+                    return;
+                }
+
+                // ちらつき防止のため一括取得
                 const promises = friends.map(fid => getDoc(doc(db, "users", fid)).catch(()=>null));
                 const snaps = await Promise.all(promises);
                 
@@ -1319,7 +1363,7 @@
                         html += `<div class="dm-item" onclick="app.startDM('${fid}', '${fData.name.replace(/'/g,"\\'")}')"><div class="dm-icon">${fData.name.charAt(0)}</div><div><div class="font-bold text-sm">${fData.name} ${app.getBadgesHtml(fData.badges)}</div><div class="text-xs text-sub">ID: ${fid}</div></div></div>`;
                     }
                 });
-                list.innerHTML = html || "<div class='text-xs text-sub p-2'>友達がいません</div>";
+                list.innerHTML = html;
             });
         },
         startDM: async (targetUid, targetName) => {
@@ -1632,7 +1676,7 @@
             const u = await app.mkExportWebP(); app.pkDraft.mainDataUrl = u; document.getElementById('pk-main-preview').src = u; document.getElementById('pk-main-preview').style.display='block'; app.pkRender(); app.toast('メイン画像に設定しました');
         },
 
-        // Trade & Market (Shop)
+        // Trade & Market (Fixed)
         switchTradeTab: (mode) => {
             document.getElementById('trade-area-shop').classList.toggle('hidden', mode!=='shop');
             document.getElementById('trade-area-exchange').classList.toggle('hidden', mode!=='exchange');
@@ -1715,7 +1759,8 @@
             await deleteDoc(doc(db, 'trades', id)); app.toast('成立！(アイテムは自動増減されません)');
         },
         subTrade: () => {
-            listeners.push(onSnapshot(query(collection(db,"trades"), where("status","==","open"), limit(100)), s=>{
+            if(listeners.trade) listeners.trade();
+            listeners.trade = onSnapshot(query(collection(db,"trades"), where("status","==","open"), limit(100)), s=>{
                 const l=document.getElementById('trade-list'); l.innerHTML="";
                 let items = []; s.forEach(d => items.push({id:d.id, ...d.data()})); items.sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
                 items.forEach(t=>{
@@ -1723,7 +1768,7 @@
                     const fmt = (arr) => arr.map(o=>(o.type==='coins'||o.type==='diamonds')?`${o.amount}${o.type}`:`${o.id}x${o.qty}`).join(', ');
                     l.innerHTML += `<div class="card flex justify-between items-center" style="margin-bottom:8px"><div style="flex:1"><div class="text-xs text-sub mb-1">${t.makerName} ${t.passcode?'🔒':''}</div><div class="font-bold">出: ${fmt(t.give)}</div><div class="font-bold text-primary">求: ${fmt(t.want)}</div></div><button class="btn btn-sm ${me?'btn-danger':'btn-primary'}" style="width:auto" onclick="${me?`app.cancelTrade('${t.id}')`:`app.doTrade('${t.id}',${pass})`}">${me?'取消':'交換'}</button></div>`;
                 });
-            }));
+            });
         },
 
         // Market
@@ -1793,14 +1838,15 @@
             } catch(e) { app.toast("エラー"); }
         },
         subMarket: () => {
-            listeners.push(onSnapshot(query(collection(db, "market"), where("status", "==", "open"), limit(100)), s => {
+            if(listeners.market) listeners.market();
+            listeners.market = onSnapshot(query(collection(db, "market"), where("status", "==", "open"), limit(100)), s => {
                 const l = document.getElementById('market-list'); if(!l) return; l.innerHTML = "";
                 let items = []; s.forEach(d => items.push({ id: d.id, ...d.data() })); items.sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
                 items.forEach(m => {
                     const isMe = m.sellerUid === currentUser.username; const meta = getMeta(m.type, m.itemId);
                     l.innerHTML += `<div class="card flex justify-between items-center" style="margin-bottom:8px"><div style="flex:1; padding-right:10px"><div class="text-xs text-sub mb-1">出品者: ${m.sellerName}</div><div class="font-bold">${meta.icon} ${meta.name} ×${m.qty}</div><div class="font-bold mt-1" style="color:var(--warning)">🪙 ${m.price} コイン</div></div><button class="btn btn-sm ${isMe ? 'btn-ghost' : 'btn-primary'}" style="width:auto" onclick="${isMe ? `app.cancelMarketItem('${m.id}')` : `app.buyMarketItem('${m.id}')`}">${isMe ? '取消' : '購入'}</button></div>`;
                 });
-            }));
+            });
         },
 
         // Admin Logic
