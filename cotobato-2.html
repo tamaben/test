@@ -744,7 +744,7 @@
     const KB_SAVE_KEY = "kb_save_v60"; 
 
     let currentUser = null;
-    let listeners = {}; // 修正: オブジェクトとして初期化
+    let listeners = { core: [] };
     let chatImg = null; let dmImg = null; let newsImg = null;
     let currentRoomId = null; 
     let dmUnsub = null;
@@ -856,8 +856,10 @@
             } catch(e) { app.toast("登録エラー"); }
         },
         loadUser: async (uid) => {
-            if(listeners.core) listeners.core();
-            listeners.core = onSnapshot(doc(db,"users",uid), async s=>{
+            if(listeners.core) listeners.core.forEach(u => u());
+            listeners.core = [];
+
+            listeners.core.push(onSnapshot(doc(db,"users",uid), async s=>{
                 if(s.exists()){ 
                     currentUser=s.data(); 
                     if(currentUser.isBanned) {
@@ -875,9 +877,71 @@
                     
                     app.subNews(); app.subChat(); app.subTrade(); app.subMarket(); app.subDMList(uid); app.subRequests(uid);
                 } else { localStorage.removeItem(SESS_KEY); location.reload(); }
-            });
+            }));
         },
         logout: () => { localStorage.removeItem(SESS_KEY); localStorage.removeItem(ADM_KEY); location.reload(); },
+
+        // Backup & Restore
+        backupFullGameData: async () => {
+            const data = localStorage.getItem(KB_SAVE_KEY);
+            if(!data) return app.toast("セーブデータが空です");
+            try {
+                await addDoc(collection(db, "users", currentUser.username, "backups"), {
+                    data: data,
+                    createdAt: serverTimestamp(),
+                    device: navigator.userAgent
+                });
+                app.toast("バックアップを作成しました");
+            } catch(e) {
+                console.error(e);
+                app.toast("作成エラー");
+            }
+        },
+        restoreCloudList: async () => {
+            try {
+                const q = query(collection(db, "users", currentUser.username, "backups"), orderBy("createdAt", "desc"), limit(10));
+                const snap = await getDocs(q);
+                let html = "";
+                snap.forEach(d => {
+                    const b = d.data();
+                    const date = b.createdAt ? toDate(b.createdAt).toLocaleString() : "Unknown";
+                    const size = b.data ? Math.round(b.data.length / 1024) + "KB" : "0KB";
+                    html += `<div class="card p-2 mb-2 flex justify-between items-center">
+                        <div>
+                            <div class="font-bold text-sm">${date}</div>
+                            <div class="text-xs text-sub">${size} - ${b.device||'Unknown'}</div>
+                        </div>
+                        <button class="btn btn-primary btn-sm" onclick="app.doRestore('${d.id}')">復元</button>
+                    </div>`;
+                });
+                if(!html) html = "<div class='p-4'>バックアップがありません</div>";
+                app.mdl("バックアップ履歴", html);
+            } catch(e) {
+                console.error(e);
+                app.toast("リスト取得エラー");
+            }
+        },
+        doRestore: async (id) => {
+            if(!confirm("現在のセーブデータを上書きします。よろしいですか？")) return;
+            try {
+                const snap = await getDoc(doc(db, "users", currentUser.username, "backups", id));
+                if(!snap.exists()) return app.toast("データがありません");
+                const data = snap.data().data;
+                localStorage.setItem(KB_SAVE_KEY, data);
+                app.toast("復元しました。再読み込みします...");
+                setTimeout(() => location.reload(), 1500);
+            } catch(e) {
+                app.toast("復元エラー");
+            }
+        },
+        importFullFromGame: async () => {
+             // Placeholder to prevent crash
+             app.toast("同期機能は準備中です。バックアップをご利用ください。"); 
+        },
+        exportFullToGame: async () => {
+            // Placeholder to prevent crash
+            app.toast("同期機能は準備中です。バックアップをご利用ください。");
+        },
 
         // Badges & Apply
         checkAutoBadges: async () => {
@@ -983,9 +1047,7 @@
                 const g = d.data();
                 if(g.to !== 'all' && g.to !== currentUser.username) return;
                 if(g.claimedBy && g.claimedBy.includes(currentUser.username)) return;
-                // 有効期限切れチェック
-                // if(g.expireAt && toDate(g.expireAt) < now) return; 
-
+                
                 html += `<div class="card p-3 mb-2 flex justify-between items-center">
                     <div>
                         <div class="font-bold text-warning">${g.val} ${g.type}</div>
