@@ -744,7 +744,7 @@
     const KB_SAVE_KEY = "kb_save_v60"; 
 
     let currentUser = null;
-    let listeners = { core: [] };
+    let listeners = {}; 
     let chatImg = null; let dmImg = null; let newsImg = null;
     let currentRoomId = null; 
     let dmUnsub = null;
@@ -856,10 +856,8 @@
             } catch(e) { app.toast("登録エラー"); }
         },
         loadUser: async (uid) => {
-            if(listeners.core) listeners.core.forEach(u => u());
-            listeners.core = [];
-
-            listeners.core.push(onSnapshot(doc(db,"users",uid), async s=>{
+            if(listeners.core) listeners.core();
+            listeners.core = onSnapshot(doc(db,"users",uid), async s=>{
                 if(s.exists()){ 
                     currentUser=s.data(); 
                     if(currentUser.isBanned) {
@@ -877,7 +875,7 @@
                     
                     app.subNews(); app.subChat(); app.subTrade(); app.subMarket(); app.subDMList(uid); app.subRequests(uid);
                 } else { localStorage.removeItem(SESS_KEY); location.reload(); }
-            }));
+            });
         },
         logout: () => { localStorage.removeItem(SESS_KEY); localStorage.removeItem(ADM_KEY); location.reload(); },
 
@@ -934,13 +932,42 @@
                 app.toast("復元エラー");
             }
         },
+        // Game Data Sync
         importFullFromGame: async () => {
-             // Placeholder to prevent crash
-             app.toast("同期機能は準備中です。バックアップをご利用ください。"); 
+            if(!confirm("クラウド上のデータで現在のセーブデータを上書きします。よろしいですか？\n(注意: 現在のブラウザ上のデータは失われます)")) return;
+            try {
+                const snap = await getDoc(doc(db, "users", currentUser.username));
+                if(!snap.exists()) return app.toast("ユーザーデータが見つかりません");
+                
+                const d = snap.data();
+                if(d.gameData) {
+                    localStorage.setItem(KB_SAVE_KEY, d.gameData);
+                    app.toast("同期しました。ページを再読み込みします...");
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    app.toast("クラウドに同期されたデータがありません");
+                }
+            } catch(e) {
+                console.error(e);
+                app.toast("同期中にエラーが発生しました");
+            }
         },
         exportFullToGame: async () => {
-            // Placeholder to prevent crash
-            app.toast("同期機能は準備中です。バックアップをご利用ください。");
+            const data = localStorage.getItem(KB_SAVE_KEY);
+            if(!data) return app.toast("ブラウザにセーブデータ(kb_save_v60)がありません");
+            
+            if(!confirm("現在のセーブデータをクラウドにアップロードしますか？\n(以前のクラウドデータは上書きされます)")) return;
+            
+            try {
+                await updateDoc(doc(db, "users", currentUser.username), {
+                    gameData: data,
+                    gameDataSyncedAt: serverTimestamp()
+                });
+                app.toast("クラウドへアップロードしました");
+            } catch(e) {
+                console.error(e);
+                app.toast("アップロードに失敗しました");
+            }
         },
 
         // Badges & Apply
