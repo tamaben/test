@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>コトバト広場 (Fixed)</title>
+    <title>コトバト広場</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
@@ -62,6 +62,11 @@
         .header-mobile { height: 56px; background: var(--bg-sidebar); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: center; padding: 0 16px; flex-shrink: 0; font-weight: 700; font-size: 1.1rem; position: relative; }
         .header-user { position: absolute; right: 16px; font-size: 0.8rem; color: var(--text-sub); }
         .scroll-view { flex: 1; min-height:0; overflow-y: auto; padding: 20px; padding-bottom: 80px; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; touch-action: pan-y; }
+        
+        /* News Item Style */
+        .news-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: background 0.2s; margin-bottom: 8px; }
+        .news-item:active { background: var(--bg-input); }
+        .news-thumb { width: 48px; height: 48px; border-radius: 6px; object-fit: cover; background: var(--bg-input); flex-shrink: 0; }
         
         #scr-stamp-maker { height: 100vh; }
         #scr-stamp-maker .scroll-view { height: calc(100vh - 50px); flex: none; }
@@ -655,6 +660,11 @@
                         </div>
                     </div>
                     <div class="card" style="border-color:var(--danger)">
+                        <h3 class="mb-2">処罰中ユーザー一覧</h3>
+                        <div id="adm-punished-list" class="flex flex-col gap-2 max-h-40 overflow-y-auto mb-2"></div>
+                        <button class="btn btn-ghost btn-sm" onclick="app.admLoadPunishedUsers()">更新</button>
+                    </div>
+                    <div class="card" style="border-color:var(--danger)">
                         <h3 class="mb-2">通報一覧</h3>
                         <div id="adm-report-list" class="flex flex-col gap-2 max-h-40 overflow-y-auto"></div>
                         <button class="btn btn-ghost btn-sm mt-2" onclick="app.admLoadReports()">更新</button>
@@ -808,7 +818,7 @@
             if(id==='chat') { t.style.display='flex'; document.body.classList.add('chat-mode'); app.switchChatMode('all'); } else document.body.classList.remove('chat-mode');
             if(id==='trade') { app.switchTradeTab('shop'); try { app.loadShopItems(); } catch(e){} }
             if(id==='stamps') { try { app.loadMyStampsTop(); } catch(e) {} }
-            if(id==='admin') { if(!app.checkAdmSess()) { app.tab('settings'); return; } else { app.admLoadStampQueue(); app.subAdmList(); app.admLoadReports(); } }
+            if(id==='admin') { if(!app.checkAdmSess()) { app.tab('settings'); return; } else { app.admLoadStampQueue(); app.subAdmList(); app.admLoadReports(); app.admLoadPunishedUsers(); } }
             document.querySelectorAll('.nav-link, .b-nav-item').forEach(e=>e.classList.remove('active'));
             document.querySelectorAll(`[data-tab="${id}"]`).forEach(e=>e.classList.add('active'));
         },
@@ -852,7 +862,10 @@
             listeners.core.push(onSnapshot(doc(db,"users",uid), async s=>{
                 if(s.exists()){ 
                     currentUser=s.data(); 
-                    if(currentUser.isBanned) { app.toast('アカウントが凍結されています'); app.logout(); return; }
+                    // 修正: BANされていてもログインは可能にするが警告
+                    if(currentUser.isBanned) {
+                        app.toast('アカウントが凍結されています。機能が制限されます。');
+                    }
                     
                     document.getElementById('splash-screen').classList.add('fade-out');
                     setTimeout(() => document.getElementById('splash-screen').style.display = 'none', 500);
@@ -922,7 +935,7 @@
             app.toast("更新しました");
         },
 
-        // News
+        // News (Fix)
         subNews: () => {
             if(listeners.news) return;
             listeners.news = onSnapshot(query(collection(db, "announcements"), orderBy("createdAt", "desc"), limit(10)), s => {
@@ -932,14 +945,30 @@
                 if(s.empty) el.innerHTML = `<div class="p-4 text-center text-sub text-xs">お知らせはありません</div>`;
                 s.forEach(d => {
                     const n = d.data();
+                    appCache.news[d.id] = n; // キャッシュ
                     const date = n.createdAt ? toDate(n.createdAt).toLocaleDateString() : '';
-                    el.innerHTML += `<div class="card p-2 mb-2" style="background:var(--card-bg)">
-                        <div class="font-bold flex justify-between"><span>${n.title}</span><span class="text-xs text-sub">${date}</span></div>
-                        <div class="text-sm mt-1">${n.body}</div>
-                        ${n.img ? `<img src="${n.img}" style="max-width:100%; border-radius:4px; margin-top:4px;">` : ''}
+                    const thumb = n.img ? `<img src="${n.img}" class="news-thumb">` : `<div class="news-thumb flex items-center justify-center text-xs text-sub">No Img</div>`;
+                    
+                    el.innerHTML += `<div class="news-item" onclick="app.openNewsDetail('${d.id}')">
+                        ${thumb}
+                        <div style="flex:1">
+                            <div class="font-bold text-sm">${n.title}</div>
+                            <div class="text-xs text-sub">${date}</div>
+                        </div>
                     </div>`;
                 });
             });
+        },
+        openNewsDetail: (id) => {
+            const n = appCache.news[id];
+            if(!n) return;
+            const date = n.createdAt ? toDate(n.createdAt).toLocaleString() : '';
+            const html = `
+                <div class="mb-2 text-xs text-sub">${date}</div>
+                ${n.img ? `<img src="${n.img}" style="width:100%; border-radius:8px; margin-bottom:10px;">` : ''}
+                <div style="white-space:pre-wrap; line-height:1.6;">${safeArgs(n.body)}</div>
+            `;
+            app.mdl(n.title, html);
         },
 
         // Chat
@@ -1091,12 +1120,9 @@
                 const isFriend = currentUser.friends && currentUser.friends.includes(uid);
                 let btnHtml = isFriend ? `<button class="btn btn-success mt-2" onclick="app.startDM('${uid}', '${name.replace(/'/g,"\\'")}')">チャットする</button>` : `<button class="btn btn-primary mt-2" onclick="app.sendRequest('${uid}')">友達申請する</button>`;
                 
-                const myB = currentUser.badges || [];
                 // 運営者のみバッジ管理可能に変更
                 if(app.checkAdmSess()) {
                     btnHtml += `<button class="btn btn-warning mt-2" onclick="app.manageBadges('${uid}')">バッジを管理する (運営)</button>`;
-                } else if (myB.includes('developer') || myB.includes('staff')) {
-                     // スタッフ用表示（権限があれば）
                 }
 
                 app.mdl("プロフィール", `<div style="text-align:center"><div style="font-size:3rem; margin-bottom:10px;"><svg class="icon icon-xl" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div><h3>${target.name}</h3><div class="mb-2">${app.getBadgesHtml(target.badges)}</div><p class="text-sub text-xs mb-4">ID: ${uid}</p>${btnHtml}</div>`);
@@ -1217,7 +1243,7 @@
         toggleMic: () => { if(localStream) { const t = localStream.getAudioTracks()[0]; if(t) { t.enabled = !t.enabled; document.getElementById('btn-mic-toggle').classList.toggle('active', t.enabled); } } },
         toggleVideo: async () => { app.toast("ビデオ切替"); },
 
-        // Friends & DM
+        // Friends & DM (Fix)
         searchUserForFriendInline: async () => {
             const tid = document.getElementById('inline-friend-id').value.trim();
             const resDiv = document.getElementById('inline-friend-result');
@@ -1278,16 +1304,22 @@
             listeners.dmList = onSnapshot(doc(db, "users", uid), async s => {
                 if (!s.exists()) return;
                 const friends = s.data().friends || [];
-                const list = document.getElementById('dm-list-box'); if(!list) return; list.innerHTML = "";
-                for(const fid of friends) {
-                    try {
-                        const fSnap = await getDoc(doc(db, "users", fid));
-                        if(fSnap.exists()) {
-                            const fData = fSnap.data();
-                            list.innerHTML += `<div class="dm-item" onclick="app.startDM('${fid}', '${fData.name.replace(/'/g,"\\'")}')"><div class="dm-icon">${fData.name.charAt(0)}</div><div><div class="font-bold text-sm">${fData.name} ${app.getBadgesHtml(fData.badges)}</div><div class="text-xs text-sub">ID: ${fid}</div></div></div>`;
-                        }
-                    } catch(e) {}
-                }
+                const list = document.getElementById('dm-list-box'); if(!list) return; 
+                list.innerHTML = "";
+                
+                // 修正: Promise.allで一括取得して描画（ちらつき防止）
+                const promises = friends.map(fid => getDoc(doc(db, "users", fid)).catch(()=>null));
+                const snaps = await Promise.all(promises);
+                
+                let html = "";
+                snaps.forEach((fSnap, i) => {
+                    if(fSnap && fSnap.exists()) {
+                        const fData = fSnap.data();
+                        const fid = friends[i];
+                        html += `<div class="dm-item" onclick="app.startDM('${fid}', '${fData.name.replace(/'/g,"\\'")}')"><div class="dm-icon">${fData.name.charAt(0)}</div><div><div class="font-bold text-sm">${fData.name} ${app.getBadgesHtml(fData.badges)}</div><div class="text-xs text-sub">ID: ${fid}</div></div></div>`;
+                    }
+                });
+                list.innerHTML = html || "<div class='text-xs text-sub p-2'>友達がいません</div>";
             });
         },
         startDM: async (targetUid, targetName) => {
@@ -1782,6 +1814,7 @@
             let vc="cotobato-admin"; try { const d=await getDoc(doc(db,"system","config")); if(d.exists() && d.data().code) vc=d.data().code; } catch(e) {}
             if(c===vc){ localStorage.setItem(ADM_KEY, Date.now()+1800000); document.getElementById('nav-adm-pc').classList.remove('hidden'); app.tab('admin'); app.toast("認証成功"); document.getElementById('adm-code').value=""; } else app.toast("違います");
         },
+        // ユーザー処罰
         applyPenalty: async (type) => {
             if(!app.checkAdmSess()) return;
             const uid = document.getElementById('adm-police-uid').value.trim();
@@ -1796,7 +1829,7 @@
                 
                 if(type === 'mute') {
                     changes.isMuted = true;
-                    // 1週間後のDateオブジェクトをFirestore Timestampに変換して保存
+                    // 1週間後
                     const d = new Date(); d.setDate(d.getDate() + 7);
                     changes.muteExpiresAt = Timestamp.fromDate(d);
                 }
@@ -1812,16 +1845,19 @@
                 
                 await updateDoc(ref, changes);
                 app.toast(`実行しました: ${type}`);
+                app.admLoadPunishedUsers(); // リスト更新
             } catch(e) { app.toast('エラー: ユーザー不在など'); }
         },
         subAdmList: () => {
+            // お知らせ一覧
             onSnapshot(query(collection(db,"announcements"), limit(50)), s=>{
                 const l=document.getElementById('adm-list-news'); l.innerHTML="";
-                s.forEach(d=>{ const n=d.data(); l.innerHTML+=`<div class="card p-2 mb-2 flex justify-between"><div>${n.title}</div><button class="btn btn-sm btn-danger" onclick="app.delDoc('announcements','${d.id}')">削除</button></div>`; });
+                s.forEach(d=>{ const n=d.data(); l.innerHTML+=`<div class="card p-2 mb-2 flex justify-between"><div>${n.title}</div><div class="flex gap-2"><button class="btn btn-sm btn-ghost" onclick="app.editNews('${d.id}')">編集</button><button class="btn btn-sm btn-danger" onclick="app.delDoc('announcements','${d.id}')">削除</button></div></div>`; });
             });
+            // ギフト一覧
             onSnapshot(query(collection(db,"gifts"), limit(30)), s=>{
                 const l=document.getElementById('adm-list-gifts'); l.innerHTML="";
-                s.forEach(d=>{ const g=d.data(); l.innerHTML+=`<div class="card p-2 mb-2 flex justify-between"><div>${g.val} ${g.type}</div><button class="btn btn-sm btn-danger" onclick="app.delDoc('gifts','${d.id}')">削除</button></div>`; });
+                s.forEach(d=>{ const g=d.data(); l.innerHTML+=`<div class="card p-2 mb-2 flex justify-between"><div>${g.val} ${g.type}</div><div class="flex gap-2"><button class="btn btn-sm btn-ghost" onclick="app.editGift('${d.id}')">編集</button><button class="btn btn-sm btn-danger" onclick="app.delDoc('gifts','${d.id}')">削除</button></div></div>`; });
             });
         },
         admLoadReports: () => {
@@ -1840,18 +1876,128 @@
                 });
             });
         },
+        // 処罰ユーザー一覧（単純なクエリ、インデックスが必要になる場合はエラーが出るため注意）
+        admLoadPunishedUsers: async () => {
+            const box = document.getElementById('adm-punished-list');
+            box.innerHTML = "<div>Loading...</div>";
+            try {
+                // ORクエリは複雑なので2回引く
+                const q1 = query(collection(db,"users"), where("isBanned", "==", true), limit(20));
+                const q2 = query(collection(db,"users"), where("isMuted", "==", true), limit(20));
+                const [s1, s2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+                
+                const map = new Map();
+                s1.forEach(d => map.set(d.id, { ...d.data(), id: d.id, banned: true }));
+                s2.forEach(d => {
+                    const existing = map.get(d.id) || { ...d.data(), id: d.id };
+                    existing.muted = true;
+                    map.set(d.id, existing);
+                });
+
+                box.innerHTML = "";
+                if(map.size === 0) { box.innerHTML = "<div class='text-xs text-sub'>対象者はいません</div>"; return; }
+
+                map.forEach(u => {
+                    let status = [];
+                    if(u.banned) status.push("凍結");
+                    if(u.muted) status.push("Mute");
+                    box.innerHTML += `<div class="card p-2 mb-1 flex justify-between items-center">
+                        <div class="text-xs">
+                            <div class="font-bold">${u.id}</div>
+                            <div class="text-danger">${status.join(", ")}</div>
+                        </div>
+                        <div class="flex gap-1">
+                            ${u.banned ? `<button class="btn btn-sm btn-ghost" onclick="document.getElementById('adm-police-uid').value='${u.id}'; app.applyPenalty('unban')">解凍</button>` : ''}
+                            ${u.muted ? `<button class="btn btn-sm btn-ghost" onclick="document.getElementById('adm-police-uid').value='${u.id}'; app.applyPenalty('unmute')">解M</button>` : ''}
+                        </div>
+                    </div>`;
+                });
+            } catch(e) { 
+                console.error(e);
+                box.innerHTML = "<div class='text-xs text-danger'>インデックス未作成等のため取得失敗</div>"; 
+            }
+        },
+
+        // News Editing
+        editingNewsId: null,
+        editNews: async (id) => {
+            const snap = await getDoc(doc(db,"announcements",id));
+            if(!snap.exists()) return;
+            const d = snap.data();
+            app.editingNewsId = id;
+            document.getElementById('adm-news-title').value = d.title;
+            document.getElementById('adm-news-body').value = d.body;
+            document.getElementById('adm-news-pin').checked = !!d.pin;
+            if(d.publishAt) document.getElementById('adm-news-date').value = new Date(d.publishAt.seconds*1000 - new Date().getTimezoneOffset()*60000).toISOString().slice(0,16);
+            document.getElementById('btn-news-post').innerText = "更新";
+            document.getElementById('btn-news-cancel').classList.remove('hidden');
+            app.toast("編集モード: " + d.title);
+        },
+        resetNewsForm: () => {
+            app.editingNewsId = null;
+            document.getElementById('adm-news-title').value = "";
+            document.getElementById('adm-news-body').value = "";
+            document.getElementById('adm-news-pin').checked = false;
+            document.getElementById('adm-news-date').value = "";
+            document.getElementById('btn-news-post').innerText = "配信登録";
+            document.getElementById('btn-news-cancel').classList.add('hidden');
+        },
         postNews: async () => {
             const ti=document.getElementById('adm-news-title').value, bo=document.getElementById('adm-news-body').value, pi=document.getElementById('adm-news-pin').checked, da=document.getElementById('adm-news-date').value;
             if(!ti) return;
             const d={title:ti, body:bo, pin:pi, createdAt: serverTimestamp()}; 
             if(newsImg) d.img=newsImg; if(da) d.publishAt=Timestamp.fromDate(new Date(da)); else d.publishAt=serverTimestamp();
-            await addDoc(collection(db,"announcements"), d); app.toast("配信しました"); document.getElementById('adm-news-title').value=""; document.getElementById('adm-news-body').value="";
+            
+            if(app.editingNewsId) {
+                await updateDoc(doc(db,"announcements", app.editingNewsId), d);
+                app.toast("更新しました");
+                app.resetNewsForm();
+            } else {
+                await addDoc(collection(db,"announcements"), d); 
+                app.toast("配信しました");
+                app.resetNewsForm();
+            }
+        },
+
+        // Gift Editing
+        editingGiftId: null,
+        editGift: async (id) => {
+            const snap = await getDoc(doc(db,"gifts",id));
+            if(!snap.exists()) return;
+            const d = snap.data();
+            app.editingGiftId = id;
+            document.getElementById('adm-gift-type').value = d.type;
+            document.getElementById('adm-gift-val').value = d.val;
+            document.getElementById('adm-gift-msg').value = d.msg || "";
+            document.getElementById('btn-gift-post').innerText = "更新";
+            document.getElementById('btn-gift-post').classList.remove('btn-danger');
+            document.getElementById('btn-gift-post').classList.add('btn-primary');
+            document.getElementById('btn-gift-cancel').classList.remove('hidden');
+        },
+        resetGiftForm: () => {
+            app.editingGiftId = null;
+            document.getElementById('adm-gift-val').value = "";
+            document.getElementById('adm-gift-msg').value = "";
+            document.getElementById('btn-gift-post').innerText = "全員に配布";
+            document.getElementById('btn-gift-post').classList.add('btn-danger');
+            document.getElementById('btn-gift-post').classList.remove('btn-primary');
+            document.getElementById('btn-gift-cancel').classList.add('hidden');
         },
         distributeGift: async () => {
             const ty=document.getElementById('adm-gift-type').value, va=parseInt(document.getElementById('adm-gift-val').value), ms=document.getElementById('adm-gift-msg').value;
             if(!va) return;
-            await addDoc(collection(db,"gifts"), {type:ty, val:va, msg:ms, to:"all", claimedBy:[], createdAt:serverTimestamp()}); app.toast("配布しました");
+            
+            if(app.editingGiftId) {
+                await updateDoc(doc(db,"gifts",app.editingGiftId), {type:ty, val:va, msg:ms});
+                app.toast("更新しました");
+                app.resetGiftForm();
+            } else {
+                await addDoc(collection(db,"gifts"), {type:ty, val:va, msg:ms, to:"all", claimedBy:[], createdAt:serverTimestamp()}); 
+                app.toast("配布しました");
+                app.resetGiftForm();
+            }
         },
+
         delDoc: async (c,i) => { if(confirm("削除しますか？")) await deleteDoc(doc(db,c,i)); },
         admLoadStampQueue: async () => {
             const box = document.getElementById('adm-stamp-queue'); if(!box) return; box.innerHTML = "";
@@ -1883,4 +2029,3 @@
 </script>
 </body>
 </html>
-```
