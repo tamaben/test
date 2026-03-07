@@ -10,8 +10,29 @@
         body { margin: 0; overflow: hidden; touch-action: none; font-family: 'Inter', sans-serif; color: white; user-select: none; background: #020617; }
         #bg-gradient { position: absolute; inset: 0; z-index: -2; background: radial-gradient(circle at center, #0f172a 0%, #020617 100%); transition: opacity 0.5s; }
         
-        #camera-video { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; object-fit: cover; opacity: 0; z-index: -3; pointer-events: none; transition: opacity 0.5s; }
-        #ar-overlay { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; opacity: 0; transition: opacity 0.5s; }
+        /* カメラコンテナ（ワイプ表示用） */
+        #camera-container {
+            position: absolute;
+            top: 130px; /* プレイヤータイマーの下 */
+            left: 20px;
+            width: 240px;
+            z-index: 50;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            background: #000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #camera-container.active { opacity: 1; pointer-events: auto; }
+        
+        #camera-video { width: 100%; height: auto; display: block; object-fit: cover; transform: scaleX(-1); }
+        #ar-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
 
         #canvas-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; pointer-events: auto; }
         .ui-layer { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 10; display: flex; flex-direction: column; pointer-events: none; }
@@ -23,7 +44,7 @@
 
         @media (max-width: 768px) {
             .vs-divider { top: 50%; left: 0; width: 100%; height: 2px; background: linear-gradient(to right, transparent, rgba(6,182,212,0.6) 20%, rgba(239,68,68,0.6) 80%, transparent); transform: translateY(-50%); }
-            .ar-mode-active .vs-divider { opacity: 0; }
+            #camera-container { top: auto; bottom: 160px; left: 10px; width: 140px; } /* スマホ時は下部に配置 */
         }
 
         .toast-enter { animation: slideDown 0.3s ease-out forwards; }
@@ -31,9 +52,6 @@
         @keyframes slideDown { from { transform: translate(-50%, -100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
         @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
 
-        .ar-mode-active #vs-logo { opacity: 0.1 !important; }
-        .ar-mode-active #top-stats { background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
-        
         @keyframes btPulse { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); } }
         .bt-active { border-color: #3b82f6 !important; animation: btPulse 2s infinite; background: rgba(30, 58, 138, 0.8) !important; color: #93c5fd !important; }
 
@@ -43,8 +61,12 @@
 <body>
 
     <div id="bg-gradient"></div>
-    <video id="camera-video" playsinline autoplay muted></video>
-    <canvas id="ar-overlay"></canvas>
+    
+    <!-- カメラ映像表示用コンテナ（ワイプ） -->
+    <div id="camera-container">
+        <video id="camera-video" playsinline autoplay muted></video>
+        <canvas id="ar-overlay"></canvas>
+    </div>
 
     <div id="canvas-container"></div>
     <div class="vs-divider"></div>
@@ -96,7 +118,7 @@
                     <button id="btn-camera" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold py-2 md:py-3 rounded-xl border border-emerald-800/50 transition-all text-[9px] md:text-xs flex flex-col items-center justify-center shadow-lg active:scale-95 cursor-pointer">
                         <svg class="w-5 h-5 mb-1 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                         <span class="block">MULTI DETECTOR</span>
-                        <span class="text-[7px] md:text-[9px] text-slate-400 font-normal mt-0.5">複数キューブ検出</span>
+                        <span class="text-[7px] md:text-[9px] text-slate-400 font-normal mt-0.5">カメラモニタリング</span>
                     </button>
                     <button id="btn-prep" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 md:py-3 rounded-xl border border-indigo-400 transition-all text-[9px] md:text-xs flex flex-col items-center justify-center shadow-[0_0_20px_rgba(79,70,229,0.4)] active:scale-95 cursor-pointer">
                         <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
@@ -159,21 +181,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const dirLight1 = new THREE.DirectionalLight(0xffffff, 0.7); dirLight1.position.set(10, 20, 15); scene.add(dirLight1);
 
         /**
-         * ========================================================
-         * 変更点: 世界基準配色 かつ 白をD面（底面）にする設定
-         * ========================================================
-         * 通常: U=White, D=Yellow, F=Green, B=Blue, R=Red, L=Orange
-         * 指定: U=Yellow, D=White (白を底面)
-         * 正しい配色(Chirality)を保つため:
-         * Top(Yellow) & Front(Green) の場合 -> Rightは Orange, Leftは Red となる。
+         * 世界基準配色設定
+         * U=Yellow, D=White (白を底面)
+         * 正しいChirality: Top(Yellow), Front(Green) -> Right(Orange), Left(Red), Back(Blue)
          */
         const colors = { 
             U: 0xFFD500, // Yellow (Up)
             D: 0xFFFFFF, // White  (Down/Bottom)
             F: 0x009E60, // Green  (Front)
             B: 0x0051BA, // Blue   (Back)
-            R: 0xFF5800, // Orange (Right) - 世界基準で黄上が上の場合、右はオレンジ
-            L: 0xC41E3A, // Red    (Left)  - 左は赤
+            R: 0xFF5800, // Orange (Right)
+            L: 0xC41E3A, // Red    (Left)
             In: 0x111111 // 内部
         };
         const cubieSize = 1, spacing = 1.02;
@@ -450,6 +468,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 複数キューブ検出・カメラ選択機能 (マルチARトラッカー)
         // ========================================================
         const video = document.getElementById('camera-video'), arOverlay = document.getElementById('ar-overlay');
+        const cameraContainer = document.getElementById('camera-container');
         const arCtx = arOverlay.getContext('2d');
         
         let currentStream = null;
@@ -512,11 +531,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 document.getElementById('btn-camera').classList.replace('bg-slate-800', 'bg-emerald-900');
                 document.getElementById('btn-camera').classList.replace('border-emerald-800/50', 'border-emerald-500');
-                document.body.classList.add('ar-mode-active'); document.getElementById('bg-gradient').style.opacity = '0.9'; 
-                video.style.opacity = '0.4'; arOverlay.style.opacity = '1';
-                playerCube.basePivot.position.set(0, 0, 0); playerCube.humanPivot.rotation.set(0,0,0);
                 
-                showToast("🤖 MULTI DETECTOR 起動<br><span class='text-xs'>画面内のすべてのキューブを検出し、メインを同期します。</span>", "success");
+                // コンテナを表示（ワイプ表示）
+                cameraContainer.classList.add('active');
+                
+                showToast("🤖 MULTI DETECTOR 起動<br><span class='text-xs'>画面左上のモニタリングビューでキューブを確認してください。</span>", "success");
             } catch(err) { showToast("カメラが利用できません。", "error"); }
         }
 
@@ -525,8 +544,9 @@ document.addEventListener('DOMContentLoaded', () => {
             setInputMode('MANUAL');
             document.getElementById('btn-camera').classList.replace('bg-emerald-900', 'bg-slate-800');
             document.getElementById('btn-camera').classList.replace('border-emerald-500', 'border-emerald-800/50');
-            document.body.classList.remove('ar-mode-active');
-            document.getElementById('bg-gradient').style.opacity = '1'; video.style.opacity = '0'; arOverlay.style.opacity = '0';
+            
+            cameraContainer.classList.remove('active');
+            
             updateLayout(); forceSolvePlayerCube();
         }
 
@@ -552,8 +572,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (v < 30 || (s < 20 && v < 50)) return null; 
             if (s < 25 && v > 50) return { name: 'D', hex: 0xFFFFFF, rgb: [255,255,255] }; // White (now D)
             if (s > 40) {
-                // 赤(L), 橙(R), 黄(U), 緑(F), 青(B)
-                // 3Dモデルの色設定に合わせて判定を返す
                 if (h < 15 || h > 340) return { name: 'L', hex: 0xC41E3A, rgb:[196,30,58] }; // Red
                 if (h >= 15 && h < 45) return { name: 'R', hex: 0xFF5800, rgb:[255,88,0] };  // Orange
                 if (h >= 45 && h < 80) return { name: 'U', hex: 0xFFD500, rgb:[255,213,0] }; // Yellow
@@ -563,7 +581,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return null;
         }
 
-        // 複数キューブ（Blob）の検出
         function detectCubes(ctx, width, height) {
             const imgData = ctx.getImageData(0, 0, width, height).data;
             const pixels = new Uint8Array(width * height);
@@ -602,7 +619,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             
-            // 近接するBlobを統合（キューブの隙間対策）
             let merged = true;
             while(merged) {
                 merged = false;
@@ -622,14 +638,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             
-            // キューブらしい比率のものだけを抽出
             return blobs.filter(b => {
                 const w = b.maxX - b.minX, h = b.maxY - b.minY, aspect = w / h;
                 return w > 15 && h > 15 && aspect > 0.4 && aspect < 2.5;
             }).map(b => ({ x: (b.minX + b.maxX) / 2, y: (b.minY + b.maxY) / 2, w: b.maxX - b.minX, h: b.maxY - b.minY }));
         }
 
-        // キューブの面（3x3グリッド）の色をサンプリング
         function sampleCubeColors(ctx, cube, pWidth, pHeight) {
             const grid =[]; const stepX = cube.w / 3, stepY = cube.h / 3;
             for(let r=0; r<3; r++) {
@@ -646,15 +660,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return grid;
         }
 
-        // すべてのキューブにAR枠を描画
         function drawMultipleARGuides(cubes, scaleX, scaleY) {
             const w = arOverlay.width, h = arOverlay.height;
             arCtx.clearRect(0, 0, w, h);
             if(inputMode !== 'CAMERA') return;
-
-            arCtx.fillStyle = 'rgba(255, 255, 255, 0.9)'; arCtx.font = 'bold 16px "Inter", sans-serif'; 
-            arCtx.textAlign = 'center'; arCtx.shadowColor = 'rgba(0,0,0,0.8)'; arCtx.shadowBlur = 8;
-            arCtx.fillText("AUTO-DETECTING ALL CUBES", w/2, 40); arCtx.shadowBlur = 0;
 
             cubes.forEach((cube, index) => {
                 const realX = cube.x * scaleX, realY = cube.y * scaleY, realW = cube.w * scaleX, realH = cube.h * scaleY;
@@ -662,19 +671,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const drawY = realY;
 
                 arCtx.strokeStyle = cube.isMain ? '#10b981' : '#3b82f6'; 
-                arCtx.lineWidth = cube.isMain ? 4 : 2;
+                arCtx.lineWidth = cube.isMain ? 3 : 1;
                 arCtx.strokeRect(drawX - realW/2, drawY - realH/2, realW, realH);
-
-                arCtx.fillStyle = cube.isMain ? '#10b981' : '#3b82f6';
-                arCtx.font = 'bold 12px "Inter", sans-serif';
-                arCtx.fillText(cube.isMain ? "MAIN CUBE" : `CUBE ${index+1}`, drawX, drawY - realH/2 - 10);
 
                 const miniStep = realW / 3, startX = drawX - realW/2, startY = drawY - realH/2;
                 cube.colors.forEach((col, i) => {
                     const r = Math.floor(i / 3), c = i % 3;
                     const drawC = isVideoMirrored ? (2 - c) : c;
                     arCtx.fillStyle = `rgb(${col.rgb.join(',')})`;
-                    arCtx.fillRect(startX + drawC * miniStep + 2, startY + r * miniStep + 2, miniStep - 4, miniStep - 4);
+                    arCtx.fillRect(startX + drawC * miniStep + 1, startY + r * miniStep + 1, miniStep - 2, miniStep - 2);
                 });
             });
         }
@@ -682,14 +687,20 @@ document.addEventListener('DOMContentLoaded', () => {
         function runAutoTrackerEngine() {
             if (inputMode !== 'CAMERA' || video.readyState !== video.HAVE_ENOUGH_DATA) return;
             
+            // ワイプ内のキャンバスサイズ調整
+            if (arOverlay.width !== cameraContainer.clientWidth || arOverlay.height !== cameraContainer.clientHeight) {
+                arOverlay.width = cameraContainer.clientWidth;
+                arOverlay.height = cameraContainer.clientHeight;
+            }
+
             const videoAspect = video.videoWidth / video.videoHeight;
             processCanvas.height = 120; processCanvas.width = Math.floor(120 * videoAspect);
             processCtx.drawImage(video, 0, 0, processCanvas.width, processCanvas.height);
             
             const detectedCubes = detectCubes(processCtx, processCanvas.width, processCanvas.height);
             
-            if (arOverlay.width !== window.innerWidth) { arOverlay.width = window.innerWidth; arOverlay.height = window.innerHeight; }
-            const scaleX = window.innerWidth / processCanvas.width, scaleY = window.innerHeight / processCanvas.height;
+            // スケール計算は ワイプサイズ / プロセスサイズ
+            const scaleX = arOverlay.width / processCanvas.width, scaleY = arOverlay.height / processCanvas.height;
             const centerX = processCanvas.width / 2, centerY = processCanvas.height / 2;
 
             let mainCube = null, minDist = Infinity;
@@ -703,16 +714,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (mainCube) {
                 mainCube.isMain = true;
                 // メインキューブの色をサイト内の正面(F面)に同期
-                // F面は z=1 の面。
                 mainCube.colors.forEach((col, i) => {
-                    // グリッド(i) 0~8 を 3x3 に展開
-                    // F面: xは -1, 0, 1 / yは 1, 0, -1
                     const logicX = (i % 3) - 1;
                     const logicY = 1 - Math.floor(i / 3);
                     const logicZ = 1; 
                     
                     const cubie = playerCube.allCubies.find(cb => Math.abs(cb.userData.logicPos.x - logicX) < 0.1 && Math.abs(cb.userData.logicPos.y - logicY) < 0.1 && Math.abs(cb.userData.logicPos.z - logicZ) < 0.1);
-                    // マテリアルインデックス 4 が F面 (getMats参照: z===1)
                     if (cubie && col.name !== 'In') cubie.material[4].color.setHex(col.hex);
                 });
                 
