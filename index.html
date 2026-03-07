@@ -15,11 +15,11 @@
             position: absolute;
             top: 130px; /* プレイヤータイマーの下 */
             left: 20px;
-            width: 260px; /* 少し大きくしました */
+            width: 260px;
             z-index: 50;
             border-radius: 12px;
             overflow: hidden;
-            border: 1px solid rgba(16, 185, 129, 0.3); /* エメラルド色の枠 */
+            border: 1px solid rgba(16, 185, 129, 0.5);
             box-shadow: 0 4px 20px rgba(0,0,0,0.6);
             background: #000;
             opacity: 0;
@@ -31,13 +31,13 @@
         }
         #camera-container.active { opacity: 1; pointer-events: auto; }
         
-        /* スキャンラインアニメーション */
+        /* SFチックなスキャンライン */
         #camera-scanline {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to bottom, transparent, rgba(16, 185, 129, 0.1) 50%, transparent);
+            background: linear-gradient(to bottom, transparent, rgba(16, 185, 129, 0.2) 50%, transparent);
             background-size: 100% 200%;
-            animation: scanAnim 3s linear infinite;
+            animation: scanAnim 2s linear infinite;
             pointer-events: none;
             z-index: 2;
         }
@@ -56,7 +56,7 @@
 
         @media (max-width: 768px) {
             .vs-divider { top: 50%; left: 0; width: 100%; height: 2px; background: linear-gradient(to right, transparent, rgba(6,182,212,0.6) 20%, rgba(239,68,68,0.6) 80%, transparent); transform: translateY(-50%); }
-            #camera-container { top: auto; bottom: 160px; left: 10px; width: 140px; } 
+            #camera-container { top: auto; bottom: 180px; left: 20px; width: 140px; } 
         }
 
         .toast-enter { animation: slideDown 0.3s ease-out forwards; }
@@ -74,7 +74,7 @@
 
     <div id="bg-gradient"></div>
     
-    <!-- カメラ映像表示用コンテナ（ワイプ） -->
+    <!-- 左上ワイプ：カメラ映像＆ARスキャン表示 -->
     <div id="camera-container">
         <div id="camera-scanline"></div>
         <video id="camera-video" playsinline autoplay muted></video>
@@ -111,6 +111,7 @@
                 <p id="scramble-text" class="text-sm md:text-lg text-yellow-400 font-mono font-bold tracking-wider leading-relaxed"></p>
             </div>
 
+            <!-- カメラ切り替えUI -->
             <div id="camera-select-wrapper" class="hidden max-w-4xl mx-auto mb-3 text-center pointer-auto">
                 <div class="inline-flex items-center bg-slate-800/80 p-1.5 rounded-xl border border-slate-600 backdrop-blur-md shadow-lg transition-transform active:scale-95">
                     <svg class="w-4 h-4 text-emerald-400 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
@@ -129,8 +130,8 @@
                     </button>
                     <button id="btn-camera" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold py-2 md:py-3 rounded-xl border border-emerald-800/50 transition-all text-[9px] md:text-xs flex flex-col items-center justify-center shadow-lg active:scale-95 cursor-pointer">
                         <svg class="w-5 h-5 mb-1 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                        <span class="block">MULTI DETECTOR</span>
-                        <span class="text-[7px] md:text-[9px] text-slate-400 font-normal mt-0.5">カメラモニタリング</span>
+                        <span class="block">AUTO DETECT</span>
+                        <span class="text-[7px] md:text-[9px] text-slate-400 font-normal mt-0.5">カメラ自動検出</span>
                     </button>
                     <button id="btn-prep" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 md:py-3 rounded-xl border border-indigo-400 transition-all text-[9px] md:text-xs flex flex-col items-center justify-center shadow-[0_0_20px_rgba(79,70,229,0.4)] active:scale-95 cursor-pointer">
                         <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
@@ -194,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const colors = { 
             U: 0xFFD500, // Yellow
-            D: 0xFFFFFF, // White (Bottom)
+            D: 0xFFFFFF, // White
             F: 0x009E60, // Green
             B: 0x0051BA, // Blue
             R: 0xFF5800, // Orange
@@ -542,14 +543,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function getCubeColorType(r, g, b) {
             const[h, s, v] = rgbToHsv(r, g, b);
-            if (v < 30 || (s < 20 && v < 50)) return null; 
-            if (s < 25 && v > 50) return { name: 'D', hex: 0xFFFFFF, rgb: [255,255,255] }; 
-            if (s > 40) {
-                if (h < 15 || h > 340) return { name: 'L', hex: 0xC41E3A, rgb:[196,30,58] }; 
-                if (h >= 15 && h < 45) return { name: 'R', hex: 0xFF5800, rgb:[255,88,0] };  
-                if (h >= 45 && h < 80) return { name: 'U', hex: 0xFFD500, rgb:[255,213,0] }; 
-                if (h >= 80 && h < 165) return { name: 'F', hex: 0x009E60, rgb:[0,158,96] }; 
-                if (h >= 165 && h < 260) return { name: 'B', hex: 0x0051BA, rgb:[0,81,186] }; 
+            // 閾値を緩めて検出力を強化
+            if (v < 20) return null; // 暗すぎるピクセルのみ除外
+            if (s < 30 && v > 40) return { name: 'D', hex: 0xFFFFFF, rgb: [255,255,255] }; 
+            if (s > 25) { // 彩度閾値を下げて鈍い色も検出
+                if (h < 12 || h > 345) return { name: 'L', hex: 0xC41E3A, rgb:[196,30,58] }; 
+                if (h >= 12 && h < 45) return { name: 'R', hex: 0xFF5800, rgb:[255,88,0] };  
+                if (h >= 45 && h < 85) return { name: 'U', hex: 0xFFD500, rgb:[255,213,0] }; 
+                if (h >= 85 && h < 170) return { name: 'F', hex: 0x009E60, rgb:[0,158,96] }; 
+                if (h >= 170 && h < 260) return { name: 'B', hex: 0x0051BA, rgb:[0,81,186] }; 
             }
             return null;
         }
@@ -629,21 +631,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 const drawY = realY;
                 const halfW = realW / 2, halfH = realH / 2;
 
-                // コーナーブラケット（ターゲットスコープ風）
+                // SFチックなターゲットスコープ（四隅のみ表示）
                 arCtx.strokeStyle = cube.isMain ? '#10b981' : '#3b82f6'; 
                 arCtx.lineWidth = 3;
                 const cornerLen = Math.min(realW, realH) * 0.25;
 
-                // 左上
                 arCtx.beginPath(); arCtx.moveTo(drawX - halfW, drawY - halfH + cornerLen); arCtx.lineTo(drawX - halfW, drawY - halfH); arCtx.lineTo(drawX - halfW + cornerLen, drawY - halfH); arCtx.stroke();
-                // 右上
                 arCtx.beginPath(); arCtx.moveTo(drawX + halfW - cornerLen, drawY - halfH); arCtx.lineTo(drawX + halfW, drawY - halfH); arCtx.lineTo(drawX + halfW, drawY - halfH + cornerLen); arCtx.stroke();
-                // 左下
                 arCtx.beginPath(); arCtx.moveTo(drawX - halfW, drawY + halfH - cornerLen); arCtx.lineTo(drawX - halfW, drawY + halfH); arCtx.lineTo(drawX - halfW + cornerLen, drawY + halfH); arCtx.stroke();
-                // 右下
                 arCtx.beginPath(); arCtx.moveTo(drawX + halfW - cornerLen, drawY + halfH); arCtx.lineTo(drawX + halfW, drawY + halfH); arCtx.lineTo(drawX + halfW, drawY + halfH - cornerLen); arCtx.stroke();
 
-                // 検出された有効なステッカーのみをハイライト
+                // 検出された色セルだけをハイライト（スキャンされた面を強調）
                 const miniStep = realW / 3, startX = drawX - halfW, startY = drawY - halfH;
                 cube.colors.forEach((col, i) => {
                     if (col.name !== 'In') {
@@ -652,12 +650,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         const px = startX + drawC * miniStep;
                         const py = startY + r * miniStep;
                         
-                        // 枠線
                         arCtx.strokeStyle = `rgb(${col.rgb.join(',')})`;
                         arCtx.lineWidth = 2;
                         arCtx.strokeRect(px + 4, py + 4, miniStep - 8, miniStep - 8);
                         
-                        // 薄い塗りつぶし
                         arCtx.fillStyle = `rgba(${col.rgb.join(',')}, 0.3)`;
                         arCtx.fillRect(px + 4, py + 4, miniStep - 8, miniStep - 8);
                     }
