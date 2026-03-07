@@ -31,7 +31,6 @@
         }
         #camera-container.active { opacity: 1; pointer-events: auto; }
         
-        /* SFチックなスキャンライン */
         #camera-scanline {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -74,7 +73,6 @@
 
     <div id="bg-gradient"></div>
     
-    <!-- 左上ワイプ：カメラ映像＆ARスキャン表示 -->
     <div id="camera-container">
         <div id="camera-scanline"></div>
         <video id="camera-video" playsinline autoplay muted></video>
@@ -111,7 +109,6 @@
                 <p id="scramble-text" class="text-sm md:text-lg text-yellow-400 font-mono font-bold tracking-wider leading-relaxed"></p>
             </div>
 
-            <!-- カメラ切り替えUI -->
             <div id="camera-select-wrapper" class="hidden max-w-4xl mx-auto mb-3 text-center pointer-auto">
                 <div class="inline-flex items-center bg-slate-800/80 p-1.5 rounded-xl border border-slate-600 backdrop-blur-md shadow-lg transition-transform active:scale-95">
                     <svg class="w-4 h-4 text-emerald-400 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
@@ -314,6 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let easeFunc;
             if (lockup) {
+                // 失敗: ガタガタして戻るか、無理やり進む
                 easeFunc = (t) => {
                     if (t >= 1) return 1;
                     if (t < 0.2) return t * 1.5; 
@@ -323,6 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     return 0.7 + remain * 0.3 + Math.sin(remain * Math.PI) * 0.02;
                 };
             } else {
+                // 通常: マグネットアシスト
                 easeFunc = (t) => {
                     if (t >= 1) return 1;
                     let val = 0;
@@ -343,14 +342,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 pivot.rotation[bestAbsAxis] = angle * absSign * easeFunc(t); 
                 if (t < 1) requestAnimationFrame(animateMove);
                 else {
-                    pivot.rotation[bestAbsAxis] = angle * absSign; pivot.updateMatrixWorld();
+                    // コーナーカット表現: 完全に揃わず微小にズレる
+                    const imperfectAlign = (Math.random() - 0.5) * 0.05; 
+                    pivot.rotation[bestAbsAxis] = angle * absSign + imperfectAlign; 
+                    
+                    pivot.updateMatrixWorld();
                     cubies.forEach(c => cubeObj.cubeGroup.attach(c)); cubeObj.scenePivot.remove(pivot);
+                    
+                    // 論理的には整列させる
                     cubies.forEach(cubie => {
                         const p = cubie.position; p.x = Math.round(p.x/spacing)*spacing; p.y = Math.round(p.y/spacing)*spacing; p.z = Math.round(p.z/spacing)*spacing;
                         const e = new THREE.Euler().setFromQuaternion(cubie.quaternion);
                         e.x = Math.round(e.x/(Math.PI/2))*(Math.PI/2); e.y = Math.round(e.y/(Math.PI/2))*(Math.PI/2); e.z = Math.round(e.z/(Math.PI/2))*(Math.PI/2);
                         cubie.quaternion.setFromEuler(e);
                     });
+                    
                     cubeObj.isAnimating = false;
                     if (cubeObj.isAI) cubeObj.aiBaseTargetEuler.set(0.4, -0.4, 0); 
                     checkSolveState();
@@ -371,7 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const sets = { 
                 1: { tps: 0.8, regrip: 0.9, pTime: 1500, lockup: 0.5,  overshoot: 0.25, tilt: 0.4, splitU2: true },   
                 2: { tps: 1.5, regrip: 0.7, pTime: 800,  lockup: 0.3,  overshoot: 0.15, tilt: 0.3, splitU2: true },   
-                3: { tps: 3.0, regrip: 0.4, pTime: 400,  lockup: 0.15, overshoot: 0.08, tilt: 0.2, splitU2: false }, 
+                3: { tps: 3.0, regrip: 0.5, pTime: 400,  lockup: 0.25, overshoot: 0.08, tilt: 0.2, splitU2: false }, // より人間らしく劣化
                 4: { tps: 5.5, regrip: 0.2, pTime: 150,  lockup: 0.05, overshoot: 0.04, tilt: 0.15,  splitU2: false }, 
                 5: { tps: 8.5, regrip: 0.05, pTime: 50,  lockup: 0.01, overshoot: 0.01, tilt: 0.1, splitU2: false }, 
                 6: { tps: 15.0,regrip: 0,    pTime: 0,   lockup: 0,    overshoot: 0,    tilt: 0.05, splitU2: false }  
@@ -517,7 +523,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('btn-camera').classList.replace('bg-slate-800', 'bg-emerald-900');
                 document.getElementById('btn-camera').classList.replace('border-emerald-800/50', 'border-emerald-500');
                 cameraContainer.classList.add('active');
-                showToast("🤖 MULTI DETECTOR 起動<br><span class='text-xs'>画面左上のモニタリングビューでキューブを確認してください。</span>", "success");
+                showToast("🤖 AUTO DETECT 起動<br><span class='text-xs'>キューブを自動認識し、動きと色を同期します。</span>", "success");
             } catch(err) { showToast("カメラが利用できません。", "error"); }
         }
 
@@ -543,10 +549,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function getCubeColorType(r, g, b) {
             const[h, s, v] = rgbToHsv(r, g, b);
-            // 閾値を緩めて検出力を強化
-            if (v < 20) return null; // 暗すぎるピクセルのみ除外
+            if (v < 20) return null; 
             if (s < 30 && v > 40) return { name: 'D', hex: 0xFFFFFF, rgb: [255,255,255] }; 
-            if (s > 25) { // 彩度閾値を下げて鈍い色も検出
+            if (s > 25) { 
                 if (h < 12 || h > 345) return { name: 'L', hex: 0xC41E3A, rgb:[196,30,58] }; 
                 if (h >= 12 && h < 45) return { name: 'R', hex: 0xFF5800, rgb:[255,88,0] };  
                 if (h >= 45 && h < 85) return { name: 'U', hex: 0xFFD500, rgb:[255,213,0] }; 
@@ -631,7 +636,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const drawY = realY;
                 const halfW = realW / 2, halfH = realH / 2;
 
-                // SFチックなターゲットスコープ（四隅のみ表示）
                 arCtx.strokeStyle = cube.isMain ? '#10b981' : '#3b82f6'; 
                 arCtx.lineWidth = 3;
                 const cornerLen = Math.min(realW, realH) * 0.25;
@@ -641,7 +645,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 arCtx.beginPath(); arCtx.moveTo(drawX - halfW, drawY + halfH - cornerLen); arCtx.lineTo(drawX - halfW, drawY + halfH); arCtx.lineTo(drawX - halfW + cornerLen, drawY + halfH); arCtx.stroke();
                 arCtx.beginPath(); arCtx.moveTo(drawX + halfW - cornerLen, drawY + halfH); arCtx.lineTo(drawX + halfW, drawY + halfH); arCtx.lineTo(drawX + halfW, drawY + halfH - cornerLen); arCtx.stroke();
 
-                // 検出された色セルだけをハイライト（スキャンされた面を強調）
                 const miniStep = realW / 3, startX = drawX - halfW, startY = drawY - halfH;
                 cube.colors.forEach((col, i) => {
                     if (col.name !== 'In') {
@@ -725,10 +728,24 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (state === 'STOP') { txt.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path></svg> TAP TO STOP'; btnManualTimer.className = "md:col-span-1 bg-red-600/90 text-white font-black py-3 md:py-4 rounded-xl border-2 border-red-400 transition-all text-xs md:text-sm cursor-pointer shadow-[0_0_20px_rgba(239,68,68,0.5)] relative overflow-hidden group active:scale-[0.98] select-none touch-manipulation"; }
         }
 
+        // AIのエンドレスループ機能
+        function runAILoop() {
+            if (gameState !== 'BATTLING') return;
+            const newScramble = generateShortScramble();
+            // 高速スクランブル -> 人間らしいソルブ -> 再帰呼び出し
+            const scrambleSeq = newScramble.map(m => ({ move: m, duration: 80 }));
+            playSequence(aiCube, scrambleSeq, () => {
+                const solveSeq = generateHumanLikeSolve(newScramble, aiLevel);
+                playSequence(aiCube, solveSeq, () => {
+                    if (gameState === 'BATTLING') setTimeout(runAILoop, 500); // 0.5秒休憩して次へ
+                });
+            });
+        }
+
         function generateShortScramble() { const moves =["U", "D", "R", "L", "F", "B"], mods = ["", "'", "2"], sc =[]; let lastFace = ""; for(let i=0; i<12; i++) { let f; do { f = moves[Math.floor(Math.random() * moves.length)]; } while (f === lastFace); lastFace = f; sc.push(f + mods[Math.floor(Math.random() * mods.length)]); } return sc; }
         document.getElementById('btn-prep').addEventListener('click', () => { if (gameState === 'BATTLING' || gameState === 'PREPPING') return; gameState = 'PREPPING'; resetCubes(); updateTimerUI('WAITING'); toggleControlsForBattle(false); elTimerPlayer.style.color = 'white'; elTimerPlayer.innerText = "0.00"; elTimerAi.innerText = "0.00"; elStatusPlayer.innerText = "Scrambling..."; elStatusAi.innerText = "Strategy..."; currentScramble = generateShortScramble(); document.getElementById('scramble-text').innerText = currentScramble.join(' '); document.getElementById('scramble-box').classList.remove('hidden'); aiSolveSequence = generateHumanLikeSolve(currentScramble, aiLevel); const pSeq = currentScramble.map(m => ({ move: m, duration: 80 })); let d = 0; playSequence(playerCube, pSeq, () => { d++; if(d===2) ready(); }); playSequence(aiCube, pSeq, () => { d++; if(d===2) ready(); }); function ready() { gameState = 'PREPARED'; elStatusPlayer.innerText = "READY!"; elStatusAi.innerText = "READY!"; updateTimerUI('READY'); } });
         function handleTimerAction() { if (gameState === 'PREPARED') startBattle(); else if (gameState === 'BATTLING') forceStopBattle(); else if (gameState === 'IDLE' || gameState === 'FINISHED') showToast("先に「PREPARE」ボタンを押して準備してください", "info"); }
-        function startBattle() { gameState = 'BATTLING'; document.getElementById('scramble-box').classList.add('hidden'); elStatusPlayer.innerText = "SOLVING..."; elStatusAi.innerText = "SOLVING..."; toggleControlsForBattle(true); updateTimerUI('STOP'); playerStartTime = performance.now(); playerInterval = setInterval(() => { elTimerPlayer.innerText = formatTime(performance.now() - playerStartTime); }, 10); aiStartTime = performance.now(); aiInterval = setInterval(() => { elTimerAi.innerText = formatTime(performance.now() - aiStartTime); }, 10); playSequence(aiCube, aiSolveSequence, () => { clearInterval(aiInterval); aiInterval = null; elTimerAi.innerText = formatTime(performance.now() - aiStartTime); elStatusAi.innerText = "FINISHED!"; if(!playerInterval) { gameState = 'FINISHED'; toggleControlsForBattle(false); } }); }
+        function startBattle() { gameState = 'BATTLING'; document.getElementById('scramble-box').classList.add('hidden'); elStatusPlayer.innerText = "SOLVING..."; elStatusAi.innerText = "SOLVING..."; toggleControlsForBattle(true); updateTimerUI('STOP'); playerStartTime = performance.now(); playerInterval = setInterval(() => { elTimerPlayer.innerText = formatTime(performance.now() - playerStartTime); }, 10); aiStartTime = performance.now(); aiInterval = setInterval(() => { elTimerAi.innerText = formatTime(performance.now() - aiStartTime); }, 10); playSequence(aiCube, aiSolveSequence, () => { setTimeout(runAILoop, 500); }); }
         function forceStopBattle() { if(playerInterval) { clearInterval(playerInterval); playerInterval = null; elTimerPlayer.innerText = formatTime(performance.now() - playerStartTime); elTimerPlayer.style.color = '#10b981'; elStatusPlayer.innerText = "FINISHED!"; showToast("🎉 完成！", "success"); if(inputMode === 'MANUAL') forceSolvePlayerCube(); } updateTimerUI('WAITING'); if (!aiInterval) gameState = 'FINISHED'; toggleControlsForBattle(false); }
         btnManualTimer.addEventListener('click', handleTimerAction);
 
