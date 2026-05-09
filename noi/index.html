@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>簡易ノイズキャンセリング実験</title>
+<style>
+body{
+    font-family: sans-serif;
+    background:#111;
+    color:white;
+    padding:30px;
+}
+button{
+    font-size:18px;
+    padding:12px 20px;
+    margin:10px;
+}
+.box{
+    background:#222;
+    padding:20px;
+    border-radius:12px;
+    max-width:700px;
+}
+</style>
+</head>
+<body>
+<div class="box">
+<h1>簡易ノイズキャンセリング実験</h1>
+
+<p>
+これは「逆位相」を体験するためのデモです。<br>
+本物のANC（ノイズキャンセリング）ではありませんが、
+音波を打ち消す原理を試せます。
+</p>
+
+<button onclick="startDemo()">実験開始</button>
+<button onclick="stopDemo()">停止</button>
+
+<p id="status">停止中</p>
+
+<h2>やること</h2>
+<ol>
+<li>イヤホン推奨</li>
+<li>「実験開始」を押す</li>
+<li>440Hzの音と逆位相の音を同時再生</li>
+<li>位相干渉のイメージを体験</li>
+</ol>
+
+<p>
+※ スマホスピーカーでは効果が分かりにくいです。<br>
+※ 音量は小さめから試してください。
+</p>
+</div>
+
+<script>
+let audioCtx;
+let osc1;
+let osc2;
+let gain;
+
+function startDemo(){
+    if(audioCtx) return;
+
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    osc1 = audioCtx.createOscillator();
+    osc2 = audioCtx.createOscillator();
+    gain = audioCtx.createGain();
+
+    osc1.type = "sine";
+    osc2.type = "sine";
+
+    osc1.frequency.value = 440;
+    osc2.frequency.value = 440;
+
+    // 逆位相
+    osc2.phase = Math.PI;
+
+    const merger = audioCtx.createChannelMerger(2);
+
+    osc1.connect(gain);
+    osc2.connect(gain);
+
+    gain.connect(audioCtx.destination);
+
+    // 片方を反転
+    const inverter = audioCtx.createGain();
+    inverter.gain.value = -1;
+
+    osc2.disconnect();
+    osc2.connect(inverter);
+    inverter.connect(gain);
+
+    gain.gain.value = 0.05;
+
+    osc1.start();
+    osc2.start();
+
+    document.getElementById("status").innerText =
+        "再生中：逆位相実験";
+}
+
+function stopDemo(){
+    if(!audioCtx) return;
+
+    osc1.stop();
+    osc2.stop();
+
+    audioCtx.close();
+
+    audioCtx = null;
+    osc1 = null;
+    osc2 = null;
+
+    document.getElementById("status").innerText =
+        "停止中";
+}
+</script>
+</body>
+</html>
