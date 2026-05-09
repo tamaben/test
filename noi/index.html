@@ -2,119 +2,112 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>簡易ノイズキャンセリング実験</title>
+<title>マイク式ノイズキャンセリング実験</title>
 <style>
 body{
-    font-family: sans-serif;
-    background:#111;
+    background:#101010;
     color:white;
+    font-family:sans-serif;
     padding:30px;
 }
 button{
     font-size:18px;
-    padding:12px 20px;
-    margin:10px;
+    padding:12px 18px;
+    margin:10px 0;
 }
-.box{
-    background:#222;
+.card{
+    background:#1e1e1e;
     padding:20px;
-    border-radius:12px;
-    max-width:700px;
+    border-radius:14px;
+    max-width:800px;
 }
 </style>
 </head>
 <body>
-<div class="box">
-<h1>簡易ノイズキャンセリング実験</h1>
+
+<div class="card">
+<h1>マイク式ノイキャン実験</h1>
 
 <p>
-これは「逆位相」を体験するためのデモです。<br>
-本物のANC（ノイズキャンセリング）ではありませんが、
-音波を打ち消す原理を試せます。
+このデモは、マイク入力を「逆位相」にして再生する実験です。<br>
+本物のANCほど精密ではありませんが、
+原理を体験できます。
 </p>
 
-<button onclick="startDemo()">実験開始</button>
-<button onclick="stopDemo()">停止</button>
+<button onclick="startANC()">マイク開始</button>
+<button onclick="stopANC()">停止</button>
 
 <p id="status">停止中</p>
 
-<h2>やること</h2>
-<ol>
+<h2>注意</h2>
+<ul>
+<li>HTTPSまたはローカルファイルで開いてください</li>
 <li>イヤホン推奨</li>
-<li>「実験開始」を押す</li>
-<li>440Hzの音と逆位相の音を同時再生</li>
-<li>位相干渉のイメージを体験</li>
-</ol>
-
-<p>
-※ スマホスピーカーでは効果が分かりにくいです。<br>
-※ 音量は小さめから試してください。
-</p>
+<li>ハウリング防止のため音量注意</li>
+<li>iPhoneではSafari推奨</li>
+</ul>
 </div>
 
 <script>
-let audioCtx;
-let osc1;
-let osc2;
-let gain;
+let audioContext;
+let stream;
+let source;
+let inverter;
 
-function startDemo(){
-    if(audioCtx) return;
+async function startANC(){
+    try{
+        document.getElementById("status").innerText = "マイク取得中...";
 
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+                echoCancellation: false,
+                noiseSuppression: false,
+                autoGainControl: false
+            }
+        });
 
-    osc1 = audioCtx.createOscillator();
-    osc2 = audioCtx.createOscillator();
-    gain = audioCtx.createGain();
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-    osc1.type = "sine";
-    osc2.type = "sine";
+        source = audioContext.createMediaStreamSource(stream);
 
-    osc1.frequency.value = 440;
-    osc2.frequency.value = 440;
+        inverter = audioContext.createGain();
 
-    // 逆位相
-    osc2.phase = Math.PI;
+        // 位相反転
+        inverter.gain.value = -1;
 
-    const merger = audioCtx.createChannelMerger(2);
+        source.connect(inverter);
+        inverter.connect(audioContext.destination);
 
-    osc1.connect(gain);
-    osc2.connect(gain);
+        document.getElementById("status").innerText =
+            "動作中：逆位相出力";
 
-    gain.connect(audioCtx.destination);
+    }catch(err){
+        document.getElementById("status").innerText =
+            "マイク取得失敗: " + err.message;
 
-    // 片方を反転
-    const inverter = audioCtx.createGain();
-    inverter.gain.value = -1;
-
-    osc2.disconnect();
-    osc2.connect(inverter);
-    inverter.connect(gain);
-
-    gain.gain.value = 0.05;
-
-    osc1.start();
-    osc2.start();
-
-    document.getElementById("status").innerText =
-        "再生中：逆位相実験";
+        alert(
+            "マイク許可が必要です。\n" +
+            "Safari/Chromeでマイクを許可してください。"
+        );
+    }
 }
 
-function stopDemo(){
-    if(!audioCtx) return;
+function stopANC(){
 
-    osc1.stop();
-    osc2.stop();
+    if(stream){
+        stream.getTracks().forEach(track => track.stop());
+    }
 
-    audioCtx.close();
+    if(audioContext){
+        audioContext.close();
+    }
 
-    audioCtx = null;
-    osc1 = null;
-    osc2 = null;
+    stream = null;
+    audioContext = null;
 
-    document.getElementById("status").innerText =
-        "停止中";
+    document.getElementById("status").innerText = "停止中";
 }
 </script>
+
 </body>
 </html>
