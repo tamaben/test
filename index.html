@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voice Mixer & Background Inverter</title>
+    <title>Active Noise Canceling (Phase Inversion) Simulator</title>
     <style>
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -12,34 +12,26 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background-color: #1a1a2e;
-            color: #e0e0e0;
+            background-color: #222;
+            color: #fff;
             margin: 0;
         }
         .container {
-            background: #16213e;
+            background: #333;
             padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             text-align: center;
             max-width: 500px;
         }
-        h2 {
-            margin-top: 0;
-            color: #43d8c9;
-        }
-        .description {
-            font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 20px;
-            color: #a0a0a0;
-        }
+        h2 { margin-top: 0; color: #4facfe; }
+        .description { font-size: 14px; line-height: 1.6; margin-bottom: 20px; color: #ccc; }
         .warning {
-            color: #e94560;
+            color: #ff4757;
             font-weight: bold;
             font-size: 14px;
             margin-bottom: 20px;
-            background: rgba(233, 69, 96, 0.1);
+            background: rgba(255, 71, 87, 0.1);
             padding: 10px;
             border-radius: 8px;
         }
@@ -48,45 +40,34 @@
             font-size: 18px;
             font-weight: bold;
             color: white;
-            background-color: #0f3460;
-            border: 2px solid #43d8c9;
+            background-color: #4facfe;
+            border: none;
             border-radius: 30px;
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        button:hover:not(:disabled) {
-            background-color: #43d8c9;
-            color: #1a1a2e;
-            box-shadow: 0 0 15px #43d8c9;
-        }
-        button:disabled {
-            background-color: #333;
-            border-color: #555;
-            color: #777;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
+        button:hover:not(:disabled) { background-color: #00f2fe; color: #222; }
+        button:disabled { background-color: #555; color: #888; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>ボーカルクリア ＆ 背景音反転ミキサー</h2>
+    <h2>ANC（逆位相ノイズキャンセリング）シミュレーター</h2>
     <p class="description">
-        人間の声はクリアに強調して手前（上）で再生し、<br>
-        それ以外の音は周波数を反転させて背景（下）に押し込みます。
+        人間の声はそのまま出力し、声以外の音は<br>
+        「ゲイン -1.0（逆位相）」を掛けて打ち消し用の波形として出力します。
     </p>
     <div class="warning">
-        ⚠️ 激しいハウリングを防ぐため、<br>必ずイヤホンまたはヘッドホンを装着してください。
+        ⚠️ ハウリングを防ぐため、必ずイヤホンを装着してください。
     </div>
-    <button id="startButton">マイクを有効にしてミックス開始</button>
-    <button id="stopButton" disabled style="margin-top: 15px; border-color: #e94560; background-color: transparent; color: #e94560;">停止</button>
+    <button id="startButton">マイクを有効にして開始</button>
+    <button id="stopButton" disabled style="margin-top: 15px; background-color: transparent; border: 1px solid #ff4757; color: #ff4757;">停止</button>
 </div>
 
 <script>
     let audioContext;
     let mediaStream;
-    let oscillator;
 
     const startButton = document.getElementById('startButton');
     const stopButton = document.getElementById('stopButton');
@@ -95,7 +76,7 @@
         try {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-            // ブラウザの自動ノイズキャンセリングはオフにし、生の音声を独自に処理する
+            // ブラウザ側のソフトウェア処理をすべて切り、生の音波を取得する
             mediaStream = await navigator.mediaDevices.getUserMedia({ 
                 audio: {
                     noiseSuppression: false, 
@@ -108,86 +89,46 @@
             const sourceNode = audioContext.createMediaStreamSource(mediaStream);
 
             // ==========================================
-            // レイヤー1: 人間の声（クリアに強調して上に乗せる）
+            // パス1: 人間の声（通常の再生）
             // ==========================================
-            
-            // 1-1. 声の帯域を抽出（300Hz〜3000Hz付近）
             const vocalFilter = audioContext.createBiquadFilter();
             vocalFilter.type = 'bandpass';
-            vocalFilter.frequency.value = 1200; // 声の中心帯域
+            vocalFilter.frequency.value = 1200; // 声の帯域の中心
             vocalFilter.Q.value = 0.7;
 
-            // 1-2. 声の輪郭（子音）をくっきりさせるEQ
-            const vocalEQ = audioContext.createBiquadFilter();
-            vocalEQ.type = 'peaking';
-            vocalEQ.frequency.value = 3000;
-            vocalEQ.Q.value = 1.0;
-            vocalEQ.gain.value = 8.0; // 声を前に張り出させる
-
-            // 1-3. コンプレッサー（音圧を上げて常に聞こえやすくする）
-            const vocalCompressor = audioContext.createDynamicsCompressor();
-            vocalCompressor.threshold.value = -40;
-            vocalCompressor.knee.value = 10;
-            vocalCompressor.ratio.value = 12;
-            vocalCompressor.attack.value = 0.003;
-            vocalCompressor.release.value = 0.25;
-
-            // 1-4. ボーカルトラックの最終音量（大きめ）
-            const vocalGain = audioContext.createGain();
-            vocalGain.gain.value = 2.0; 
-
 
             // ==========================================
-            // レイヤー2: それ以外の音（周波数を反転してノイズ化）
+            // パス2: ノイズキャンセリング用（逆位相の生成）
             // ==========================================
-
-            // 2-1. 声の帯域を削り取る（背景音の抽出）
-            const bgFilter = audioContext.createBiquadFilter();
-            bgFilter.type = 'notch';
-            bgFilter.frequency.value = 1200;
-            bgFilter.Q.value = 0.7;
-
-            // 2-2. 周波数反転用のオシレーター
-            oscillator = audioContext.createOscillator();
-            oscillator.type = 'sine';
-            oscillator.frequency.value = 8000; // 8kHzで乗算
-
-            // 2-3. リングモジュレーター（周波数反転処理）
-            const ringModulator = audioContext.createGain();
-            ringModulator.gain.value = 0; // 音声信号でゲインをモジュレートする
-
-            // 2-4. 背景ノイズトラックの最終音量（小さめにして奥に追いやる）
-            const bgGain = audioContext.createGain();
-            bgGain.gain.value = 0.3; // ボリュームを下げる
-
-
-            // ==========================================
-            // 接続ルーティング（ミキシング）
-            // ==========================================
-
-            // ボーカルパスの接続: マイク -> BPフィルター -> EQ -> コンプ -> ボーカル音量 -> スピーカー
-            sourceNode.connect(vocalFilter);
-            vocalFilter.connect(vocalEQ);
-            vocalEQ.connect(vocalCompressor);
-            vocalCompressor.connect(vocalGain);
-            vocalGain.connect(audioContext.destination);
-
-            // 背景パスの接続: マイク -> ノッチフィルター -> モジュレーター(Gain)
-            sourceNode.connect(bgFilter);
-            bgFilter.connect(ringModulator.gain); // 音声信号で振幅変調
             
-            // オシレーター -> モジュレーター -> 背景音量 -> スピーカー
-            oscillator.connect(ringModulator);
-            ringModulator.connect(bgGain);
-            bgGain.connect(audioContext.destination);
+            // 声以外の帯域を抽出（ノイズ）
+            const noiseFilter = audioContext.createBiquadFilter();
+            noiseFilter.type = 'notch';
+            noiseFilter.frequency.value = 1200;
+            noiseFilter.Q.value = 0.7;
 
-            // オシレーター起動
-            oscillator.start();
+            // ANCのコア部分：波形の上下を反転させる（位相を180度ずらす）
+            const phaseInverter = audioContext.createGain();
+            phaseInverter.gain.value = -1.0; 
+            // ※ここで音波をマイナス化することで、外部の音波とぶつかった時に打ち消し合う
 
-            // UI更新
+
+            // ==========================================
+            // 接続ルーティング
+            // ==========================================
+            
+            // 声はそのままスピーカーへ
+            sourceNode.connect(vocalFilter);
+            vocalFilter.connect(audioContext.destination);
+
+            // ノイズは抽出後、波形を反転（逆位相化）させてスピーカーへ
+            sourceNode.connect(noiseFilter);
+            noiseFilter.connect(phaseInverter);
+            phaseInverter.connect(audioContext.destination);
+
             startButton.disabled = true;
             stopButton.disabled = false;
-            startButton.innerText = "ミキシング実行中...";
+            startButton.innerText = "ANC処理 実行中...";
 
         } catch (err) {
             console.error('エラー:', err);
@@ -196,19 +137,12 @@
     });
 
     stopButton.addEventListener('click', () => {
-        if (audioContext) {
-            audioContext.close();
-        }
-        if (mediaStream) {
-            mediaStream.getTracks().forEach(track => track.stop());
-        }
-        if (oscillator) {
-            try { oscillator.stop(); } catch(e) {}
-        }
+        if (audioContext) audioContext.close();
+        if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
         
         startButton.disabled = false;
         stopButton.disabled = true;
-        startButton.innerText = "マイクを有効にしてミックス開始";
+        startButton.innerText = "マイクを有効にして開始";
     });
 </script>
 
