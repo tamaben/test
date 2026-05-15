@@ -2,492 +2,215 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ULTIMATE SMART CUBE BATTLE</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Mixer & Background Inverter</title>
     <style>
-        body { margin: 0; overflow: hidden; touch-action: none; font-family: 'Inter', sans-serif; color: white; user-select: none; background: #020617; }
-        
-        /* 背景レイヤー */
-        #bg-gradient { position: absolute; inset: 0; z-index: -2; background: radial-gradient(circle at center, #0f172a 0%, #020617 100%); transition: opacity 0.5s; }
-        
-        /* 3Dキャンバスレイヤー */
-        #canvas-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; pointer-events: auto; }
-        
-        /* UIレイヤー (全体はクリック透過、ボタンのみ有効化) */
-        .ui-layer { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 10; display: flex; flex-direction: column; pointer-events: none; }
-        
-        /* 確実にボタンを押せるようにする設定 */
-        .pointer-auto { pointer-events: auto !important; }
-        button, input, select { pointer-events: auto !important; cursor: pointer; }
-        
-        /* カメラワイプ */
-        #camera-container {
-            position: absolute; top: 130px; left: 20px; width: 180px; z-index: 50;
-            border-radius: 12px; overflow: hidden;
-            border: 1px solid rgba(16, 185, 129, 0.5);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.6);
-            background: #000; opacity: 0; transition: opacity 0.3s;
-            pointer-events: none; display: flex; align-items: center; justify-content: center;
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #1a1a2e;
+            color: #e0e0e0;
+            margin: 0;
         }
-        #camera-container.active { opacity: 1; pointer-events: auto; }
-        #camera-scanline {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to bottom, transparent, rgba(16, 185, 129, 0.2) 50%, transparent);
-            background-size: 100% 200%; animation: scanAnim 2s linear infinite; pointer-events: none; z-index: 2;
+        .container {
+            background: #16213e;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            text-align: center;
+            max-width: 500px;
         }
-        @keyframes scanAnim { 0% { background-position: 0% -100%; } 100% { background-position: 0% 200%; } }
-        #camera-video { width: 100%; height: auto; display: block; object-fit: cover; transform: scaleX(-1); }
-        #ar-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; }
-
-        .timer-text { font-variant-numeric: tabular-nums; }
-        .vs-divider { position: absolute; top: 0; left: 50%; width: 2px; height: 100%; background: linear-gradient(to bottom, transparent, rgba(6,182,212,0.6) 20%, rgba(239,68,68,0.6) 80%, transparent); transform: translateX(-50%); z-index: 5; pointer-events: none; transition: opacity 0.3s; }
-
-        @media (max-width: 768px) {
-            .vs-divider { top: 50%; left: 0; width: 100%; height: 2px; background: linear-gradient(to right, transparent, rgba(6,182,212,0.6) 20%, rgba(239,68,68,0.6) 80%, transparent); transform: translateY(-50%); }
-            #camera-container { top: auto; bottom: 180px; left: 20px; width: 120px; } 
+        h2 {
+            margin-top: 0;
+            color: #43d8c9;
         }
-
-        .toast-enter { animation: slideDown 0.3s ease-out forwards; }
-        .toast-leave { animation: fadeOut 0.5s ease-in forwards; }
-        @keyframes slideDown { from { transform: translate(-50%, -100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
-        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
-        
-        .bt-active { border-color: #3b82f6 !important; background: rgba(30, 58, 138, 0.8) !important; color: #93c5fd !important; }
-        select { -webkit-appearance: none; -moz-appearance: none; text-overflow: ellipsis; }
+        .description {
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: #a0a0a0;
+        }
+        .warning {
+            color: #e94560;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 20px;
+            background: rgba(233, 69, 96, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        button {
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background-color: #0f3460;
+            border: 2px solid #43d8c9;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        button:hover:not(:disabled) {
+            background-color: #43d8c9;
+            color: #1a1a2e;
+            box-shadow: 0 0 15px #43d8c9;
+        }
+        button:disabled {
+            background-color: #333;
+            border-color: #555;
+            color: #777;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
     </style>
 </head>
 <body>
 
-    <div id="bg-gradient"></div>
-    <div id="camera-container">
-        <div id="camera-scanline"></div>
-        <video id="camera-video" playsinline autoplay muted></video>
-        <canvas id="ar-overlay"></canvas>
+<div class="container">
+    <h2>ボーカルクリア ＆ 背景音反転ミキサー</h2>
+    <p class="description">
+        人間の声はクリアに強調して手前（上）で再生し、<br>
+        それ以外の音は周波数を反転させて背景（下）に押し込みます。
+    </p>
+    <div class="warning">
+        ⚠️ 激しいハウリングを防ぐため、<br>必ずイヤホンまたはヘッドホンを装着してください。
     </div>
-
-    <div id="canvas-container"></div>
-    <div class="vs-divider"></div>
-
-    <div class="ui-layer">
-        <div class="w-full flex justify-between px-4 md:px-8 py-4 transition-opacity duration-300 pointer-events-none" id="top-stats">
-            <div class="text-left w-1/2">
-                <h2 class="text-cyan-400 font-black text-lg md:text-2xl tracking-widest flex items-center gap-2">
-                    PLAYER <span id="input-indicator" class="hidden w-3 h-3 rounded-full shadow-[0_0_8px_currentColor] animate-pulse"></span>
-                </h2>
-                <div id="timer-player" class="text-5xl md:text-7xl font-mono font-bold timer-text text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.4)]">0.00</div>
-                <div id="player-status" class="text-[10px] md:text-xs text-cyan-200 mt-1 uppercase font-bold tracking-widest">Manual Mode</div>
-            </div>
-            <div class="text-right w-1/2">
-                <h2 class="text-red-500 font-black text-lg md:text-2xl tracking-widest">AI BOT</h2>
-                <div id="timer-ai" class="text-5xl md:text-7xl font-mono font-bold timer-text text-gray-600">0.00</div>
-                <div id="ai-status" class="text-[10px] md:text-xs text-red-300 mt-1 uppercase font-bold tracking-widest">Lv.3 (Advanced)</div>
-            </div>
-        </div>
-
-        <div class="flex-1 flex items-center justify-center pointer-events-none transition-opacity duration-300" id="vs-logo">
-            <div class="text-6xl md:text-8xl font-black italic text-white opacity-10 drop-shadow-[0_0_30px_white] tracking-tighter">VS</div>
-        </div>
-
-        <div id="controls-wrapper" class="w-full p-4 md:p-6 bg-gradient-to-t from-black via-black/80 to-transparent pointer-auto transition-all duration-300">
-            <div id="scramble-box" class="hidden max-w-3xl mx-auto mb-4 p-4 bg-slate-900/80 rounded-xl border border-slate-700 text-center backdrop-blur-md shadow-2xl pointer-auto">
-                <p class="text-[10px] text-slate-400 mb-1 font-bold uppercase tracking-widest">Scramble Sequence</p>
-                <p id="scramble-text" class="text-sm md:text-lg text-yellow-400 font-mono font-bold tracking-wider leading-relaxed"></p>
-            </div>
-
-            <div id="camera-select-wrapper" class="hidden max-w-4xl mx-auto mb-3 text-center pointer-auto">
-                <div class="inline-flex items-center bg-slate-800/80 p-1.5 rounded-xl border border-slate-600 backdrop-blur-md shadow-lg transition-transform active:scale-95">
-                    <svg class="w-4 h-4 text-emerald-400 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    <select id="camera-select" class="bg-transparent text-white font-bold text-xs py-1 pr-6 border-none outline-none cursor-pointer text-center pointer-auto">
-                        <option>カメラ検索中...</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-2 md:gap-3 mb-4">
-                <div id="action-buttons" class="md:col-span-3 grid grid-cols-3 gap-2 transition-opacity duration-300 pointer-auto">
-                    <button id="btn-bluetooth" class="bg-slate-800 hover:bg-slate-700 text-blue-400 font-bold py-2 md:py-3 rounded-xl border border-blue-800/50 transition-all text-[9px] md:text-xs flex flex-col items-center justify-center shadow-lg active:scale-95 cursor-pointer pointer-auto">
-                        <svg class="w-5 h-5 mb-1 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
-                        <span class="block">SMART CUBE</span>
-                        <span class="text-[7px] md:text-[9px] text-slate-400 font-normal mt-0.5">Bluetooth接続</span>
-                    </button>
-                    <button id="btn-camera" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold py-2 md:py-3 rounded-xl border border-emerald-800/50 transition-all text-[9px] md:text-xs flex flex-col items-center justify-center shadow-lg active:scale-95 cursor-pointer pointer-auto">
-                        <svg class="w-5 h-5 mb-1 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                        <span class="block">AUTO DETECT</span>
-                        <span class="text-[7px] md:text-[9px] text-slate-400 font-normal mt-0.5">カメラ自動検出</span>
-                    </button>
-                    <button id="btn-prep" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 md:py-3 rounded-xl border border-indigo-400 transition-all text-[9px] md:text-xs flex flex-col items-center justify-center shadow-[0_0_20px_rgba(79,70,229,0.4)] active:scale-95 cursor-pointer pointer-auto">
-                        <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path></svg>
-                        <span class="block">START BATTLE</span>
-                        <span class="text-[7px] md:text-[9px] text-indigo-200 font-normal mt-0.5">AI対戦開始</span>
-                    </button>
-                </div>
-                <button id="btn-manual-timer" class="md:col-span-1 bg-slate-800/90 text-slate-400 font-black py-3 md:py-4 rounded-xl border-2 border-slate-600 transition-all text-xs md:text-sm cursor-pointer shadow-xl relative overflow-hidden group active:scale-[0.98] select-none touch-manipulation pointer-auto">
-                    <span id="manual-timer-text" class="relative z-10 flex items-center justify-center gap-2 pointer-events-none">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        WAITING...
-                    </span>
-                </button>
-            </div>
-
-            <div id="slider-wrapper" class="max-w-2xl mx-auto text-center bg-slate-900/50 p-2 rounded-xl border border-slate-800 transition-opacity duration-300 pointer-auto">
-                <div class="flex justify-between text-[8px] md:text-[10px] text-slate-500 font-bold mb-1.5 uppercase tracking-widest px-1">
-                    <span>Beginner</span><span>Intermediate</span><span>Advanced</span><span>Expert</span><span>Master</span><span>God</span>
-                </div>
-                <input type="range" id="ai-level-slider" min="1" max="6" value="3" class="w-full accent-red-500 h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer">
-            </div>
-        </div>
-    </div>
+    <button id="startButton">マイクを有効にしてミックス開始</button>
+    <button id="stopButton" disabled style="margin-top: 15px; border-color: #e94560; background-color: transparent; color: #e94560;">停止</button>
+</div>
 
 <script>
-// --- UI操作系スクリプト（DOM読み込み完了直後に実行） ---
-document.addEventListener('DOMContentLoaded', () => {
-    
-    // 変数定義
-    let inputMode = 'MANUAL';
-    let gameState = 'IDLE'; 
-    let aiLevel = 3; 
-    let currentScramble = [], aiSolveSequence =[];
-    let playerStartTime = 0, aiStartTime = 0, playerInterval, aiInterval;
-    let bleDevice = null, bleServer = null;
-    let currentStream = null, isVideoMirrored = true;
+    let audioContext;
+    let mediaStream;
+    let oscillator;
 
-    // DOM要素の取得
-    const elTimerPlayer = document.getElementById('timer-player');
-    const elTimerAi = document.getElementById('timer-ai');
-    const elStatusPlayer = document.getElementById('player-status');
-    const elStatusAi = document.getElementById('ai-status');
-    
-    const btnManualTimer = document.getElementById('btn-manual-timer');
-    const btnPrep = document.getElementById('btn-prep');
-    const btnCamera = document.getElementById('btn-camera');
-    const btnBluetooth = document.getElementById('btn-bluetooth');
-    const sliderAi = document.getElementById('ai-level-slider');
-    
-    const video = document.getElementById('camera-video');
-    const arOverlay = document.getElementById('ar-overlay');
-    const cameraContainer = document.getElementById('camera-container');
-    const arCtx = arOverlay.getContext('2d');
+    const startButton = document.getElementById('startButton');
+    const stopButton = document.getElementById('stopButton');
 
-    // トースト表示
-    function showToast(message, type = 'error') {
-        const toast = document.createElement('div');
-        const bgColor = type === 'error' ? 'bg-red-600' : (type === 'success' ? 'bg-emerald-600' : 'bg-blue-600');
-        toast.className = `fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-xl shadow-2xl text-white text-sm font-bold ${bgColor} border border-white/20 toast-enter text-center max-w-[90vw]`;
-        toast.innerHTML = message;
-        document.body.appendChild(toast);
-        setTimeout(() => { toast.classList.add('toast-leave'); setTimeout(() => toast.remove(), 500); }, 3000);
-    }
+    startButton.addEventListener('click', async () => {
+        try {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-    if (typeof THREE === 'undefined') {
-        showToast("3Dライブラリの読み込みに失敗しました。リロードしてください。", "error");
-        return;
-    }
+            // ブラウザの自動ノイズキャンセリングはオフにし、生の音声を独自に処理する
+            mediaStream = await navigator.mediaDevices.getUserMedia({ 
+                audio: {
+                    noiseSuppression: false, 
+                    echoCancellation: false,
+                    autoGainControl: false
+                }, 
+                video: false 
+            });
 
-    // --- 3Dシーン初期化 ---
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.set(0, 0, 16);
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    document.getElementById('canvas-container').appendChild(renderer.domElement);
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.9); scene.add(ambientLight);
-    const dirLight1 = new THREE.DirectionalLight(0xffffff, 0.7); dirLight1.position.set(10, 20, 15); scene.add(dirLight1);
+            const sourceNode = audioContext.createMediaStreamSource(mediaStream);
 
-    const colors = { U: 0xFFD500, D: 0xFFFFFF, F: 0x009E60, B: 0x0051BA, R: 0xFF5800, L: 0xC41E3A, In: 0x111111 };
-    const cubieSize = 1, spacing = 1.02;
+            // ==========================================
+            // レイヤー1: 人間の声（クリアに強調して上に乗せる）
+            // ==========================================
+            
+            // 1-1. 声の帯域を抽出（300Hz〜3000Hz付近）
+            const vocalFilter = audioContext.createBiquadFilter();
+            vocalFilter.type = 'bandpass';
+            vocalFilter.frequency.value = 1200; // 声の中心帯域
+            vocalFilter.Q.value = 0.7;
 
-    function createRubiksCube(isAI) {
-        const basePivot = new THREE.Group();
-        basePivot.rotation.set(0.4, -0.4, 0); 
-        const humanPivot = new THREE.Group(); basePivot.add(humanPivot);
-        const scenePivot = new THREE.Group(); humanPivot.add(scenePivot);
-        const cubeGroup = new THREE.Group(); scenePivot.add(cubeGroup);
-        const allCubies =[];
-        const geo = new THREE.BoxGeometry(cubieSize, cubieSize, cubieSize);
-        function getMats(x, y, z) {
-            return[
-                new THREE.MeshStandardMaterial({ color: x===1 ? colors.R : colors.In, roughness: 0.1, metalness: 0.1 }), 
-                new THREE.MeshStandardMaterial({ color: x===-1 ? colors.L : colors.In, roughness: 0.1, metalness: 0.1 }),
-                new THREE.MeshStandardMaterial({ color: y===1 ? colors.U : colors.In, roughness: 0.1, metalness: 0.1 }), 
-                new THREE.MeshStandardMaterial({ color: y===-1 ? colors.D : colors.In, roughness: 0.1, metalness: 0.1 }),
-                new THREE.MeshStandardMaterial({ color: z===1 ? colors.F : colors.In, roughness: 0.1, metalness: 0.1 }), 
-                new THREE.MeshStandardMaterial({ color: z===-1 ? colors.B : colors.In, roughness: 0.1, metalness: 0.1 }) 
-            ];
+            // 1-2. 声の輪郭（子音）をくっきりさせるEQ
+            const vocalEQ = audioContext.createBiquadFilter();
+            vocalEQ.type = 'peaking';
+            vocalEQ.frequency.value = 3000;
+            vocalEQ.Q.value = 1.0;
+            vocalEQ.gain.value = 8.0; // 声を前に張り出させる
+
+            // 1-3. コンプレッサー（音圧を上げて常に聞こえやすくする）
+            const vocalCompressor = audioContext.createDynamicsCompressor();
+            vocalCompressor.threshold.value = -40;
+            vocalCompressor.knee.value = 10;
+            vocalCompressor.ratio.value = 12;
+            vocalCompressor.attack.value = 0.003;
+            vocalCompressor.release.value = 0.25;
+
+            // 1-4. ボーカルトラックの最終音量（大きめ）
+            const vocalGain = audioContext.createGain();
+            vocalGain.gain.value = 2.0; 
+
+
+            // ==========================================
+            // レイヤー2: それ以外の音（周波数を反転してノイズ化）
+            // ==========================================
+
+            // 2-1. 声の帯域を削り取る（背景音の抽出）
+            const bgFilter = audioContext.createBiquadFilter();
+            bgFilter.type = 'notch';
+            bgFilter.frequency.value = 1200;
+            bgFilter.Q.value = 0.7;
+
+            // 2-2. 周波数反転用のオシレーター
+            oscillator = audioContext.createOscillator();
+            oscillator.type = 'sine';
+            oscillator.frequency.value = 8000; // 8kHzで乗算
+
+            // 2-3. リングモジュレーター（周波数反転処理）
+            const ringModulator = audioContext.createGain();
+            ringModulator.gain.value = 0; // 音声信号でゲインをモジュレートする
+
+            // 2-4. 背景ノイズトラックの最終音量（小さめにして奥に追いやる）
+            const bgGain = audioContext.createGain();
+            bgGain.gain.value = 0.3; // ボリュームを下げる
+
+
+            // ==========================================
+            // 接続ルーティング（ミキシング）
+            // ==========================================
+
+            // ボーカルパスの接続: マイク -> BPフィルター -> EQ -> コンプ -> ボーカル音量 -> スピーカー
+            sourceNode.connect(vocalFilter);
+            vocalFilter.connect(vocalEQ);
+            vocalEQ.connect(vocalCompressor);
+            vocalCompressor.connect(vocalGain);
+            vocalGain.connect(audioContext.destination);
+
+            // 背景パスの接続: マイク -> ノッチフィルター -> モジュレーター(Gain)
+            sourceNode.connect(bgFilter);
+            bgFilter.connect(ringModulator.gain); // 音声信号で振幅変調
+            
+            // オシレーター -> モジュレーター -> 背景音量 -> スピーカー
+            oscillator.connect(ringModulator);
+            ringModulator.connect(bgGain);
+            bgGain.connect(audioContext.destination);
+
+            // オシレーター起動
+            oscillator.start();
+
+            // UI更新
+            startButton.disabled = true;
+            stopButton.disabled = false;
+            startButton.innerText = "ミキシング実行中...";
+
+        } catch (err) {
+            console.error('エラー:', err);
+            alert('マイクのアクセスが許可されていないか、エラーが発生しました。');
         }
-        for (let x = -1; x <= 1; x++) {
-            for (let y = -1; y <= 1; y++) {
-                for (let z = -1; z <= 1; z++) {
-                    const mesh = new THREE.Mesh(geo, getMats(x, y, z));
-                    mesh.position.set(x * spacing, y * spacing, z * spacing);
-                    const edges = new THREE.LineSegments(new THREE.EdgesGeometry(geo), new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 4 }));
-                    mesh.add(edges); cubeGroup.add(mesh); allCubies.push(mesh);
-                    mesh.userData = { initPos: mesh.position.clone(), initQuat: mesh.quaternion.clone(), initColors: mesh.material.map(m => m.color.getHex()), logicPos: new THREE.Vector3(x,y,z) };
-                }
-            }
-        }
-        return { 
-            basePivot, humanPivot, scenePivot, cubeGroup, allCubies, isAI, isAnimating: false, 
-            aiBaseTargetEuler: new THREE.Euler(0.4, -0.4, 0), currentTilt: {x:0, y:0},
-            breathingOffset: Math.random() * Math.PI * 2, breathingSpeed: 0.0015 + Math.random() * 0.001,
-            isInspecting: false 
-        };
-    }
-
-    const playerCube = createRubiksCube(false);
-    const aiCube = createRubiksCube(true);
-    scene.add(playerCube.basePivot); scene.add(aiCube.basePivot);
-
-    function updateLayout() {
-        if (inputMode === 'CAMERA') return;
-        const isPortrait = window.innerWidth < 768;
-        if (isPortrait) { playerCube.basePivot.position.set(0, 4.0, 0); aiCube.basePivot.position.set(0, -3.5, 0); camera.position.z = 19; } 
-        else { playerCube.basePivot.position.set(-4.5, 0, 0); aiCube.basePivot.position.set(4.5, 0, 0); camera.position.z = 16; }
-    }
-    updateLayout(); 
-    window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); updateLayout(); });
-
-    // --- キューブ回転ロジック ---
-    function parseMoveNotation(notation) {
-        const base = notation[0], isPrime = notation.includes("'"), isDouble = notation.includes("2");
-        let axis = 'y', value = [1], angleDir = -1;
-        switch(base) {
-            case 'U': axis = 'y'; value = [1]; angleDir = -1; break; case 'D': axis = 'y'; value = [-1]; angleDir = 1; break;
-            case 'R': axis = 'x'; value = [1]; angleDir = -1; break; case 'L': axis = 'x'; value = [-1]; angleDir = 1; break;
-            case 'F': axis = 'z'; value = [1]; angleDir = -1; break; case 'B': axis = 'z'; value = [-1]; angleDir = 1; break;
-        }
-        return { axis, values: value, angle: (Math.PI / 2) * angleDir * (isPrime ? -1 : 1) * (isDouble ? 2 : 1), baseMove: base };
-    }
-
-    function executeHumanLikeMove(cubeObj, moveConfig, callback = null) {
-        if (moveConfig.move === "PAUSE") { setTimeout(() => { if(callback) callback(); }, moveConfig.duration); return; }
-        const { axis, values, angle, baseMove } = parseMoveNotation(moveConfig.move);
-        const dur = moveConfig.duration;
-        const overshootRatio = moveConfig.overshoot || 0; 
-        const lockup = moveConfig.isLockup; 
-        
-        if (cubeObj.isAI && !cubeObj.isInspecting) {
-            const tiltForce = moveConfig.tiltForce || 0.1;
-            let tx = 0.4, ty = -0.4, regripX = 0, regripY = 0;
-            if (baseMove === 'U') regripX = 0.25; else if (baseMove === 'D') regripX = -0.25; else if (baseMove === 'B') { regripX = 0.6; regripY = 0.3; } else if (baseMove === 'L') regripY = -0.3; else if (baseMove === 'R') regripY = 0.3; 
-            if (baseMove === 'R') ty -= tiltForce; else if (baseMove === 'L') ty += tiltForce; else if (baseMove === 'U') tx -= tiltForce; else if (baseMove === 'D') tx += tiltForce;
-            cubeObj.aiBaseTargetEuler.set(tx + regripX, ty + regripY, 0); 
-        }
-
-        const cgq = new THREE.Quaternion(); cubeObj.scenePivot.getWorldQuaternion(cgq);
-        const localAxisVec = new THREE.Vector3(); localAxisVec[axis] = 1;
-        const worldAxisVec = localAxisVec.clone().applyQuaternion(cgq);
-        let bestAbsAxis = 'y', maxDot = -1, absSign = 1;
-        ['x','y','z'].forEach(a => { [1,-1].forEach(v => { const v3 = new THREE.Vector3(); v3[a] = v; const dot = worldAxisVec.dot(v3); if(dot > maxDot) { maxDot = dot; bestAbsAxis = a; absSign = v; } }); });
-
-        const cubies = cubeObj.allCubies.filter(c => {
-            const p = new THREE.Vector3(); c.getWorldPosition(p); cubeObj.cubeGroup.worldToLocal(p);
-            return values.some(v => Math.abs(p[bestAbsAxis] - (v * absSign * spacing)) < 0.1);
-        });
-
-        if (cubies.length === 0) { if(callback) callback(); return; }
-
-        cubeObj.isAnimating = true; const pivot = new THREE.Group(); cubeObj.scenePivot.add(pivot); cubies.forEach(c => pivot.attach(c));
-
-        let easeFunc = lockup ? 
-            (t) => { if (t >= 1) return 1; if (t < 0.2) return t * 1.5; if (t < 0.6) return 0.3 + (Math.sin(t * 50) * 0.05); if (t < 0.8) return 0.3 + ((t - 0.6) / 0.2) * 0.4; let remain = (t - 0.8) / 0.2; return 0.7 + remain * 0.3 + Math.sin(remain * Math.PI) * 0.02; } :
-            (t) => { if (t >= 1) return 1; let val = 0; if (t < 0.7) { let pt = t / 0.7; val = pt * pt * (3 - 2 * pt) * 0.8; } else { let mt = (t - 0.7) / 0.3; let bounce = overshootRatio > 0 ? Math.sin(mt * Math.PI) * overshootRatio * (1 - mt) : Math.sin(mt * Math.PI * 2) * 0.03 * (1 - mt); val = 0.8 + (mt * 0.2) + bounce; } return val; };
-
-        const startTime = performance.now();
-        function animateMove(time) {
-            let t = Math.min((time - startTime) / dur, 1);
-            pivot.rotation[bestAbsAxis] = angle * absSign * easeFunc(t); 
-            if (t < 1) requestAnimationFrame(animateMove);
-            else {
-                const imperfectAlign = (Math.random() - 0.5) * 0.05; 
-                pivot.rotation[bestAbsAxis] = angle * absSign + imperfectAlign; 
-                pivot.updateMatrixWorld();
-                cubies.forEach(c => cubeObj.cubeGroup.attach(c)); cubeObj.scenePivot.remove(pivot);
-                cubies.forEach(cubie => {
-                    const p = cubie.position; p.x = Math.round(p.x/spacing)*spacing; p.y = Math.round(p.y/spacing)*spacing; p.z = Math.round(p.z/spacing)*spacing;
-                    const e = new THREE.Euler().setFromQuaternion(cubie.quaternion);
-                    e.x = Math.round(e.x/(Math.PI/2))*(Math.PI/2); e.y = Math.round(e.y/(Math.PI/2))*(Math.PI/2); e.z = Math.round(e.z/(Math.PI/2))*(Math.PI/2);
-                    cubie.quaternion.setFromEuler(e);
-                });
-                cubeObj.isAnimating = false;
-                if (cubeObj.isAI && !cubeObj.isInspecting) cubeObj.aiBaseTargetEuler.set(0.4, -0.4, 0); 
-                checkSolveState();
-                if (callback) callback();
-            }
-        }
-        requestAnimationFrame(animateMove);
-    }
-
-    function checkSolveState() {
-        if (gameState !== 'BATTLING' || inputMode === 'CAMERA') return;
-        let isSolved = playerCube.allCubies.every(c => Math.abs(c.position.x - c.userData.initPos.x) < 0.1 && Math.abs(c.position.y - c.userData.initPos.y) < 0.1 && Math.abs(c.position.z - c.userData.initPos.z) < 0.1);
-        if (isSolved) forceStopBattle();
-    }
-
-    // --- AI Logic ---
-    function generateHumanLikeSolve(moves, level) {
-        const reversed = moves.slice().reverse().map(m => { if (m.endsWith("2")) return m; if (m.endsWith("'")) return m[0]; return m + "'"; });
-        const sets = { 1: {tps:0.8,regrip:0.9,pTime:1500,lockup:0.5,overshoot:0.25,tilt:0.4,splitU2:true}, 2: {tps:1.5,regrip:0.7,pTime:800,lockup:0.3,overshoot:0.15,tilt:0.3,splitU2:true}, 3: {tps:3.0,regrip:0.5,pTime:400,lockup:0.25,overshoot:0.08,tilt:0.2,splitU2:false}, 4: {tps:5.5,regrip:0.2,pTime:150,lockup:0.05,overshoot:0.04,tilt:0.15,splitU2:false}, 5: {tps:8.5,regrip:0.05,pTime:50,lockup:0.01,overshoot:0.01,tilt:0.1,splitU2:false}, 6: {tps:15.0,regrip:0,pTime:0,lockup:0,overshoot:0,tilt:0.05,splitU2:false} };
-        const s = sets[level]; const baseDur = 1000 / s.tps; const out =[]; let lastFace = "";
-        const total = reversed.length;
-        reversed.forEach((move, idx) => {
-            const progress = idx / total;
-            let phaseLabel = progress < 0.2 ? "CROSS" : (progress < 0.6 ? "F2L PAIR" : (progress < 0.85 ? "OLL" : "PLL"));
-            if (idx > 0 && (Math.floor(progress * 10) !== Math.floor((idx-1)/total * 10)) && Math.random() > 0.5) { out.push({ move: "PAUSE", duration: s.pTime * 2, phase: phaseLabel }); }
-            if ((lastFace && lastFace !== move[0] && Math.random() < s.regrip)) { out.push({ move: "PAUSE", duration: s.pTime * (0.5 + Math.random() * 0.5), phase: phaseLabel }); }
-            const isLockup = Math.random() < s.lockup;
-            if (move.includes("2") && s.splitU2) {
-                const single = move.replace("2", "");
-                out.push({ move: single, duration: baseDur * 1.2, isLockup: false, overshoot: s.overshoot, tiltForce: s.tilt, phase: phaseLabel });
-                out.push({ move: single, duration: baseDur * 1.2, isLockup: isLockup, overshoot: s.overshoot, tiltForce: s.tilt, phase: phaseLabel });
-            } else { out.push({ move: move, duration: isLockup ? baseDur * 2.5 : baseDur, isLockup: isLockup, overshoot: isLockup ? 0 : s.overshoot, tiltForce: s.tilt, phase: phaseLabel }); }
-            if (isLockup) out.push({ move: "PAUSE", duration: s.pTime * 1.5, phase: phaseLabel });
-            lastFace = move[0];
-        });
-        return out;
-    }
-
-    function runAILoop() {
-        if (gameState !== 'BATTLING') return;
-        elStatusAi.innerText = "SCRAMBLING...";
-        const newScramble = generateShortScramble();
-        const scrambleSeq = newScramble.map(m => ({ move: m, duration: 50, phase: "SCRAMBLING" })); 
-        playSequence(aiCube, scrambleSeq, () => {
-            if (gameState !== 'BATTLING') return;
-            elStatusAi.innerText = "INSPECTING...";
-            aiCube.isInspecting = true;
-            const inspectTime = Math.max(500, 3000 - (aiLevel * 400));
-            const startTime = performance.now();
-            function inspectAnim() {
-                const now = performance.now();
-                const progress = (now - startTime) / inspectTime;
-                if (progress < 1 && gameState === 'BATTLING') { aiCube.aiBaseTargetEuler.set(0.4 + Math.sin(now * 0.005) * 0.5, -0.4 + Math.cos(now * 0.003) * 0.5, 0); requestAnimationFrame(inspectAnim); } 
-                else { aiCube.isInspecting = false; aiCube.aiBaseTargetEuler.set(0.4, -0.4, 0); if (gameState === 'BATTLING') startAISolve(newScramble); }
-            }
-            inspectAnim();
-        });
-    }
-
-    function startAISolve(scramble) {
-        elStatusAi.innerText = "CROSS";
-        const solveSeq = generateHumanLikeSolve(scramble, aiLevel);
-        playSequence(aiCube, solveSeq, () => {
-            if (gameState === 'BATTLING') { elStatusAi.innerText = "CHECKING..."; setTimeout(runAILoop, 1500); }
-        });
-    }
-
-    function playSequence(cubeObj, seq, onComplete) {
-        let i = 0; 
-        const next = () => { 
-            if (i >= seq.length || gameState === 'FINISHED') { if(onComplete) onComplete(); return; } 
-            const item = seq[i];
-            if (cubeObj.isAI && item.phase) elStatusAi.innerText = item.phase;
-            if(cubeObj.isAI) executeHumanLikeMove(cubeObj, item, next);
-            else executeHumanLikeMove(cubeObj, { move: item.move, duration: item.duration, overshoot: 0, isLockup: false, tiltForce: 0 }, next);
-            i++; 
-        }; 
-        next();
-    }
-
-    function generateShortScramble() { const moves =["U", "D", "R", "L", "F", "B"], mods = ["", "'", "2"], sc =[]; let lastFace = ""; for(let i=0; i<14; i++) { let f; do { f = moves[Math.floor(Math.random() * moves.length)]; } while (f === lastFace); lastFace = f; sc.push(f + mods[Math.floor(Math.random() * mods.length)]); } return sc; }
-
-    function formatTime(ms) { return (ms / 1000).toFixed(2); }
-    function resetCubes() {[playerCube, aiCube].forEach(obj => { obj.allCubies.forEach(c => { c.position.copy(c.userData.initPos); c.quaternion.copy(c.userData.initQuat); c.material.forEach((m, i) => m.color.setHex(c.userData.initColors[i])); }); obj.scenePivot.quaternion.identity(); obj.cubeGroup.rotation.set(0,0,0); obj.aiBaseTargetEuler = new THREE.Euler(0.4, -0.4, 0); }); }
-    function forceSolvePlayerCube() { playerCube.allCubies.forEach(c => { c.position.copy(c.userData.initPos); c.quaternion.copy(c.userData.initQuat); c.material.forEach((m, i) => m.color.setHex(c.userData.initColors[i])); }); }
-    
-    function updateTimerUI(state) {
-        if (state === 'WAITING') { 
-            btnManualTimer.innerHTML = '<span class="relative z-10 flex items-center justify-center gap-2 pointer-events-none"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> WAITING...</span>'; 
-            btnManualTimer.className = "md:col-span-1 bg-slate-800/90 text-slate-400 font-black py-3 md:py-4 rounded-xl border-2 border-slate-600 transition-all text-xs md:text-sm cursor-pointer shadow-xl relative overflow-hidden group active:scale-[0.98] select-none touch-manipulation pointer-auto"; 
-        } else if (state === 'READY') { 
-            btnManualTimer.innerHTML = '<span class="relative z-10 flex items-center justify-center gap-2 pointer-events-none"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path></svg> TAP TO START</span>'; 
-            btnManualTimer.className = "md:col-span-1 bg-emerald-600/90 text-white font-black py-3 md:py-4 rounded-xl border-2 border-emerald-400 transition-all text-xs md:text-sm cursor-pointer shadow-[0_0_20px_rgba(16,185,129,0.5)] relative overflow-hidden group active:scale-[0.98] select-none touch-manipulation pointer-auto"; 
-        } else if (state === 'STOP') { 
-            btnManualTimer.innerHTML = '<span class="relative z-10 flex items-center justify-center gap-2 pointer-events-none"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path></svg> TAP TO STOP</span>'; 
-            btnManualTimer.className = "md:col-span-1 bg-red-600/90 text-white font-black py-3 md:py-4 rounded-xl border-2 border-red-400 transition-all text-xs md:text-sm cursor-pointer shadow-[0_0_20px_rgba(239,68,68,0.5)] relative overflow-hidden group active:scale-[0.98] select-none touch-manipulation pointer-auto"; 
-        }
-    }
-
-    // --- イベントリスナーの登録 ---
-    // ここで確実にイベントを登録する
-    btnPrep.addEventListener('click', () => {
-        if (gameState === 'BATTLING' || gameState === 'PREPPING') return;
-        gameState = 'PREPPING'; resetCubes(); updateTimerUI('WAITING'); toggleControlsForBattle(false);
-        elTimerPlayer.style.color = 'white'; elTimerPlayer.innerText = "0.00"; elTimerAi.innerText = "0.00"; elStatusPlayer.innerText = "Scrambling..."; elStatusAi.innerText = "Strategy...";
-        currentScramble = generateShortScramble();
-        document.getElementById('scramble-text').innerText = currentScramble.join(' '); document.getElementById('scramble-box').classList.remove('hidden');
-        const pSeq = currentScramble.map(m => ({ move: m, duration: 80 }));
-        playSequence(playerCube, pSeq, () => { gameState = 'PREPARED'; elStatusPlayer.innerText = "READY!"; updateTimerUI('READY'); });
     });
 
-    btnManualTimer.addEventListener('click', () => {
-        if (gameState === 'PREPARED') startBattle();
-        else if (gameState === 'BATTLING') forceStopBattle();
-        else if (gameState === 'IDLE' || gameState === 'FINISHED') showToast("先に「START BATTLE」ボタンを押して準備してください", "info");
-    });
-
-    function startBattle() { gameState = 'BATTLING'; document.getElementById('scramble-box').classList.add('hidden'); elStatusPlayer.innerText = "SOLVING..."; toggleControlsForBattle(true); updateTimerUI('STOP'); playerStartTime = performance.now(); playerInterval = setInterval(() => { elTimerPlayer.innerText = formatTime(performance.now() - playerStartTime); }, 10); runAILoop(); }
-    function forceStopBattle() { if(playerInterval) { clearInterval(playerInterval); playerInterval = null; elTimerPlayer.innerText = formatTime(performance.now() - playerStartTime); elTimerPlayer.style.color = '#10b981'; elStatusPlayer.innerText = "FINISHED!"; showToast("🎉 完成！", "success"); if(inputMode === 'MANUAL') forceSolvePlayerCube(); } updateTimerUI('WAITING'); if (!aiInterval) gameState = 'FINISHED'; toggleControlsForBattle(false); }
-    function toggleControlsForBattle(isBattling) {
-        const isMobile = window.innerWidth < 768;
-        const actionBtns = document.getElementById('action-buttons'), sliderWrap = document.getElementById('slider-wrapper');
-        const controlsWrap = document.getElementById('controls-wrapper'), vsLogo = document.getElementById('vs-logo');
-        if (isBattling && isMobile) { actionBtns.style.display = 'none'; sliderWrap.style.display = 'none'; vsLogo.style.opacity = '0'; document.getElementById('camera-select-wrapper').style.display = 'none'; controlsWrap.classList.replace('bg-gradient-to-t', 'bg-transparent'); controlsWrap.classList.replace('from-black', 'from-transparent'); } 
-        else { actionBtns.style.display = ''; sliderWrap.style.display = ''; vsLogo.style.opacity = '1'; document.getElementById('camera-select-wrapper').style.display = ''; controlsWrap.classList.replace('bg-transparent', 'bg-gradient-to-t'); controlsWrap.classList.replace('from-transparent', 'from-black'); }
-    }
-
-    // カメラ・Bluetooth関連イベント
-    async function getCameras() { try { const devices = await navigator.mediaDevices.enumerateDevices(); const videoDevices = devices.filter(device => device.kind === 'videoinput'); const select = document.getElementById('camera-select'); select.innerHTML = ''; videoDevices.forEach((device, index) => { const option = document.createElement('option'); option.value = device.deviceId; option.text = device.label || `カメラ ${index + 1}`; select.appendChild(option); }); } catch(err) { console.error(err); } }
-    document.getElementById('camera-select').addEventListener('change', (e) => { if (inputMode === 'CAMERA') startCameraMode(e.target.value); });
-    btnCamera.addEventListener('click', async () => { if (inputMode === 'BLUETOOTH') disconnectBluetooth(); if (inputMode === 'CAMERA') { stopCameraMode(); return; } try { const initStream = await navigator.mediaDevices.getUserMedia({ video: true }); await getCameras(); const select = document.getElementById('camera-select'); const deviceId = select.options.length > 0 ? select.options[0].value : null; initStream.getTracks().forEach(t => t.stop()); await startCameraMode(deviceId); } catch(err) { showToast("カメラ権限がありません", "error"); } });
-    async function startCameraMode(deviceId = null) { if (currentStream) currentStream.getTracks().forEach(t => t.stop()); const constraints = { video: deviceId ? { deviceId: { exact: deviceId } } : { facingMode: { ideal: "environment" } } }; try { currentStream = await navigator.mediaDevices.getUserMedia(constraints); video.srcObject = currentStream; video.play(); setInputMode('CAMERA'); await getCameras(); if (deviceId) document.getElementById('camera-select').value = deviceId; const select = document.getElementById('camera-select'); const label = select.options.length > 0 ? select.options[select.selectedIndex].text.toLowerCase() : ''; if (label.includes('back') || label.includes('rear')) { video.style.transform = 'scaleX(1)'; isVideoMirrored = false; } else { video.style.transform = 'scaleX(-1)'; isVideoMirrored = true; } document.getElementById('btn-camera').classList.replace('bg-slate-800', 'bg-emerald-900'); document.getElementById('btn-camera').classList.replace('border-emerald-800/50', 'border-emerald-500'); cameraContainer.classList.add('active'); showToast("🤖 AUTO DETECT 起動", "success"); } catch(err) { showToast("カメラエラー", "error"); } }
-    function stopCameraMode() { if (currentStream) { currentStream.getTracks().forEach(t => t.stop()); currentStream = null; } setInputMode('MANUAL'); document.getElementById('btn-camera').classList.replace('bg-emerald-900', 'bg-slate-800'); document.getElementById('btn-camera').classList.replace('border-emerald-500', 'border-emerald-800/50'); cameraContainer.classList.remove('active'); updateLayout(); forceSolvePlayerCube(); }
-    
-    btnBluetooth.addEventListener('click', async () => { if (inputMode === 'CAMERA') stopCameraMode(); if (bleDevice && bleDevice.gatt.connected) { disconnectBluetooth(); return; } try { if (!navigator.bluetooth) { showToast("Web Bluetooth非対応", "error"); return; } showToast("スマートキューブ検索中...", "success"); bleDevice = await navigator.bluetooth.requestDevice({ filters: [{ services:['0000fff0-0000-1000-8000-00805f9b34fb'] }, { namePrefix: 'GAN' }, { namePrefix: 'GiC' }], optionalServices:['0000a002-0000-1000-8000-00805f9b34fb', '0000ffe0-0000-1000-8000-00805f9b34fb'] }); bleDevice.addEventListener('gattserverdisconnected', disconnectBluetooth); bleServer = await bleDevice.gatt.connect(); setInputMode('BLUETOOTH'); btnBluetooth.classList.add('bt-active'); btnBluetooth.innerHTML = `<svg class="w-5 h-5 mb-1 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span class="block text-white">CONNECTED</span><span class="text-[7px] md:text-[9px] text-blue-200 font-normal mt-0.5">${bleDevice.name || 'Smart Cube'}</span>`; showToast("接続成功！", "success"); } catch (error) { showToast("接続キャンセル/失敗", "error"); } });
-    function disconnectBluetooth() { if (bleDevice && bleDevice.gatt.connected) bleDevice.gatt.disconnect(); bleDevice = null; bleServer = null; setInputMode('MANUAL'); btnBluetooth.classList.remove('bt-active'); btnBluetooth.innerHTML = `<svg class="w-5 h-5 mb-1 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg><span class="block text-blue-400">SMART CUBE</span><span class="text-[7px] md:text-[9px] text-slate-400 font-normal mt-0.5">Bluetooth接続</span>`; showToast("切断しました", "success"); }
-    function setInputMode(mode) { inputMode = mode; document.getElementById('input-indicator').classList.remove('hidden', 'text-emerald-500', 'text-blue-500', 'text-white'); if (mode === 'CAMERA') { document.getElementById('input-indicator').classList.add('text-emerald-500', 'bg-emerald-500'); elStatusPlayer.innerText = 'AR CAMERA SYNC'; elStatusPlayer.className = "text-[10px] md:text-xs text-emerald-300 mt-1 uppercase font-bold tracking-widest"; document.getElementById('camera-select-wrapper').classList.remove('hidden'); } else if (mode === 'BLUETOOTH') { document.getElementById('input-indicator').classList.add('text-blue-500', 'bg-blue-500'); elStatusPlayer.innerText = 'SMART CUBE CONNECTED'; elStatusPlayer.className = "text-[10px] md:text-xs text-blue-300 mt-1 uppercase font-bold tracking-widest"; document.getElementById('camera-select-wrapper').classList.add('hidden'); } else { document.getElementById('input-indicator').classList.add('hidden'); elStatusPlayer.innerText = 'Manual Mode'; elStatusPlayer.className = "text-[10px] md:text-xs text-cyan-200 mt-1 uppercase font-bold tracking-widest"; document.getElementById('camera-select-wrapper').classList.add('hidden'); } }
-
-    sliderAi.addEventListener('input', (e) => { aiLevel = parseInt(e.target.value); const levelNames =["Lv.1 (Beginner)", "Lv.2 (Intermediate)", "Lv.3 (Advanced)", "Lv.4 (Expert)", "Lv.5 (Master)", "Lv.6 (God)"]; elStatusAi.innerText = levelNames[aiLevel - 1]; });
-    window.addEventListener('keydown', (e) => { if (inputMode === 'CAMERA' || playerCube.isAnimating) return; const keyMap = { 'u':'U', 'd':'D', 'r':'R', 'l':'L', 'f':'F', 'b':'B', 'U':"U'", 'D':"D'", 'R':"R'", 'L':"L'", 'F':"F'", 'B':"B'" }; if (keyMap[e.key]) { executeHumanLikeMove(playerCube, {move: keyMap[e.key], duration: 100}); } });
-
-    // カメラ検出ロジック (省略せず記述)
-    const processCanvas = document.createElement('canvas'); const processCtx = processCanvas.getContext('2d', { willReadFrequently: true });
-    function rgbToHsv(r,g,b){r/=255;g/=255;b/=255;let max=Math.max(r,g,b),min=Math.min(r,g,b),h,s,v=max,d=max-min;s=max==0?0:d/max;if(max==min)h=0;else{switch(max){case r:h=(g-b)/d+(g<b?6:0);break;case g:h=(b-r)/d+2;break;case b:h=(r-g)/d+4;break;}h/=6;}return[h*360,s*100,v*100];}
-    function getCubeColorType(r,g,b){const[h,s,v]=rgbToHsv(r,g,b);if(v<20)return null;if(s<30&&v>40)return{name:'D',hex:0xFFFFFF,rgb:[255,255,255]};if(s>25){if(h<12||h>345)return{name:'L',hex:0xC41E3A,rgb:[196,30,58]};if(h>=12&&h<45)return{name:'R',hex:0xFF5800,rgb:[255,88,0]};if(h>=45&&h<85)return{name:'U',hex:0xFFD500,rgb:[255,213,0]};if(h>=85&&h<170)return{name:'F',hex:0x009E60,rgb:[0,158,96]};if(h>=170&&h<260)return{name:'B',hex:0x0051BA,rgb:[0,81,186]};}return null;}
-    function detectCubes(ctx,w,h){const d=ctx.getImageData(0,0,w,h).data,p=new Uint8Array(w*h);for(let i=0;i<w*h;i++)if(getCubeColorType(d[i*4],d[i*4+1],d[i*4+2]))p[i]=1;const v=new Uint8Array(w*h),blobs=[];for(let y=0;y<h;y++)for(let x=0;x<w;x++){const i=y*w+x;if(p[i]&&!v[i]){const q=[i];v[i]=1;let X=x,x2=x,Y=y,y2=y,c=0,hd=0;while(hd<q.length){const cur=q[hd++],cx=cur%w,cy=Math.floor(cur/w);c++;if(cx<X)X=cx;if(cx>x2)x2=cx;if(cy<Y)Y=cy;if(cy>y2)y2=cy;[[cx+1,cy],[cx-1,cy],[cx,cy+1],[cx,cy-1]].forEach(([nx,ny])=>{if(nx>=0&&nx<w&&ny>=0&&ny<h){const ni=ny*w+nx;if(p[ni]&&!v[ni]){v[ni]=1;q.push(ni);}}});}if(c>20)blobs.push({minX:X,maxX:x2,minY:Y,maxY:y2,count:c});}}let m=true;while(m){m=false;for(let i=0;i<blobs.length;i++)for(let j=i+1;j<blobs.length;j++){const a=blobs[i],b=blobs[j],e=15;if(!(a.maxX+e<b.minX||a.minX-e>b.maxX||a.maxY+e<b.minY||a.minY-e>b.maxY)){a.minX=Math.min(a.minX,b.minX);a.maxX=Math.max(a.maxX,b.maxX);a.minY=Math.min(a.minY,b.minY);a.maxY=Math.max(a.maxY,b.maxY);a.count+=b.count;blobs.splice(j,1);m=true;break;}}}return blobs.filter(b=>{const W=b.maxX-b.minX,H=b.maxY-b.minY,A=W/H;return W>15&&H>15&&A>0.4&&A<2.5;}).map(b=>({x:(b.minX+b.maxX)/2,y:(b.minY+b.maxY)/2,w:b.maxX-b.minX,h:b.maxY-b.minY}));}
-    function sampleColors(ctx,b,w,h){const g=[],SX=b.w/3,SY=b.h/3;for(let r=0;r<3;r++)for(let c=0;c<3;c++){const px=Math.floor(b.x-b.w/2+c*SX+SX/2),py=Math.floor(b.y-b.h/2+r*SY+SY/2);if(px>=0&&px<w&&py>=0&&py<h){const d=ctx.getImageData(px,py,1,1).data;const t=getCubeColorType(d[0],d[1],d[2]);g.push(t||{rgb:[50,50,50],hex:0x333333,name:'In'});}else g.push({rgb:[50,50,50],hex:0x333333,name:'In'});}return g;}
-    function drawAR(cubes,sx,sy){arCtx.clearRect(0,0,arOverlay.width,arOverlay.height);if(inputMode!=='CAMERA')return;cubes.forEach(c=>{const rx=c.x*sx,ry=c.y*sy,rw=c.w*sx,rh=c.h*sy,dx=isVideoMirrored?arOverlay.width-rx:rx,dy=ry,hw=rw/2,hh=rh/2;arCtx.strokeStyle=c.isMain?'#10b981':'#3b82f6';arCtx.lineWidth=3;const cl=Math.min(rw,rh)*0.25;arCtx.beginPath();arCtx.moveTo(dx-hw,dy-hh+cl);arCtx.lineTo(dx-hw,dy-hh);arCtx.lineTo(dx-hw+cl,dy-hh);arCtx.stroke();arCtx.beginPath();arCtx.moveTo(dx+hw-cl,dy-hh);arCtx.lineTo(dx+hw,dy-hh);arCtx.lineTo(dx+hw,dy-hh+cl);arCtx.stroke();arCtx.beginPath();arCtx.moveTo(dx-hw,dy+hh-cl);arCtx.lineTo(dx-hw,dy+hh);arCtx.lineTo(dx-hw+cl,dy+hh);arCtx.stroke();arCtx.beginPath();arCtx.moveTo(dx+hw-cl,dy+hh);arCtx.lineTo(dx+hw,dy+hh);arCtx.lineTo(dx+hw,dy+hh-cl);arCtx.stroke();const ms=rw/3,stx=dx-hw,sty=dy-hh;c.colors.forEach((col,i)=>{if(col.name!=='In'){const r=Math.floor(i/3),cc=i%3,dc=isVideoMirrored?2-cc:cc,px=stx+dc*ms,py=sty+r*ms;arCtx.strokeStyle=`rgb(${col.rgb})`;arCtx.lineWidth=2;arCtx.strokeRect(px+4,py+4,ms-8,ms-8);arCtx.fillStyle=`rgba(${col.rgb},0.3)`;arCtx.fillRect(px+4,py+4,ms-8,ms-8);}});});}
-    function runAutoTrackerEngine(){if(inputMode!=='CAMERA'||video.readyState!==video.HAVE_ENOUGH_DATA)return;if(arOverlay.width!==cameraContainer.clientWidth)arOverlay.width=cameraContainer.clientWidth;if(arOverlay.height!==cameraContainer.clientHeight)arOverlay.height=cameraContainer.clientHeight;const va=video.videoWidth/video.videoHeight;processCanvas.height=120;processCanvas.width=Math.floor(120*va);processCtx.drawImage(video,0,0,processCanvas.width,processCanvas.height);const dc=detectCubes(processCtx,processCanvas.width,processCanvas.height),sx=arOverlay.width/processCanvas.width,sy=arOverlay.height/processCanvas.height,cx=processCanvas.width/2,cy=processCanvas.height/2;let mc=null,md=Infinity;dc.forEach(c=>{c.colors=sampleColors(processCtx,c,processCanvas.width,processCanvas.height);const d=Math.pow(c.x-cx,2)+Math.pow(c.y-cy,2);if(d<md){md=d;mc=c;}});if(mc){mc.isMain=true;mc.colors.forEach((col,i)=>{const lx=(i%3)-1,ly=1-Math.floor(i/3),lz=1,cb=playerCube.allCubies.find(b=>Math.abs(b.userData.logicPos.x-lx)<0.1&&Math.abs(b.userData.logicPos.y-ly)<0.1&&Math.abs(b.userData.logicPos.z-lz)<0.1);if(cb&&col.name!=='In')cb.material[4].color.setHex(col.hex);});const tx=(mc.y-cy)*0.01,ty=isVideoMirrored?(cx-mc.x)*0.01:(mc.x-cx)*0.01;playerCube.humanPivot.rotation.x+=(tx-playerCube.humanPivot.rotation.x)*0.15;playerCube.humanPivot.rotation.y+=(ty-playerCube.humanPivot.rotation.y)*0.15;}else{playerCube.humanPivot.rotation.x*=0.9;playerCube.humanPivot.rotation.y*=0.9;}drawAR(dc,sx,sy);}
-
-    // マウス・タッチ操作
-    let drag = { isDragging: false, startX: 0, startY: 0, startQuat: new THREE.Quaternion() };
-    function startInteraction(x, y) { if(inputMode === 'CAMERA') return; drag.isDragging = true; drag.startX = x; drag.startY = y; drag.startQuat.copy(playerCube.scenePivot.quaternion); }
-    function moveInteraction(x, y) { if(!drag.isDragging) return; const dx = x - drag.startX, dy = y - drag.startY; const qx = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0), dx*0.01); const qy = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0), dy*0.01); playerCube.scenePivot.quaternion.copy(drag.startQuat).premultiply(qx).premultiply(qy); }
-    function endInteraction(x, y) { drag.isDragging = false; }
-    const canvasElem = renderer.domElement;
-    canvasElem.addEventListener('mousedown', (e) => { startInteraction(e.clientX, e.clientY); }); window.addEventListener('mousemove', (e) => { moveInteraction(e.clientX, e.clientY); }); window.addEventListener('mouseup', (e) => { endInteraction(e.clientX, e.clientY); });
-    canvasElem.addEventListener('touchstart', (e) => { if(e.touches.length > 0) startInteraction(e.touches[0].clientX, e.touches[0].clientY); }, {passive: false}); window.addEventListener('touchmove', (e) => { if(e.touches.length > 0) moveInteraction(e.touches[0].clientX, e.touches[0].clientY); }, {passive: false}); window.addEventListener('touchend', (e) => { if(e.changedTouches.length > 0) endInteraction(e.changedTouches[0].clientX, e.changedTouches[0].clientY); });
-
-    function animateRender() {
-        requestAnimationFrame(animateRender);
-        if (inputMode === 'CAMERA') runAutoTrackerEngine();
-        if (gameState !== 'FINISHED' && gameState !== 'IDLE' && aiCube.isAI) {
-            const time = performance.now(); const breath = Math.sin(time * aiCube.breathingSpeed + aiCube.breathingOffset) * 0.03; const tremorX = (Math.sin(time * 0.05) * Math.cos(time * 0.03)) * 0.005; const tremorY = (Math.cos(time * 0.04) * Math.sin(time * 0.06)) * 0.005;
-            aiCube.humanPivot.rotation.x = breath + tremorX; aiCube.humanPivot.rotation.y = tremorY; aiCube.humanPivot.rotation.z = tremorX * 0.5;
+    stopButton.addEventListener('click', () => {
+        if (audioContext) {
+            audioContext.close();
         }
-        const currentAIEuler = new THREE.Euler().setFromQuaternion(aiCube.basePivot.quaternion); 
-        const smooth = aiCube.isInspecting ? 0.05 : 0.2;
-        currentAIEuler.x += (aiCube.aiBaseTargetEuler.x - currentAIEuler.x) * smooth; 
-        currentAIEuler.y += (aiCube.aiBaseTargetEuler.y - currentAIEuler.y) * smooth; 
-        aiCube.basePivot.quaternion.setFromEuler(currentAIEuler);
+        if (mediaStream) {
+            mediaStream.getTracks().forEach(track => track.stop());
+        }
+        if (oscillator) {
+            try { oscillator.stop(); } catch(e) {}
+        }
         
-        renderer.render(scene, camera);
-    }
-    animateRender();
-
-}); // End DOMContentLoaded
+        startButton.disabled = false;
+        stopButton.disabled = true;
+        startButton.innerText = "マイクを有効にしてミックス開始";
+    });
 </script>
+
 </body>
 </html>
