@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Active Noise Canceling (Phase Inversion) Simulator</title>
+    <title>Full Active Noise Canceling Simulator</title>
     <style>
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -12,57 +12,59 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background-color: #222;
+            background-color: #000;
             color: #fff;
             margin: 0;
         }
         .container {
-            background: #333;
+            background: #111;
             padding: 40px;
             border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 0 40px rgba(255,255,255,0.1);
             text-align: center;
             max-width: 500px;
+            border: 1px solid #333;
         }
-        h2 { margin-top: 0; color: #4facfe; }
-        .description { font-size: 14px; line-height: 1.6; margin-bottom: 20px; color: #ccc; }
+        h2 { margin-top: 0; color: #fff; letter-spacing: 2px; }
+        .description { font-size: 14px; line-height: 1.6; margin-bottom: 20px; color: #aaa; }
         .warning {
-            color: #ff4757;
+            color: #000;
+            background-color: #ffcc00;
             font-weight: bold;
             font-size: 14px;
             margin-bottom: 20px;
-            background: rgba(255, 71, 87, 0.1);
-            padding: 10px;
+            padding: 12px;
             border-radius: 8px;
         }
         button {
-            padding: 15px 40px;
+            padding: 16px 40px;
             font-size: 18px;
             font-weight: bold;
-            color: white;
-            background-color: #4facfe;
+            color: #000;
+            background-color: #fff;
             border: none;
-            border-radius: 30px;
+            border-radius: 40px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
         }
-        button:hover:not(:disabled) { background-color: #00f2fe; color: #222; }
-        button:disabled { background-color: #555; color: #888; cursor: not-allowed; }
+        button:hover:not(:disabled) { transform: scale(1.05); }
+        button:disabled { background-color: #333; color: #666; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>ANC（逆位相ノイズキャンセリング）シミュレーター</h2>
+    <h2>FULL ANC EXPERIMENT</h2>
     <p class="description">
-        人間の声はそのまま出力し、声以外の音は<br>
-        「ゲイン -1.0（逆位相）」を掛けて打ち消し用の波形として出力します。
+        マイクが拾ったすべての音波に対して<br>
+        「ゲイン -1.0」を掛け、全帯域の完全打ち消しを試みます。
     </p>
     <div class="warning">
-        ⚠️ ハウリングを防ぐため、必ずイヤホンを装着してください。
+        ⚠️ 鼓膜を保護するため、最初は音量を最小にしてから<br>必ずイヤホンを装着して実行してください。
     </div>
-    <button id="startButton">マイクを有効にして開始</button>
-    <button id="stopButton" disabled style="margin-top: 15px; background-color: transparent; border: 1px solid #ff4757; color: #ff4757;">停止</button>
+    <button id="startButton">ANCテスト開始</button>
+    <button id="stopButton" disabled style="margin-top: 15px; background-color: transparent; border: 2px solid #fff; color: #fff;">停止</button>
 </div>
 
 <script>
@@ -76,7 +78,7 @@
         try {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-            // ブラウザ側のソフトウェア処理をすべて切り、生の音波を取得する
+            // ブラウザのソフトウェア補正を完全オフ（生の音波を取得）
             mediaStream = await navigator.mediaDevices.getUserMedia({ 
                 audio: {
                     noiseSuppression: false, 
@@ -88,51 +90,23 @@
 
             const sourceNode = audioContext.createMediaStreamSource(mediaStream);
 
-            // ==========================================
-            // パス1: 人間の声（通常の再生）
-            // ==========================================
-            const vocalFilter = audioContext.createBiquadFilter();
-            vocalFilter.type = 'bandpass';
-            vocalFilter.frequency.value = 1200; // 声の帯域の中心
-            vocalFilter.Q.value = 0.7;
-
-
-            // ==========================================
-            // パス2: ノイズキャンセリング用（逆位相の生成）
-            // ==========================================
-            
-            // 声以外の帯域を抽出（ノイズ）
-            const noiseFilter = audioContext.createBiquadFilter();
-            noiseFilter.type = 'notch';
-            noiseFilter.frequency.value = 1200;
-            noiseFilter.Q.value = 0.7;
-
-            // ANCのコア部分：波形の上下を反転させる（位相を180度ずらす）
+            // すべての音を反転させる（フルキャンセリング）
             const phaseInverter = audioContext.createGain();
             phaseInverter.gain.value = -1.0; 
-            // ※ここで音波をマイナス化することで、外部の音波とぶつかった時に打ち消し合う
 
-
-            // ==========================================
-            // 接続ルーティング
-            // ==========================================
-            
-            // 声はそのままスピーカーへ
-            sourceNode.connect(vocalFilter);
-            vocalFilter.connect(audioContext.destination);
-
-            // ノイズは抽出後、波形を反転（逆位相化）させてスピーカーへ
-            sourceNode.connect(noiseFilter);
-            noiseFilter.connect(phaseInverter);
+            // フィルターを一切介さず、マイク入力を直接反転してスピーカーへ
+            sourceNode.connect(phaseInverter);
             phaseInverter.connect(audioContext.destination);
 
             startButton.disabled = true;
             stopButton.disabled = false;
-            startButton.innerText = "ANC処理 実行中...";
+            startButton.innerText = "ANC 稼働中";
+            startButton.style.backgroundColor = "#ff3b30";
+            startButton.style.color = "#fff";
 
         } catch (err) {
             console.error('エラー:', err);
-            alert('マイクのアクセスが許可されていないか、エラーが発生しました。');
+            alert('マイクのアクセスに失敗しました。');
         }
     });
 
@@ -142,7 +116,9 @@
         
         startButton.disabled = false;
         stopButton.disabled = true;
-        startButton.innerText = "マイクを有効にして開始";
+        startButton.innerText = "ANCテスト開始";
+        startButton.style.backgroundColor = "#fff";
+        startButton.style.color = "#000";
     });
 </script>
 
