@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ANC Visualizer (Phase Inversion)</title>
+    <title>MAX POWER ANC Simulator</title>
     <style>
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -12,41 +12,57 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            background-color: #0d0d0d;
+            background-color: #050505;
             color: #fff;
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
         }
         .container {
-            background: #1a1a1a;
+            background: #111;
             padding: 40px;
             border-radius: 16px;
-            box-shadow: 0 0 30px rgba(0,255,128,0.1);
+            box-shadow: 0 0 50px rgba(255, 0, 0, 0.2);
             text-align: center;
             max-width: 600px;
             width: 100%;
-            border: 1px solid #333;
+            border: 2px solid #333;
         }
-        h2 { margin-top: 0; color: #fff; letter-spacing: 2px; }
-        .description { font-size: 14px; line-height: 1.6; margin-bottom: 20px; color: #aaa; }
-        .legend {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 20px;
-            font-size: 14px;
+        h2 { margin-top: 0; color: #ff3b30; letter-spacing: 3px; font-weight: 900; }
+        .description { font-size: 14px; line-height: 1.6; margin-bottom: 20px; color: #ccc; }
+        
+        .slider-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: #222;
+            border-radius: 12px;
+            border: 1px solid #444;
+        }
+        .slider-label {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 10px;
+            display: block;
+        }
+        input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+            accent-color: #ff3b30;
+        }
+        #volumeValue {
+            font-size: 24px;
+            color: #ff3b30;
             font-weight: bold;
         }
-        .legend-green { color: #00ff80; }
-        .legend-red { color: #ff4040; }
+
         .warning {
             color: #000;
             background-color: #ffcc00;
             font-weight: bold;
-            font-size: 14px;
-            margin-bottom: 20px;
-            padding: 12px;
+            font-size: 15px;
+            margin-bottom: 25px;
+            padding: 15px;
             border-radius: 8px;
         }
         canvas {
@@ -54,85 +70,95 @@
             height: 200px;
             background-color: #000;
             border-radius: 8px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             border: 1px solid #333;
         }
         button {
-            padding: 16px 40px;
-            font-size: 18px;
-            font-weight: bold;
-            color: #000;
-            background-color: #fff;
+            padding: 18px 40px;
+            font-size: 20px;
+            font-weight: 900;
+            color: #fff;
+            background-color: #ff3b30;
             border: none;
-            border-radius: 40px;
+            border-radius: 50px;
             cursor: pointer;
             transition: all 0.2s ease;
             text-transform: uppercase;
+            box-shadow: 0 5px 15px rgba(255, 59, 48, 0.4);
         }
-        button:hover:not(:disabled) { transform: scale(1.05); }
-        button:disabled { background-color: #333; color: #666; cursor: not-allowed; }
+        button:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255, 59, 48, 0.6); }
+        button:disabled { background-color: #333; color: #666; cursor: not-allowed; box-shadow: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>ANC WAVEFORM VISUALIZER</h2>
+    <h2>OVERDRIVE ANC EXPERIMENT</h2>
     <p class="description">
-        ノイズキャンセリングの仕組みを視覚化します。<br>
-        入力された音波と、それを打ち消すための逆位相の音波を表示します。
+        音量を極限まで増幅し、外の音波を力技でねじ伏せます。<br>
+        スライダーを調整して、音が完全に消える「相殺点」を探してください。
     </p>
 
-    <div class="legend">
-        <span class="legend-green">■ 元の入力音（マイク）</span>
-        <span class="legend-red">■ 逆位相の出力音（ANC）</span>
+    <div class="warning">
+        ⚠️ 【警告】音量を上げすぎると強烈なハウリングや爆音が鳴る危険があります。<br>
+        必ずスライダーを「1.0」にした状態で開始し、イヤホンをして少しずつ上げてください。
     </div>
 
     <!-- 波形を描画するキャンバス -->
     <canvas id="oscilloscope" width="600" height="200"></canvas>
 
-    <div class="warning">
-        ⚠️ 鼓膜を保護するため、最初は音量を最小にしてから<br>必ずイヤホンを装着して実行してください。
+    <div class="slider-container">
+        <label class="slider-label">増幅レベル (Gain): <span id="volumeValue">x3.0</span></label>
+        <!-- 最小0倍、最大10倍（爆音）まで調整可能。初期値はデカめの3倍 -->
+        <input type="range" id="volumeSlider" min="0" max="10" step="0.1" value="3.0">
     </div>
     
-    <button id="startButton">ANC ＆ 視覚化を開始</button>
-    <button id="stopButton" disabled style="margin-top: 15px; background-color: transparent; border: 2px solid #fff; color: #fff;">停止</button>
+    <button id="startButton">爆音ANC 起動</button>
+    <button id="stopButton" disabled style="margin-top: 15px; background-color: transparent; border: 2px solid #ff3b30; color: #ff3b30; box-shadow: none;">緊急停止</button>
 </div>
 
 <script>
     let audioContext;
     let mediaStream;
     let animationId;
+    let preAmp; // 音量をデカくするためのアンプ
 
     const startButton = document.getElementById('startButton');
     const stopButton = document.getElementById('stopButton');
+    const volumeSlider = document.getElementById('volumeSlider');
+    const volumeValueDisplay = document.getElementById('volumeValue');
     const canvas = document.getElementById('oscilloscope');
     const canvasCtx = canvas.getContext('2d');
 
-    // キャンバスの初期化（黒塗り）
-    canvasCtx.fillStyle = 'rgb(0, 0, 0)';
-    canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+    // スライダーの値をリアルタイムでアンプに反映
+    volumeSlider.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value).toFixed(1);
+        volumeValueDisplay.innerText = `x${val}`;
+        if (preAmp) {
+            preAmp.gain.value = val; // 音量を即時変更
+        }
+    });
 
     startButton.addEventListener('click', async () => {
         try {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-            // ブラウザのソフトウェア補正を完全オフ（生の音波を取得）
             mediaStream = await navigator.mediaDevices.getUserMedia({ 
-                audio: {
-                    noiseSuppression: false, 
-                    echoCancellation: false,
-                    autoGainControl: false
-                }, 
+                audio: { noiseSuppression: false, echoCancellation: false, autoGainControl: false }, 
                 video: false 
             });
 
             const sourceNode = audioContext.createMediaStreamSource(mediaStream);
 
-            // すべての音を反転させる（ゲイン -1.0）
+            // 1. 増幅器（プリアンプ）: マイクの音を指定倍率にデカくする
+            preAmp = audioContext.createGain();
+            preAmp.gain.value = volumeSlider.value; 
+
+            // 2. 反転器（インバーター）: デカくした音を逆位相（-1.0）にする
             const phaseInverter = audioContext.createGain();
             phaseInverter.gain.value = -1.0; 
 
-            // 波形解析用のノードを作成（入力用と出力用）
+            // 波形解析ノード
             const analyserInput = audioContext.createAnalyser();
             const analyserOutput = audioContext.createAnalyser();
             analyserInput.fftSize = 2048;
@@ -143,36 +169,37 @@
             const dataArrayOutput = new Uint8Array(bufferLength);
 
             // ==========================================
-            // 接続ルーティング
+            // 接続ルーティング (マイク -> 増幅 -> 反転 -> スピーカー)
             // ==========================================
             
-            // 1. マイク入力を解析ノード（緑）と反転ノードへ
+            // マイク入力を解析（緑）とプリアンプへ
             sourceNode.connect(analyserInput);
-            sourceNode.connect(phaseInverter);
+            sourceNode.connect(preAmp);
 
-            // 2. 反転させた音を解析ノード（赤）とスピーカーへ
+            // プリアンプの出力をインバーターへ
+            preAmp.connect(phaseInverter);
+
+            // インバーターの出力を解析（赤）とスピーカーへ
             phaseInverter.connect(analyserOutput);
             phaseInverter.connect(audioContext.destination);
 
 
             // ==========================================
-            // 描画ループ関数
+            // 描画ループ関数（波形が画面を突き破るほどデカくなります）
             // ==========================================
             function draw() {
                 animationId = requestAnimationFrame(draw);
 
-                // 現在の波形データを配列に取得
                 analyserInput.getByteTimeDomainData(dataArrayInput);
                 analyserOutput.getByteTimeDomainData(dataArrayOutput);
 
-                // 背景を黒で塗りつぶす（残像を消す）
-                canvasCtx.fillStyle = 'rgb(0, 0, 0)';
+                canvasCtx.fillStyle = 'rgb(10, 10, 10)';
                 canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
 
-                canvasCtx.lineWidth = 2;
+                canvasCtx.lineWidth = 3;
                 const sliceWidth = canvas.width * 1.0 / bufferLength;
 
-                // --- 元の波形（緑）を描画 ---
+                // --- 元の波形（緑） ---
                 canvasCtx.strokeStyle = 'rgb(0, 255, 128)';
                 canvasCtx.beginPath();
                 let x = 0;
@@ -185,8 +212,8 @@
                 }
                 canvasCtx.stroke();
 
-                // --- 反転した波形（赤）を描画 ---
-                canvasCtx.strokeStyle = 'rgb(255, 64, 64)';
+                // --- 増幅＆反転した波形（赤・爆音） ---
+                canvasCtx.strokeStyle = 'rgb(255, 59, 48)';
                 canvasCtx.beginPath();
                 x = 0;
                 for (let i = 0; i < bufferLength; i++) {
@@ -198,7 +225,6 @@
                 }
                 canvasCtx.stroke();
                 
-                // 真ん中の基準線を引く
                 canvasCtx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
                 canvasCtx.beginPath();
                 canvasCtx.moveTo(0, canvas.height / 2);
@@ -206,14 +232,13 @@
                 canvasCtx.stroke();
             }
 
-            // 描画開始
             draw();
 
-            // UI更新
             startButton.disabled = true;
             stopButton.disabled = false;
-            startButton.innerText = "ANC ＆ 視覚化 稼働中";
-            startButton.style.backgroundColor = "#00ff80";
+            startButton.innerText = "🚨 稼働中 🚨";
+            startButton.style.backgroundColor = "#ffcc00";
+            startButton.style.color = "#000";
 
         } catch (err) {
             console.error('エラー:', err);
@@ -226,15 +251,14 @@
         if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
         if (animationId) cancelAnimationFrame(animationId);
         
-        // キャンバスをクリア
-        canvasCtx.fillStyle = 'rgb(0, 0, 0)';
+        canvasCtx.fillStyle = 'rgb(10, 10, 10)';
         canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // UI更新
         startButton.disabled = false;
         stopButton.disabled = true;
-        startButton.innerText = "ANC ＆ 視覚化を開始";
-        startButton.style.backgroundColor = "#fff";
+        startButton.innerText = "爆音ANC 起動";
+        startButton.style.backgroundColor = "#ff3b30";
+        startButton.style.color = "#fff";
     });
 </script>
 
