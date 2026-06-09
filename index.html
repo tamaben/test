@@ -2,641 +2,281 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>超・五感センサークエスト</title>
-    <!-- Tailwind CSS (スタイリング用) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- iOS PWA化対応メタタグ -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>シェイク・タイムアタック</title>
     <style>
+        /* モバイル向けのシンプルなデザイン */
         body {
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
             user-select: none;
             -webkit-user-select: none;
-            touch-action: manipulation;
         }
-        #game-canvas {
-            touch-action: none;
+        .container {
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #ffcc00;
+        }
+        .btn {
+            background-color: #ffcc00;
+            color: #1a1a1a;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: transform 0.1s;
+            margin-top: 20px;
+            width: 80%;
+        }
+        .btn:active {
+            transform: scale(0.95);
+        }
+        .screen {
+            display: none;
+        }
+        .screen.active {
+            display: block;
+        }
+        .count-display {
+            font-size: 80px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #00ffcc;
+        }
+        .timer-display {
+            font-size: 24px;
+            color: #ff5555;
+            margin-bottom: 20px;
+        }
+        .note {
+            font-size: 12px;
+            color: #aaaaaa;
+            margin-top: 20px;
+            line-height: 1.5;
+            text-align: left;
         }
     </style>
 </head>
-<body class="bg-slate-900 text-white font-sans overflow-hidden h-screen w-screen flex flex-col justify-between">
-
-    <!-- 画面ヘッダー -->
-    <header class="p-4 text-center border-b border-slate-800 z-30">
-        <h1 class="text-xs font-mono tracking-widest text-cyan-400">SENSORY QUEST v1.0</h1>
-    </header>
-
-    <!-- メインコンテンツ領域 -->
-    <main class="flex-grow flex items-center justify-center p-4 relative overflow-hidden">
-        
-        <!-- STAGE 0: 初期説明 / 権限リクエスト画面 -->
-        <div id="stage-welcome" class="stage-panel max-w-sm w-full bg-slate-800/90 backdrop-blur-md p-6 rounded-3xl border border-slate-700 shadow-2xl text-center space-y-6 z-30">
-            <div class="text-5xl animate-bounce">📱</div>
-            <h2 class="text-xl font-black bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">iPhone アルティメット<br>センサー・クエスト</h2>
-            <p class="text-xs text-slate-400 leading-relaxed">
-                このウェブゲームは、iPhoneに搭載されている高度なハードウェア機能をフル活用して作られています。
+<body>
+    <div class="container">
+        <!-- 開始画面 -->
+        <div id="screen-start" class="screen active">
+            <h1>シェイク・タイムアタック</h1>
+            <p>10秒間にスマホを振った回数を競うゲームです。</p>
+            <button class="btn" id="btn-start">ゲームを開始する</button>
+            <p class="note">
+                ※iPhoneでプレイする場合、動作センサーのアクセス許可が必要です。「ゲームを開始する」を押した後に表示されるダイアログで許可を選択してください。<br>
+                ※また、本ゲームはHTTPSによる安全な通信環境でのみ動作します。
             </p>
-            <div class="text-left space-y-2 text-xs text-slate-300 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
-                <div class="flex items-center"><span class="mr-2">🎙️</span>音声認識 (マイク)</div>
-                <div class="flex items-center"><span class="mr-2">🛰️</span>位置情報 (GPS)</div>
-                <div class="flex items-center"><span class="mr-2">📷</span>環境カメラ (WebRTC AR)</div>
-                <div class="flex items-center"><span class="mr-2">🔄</span>ジャイロセンサー (傾き)</div>
-                <div class="flex items-center"><span class="mr-2">🔊</span>音響生成 (Web Audio)</div>
-                <div class="flex items-center"><span class="mr-2">📳</span>触覚（Taptic Engineエミュレート）</div>
-            </div>
-            <button id="btn-start-init" class="w-full py-4 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl font-bold text-sm tracking-wider shadow-lg shadow-cyan-500/20 active:scale-95 transition-all">
-                センサーを同期して開始する
-            </button>
         </div>
 
-        <!-- STAGE 1: 音声認識キャリブレーション -->
-        <div id="stage-voice" class="stage-panel hidden max-w-sm w-full bg-slate-800/90 backdrop-blur-md p-6 rounded-3xl border border-slate-700 shadow-2xl text-center space-y-6 z-30">
-            <div class="text-5xl">🎙️</div>
-            <h2 class="text-xl font-bold text-cyan-400">STEP 1: 音声ロック解除</h2>
-            <p class="text-sm text-slate-300">
-                デバイスのマイクに「<span class="font-bold text-white px-1.5 py-0.5 bg-slate-700 rounded">スタート</span>」と発声してください。音声制御モジュールを起動します。
-            </p>
-            <div id="voice-wave" class="hidden flex items-center justify-center space-x-1.5 h-8">
-                <div class="w-1.5 h-6 bg-cyan-400 rounded-full animate-pulse"></div>
-                <div class="w-1.5 h-8 bg-cyan-400 rounded-full animate-pulse delay-75"></div>
-                <div class="w-1.5 h-4 bg-cyan-400 rounded-full animate-pulse delay-150"></div>
-                <div class="w-1.5 h-8 bg-cyan-400 rounded-full animate-pulse delay-75"></div>
-                <div class="w-1.5 h-6 bg-cyan-400 rounded-full animate-pulse"></div>
-            </div>
-            <p id="voice-status" class="text-sm font-semibold text-slate-400">音声の接続準備中...</p>
-            <div class="pt-4 flex flex-col gap-2">
-                <button id="voice-skip-btn" class="text-xs text-slate-500 underline">スキップして次へ</button>
-            </div>
+        <!-- 準備中画面（カウントダウン） -->
+        <div id="screen-ready" class="screen">
+            <h1>Ready...</h1>
+            <div id="ready-timer" style="font-size: 48px; font-weight: bold; color: #ffcc00; margin: 30px 0;">3</div>
         </div>
 
-        <!-- STAGE 2: GPS位置情報取得 -->
-        <div id="stage-gps" class="stage-panel hidden max-w-sm w-full bg-slate-800/90 backdrop-blur-md p-6 rounded-3xl border border-slate-700 shadow-2xl text-center space-y-6 z-30">
-            <div class="text-5xl">🛰️</div>
-            <h2 class="text-xl font-bold text-cyan-400">STEP 2: 空間位置の同期</h2>
-            <p class="text-sm text-slate-300">
-                iPhoneのGPS機能を利用して、周辺の同期座標を取得します。
-            </p>
-            <div id="gps-coords" class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl min-h-[90px] flex flex-col justify-center items-center">
-                <span class="text-slate-500 text-xs">座標未検出</span>
-            </div>
-            <p id="gps-status" class="text-sm font-semibold text-slate-400">ボタンをタップして同期してください</p>
-            <div class="flex flex-col gap-3">
-                <button id="gps-sync-btn" class="w-full py-3.5 bg-cyan-500 rounded-2xl font-semibold text-sm active:scale-95 transition-all">位置情報を同期する</button>
-                <button id="gps-next-btn" disabled class="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-green-600 rounded-2xl font-semibold text-sm opacity-50 cursor-not-allowed active:scale-95 transition-all">AR次元へ侵入する</button>
-            </div>
+        <!-- プレイ画面 -->
+        <div id="screen-play" class="screen">
+            <div class="timer-display">残り時間: <span id="play-timer">10.0</span> 秒</div>
+            <p>スマホを振れ！</p>
+            <div class="count-display" id="count-num">0</div>
         </div>
 
-        <!-- STAGE 3: AR Sensor Battle (メインゲーム画面) -->
-        <div id="stage-game" class="stage-panel hidden absolute inset-0 w-full h-full overflow-hidden z-10">
-            <!-- カメラフィード (背面) -->
-            <video id="camera-feed" class="absolute inset-0 w-full h-full object-cover z-0" autoplay playsinline muted></video>
-            
-            <!-- カメラ未許可時の代替グリッド -->
-            <div id="camera-fallback" class="hidden absolute inset-0 bg-slate-950/90 z-0 flex items-center justify-center">
-                <div class="w-full h-full opacity-10 bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-            </div>
-
-            <!-- 2D Canvas描画層 -->
-            <canvas id="game-canvas" class="absolute inset-0 w-full h-full z-10"></canvas>
-            
-            <!-- HUD (点数・タイマー表示) -->
-            <div id="game-hud" class="absolute inset-0 z-20 flex flex-col justify-between p-6 pointer-events-none transition-colors duration-150">
-                <!-- 上部情報 -->
-                <div class="flex justify-between items-center bg-slate-900/80 backdrop-blur-md p-3 rounded-2xl border border-slate-800 mt-4">
-                    <div class="text-xs tracking-wider">
-                        <span class="text-slate-400">SCORE:</span>
-                        <span id="score-val" class="font-bold text-lg text-emerald-400 ml-1">0</span>
-                    </div>
-                    <div class="text-xs tracking-wider text-right">
-                        <span class="text-slate-400">TIME:</span>
-                        <span id="time-val" class="font-bold text-lg text-red-400 ml-1">30</span>s
-                    </div>
-                </div>
-                
-                <!-- 中央メッセージ -->
-                <div class="text-center self-center bg-slate-900/60 backdrop-blur-xs px-4 py-1.5 rounded-full border border-slate-800">
-                    <p class="text-[9px] text-cyan-300 font-mono tracking-widest">CENTER THE TARGET AND TAP TO SHOOT</p>
-                </div>
-                
-                <!-- 下部コントローラー -->
-                <div class="flex justify-between items-end mb-6">
-                    <button id="game-reset-gyro" class="pointer-events-auto px-4 py-2 bg-slate-900/90 hover:bg-slate-800 border border-slate-800 rounded-xl text-xs flex items-center gap-1.5 active:scale-95 transition-all">
-                        <span>🔄</span> 基準点を設定
-                    </button>
-                    <div class="text-[9px] text-right text-slate-400 max-w-[150px] leading-snug">
-                        iPhoneを傾けて、赤い球を中央に合わせて画面をタップ！
-                    </div>
-                </div>
-            </div>
+        <!-- 結果画面 -->
+        <div id="screen-result" class="screen">
+            <h1>結果発表</h1>
+            <p>あなたの記録は...</p>
+            <div class="count-display" id="result-score" style="color: #ffcc00;">0回</div>
+            <button class="btn" id="btn-retry">もう一度挑戦する</button>
         </div>
+    </div>
 
-        <!-- STAGE 4: リザルト画面 -->
-        <div id="stage-result" class="stage-panel hidden max-w-sm w-full bg-slate-800/90 backdrop-blur-md p-6 rounded-3xl border border-slate-700 shadow-2xl text-center space-y-6 z-30">
-            <div class="text-5xl">🏆</div>
-            <h2 class="text-2xl font-black text-emerald-400 tracking-wide">QUEST COMPLETE</h2>
-            <p class="text-sm text-slate-300">
-                すべての試練を突破し、センサーの安定化に成功しました！
-            </p>
-            <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl flex flex-col items-center justify-center space-y-2">
-                <div>
-                    <span class="text-slate-500 text-xs block">FINAL SCORE</span>
-                    <span id="result-score" class="text-4xl font-extrabold text-white">0</span>
-                </div>
-                <div class="border-t border-slate-800 w-full pt-2">
-                    <span class="text-slate-500 text-xs block">HIGH SCORE</span>
-                    <span id="result-highscore" class="text-sm font-semibold text-cyan-400">0</span>
-                </div>
-            </div>
-            <button id="btn-restart" class="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl font-bold text-sm tracking-wider shadow-lg shadow-emerald-500/20 active:scale-95 transition-all">
-                もう一度挑戦する
-            </button>
-        </div>
-
-    </main>
-
-    <!-- フッター -->
-    <footer class="p-3 text-center text-[10px] text-slate-500 border-t border-slate-800 z-30">
-        POWERED BY HTML5 SENSOR API
-    </footer>
-
-    <!-- JavaScript ロジック -->
     <script>
-        const STAGES = {
-            WELCOME: 'welcome',
-            VOICE: 'voice',
-            GPS: 'gps',
-            GAME: 'game',
-            RESULT: 'result'
-        };
+        // DOM要素の取得
+        const screenStart = document.getElementById('screen-start');
+        const screenReady = document.getElementById('screen-ready');
+        const screenPlay = document.getElementById('screen-play');
+        const screenResult = document.getElementById('screen-result');
 
-        let currentStage = STAGES.WELCOME;
-        let audioCtx = null;
+        const btnStart = document.getElementById('btn-start');
+        const btnRetry = document.getElementById('btn-retry');
+        const readyTimerDisplay = document.getElementById('ready-timer');
+        const playTimerDisplay = document.getElementById('play-timer');
+        const countNumDisplay = document.getElementById('count-num');
+        const resultScoreDisplay = document.getElementById('result-score');
+
+        // ゲーム変数の定義
         let score = 0;
-        let timeLeft = 30;
-        let timerInterval = null;
-        let videoStream = null;
-        let recognition = null;
+        let isPlaying = false;
+        let gameTimer = null;
+        let timeLeft = 10.0;
 
-        // ジャイロセンサー座標
-        let beta = 0, gamma = 0;
-        let refBeta = null, refGamma = null;
-        let targetOffset = { x: 0, y: 0 }; // 目標の相対座標（度）
+        // 振る動作の検知用パラメータ
+        let lastX = null, lastY = null, lastZ = null;
+        // SHAKE_THRESHOLD（しきい値）とSHAKE_INTERVAL（連打検知防止のミリ秒）は、
+        // 端末の挙動に合わせて適宜調整が可能です。
+        const SHAKE_THRESHOLD = 15; 
+        const SHAKE_INTERVAL = 150; 
+        let lastShakeTime = 0;
 
-        // Canvas要素
-        const canvas = document.getElementById('game-canvas');
-        const ctx = canvas.getContext('2d');
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+        // 画面切り替え用関数
+        function showScreen(screen) {
+            screenStart.classList.remove('active');
+            screenReady.classList.remove('active');
+            screenPlay.classList.remove('active');
+            screenResult.classList.remove('active');
+            screen.classList.add('active');
         }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
 
-        // 1. Web Audio シンセサイザーの初期化
-        function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        // イベントリスナーの追加
+        btnStart.addEventListener('click', () => {
+            requestMotionPermission();
+        });
+
+        btnRetry.addEventListener('click', () => {
+            showScreen(screenStart);
+        });
+
+        // 動作センサーの許可リクエスト（iOS 13+ 対応）
+        function requestMotionPermission() {
+            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                DeviceMotionEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            startReadyCountdown();
+                        } else {
+                            alert('センサーの利用許可が得られませんでした。');
+                        }
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        alert('センサーの初期化に失敗しました。HTTPS接続であることを確認してください。');
+                    });
+            } else {
+                // iOS以外の端末（Androidなど）や、古いiOSバージョン向け
+                startReadyCountdown();
             }
         }
 
-        // 各種効果音のシンセ生成
-        function playSound(type) {
-            if (!audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            const now = audioCtx.currentTime;
-
-            if (type === 'hit') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(150, now);
-                osc.frequency.exponentialRampToValueAtTime(880, now + 0.15);
-                gain.gain.setValueAtTime(0.3, now);
-                gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
-                osc.start(now); osc.stop(now + 0.15);
-            } else if (type === 'miss') {
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(100, now);
-                osc.frequency.linearRampToValueAtTime(40, now + 0.2);
-                gain.gain.setValueAtTime(0.15, now);
-                gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
-                osc.start(now); osc.stop(now + 0.2);
-            } else if (type === 'success') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(523.25, now); // C5
-                osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
-                osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
-                gain.gain.setValueAtTime(0.2, now);
-                gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
-                osc.start(now); osc.stop(now + 0.35);
-            } else if (type === 'start') {
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(220, now);
-                osc.frequency.exponentialRampToValueAtTime(440, now + 0.3);
-                gain.gain.setValueAtTime(0.25, now);
-                gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
-                osc.start(now); osc.stop(now + 0.3);
-            }
-        }
-
-        // 2. iOS Safari対応 触覚フィードバック (Taptic Engine) エミュレーション
-        function triggerHaptic() {
-            // Android等、他ブラウザ用の標準API
-            if (navigator.vibrate) {
-                navigator.vibrate(40);
-            }
+        // 開始前のカウントダウン（3, 2, 1）
+        function startReadyCountdown() {
+            showScreen(screenReady);
+            let count = 3;
+            readyTimerDisplay.textContent = count;
             
-            // iOS Safari独自特性を使った裏技
-            // switch属性が付与された隠しチェックボックスを高速で操作することで
-            // iPhoneシステムネイティブの軽快なタップバイブレーションを発生させます
-            try {
-                const switchEl = document.createElement('input');
-                switchEl.type = 'checkbox';
-                switchEl.setAttribute('switch', ''); // iOS専用スイッチスタイル
-                switchEl.style.position = 'absolute';
-                switchEl.style.opacity = '0';
-                switchEl.style.pointerEvents = 'none';
-                document.body.appendChild(switchEl);
-                
-                // 強制再描画させてクリック処理を走らせる
-                switchEl.offsetHeight; 
-                switchEl.checked = true;
-                
-                setTimeout(() => {
-                    switchEl.remove();
-                }, 100);
-            } catch (e) {
-                console.warn("Haptic trigger skipped", e);
-            }
-        }
-
-        // 3. 音声合成 (Speech Synthesis - スコアの自動発音)
-        function speakText(text) {
-            if ('speechSynthesis' in window) {
-                // 音声キューの重複防止
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'ja-JP';
-                utterance.rate = 1.0;
-                window.speechSynthesis.speak(utterance);
-            }
-        }
-
-        // 4. 音声認識の制御 (Web Speech API)
-        function startSpeechRecognition() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                document.getElementById('voice-status').innerText = "音声認識非対応ブラウザです。スキップしてください。";
-                return;
-            }
-
-            recognition = new SpeechRecognition();
-            recognition.lang = 'ja-JP';
-            recognition.interimResults = false;
-            recognition.maxAlternatives = 1;
-
-            recognition.onstart = () => {
-                document.getElementById('voice-wave').classList.remove('hidden');
-                document.getElementById('voice-status').innerText = "マイクが接続されました。お話しください。";
-            };
-
-            recognition.onresult = (event) => {
-                const text = event.results[0][0].transcript;
-                const status = document.getElementById('voice-status');
-                
-                if (text.includes("スタート") || text.includes("すたーと") || text.includes("start")) {
-                    status.innerHTML = `<span class="text-emerald-400">認証成功: 「${text}」</span>`;
-                    playSound('success');
-                    triggerHaptic();
-                    setTimeout(() => {
-                        transitionTo(STAGES.GPS);
-                    }, 1200);
+            const interval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    readyTimerDisplay.textContent = count;
                 } else {
-                    status.innerText = `認識中「${text}」... 「スタート」ともう一度発言してください。`;
-                    recognition.start(); // 再開
+                    clearInterval(interval);
+                    startGame();
                 }
-            };
-
-            recognition.onerror = (e) => {
-                console.error("Speech Recognition Error", e);
-                document.getElementById('voice-status').innerText = "認識エラー。静かな場所でやり直すか、スキップしてください。";
-            };
-
-            recognition.start();
+            }, 1000);
         }
 
-        // 5. 位置情報 (Geolocation API)
-        function getGPSLocation() {
-            const statusText = document.getElementById('gps-status');
-            const coordsBox = document.getElementById('gps-coords');
-            const nextBtn = document.getElementById('gps-next-btn');
-
-            statusText.innerText = "衛星（GPS）と通信中...";
-
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    const lat = pos.coords.latitude.toFixed(5);
-                    const lon = pos.coords.longitude.toFixed(5);
-
-                    coordsBox.innerHTML = `
-                        <div class="text-[10px] text-cyan-400 tracking-wider">SYNC COMPLETED</div>
-                        <div class="text-lg font-mono tracking-widest mt-1">LAT: ${lat}°</div>
-                        <div class="text-lg font-mono tracking-widest">LON: ${lon}°</div>
-                    `;
-                    statusText.innerText = "同期に成功しました！AR空間に入れます。";
-                    playSound('success');
-                    triggerHaptic();
-                    nextBtn.removeAttribute('disabled');
-                    nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                },
-                (err) => {
-                    console.warn("GPS sync failed", err);
-                    coordsBox.innerHTML = `
-                        <div class="text-[10px] text-amber-500 tracking-wider">OFFLINE FALLBACK</div>
-                        <div class="text-lg font-mono tracking-widest mt-1">LAT: 35.6812°</div>
-                        <div class="text-lg font-mono tracking-widest">LON: 139.7671°</div>
-                    `;
-                    statusText.innerText = "擬似座標モデルと同期しました（スキップ可能）";
-                    playSound('success');
-                    triggerHaptic();
-                    nextBtn.removeAttribute('disabled');
-                    nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                },
-                { enableHighAccuracy: true, timeout: 5000 }
-            );
-        }
-
-        // 6. 背面カメラ起動 (WebRTC Camera Stream)
-        async function startCamera() {
-            const video = document.getElementById('camera-feed');
-            try {
-                videoStream = await navigator.mediaDevices.getUserMedia({
-                    video: {
-                        facingMode: 'environment', // 背面
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    },
-                    audio: false
-                });
-                video.srcObject = videoStream;
-                await video.play();
-            } catch (err) {
-                console.warn("Camera active failed", err);
-                document.getElementById('camera-fallback').classList.remove('hidden');
-            }
-        }
-
-        function stopCamera() {
-            if (videoStream) {
-                videoStream.getTracks().forEach(track => track.stop());
-                videoStream = null;
-            }
-        }
-
-        // 7. ジャイロデータの受信ハンドラ
-        function handleOrientation(e) {
-            beta = e.beta;
-            gamma = e.gamma;
-        }
-
-        // ターゲットの再配置
-        function spawnTarget() {
-            targetOffset.x = (Math.random() - 0.5) * 35; // 左右方向（度）
-            targetOffset.y = (Math.random() - 0.5) * 35; // 上下方向（度）
-        }
-
-        // 8. メインゲームの更新・描画ループ
-        function updateAndDraw() {
-            if (currentStage !== STAGES.GAME) return;
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // 基準の傾きが未設定なら現在の値を代入
-            if (refBeta === null || refGamma === null) {
-                refBeta = beta;
-                refGamma = gamma;
-            }
-
-            // 現在の傾きと基準座標とのズレ（度）
-            const deltaX = gamma - refGamma;
-            const deltaY = beta - refBeta;
-
-            // 画面中心座標
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-
-            // 1度あたりの画素数(感度設定)
-            const sensitivity = 14; 
-
-            // ターゲットの画面描画位置
-            const tx = centerX + (targetOffset.x - deltaX) * sensitivity;
-            const ty = centerY + (targetOffset.y - deltaY) * sensitivity;
-
-            // 画面中心の照準器（レティクル）を描画
-            ctx.strokeStyle = 'rgba(34, 211, 238, 0.7)';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, 20, 0, Math.PI * 2);
-            ctx.moveTo(centerX - 35, centerY); ctx.lineTo(centerX + 35, centerY);
-            ctx.moveTo(centerX, centerY - 35); ctx.lineTo(centerX, centerY + 35);
-            ctx.stroke();
-
-            // ターゲット（赤い球）を描画
-            const targetRadius = 32;
-            ctx.beginPath();
-            ctx.arc(tx, ty, targetRadius, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(239, 68, 68, 0.75)';
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = 'rgba(239, 68, 68, 0.9)';
-            ctx.fill();
-            ctx.shadowBlur = 0; // シャドウ効果リセット
-
-            // 中心ドット
-            ctx.beginPath();
-            ctx.arc(tx, ty, 6, 0, Math.PI * 2);
-            ctx.fillStyle = '#ffffff';
-            ctx.fill();
-
-            // ターゲットが画面外に外れたときのインジケーター（矢印風ナビゲーション）
-            const margin = 40;
-            if (tx < margin || tx > canvas.width - margin || ty < margin || ty > canvas.height - margin) {
-                const dx = tx - centerX;
-                const dy = ty - centerY;
-                const angle = Math.atan2(dy, dx);
-
-                const rx = centerX + Math.cos(angle) * (centerX - margin);
-                const ry = centerY + Math.sin(angle) * (centerY - margin);
-
-                ctx.beginPath();
-                ctx.arc(rx, ry, 12, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(239, 68, 68, 0.9)';
-                ctx.fill();
-
-                ctx.fillStyle = '#ffffff';
-                ctx.font = 'bold 10px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('▼', rx, ry);
-            }
-
-            requestAnimationFrame(updateAndDraw);
-        }
-
-        // ショット処理（タッチイベント）
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // 画面スクロールや拡大等を抑制
-            if (currentStage !== STAGES.GAME) return;
-
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-
-            const deltaX = gamma - refGamma;
-            const deltaY = beta - refBeta;
-            const sensitivity = 14;
-
-            const tx = centerX + (targetOffset.x - deltaX) * sensitivity;
-            const ty = centerY + (targetOffset.y - deltaY) * sensitivity;
-
-            // 照準とターゲットの距離計算
-            const dist = Math.hypot(tx - centerX, ty - centerY);
-
-            const hud = document.getElementById('game-hud');
-            if (dist < 42) { // ヒット許容ピクセル数
-                score += 100;
-                document.getElementById('score-val').innerText = score;
-                playSound('hit');
-                triggerHaptic();
-                spawnTarget();
-
-                // 一瞬エフェクト
-                hud.classList.add('bg-emerald-500/20');
-                setTimeout(() => hud.classList.remove('bg-emerald-500/20'), 150);
-            } else {
-                playSound('miss');
-                hud.classList.add('bg-red-500/20');
-                setTimeout(() => hud.classList.remove('bg-red-500/20'), 150);
-            }
-        });
-
-        // 9. ゲームの開始と制御
-        function transitionTo(stage) {
-            currentStage = stage;
-            document.querySelectorAll('.stage-panel').forEach(panel => panel.classList.add('hidden'));
-            document.getElementById(`stage-${stage}`).classList.remove('hidden');
-
-            if (stage === STAGES.GAME) {
-                score = 0;
-                timeLeft = 30;
-                refBeta = null;
-                refGamma = null;
-                document.getElementById('score-val').innerText = score;
-                document.getElementById('time-val').innerText = timeLeft;
-
-                startCamera();
-                spawnTarget();
-
-                // タイマー起動
-                timerInterval = setInterval(() => {
-                    timeLeft--;
-                    document.getElementById('time-val').innerText = timeLeft;
-                    if (timeLeft <= 0) {
-                        endGame();
-                    }
-                }, 1000);
-
-                updateAndDraw();
-            }
-        }
-
-        // ゲーム終了
-        function endGame() {
-            clearInterval(timerInterval);
-            stopCamera();
+        // ゲーム本編の開始
+        function startGame() {
+            score = 0;
+            timeLeft = 10.0;
+            isPlaying = true;
+            countNumDisplay.textContent = score;
+            playTimerDisplay.textContent = timeLeft.toFixed(1);
             
-            // ハイスコア判定
-            const highScoreKey = 'sensor_quest_highscore';
-            let highScore = parseInt(localStorage.getItem(highScoreKey)) || 0;
-            if (score > highScore) {
-                highScore = score;
-                localStorage.setItem(highScoreKey, highScore);
-            }
+            showScreen(screenPlay);
 
-            document.getElementById('result-score').innerText = score;
-            document.getElementById('result-highscore').innerText = highScore;
+            // 加速度センサーイベントを登録
+            window.addEventListener('devicemotion', handleMotion, true);
 
-            transitionTo(STAGES.RESULT);
+            // 残り時間の計測タイマー（10秒）
+            const startTime = Date.now();
+            gameTimer = setInterval(() => {
+                const elapsed = (Date.now() - startTime) / 1000;
+                timeLeft = Math.max(0, 10.0 - elapsed);
+                playTimerDisplay.textContent = timeLeft.toFixed(1);
 
-            // 音声合成でスコアを読み上げ
-            setTimeout(() => {
-                speakText(`ゲームクリア！最終スコアは${score}点です。`);
-            }, 500);
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 50);
         }
 
-        // --- イベントリスナー群 ---
-        
-        // 最初の画面: ユーザーインタラクションを経てブラウザのロックを解除
-        document.getElementById('btn-start-init').addEventListener('click', async () => {
-            initAudio();
-            playSound('start');
+        // 振る動作の検知処理
+        function handleMotion(event) {
+            if (!isPlaying) return;
 
-            // iOSジャイロセンサーのパーミッション申請
-            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                try {
-                    const permission = await DeviceOrientationEvent.requestPermission();
-                    if (permission === 'granted') {
-                        window.addEventListener('deviceorientation', handleOrientation);
-                    } else {
-                        alert("ジャイロセンサーのアクセスが拒否されました。");
+            // 重力を含まない純粋な加速度（event.acceleration）が推奨されますが、
+            // 端末により値が入らない場合があるため、重力含む加速度（event.accelerationIncludingGravity）を使用します。
+            const acc = event.accelerationIncludingGravity;
+            if (!acc) return;
+
+            const x = acc.x || 0;
+            const y = acc.y || 0;
+            const z = acc.z || 0;
+
+            if (lastX !== null) {
+                // 前回取得したセンサー値との差分（変化量）を算出
+                const deltaX = Math.abs(x - lastX);
+                const deltaY = Math.abs(y - lastY);
+                const deltaZ = Math.abs(z - lastZ);
+
+                // いずれかの軸で一定以上の変化があり、かつ一定のインターバルが経過している場合
+                if (deltaX > SHAKE_THRESHOLD || deltaY > SHAKE_THRESHOLD || deltaZ > SHAKE_THRESHOLD) {
+                    const now = Date.now();
+                    if (now - lastShakeTime > SHAKE_INTERVAL) {
+                        score++;
+                        countNumDisplay.textContent = score;
+                        lastShakeTime = now;
+                        
+                        // 振ったことをユーザーにフィードバックするため、背景を一瞬グレーにする
+                        document.body.style.backgroundColor = '#333333';
+                        setTimeout(() => {
+                            if (isPlaying) document.body.style.backgroundColor = '#1a1a1a';
+                        }, 50);
                     }
-                } catch (e) {
-                    console.warn("Sensor request error", e);
                 }
-            } else {
-                // 通常ブラウザ
-                window.addEventListener('deviceorientation', handleOrientation);
             }
 
-            transitionTo(STAGES.VOICE);
-            startSpeechRecognition();
-        });
+            lastX = x;
+            lastY = y;
+            lastZ = z;
+        }
 
-        // スキップボタン
-        document.getElementById('voice-skip-btn').addEventListener('click', () => {
-            if (recognition) {
-                try { recognition.stop(); } catch(e){}
-            }
-            transitionTo(STAGES.GPS);
-        });
+        // ゲーム終了処理
+        function endGame() {
+            isPlaying = false;
+            clearInterval(gameTimer);
+            // センサーイベントの登録解除
+            window.removeEventListener('devicemotion', handleMotion, true);
+            document.body.style.backgroundColor = '#1a1a1a';
 
-        // GPS同期ボタン
-        document.getElementById('gps-sync-btn').addEventListener('click', () => {
-            getGPSLocation();
-        });
+            // 変数のリセット
+            lastX = null;
+            lastY = null;
+            lastZ = null;
 
-        // AR次元侵入ボタン（メインゲーム遷移）
-        document.getElementById('gps-next-btn').addEventListener('click', () => {
-            transitionTo(STAGES.GAME);
-        });
-
-        // ジャイロ初期位置再キャリブレーション
-        document.getElementById('game-reset-gyro').addEventListener('click', () => {
-            refBeta = beta;
-            refGamma = gamma;
-            playSound('success');
-            triggerHaptic();
-        });
-
-        // 再挑戦
-        document.getElementById('btn-restart').addEventListener('click', () => {
-            transitionTo(STAGES.WELCOME);
-        });
+            resultScoreDisplay.textContent = score + '回';
+            showScreen(screenResult);
+        }
     </script>
 </body>
 </html>
